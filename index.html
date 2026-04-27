@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Retórica V11.8 - Estudio Maestro</title>
+    <style>
+        :root {
+            --p: #0f172a;
+            --bg: #ffffff;
+            --accent: #2563eb;
+            --script: #7c3aed;
+            --podcast: #ec4899;
+            --ok: #10b981;
+            --muted: #64748b;
+            --danger: #ef4444;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        
+        body { background: var(--bg); color: var(--p); height: 100vh; overflow: hidden; }
+
+        /* Pantalla de Autenticación y Registro de Dispositivo */
+        #v-auth {
+            position: fixed; inset: 0; background: var(--p); z-index: 9999;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .auth-box {
+            background: white; padding: 35px; width: 90%; max-width: 380px;
+            border-radius: 24px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+        .input-field {
+            width: 100%; padding: 14px; margin: 12px 0; border: 2px solid #e2e8f0;
+            border-radius: 12px; font-size: 16px; outline: none; transition: 0.3s;
+        }
+        .input-field:focus { border-color: var(--accent); }
+        .btn-main {
+            width: 100%; padding: 16px; background: var(--accent); color: white;
+            border: none; border-radius: 12px; font-weight: 800; cursor: pointer; font-size: 16px;
+        }
+
+        /* Menú Lateral (Hamburguesa) - Optimizado para Android 5 */
+        #sidebar {
+            position: fixed; top: 0; left: -280px; width: 280px; height: 100%;
+            background: white; z-index: 9000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 5px 0 25px rgba(0,0,0,0.1); padding: 80px 25px 25px;
+        }
+        #sidebar.open { left: 0; }
+        .overlay {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+            z-index: 8999; backdrop-filter: blur(2px);
+        }
+        .overlay.active { display: block; }
+
+        /* Header y Estructura Principal */
+        #main-app { display: none; height: 100vh; flex-direction: column; }
+        header {
+            height: 65px; display: flex; align-items: center; justify-content: space-between;
+            padding: 0 20px; border-bottom: 1px solid #f1f5f9; background: white;
+        }
+        .burger { font-size: 30px; cursor: pointer; color: var(--p); user-select: none; }
+
+        /* Editor con Scroll de Seguridad Crítico */
+        #editor-container { flex: 1; overflow-y: auto; position: relative; background: #fff; }
+        #editor {
+            min-height: 100%; padding: 30px 25px 250px; font-size: 20px;
+            line-height: 1.8; outline: none; color: #1e293b;
+        }
+        #editor:empty:before { content: attr(placeholder); color: #cbd5e1; }
+
+        /* Hilo de Ariadna (Rastro de Seguridad) */
+        #ariadna {
+            position: fixed; bottom: 85px; right: 20px; font-size: 10px;
+            font-weight: bold; color: var(--muted); background: rgba(255,255,255,0.9);
+            padding: 4px 10px; border-radius: 6px; border: 1px solid #e2e8f0; pointer-events: none;
+        }
+
+        /* Barra de Herramientas (Dock) */
+        .toolbar {
+            height: 75px; display: flex; background: #f8fafc;
+            border-top: 1px solid #e2e8f0; padding-bottom: env(safe-area-inset-bottom);
+        }
+        .t-btn {
+            flex: 1; border: none; background: transparent; display: flex;
+            flex-direction: column; align-items: center; justify-content: center;
+            color: var(--muted); font-size: 11px; font-weight: 700; cursor: pointer;
+        }
+        .t-btn i { font-size: 24px; color: var(--p); font-style: normal; margin-bottom: 4px; }
+
+        /* Modales: ADN, Exportar, Nube */
+        .modal {
+            display: none; position: fixed; bottom: 90px; left: 15px; right: 15px;
+            background: white; border: 2px solid var(--p); border-radius: 20px;
+            padding: 25px; z-index: 9500; box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
+        }
+        .modal.active { display: block; animation: slideUp 0.3s ease; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .m-title { font-weight: 900; font-size: 18px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        .export-btn {
+            width: 100%; padding: 14px; margin-top: 10px; border: 1.5px solid #e2e8f0;
+            border-radius: 12px; background: white; font-weight: 700; text-align: left;
+            display: flex; justify-content: space-between; cursor: pointer;
+        }
+        .export-btn:active { background: #f1f5f9; }
+    </style>
+</head>
+<body>
+
+<div id="v-auth">
+    <div class="auth-box">
+        <h1 style="letter-spacing: -1px; margin-bottom: 5px;">RETÓRICA</h1>
+        <p style="color: var(--muted); font-size: 13px; margin-bottom: 25px;">Estudio Nómada V11.8</p>
+        <input type="email" id="u-email" class="input-field" placeholder="Tu Email de Resguardo">
+        <button class="btn-main" onclick="initApp()">INICIAR SESIÓN</button>
+    </div>
+</div>
+
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<nav id="sidebar">
+    <h2 style="margin-bottom: 20px;">Biblioteca</h2>
+    <div id="project-list">
+        <div style="padding: 15px; border-radius: 10px; background: #f1f5f9; margin-bottom: 10px;">
+            <b>Borrador Actual</b><br>
+            <small id="side-device" style="color: var(--muted);"></small>
+        </div>
+    </div>
+    <div style="position: absolute; bottom: 30px; left: 25px; right: 25px;">
+        <hr style="border: 0; border-top: 1px solid #e2e8f0; margin-bottom: 20px;">
+        <button onclick="location.reload()" style="color: var(--danger); font-weight: bold; border: none; background: none;">Cerrar Sesión</button>
+    </div>
+</nav>
+
+<div id="main-app">
+    <header>
+        <div class="burger" onclick="openSidebar()">☰</div>
+        <div id="app-title" style="font-weight: 900; letter-spacing: 1px; font-size: 14px;">ESTUDIO ABIERTO</div>
+        <div style="width: 30px;"></div>
+    </header>
+
+    <main id="editor-container">
+        <div id="editor" contenteditable="true" placeholder="Escribe tu relámpago..." oninput="autoSync()"></div>
+        <div id="ariadna">Detectando...</div>
+    </main>
+
+    <div id="modal-dna" class="modal">
+        <div class="m-title">🧬 Portal de Linaje</div>
+        <p style="font-size: 13px; color: var(--muted); margin-bottom: 10px;">Define tus influencias para este párrafo:</p>
+        <input type="text" id="dna-input" class="input-field" placeholder="Autores, bandas, estilos...">
+        <button class="btn-main" onclick="connectDNA()">VINCULAR ADN</button>
+        <button onclick="closeModals()" style="width:100%; margin-top:10px; border:none; background:none; color:var(--muted); font-size:12px;">Cerrar</button>
+    </div>
+
+    <div id="modal-export" class="modal">
+        <div class="m-title">💾 Guardar Trabajo</div>
+        <button class="export-btn" onclick="doExport('txt')">Texto Plano <span>.txt</span></button>
+        <button class="export-btn" onclick="doExport('html')">Archivo Web <span>.html</span></button>
+        <button class="export-btn" onclick="window.print()">Documento PDF <span>PDF</span></button>
+        <button onclick="closeModals()" style="width:100%; margin-top:20px; border:none; background:none; color:var(--danger); font-weight:bold;">CANCELAR</button>
+    </div>
+
+    <footer class="toolbar">
+        <button class="t-btn" onclick="actionDictate()"><i>🎤</i>DICTAR</button>
+        <button class="t-btn" onclick="actionRead()"><i>🔊</i>LEER</button>
+        <button class="t-btn" onclick="openDNA()"><i>🧬</i>ADN</button>
+        <button class="t-btn" onclick="openExport()"><i>💾</i>GUARDAR</button>
+    </footer>
+</div>
+
+<script>
+    // 1. Identificación de Hardware Real
+    const getHardware = () => {
+        const agent = navigator.userAgent;
+        if (/Pixel/i.test(agent)) return "Google Pixel 2";
+        if (/Redmi/i.test(agent)) return "Redmi Note";
+        if (/Android 5/i.test(agent)) return "Tablet (Legacy Android 5)";
+        return "Dispositivo Móvil";
+    };
+
+    const deviceName = getHardware();
+    let syncData = { content: "", device: deviceName, time: "" };
+
+    // 2. Control de Interfaz
+    function openSidebar() { 
+        document.getElementById('sidebar').classList.add('open');
+        document.getElementById('overlay').classList.add('active');
+    }
+    function closeSidebar() { 
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('overlay').classList.remove('active');
+    }
+    function openDNA() { closeModals(); document.getElementById('modal-dna').classList.add('active'); }
+    function openExport() { closeModals(); document.getElementById('modal-export').classList.add('active'); }
+    function closeModals() {
+        document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
+    }
+
+    // 3. Lógica de Autenticación y Carga
+    function initApp() {
+        const mail = document.getElementById('u-email').value;
+        if(!mail) { alert("Ingresa un correo para la red de resguardo."); return; }
+        
+        document.getElementById('v-auth').style.display = 'none';
+        document.getElementById('main-app').style.display = 'flex';
+        document.getElementById('side-device').innerText = "Vínculo: " + deviceName;
+        
+        loadFromLocal();
+    }
+
+    // 4. Sincronización y Hilo de Ariadna
+    function autoSync() {
+        const text = document.getElementById('editor').innerHTML;
+        const now = new Date().toLocaleTimeString();
+        
+        syncData = {
+            content: text,
+            device: deviceName,
+            time: now
+        };
+
+        localStorage.setItem('retorica_master_sync', JSON.stringify(syncData));
+        document.getElementById('ariadna').innerText = `Rastro: ${deviceName} | ${now}`;
+    }
+
+    function loadFromLocal() {
+        const saved = localStorage.getItem('retorica_master_sync');
+        if(saved) {
+            const parsed = JSON.parse(saved);
+            document.getElementById('editor').innerHTML = parsed.content;
+            document.getElementById('ariadna').innerText = `Último Relevo: ${parsed.device}`;
+        }
+    }
+
+    // 5. Herramientas de Producción
+    function actionDictate() {
+        if (!('webkitSpeechRecognition' in window)) { alert("Dictado no soportado."); return; }
+        const rec = new webkitSpeechRecognition();
+        rec.lang = 'es-MX';
+        rec.onresult = (e) => {
+            document.getElementById('editor').innerHTML += " " + e.results[0][0].transcript;
+            autoSync();
+        };
+        rec.start();
+    }
+
+    function actionRead() {
+        const speech = new SpeechSynthesisUtterance(document.getElementById('editor').innerText);
+        speech.lang = 'es-MX';
+        window.speechSynthesis.speak(speech);
+    }
+
+    function connectDNA() {
+        const inf = document.getElementById('dna-input').value;
+        const sel = window.getSelection().toString();
+        alert(`Portal Abierto: Conectando '${sel || 'ideas'}' con el linaje de ${inf}`);
+        closeModals();
+    }
+
+    // 6. Exportación Multiformato Nativa
+    function doExport(format) {
+        const content = format === 'txt' ? document.getElementById('editor').innerText : document.getElementById('editor').innerHTML;
+        const blob = new Blob([content], { type: format === 'txt' ? 'text/plain' : 'text/html' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `Retorica_${deviceName}_${Date.now()}.${format}`;
+        link.click();
+        closeModals();
+    }
+
+    // Asegurar carga en Android 5
+    window.onload = () => {
+        if(localStorage.getItem('retorica_master_sync')) {
+            // Si ya hay sesión, podrías saltar el login, pero por seguridad lo dejamos manual
+        }
+    };
+</script>
+</body>
+</html>
