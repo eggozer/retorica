@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Retórica V11.7 - Estudio Universal</title>
+    <style>
+        :root { --p: #0f172a; --bg: #ffffff; --accent: #2563eb; --muted: #64748b; --danger: #ef4444; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: var(--bg); font-family: sans-serif; height: 100vh; overflow: hidden; }
+        #v-auth { position: fixed; inset: 0; background: var(--p); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .auth-card { background: white; padding: 25px; border-radius: 15px; width: 85%; max-width: 320px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .input-auth { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; }
+        #sidebar { position: fixed; top: 0; left: -260px; width: 260px; height: 100%; background: white; box-shadow: 2px 0 15px rgba(0,0,0,0.1); z-index: 1000; transition: left 0.3s ease; padding: 20px; padding-top: 70px; }
+        #sidebar.open { left: 0; }
+        #main { height: 100vh; display: flex; flex-direction: column; }
+        header { height: 60px; border-bottom: 1px solid #eee; display: flex; align-items: center; justify-content: center; position: relative; }
+        #btn-menu { position: absolute; left: 15px; font-size: 24px; cursor: pointer; }
+        #editor { flex: 1; padding: 25px; outline: none; overflow-y: auto; font-size: 19px; line-height: 1.7; padding-bottom: 200px; }
+        .toolbar { height: 70px; display: flex; border-top: 1px solid #eee; background: #f8fafc; }
+        .t-btn { flex: 1; border: none; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; color: var(--muted); }
+        .modal { display: none; position: fixed; bottom: 85px; left: 15px; right: 15px; background: white; border: 2px solid var(--p); border-radius: 15px; padding: 20px; z-index: 1010; }
+        .modal.active { display: block; }
+        .export-btn { width: 100%; padding: 10px; margin-top: 8px; border: 1px solid #ddd; border-radius: 5px; font-weight: bold; }
+    </style>
+</head>
+<body>
+<div id="v-auth"><div class="auth-card"><h1>RETÓRICA</h1><input type="email" id="email" class="input-auth" placeholder="Email"><button onclick="login()" style="width:100%; padding:12px; background:var(--p); color:white; border-radius:8px;">ENTRAR</button></div></div>
+<div id="sidebar"><h3>Biblioteca</h3><div id="proyectos-list"></div><p id="info-device" style="font-size:11px; margin-top:20px;"></p><button onclick="location.reload()" style="color:var(--danger); border:none; background:none;">Cerrar Sesión</button></div>
+<div id="main" style="display:none;">
+    <header><div id="btn-menu" onclick="toggleMenu()">☰</div><div>RETÓRICA V11.7</div></header>
+    <div id="editor" contenteditable="true" placeholder="Escribe aquí..." oninput="autoSave()"></div>
+    <div id="modal-dna" class="modal"><h4>🧬 Portal de Linaje</h4><input type="text" id="dna-input" class="input-auth" placeholder="Ej: Jim Morrison, Radiohead..."><button onclick="processDNA()" class="export-btn" style="background:var(--p); color:white;">Inspirar</button><button onclick="closeModals()" class="export-btn">Cerrar</button></div>
+    <div id="modal-export" class="modal"><h4>💾 Guardar Como</h4><button onclick="exportDoc('txt')" class="export-btn">📄 Texto (.txt)</button><button onclick="exportDoc('html')" class="export-btn">🌐 Web (.html)</button><button onclick="window.print()" class="export-btn">📕 PDF</button><button onclick="closeModals()" class="export-btn">Cancelar</button></div>
+    <div class="toolbar">
+        <button class="t-btn" onclick="startDictation()">🎤<br>DICTAR</button>
+        <button class="t-btn" onclick="startReading()">🔊<br>LEER</button>
+        <button class="t-btn" onclick="openDNA()">🧬<br>ADN</button>
+        <button class="t-btn" onclick="openExport()">💾<br>GUARDAR</button>
+    </div>
+</div>
+<script>
+    const dId = /Pixel/i.test(navigator.userAgent) ? "Pixel 2" : (/Redmi/i.test(navigator.userAgent) ? "Redmi" : "Tablet Android 5");
+    function login() { document.getElementById('v-auth').style.display='none'; document.getElementById('main').style.display='flex'; document.getElementById('info-device').innerText="DISPOSITIVO: "+dId; loadWork(); }
+    function toggleMenu() { document.getElementById('sidebar').classList.toggle('open'); }
+    function openDNA() { closeModals(); document.getElementById('modal-dna').classList.add('active'); }
+    function openExport() { closeModals(); document.getElementById('modal-export').classList.add('active'); }
+    function closeModals() { document.querySelectorAll('.modal').forEach(m => m.classList.remove('active')); }
+    function autoSave() { localStorage.setItem('ret_sync', JSON.stringify({c: document.getElementById('editor').innerHTML, d: dId, t: new Date().toLocaleString()})); }
+    function loadWork() { const s = localStorage.getItem('ret_sync'); if(s) document.getElementById('editor').innerHTML = JSON.parse(s).c; }
+    function startDictation() { if(!('webkitSpeechRecognition' in window)) return alert("No soportado"); const r = new webkitSpeechRecognition(); r.onresult = (e) => { document.getElementById('editor').innerHTML += " " + e.results[0][0].transcript; autoSave(); }; r.start(); }
+    function startReading() { const u = new SpeechSynthesisUtterance(document.getElementById('editor').innerText); window.speechSynthesis.speak(u); }
+    function processDNA() { alert("Conectando ADN de: " + document.getElementById('dna-input').value); closeModals(); }
+    function exportDoc(t) { const c = t==='txt' ? document.getElementById('editor').innerText : document.getElementById('editor').innerHTML; const b = new Blob([c], {type: 'text/'+t}); const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "Retorica_"+Date.now()+"."+t; a.click(); closeModals(); }
+</script>
+</body>
+</html>
