@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Retórica V11.7</title>
+<style>
+:root{--p:#0f172a;--bg:#fff;--accent:#2563eb;--muted:#64748b;--danger:#ef4444}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);font-family:sans-serif;height:100vh;overflow:hidden}
+#v-auth{position:fixed;inset:0;background:var(--p);z-index:9999;display:flex;align-items:center;justify-content:center}
+.auth-card{background:#fff;padding:25px;border-radius:15px;width:85%;max-width:320px;text-align:center}
+.input-auth{width:100%;padding:12px;margin:10px 0;border:1px solid #ddd;border-radius:8px}
+#sidebar{position:fixed;top:0;left:-260px;width:260px;height:100%;background:#fff;box-shadow:2px 0 15px rgba(0,0,0,.1);z-index:1000;transition:left .3s;padding:20px;padding-top:70px}
+#sidebar.open{left:0}
+#main{height:100vh;display:flex;flex-direction:column;position:relative}
+header{height:60px;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:center;position:relative;background:#fff}
+#btn-menu{position:absolute;left:15px;font-size:24px;cursor:pointer}
+#editor{flex:1;padding:25px;outline:0;overflow-y:auto;font-size:19px;line-height:1.7;padding-bottom:180px}
+.toolbar{height:70px;display:flex;border-top:1px solid #eee;background:#f8fafc;z-index:900}
+.t-btn{flex:1;border:none;background:0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;color:var(--muted);cursor:pointer}
+.t-btn i{font-size:22px;color:var(--p);font-style:normal;margin-bottom:3px}
+.modal{display:none;position:fixed;bottom:85px;left:15px;right:15px;background:#fff;border:2px solid var(--p);border-radius:15px;padding:20px;z-index:1010}
+.modal.active{display:block}
+.export-btn{width:100%;padding:10px;margin-top:8px;border:1px solid #ddd;border-radius:5px;background:#fff;font-weight:700}
+#ariadna-label{position:fixed;bottom:75px;right:15px;font-size:9px;color:var(--muted);pointer-events:none}
+</style>
+</head>
+<body>
+<div id="v-auth"><div class="auth-card"><h1>RETÓRICA</h1><input type="email" id="user-email" class="input-auth" placeholder="Email"><button onclick="login()" style="width:100%;padding:14px;background:var(--p);color:#fff;border:none;border-radius:10px">ENTRAR</button></div></div>
+<div id="sidebar"><h3>Biblioteca</h3><div id="proyectos-list"></div><p id="info-device" style="font-size:11px;margin-top:20px"></p><button onclick="location.reload()" style="color:var(--danger);border:none;background:0 0;cursor:pointer">Cerrar Sesión</button></div>
+<div id="main" style="display:none"><header><div id="btn-menu" onclick="toggleMenu()">☰</div><div>RETÓRICA V11.7</div></header>
+<div id="editor" contenteditable="true" placeholder="Escribe aquí..." oninput="autoSave()"></div>
+<div id="ariadna-label">Sincronizando...</div>
+<div id="modal-dna" class="modal"><h4>🧬 ADN</h4><input type="text" id="dna-input" class="input-auth" placeholder="Influencia..."><button onclick="processDNA()" class="export-btn" style="background:var(--p);color:#fff">Inspirar</button><button onclick="closeModals()" class="export-btn">Cerrar</button></div>
+<div id="modal-export" class="modal"><h4>💾 Guardar Como</h4><button onclick="exportDoc('txt')" class="export-btn">📄 Texto (.txt)</button><button onclick="exportDoc('html')" class="export-btn">🌐 Web (.html)</button><button onclick="window.print()" class="export-btn">📕 PDF</button><button onclick="closeModals()" class="export-btn" style="border:none;color:var(--danger)">Cancelar</button></div>
+<div class="toolbar"><button class="t-btn" onclick="startDictation()"><i>🎤</i>DICTAR</button><button class="t-btn" onclick="startReading()"><i>🔊</i>LEER</button><button class="t-btn" onclick="openDNA()"><i>🧬</i>ADN</button><button class="t-btn" onclick="openExport()"><i>💾</i>GUARDAR</button></div></div>
+<script>
+const getDevice=()=>{const ua=navigator.userAgent;if(/Pixel/i.test(ua))return"Pixel 2";if(/Redmi/i.test(ua))return"Redmi";if(/Android 5/i.test(ua))return"Tablet";return"Móvil"};
+let dId=getDevice();
+function login(){document.getElementById('v-auth').style.display='none';document.getElementById('main').style.display='flex';document.getElementById('info-device').innerText="DIPOSITIVO: "+dId;loadWork()}
+function toggleMenu(){document.getElementById('sidebar').classList.toggle('open')}
+function openDNA(){closeModals();document.getElementById('modal-dna').classList.add('active')}
+function openExport(){closeModals();document.getElementById('modal-export').classList.add('active')}
+function closeModals(){document.getElementById('modal-dna').classList.remove('active');document.getElementById('modal-export').classList.remove('active')}
+function autoSave(){const c=document.getElementById('editor').innerHTML;const n=new Date();localStorage.setItem('ret_sync',JSON.stringify({c:c,d:dId,t:n.toLocaleString()}));document.getElementById('ariadna-label').innerText=`${dId} | ${n.toLocaleTimeString()}`}
+function loadWork(){const s=localStorage.getItem('ret_sync');if(s){const d=JSON.parse(s);document.getElementById('editor').innerHTML=d.c;document.getElementById('ariadna-label').innerText=`Último: ${d.d}`}}
+function startDictation(){if(!('webkitSpeechRecognition' in window))return alert("No soportado");const r=new webkitSpeechRecognition();r.onresult=(e)=>{document.getElementById('editor').innerHTML+=" "+e.results[0][0].transcript;autoSave()};r.start()}
+function startReading(){const t=document.getElementById('editor').innerText;const u=new SpeechSynthesisUtterance(t);window.speechSynthesis.speak(u)}
+function processDNA(){alert("Conectando con linaje de "+document.getElementById('dna-input').value);closeModals()}
+function exportDoc(t){const c=document.getElementById('editor').innerText;const h=document.getElementById('editor').innerHTML;const n="Retorica_"+Date.now();if(t==='txt')dl(c,n+".txt","text/plain");else if(t==='html')dl(`<html><body>${h}</body></html>`,n+".html","text/html");closeModals()}
+function dl(d,n,t){const b=new Blob([d],{type:t});const u=URL.createObjectURL(b);const a=document.createElement("a");a.href=u;a.download=n;a.click()}
+</script>
+</body>
+</html>
