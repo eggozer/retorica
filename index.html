@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Retórica V13.1</title>
+    <style>
+        :root { --p: #0a0f1a; --bg: #ffffff; --accent: #2563eb; --muted: #64748b; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+        body { background: var(--bg); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+        /* Login */
+        #v-auth { position: fixed; inset: 0; background: var(--p); z-index: 11000; display: flex; align-items: center; justify-content: center; color: white; }
+        .auth-box { background: white; padding: 40px; border-radius: 25px; color: var(--p); text-align: center; width: 90%; max-width: 380px; }
+        .input-field { width: 100%; padding: 15px; margin: 15px 0; border: 2px solid #eee; border-radius: 12px; font-size: 16px; outline: none; }
+
+        /* Menú Lateral */
+        #sidebar { position: fixed; top: 0; left: -100%; width: 85%; max-width: 320px; height: 100%; background: white; z-index: 10000; transition: 0.3s; padding: 25px; box-shadow: 5px 0 15px rgba(0,0,0,0.2); overflow-y: auto; }
+        #sidebar.open { left: 0; }
+        #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 9999; }
+
+        header { height: 65px; display: flex; align-items: center; padding: 0 20px; border-bottom: 1px solid #eee; background: #fff; flex-shrink: 0; }
+        
+        /* Editor Pro */
+        #editor { flex: 1; padding: 25px; overflow-y: auto; font-size: 19px; outline: none; padding-bottom: 70vh; line-height: 1.6; }
+
+        /* Botones y Biblioteca */
+        .btn-tool { width: 100%; padding: 14px; margin: 6px 0; border: none; border-radius: 12px; background: #f1f5f9; display: flex; align-items: center; font-weight: bold; cursor: pointer; font-size: 14px; }
+        .btn-tool i { margin-right: 12px; font-style: normal; font-size: 18px; }
+        .btn-new { background: var(--accent) !important; color: white; justify-content: center; margin-bottom: 15px; }
+        
+        .library-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .doc-card { background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; height: 100px; overflow: hidden; font-size: 11px; color: var(--muted); cursor: pointer; }
+        
+        #page-stats { padding: 10px 20px; font-size: 11px; color: var(--muted); border-top: 1px solid #eee; background: #fafafa; font-weight: bold; }
+        
+        .export-group { display: flex; gap: 5px; margin-top: 10px; flex-wrap: wrap; }
+        .btn-exp { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid #ddd; background: white; font-size: 10px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div id="v-auth">
+    <div class="auth-box">
+        <h2 style="letter-spacing:2px; margin-bottom:10px;">RETÓRICA</h2>
+        <input type="email" id="u-email" class="input-field" placeholder="ejemplo@correo.com">
+        <button class="btn-tool" style="background:var(--accent); color:white; justify-content:center;" onclick="saveUser()">INGRESAR</button>
+    </div>
+</div>
+
+<div id="overlay" onclick="toggleMenu()"></div>
+
+<nav id="sidebar">
+    <h2 style="margin-bottom:20px">Estudio</h2>
+    
+    <button class="btn-tool btn-new" onclick="nuevoProyecto()">+ NUEVO PROYECTO</button>
+    <button class="btn-tool" onclick="dictar()"><i>🎤</i> Dictar Voz</button>
+    <button class="btn-tool" onclick="leer()"><i>🔊</i> Leer Texto</button>
+    
+    <p style="margin-top:20px; font-size:11px; font-weight:bold; color:var(--accent)">BIBLIOTECA (AUTO-GUARDADO)</p>
+    <div class="library-grid" id="library">
+        <div class="doc-card" onclick="toggleMenu()">
+            <b>Proyecto Actual</b><br>
+            <span id="lib-preview">Vacío...</span>
+        </div>
+        <div class="doc-card"><b>Historial</b><br>Próximamente archivos antiguos...</div>
+    </div>
+
+    <p style="margin-top:20px; font-size:11px; font-weight:bold;">EXPORTAR</p>
+    <div class="export-group">
+        <button class="btn-exp" onclick="exportar('txt')">TXT</button>
+        <button class="btn-exp" onclick="exportar('doc')">DOC</button>
+        <button class="btn-exp" onclick="exportar('html')">HTML</button>
+        <button class="btn-exp" onclick="exportar('pdf')">PDF</button>
+    </div>
+
+    <div id="dev-tag" style="margin-top:30px; font-size:10px; color:gray;"></div>
+    <button onclick="logout()" style="margin-top:20px; color:red; border:none; background:none; font-weight:bold; cursor:pointer">CERRAR SESIÓN</button>
+</nav>
+
+<div id="main-app" style="display:none; flex:1; flex-direction:column;">
+    <header>
+        <div style="font-size:30px; cursor:pointer" onclick="toggleMenu()">☰</div>
+        <div style="margin-left:20px; font-weight:900; letter-spacing:1px">RETÓRICA</div>
+    </header>
+    
+    <div id="editor" contenteditable="true" oninput="updateStats()" placeholder="Escribe aquí..."></div >
+    
+    <div id="page-stats">0 caracteres | 0 palabras</div>
+</div>
+
+<script>
+    const getHardware = () => {
+        const ua = navigator.userAgent;
+        if (/Android/i.test(ua)) return "Dispositivo Android";
+        if (/iPhone|iPad/i.test(ua)) return "Dispositivo iOS";
+        return "Terminal Web";
+    };
+
+    window.onload = () => {
+        const user = localStorage.getItem('ret_user');
+        if (user) {
+            document.getElementById('v-auth').style.display = 'none';
+            document.getElementById('main-app').style.display = 'flex';
+            document.getElementById('dev-tag').innerText = "Vínculo: " + getHardware();
+            const saved = localStorage.getItem('ret_content');
+            if(saved) {
+                document.getElementById('editor').innerHTML = saved;
+                updateStats();
+            }
+        }
+    };
+
+    function saveUser() {
+        const mail = document.getElementById('u-email').value;
+        if(mail.trim() !== "") {
+            localStorage.setItem('ret_user', mail.trim());
+            location.reload();
+        } else { alert("Ingresa un correo"); }
+    }
+
+    function toggleMenu() {
+        const sb = document.getElementById('sidebar');
+        const ov = document.getElementById('overlay');
+        const isOpen = sb.classList.toggle('open');
+        ov.style.display = isOpen ? 'block' : 'none';
+    }
+
+    function updateStats() {
+        const editor = document.getElementById('editor');
+        const text = editor.innerText;
+        document.getElementById('page-stats').innerText = `${text.length} caracteres | ${text.trim() === "" ? 0 : text.trim().split(/\s+/).length} palabras`;
+        document.getElementById('lib-preview').innerText = text.substring(0, 50) + "...";
+        localStorage.setItem('ret_content', editor.innerHTML);
+    }
+
+    function nuevoProyecto() {
+        if(confirm("¿Iniciar nuevo proyecto? El texto actual se borrará del editor principal.")) {
+            document.getElementById('editor').innerHTML = "";
+            localStorage.removeItem('ret_content');
+            updateStats();
+            toggleMenu();
+        }
+    }
+
+    function dictar() {
+        toggleMenu();
+        if (!('webkitSpeechRecognition' in window)) return alert("No disponible");
+        const rec = new webkitSpeechRecognition();
+        rec.lang = 'es-MX';
+        rec.onresult = (e) => { 
+            document.getElementById('editor').innerHTML += " " + e.results[0][0].transcript;
+            updateStats();
+        };
+        rec.start();
+    }
+
+    function leer() {
+        toggleMenu();
+        const u = new SpeechSynthesisUtterance(document.getElementById('editor').innerText);
+        u.lang = 'es-MX';
+        window.speechSynthesis.speak(u);
+    }
+
+    function exportar(formato) {
+        const editor = document.getElementById('editor');
+        if(formato === 'pdf') { window.print(); return; }
+        let blob, content = formato === 'txt' ? editor.innerText : editor.innerHTML;
+        let type = formato === 'txt' ? 'text/plain' : 'text/html';
+        
+        if(formato === 'doc') {
+            content = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'></head><body>${editor.innerHTML}</body></html>`;
+            type = 'application/msword';
+        }
+
+        blob = new Blob([content], {type: type});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `Retorica_${Date.now()}.${formato}`;
+        a.click();
+        toggleMenu();
+    }
+
+    function logout() {
+        if(confirm("¿Cerrar sesión?")) {
+            localStorage.removeItem('ret_user');
+            location.reload();
+        }
+    }
+</script>
+</body>
+</html>
