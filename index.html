@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Retórica V16</title>
+    <style>
+        :root { --p: #0a0f1a; --bg: #ffffff; --accent: #2563eb; --muted: #64748b; --card: #f1f5f9; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+        body { background: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* Pantalla de Inicio (Estilo Vox) */
+        #v-auth { position: fixed; inset: 0; background: var(--p); z-index: 11000; display: flex; align-items: center; justify-content: center; color: white; }
+        .auth-box { background: white; padding: 40px; border-radius: 30px; color: var(--p); text-align: center; width: 90%; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+
+        /* Header Profesional */
+        header { padding: 12px 15px; border-bottom: 1px solid #eee; background: #fff; flex-shrink: 0; }
+        .top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+        .action-btns { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
+        .action-btns::-webkit-scrollbar { display: none; }
+        
+        .btn-round { padding: 8px 16px; border-radius: 25px; border: 1px solid #ddd; background: #f8fafc; font-size: 13px; font-weight: bold; white-space: nowrap; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+        .btn-accent { background: var(--accent); color: white; border: none; }
+
+        /* Editor Infinito (Anti-Teclado) */
+        #editor { flex: 1; padding: 25px; overflow-y: auto; font-size: 19px; outline: none; padding-bottom: 65vh; line-height: 1.7; word-wrap: break-word; }
+
+        /* Menú Lateral y Biblioteca Clásica */
+        #sidebar { position: fixed; top: 0; left: -100%; width: 88%; max-width: 340px; height: 100%; background: white; z-index: 10000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); padding: 20px; box-shadow: 10px 0 30px rgba(0,0,0,0.2); overflow-y: auto; }
+        #sidebar.open { left: 0; }
+        #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; }
+
+        /* El Signo + de Vox Scribe */
+        .btn-plus { width: 50px; height: 50px; background: var(--accent); color: white; border-radius: 50%; border: none; font-size: 30px; font-weight: bold; cursor: pointer; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(37,99,235,0.3); }
+
+        /* Grid de Plantillas (2 columnas / 6 filas) */
+        .library-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
+        .doc-card { background: var(--card); padding: 15px; border-radius: 15px; height: 120px; overflow: hidden; font-size: 11px; border: 1px solid #e2e8f0; cursor: pointer; transition: 0.2s; position: relative; }
+        .doc-card:active { transform: scale(0.95); }
+        .doc-card b { display: block; margin-bottom: 6px; color: var(--p); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* Configuración de Voces */
+        .voice-section { background: #f8fafc; padding: 15px; border-radius: 15px; margin-top: 20px; border: 1px solid #eee; }
+        select { width: 100%; padding: 12px; border-radius: 10px; margin: 10px 0; border: 1px solid #ddd; font-size: 14px; }
+
+        #page-stats { padding: 12px 20px; font-size: 11px; color: var(--muted); border-top: 1px solid #eee; background: #fafafa; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div id="v-auth">
+    <div class="auth-box">
+        <h1 style="letter-spacing:3px; margin-bottom:5px">RETÓRICA</h1>
+        <p style="font-size:12px; color:gray; margin-bottom:20px">Inspirado en Vox Scribe</p>
+        <input type="email" id="u-email" style="width:100%; padding:16px; margin-bottom:15px; border-radius:15px; border:1px solid #ddd; outline:none" placeholder="Cuenta de sincronización">
+        <button onclick="saveUser()" style="width:100%; padding:16px; background:var(--accent); color:white; border:none; border-radius:15px; font-weight:bold; cursor:pointer">ACCEDER AL ESTUDIO</button>
+    </div>
+</div>
+
+<div id="overlay" onclick="toggleMenu()"></div>
+
+<nav id="sidebar">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
+        <h2 style="font-weight:900">BIBLIOTECA</h2>
+        <button class="btn-plus" onclick="nuevoProyecto()">+</button>
+    </div>
+    
+    <p style="font-size:11px; font-weight:bold; color:var(--accent); text-transform:uppercase">Mis Plantillas (Historial)</p>
+    <div class="library-grid" id="library">
+        </div>
+
+    <div class="voice-section">
+        <p style="font-size:12px; font-weight:bold">🎙️ MOTORES DE VOZ</p>
+        <select id="voice-select"></select>
+        <button onclick="addVoiceToBar()" style="width:100%; padding:10px; background:var(--p); color:white; border-radius:10px; border:none; font-size:12px; font-weight:bold">Añadir a barra superior</button>
+        <div id="voice-management" style="margin-top:15px"></div>
+    </div>
+
+    <div style="margin-top:30px; padding-top:20px; border-top:1px solid #eee">
+        <button onclick="logout()" style="color:red; border:none; background:none; font-weight:bold; cursor:pointer">Cerrar Sesión</button>
+    </div>
+</nav>
+
+<div id="main-app" style="display:none; flex:1; flex-direction:column;">
+    <header>
+        <div class="top-bar">
+            <div style="font-size:30px; cursor:pointer" onclick="toggleMenu()">☰</div>
+            <div style="font-weight:900; letter-spacing:1px; font-size:18px">RETÓRICA</div>
+            <button class="btn-round btn-accent" onclick="guardarManual()">💾 GUARDAR</button>
+        </div>
+        <div class="action-btns" id="top-bar-voices">
+            <button class="btn-round" onclick="dictar()">🎤 Dictado</button>
+            <button class="btn-round" onclick="leerTodo()">🔊 Leer Todo</button>
+            </div>
+    </header>
+    
+    <div id="editor" contenteditable="true" oninput="updateStats()" placeholder="Comienza a escribir tu guión o nota..."></div>
+    
+    <div id="page-stats">0 caracteres | 0 palabras</div>
+</div>
+
+<script>
+    let voices = [];
+    let favVoices = JSON.parse(localStorage.getItem('ret_favs')) || [];
+    let library = JSON.parse(localStorage.getItem('ret_lib')) || [];
+
+    window.onload = () => {
+        if (localStorage.getItem('ret_user')) {
+            document.getElementById('v-auth').style.display = 'none';
+            document.getElementById('main-app').style.display = 'flex';
+            loadLibrary();
+            initVoices();
+        }
+    };
+
+    function initVoices() {
+        const load = () => {
+            voices = window.speechSynthesis.getVoices();
+            const sel = document.getElementById('voice-select');
+            sel.innerHTML = voices.map((v, i) => `<option value="${i}">${v.name} (${v.lang})</option>`).join('');
+            renderVoices();
+        };
+        load();
+        if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = load;
+    }
+
+    function addVoiceToBar() {
+        const idx = document.getElementById('voice-select').value;
+        const v = voices[idx];
+        if (!favVoices.find(f => f.name === v.name)) {
+            favVoices.push({ name: v.name, index: idx, visible: true });
+            saveVoices();
+        }
+    }
+
+    function toggleVoice(i) { favVoices[i].visible = !favVoices[i].visible; saveVoices(); }
+    function removeVoice(i) { favVoices.splice(i, 1); saveVoices(); }
+    function saveVoices() { localStorage.setItem('ret_favs', JSON.stringify(favVoices)); renderVoices(); }
+
+    function renderVoices() {
+        const bar = document.getElementById('top-bar-voices');
+        const list = document.getElementById('voice-management');
+        bar.innerHTML = `<button class="btn-round" onclick="dictar()">🎤 Dictado</button>
+                         <button class="btn-round" onclick="leerTodo()">🔊 Leer Todo</button>`;
+        list.innerHTML = '';
+
+        favVoices.forEach((v, i) => {
+            if (v.visible) bar.innerHTML += `<button class="btn-round" onclick="leerConVoz(${v.index})">👤 ${v.name.split(' ')[0]}</button>`;
+            list.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:12px">
+                <span>${v.name.split(' ')[0]}</span>
+                <div>
+                    <button onclick="toggleVoice(${i})" style="border:none; background:none">${v.visible?'👁️':'🚫'}</button>
+                    <button onclick="removeVoice(${i})" style="border:none; background:none; color:red; margin-left:10px">✕</button>
+                </div>
+            </div>`;
+        });
+    }
+
+    function leerConVoz(idx) {
+        speechSynthesis.cancel();
+        const text = window.getSelection().toString() || document.getElementById('editor').innerText;
+        if (!text) return;
+        const u = new SpeechSynthesisUtterance(text);
+        u.voice = voices[idx];
+        speechSynthesis.speak(u);
+    }
+
+    function leerTodo() {
+        speechSynthesis.cancel();
+        speechSynthesis.speak(new SpeechSynthesisUtterance(document.getElementById('editor').innerText));
+    }
+
+    function dictar() {
+        const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        rec.lang = 'es-MX';
+        rec.onresult = (e) => {
+            document.getElementById('editor').innerHTML += " " + e.results[0][0].transcript;
+            updateStats();
+        };
+        rec.start();
+    }
+
+    function guardarManual() {
+        const editor = document.getElementById('editor');
+        const text = editor.innerText.trim();
+        if (!text) return alert("Editor vacío");
+        
+        const doc = {
+            id: Date.now(),
+            title: text.substring(0, 20) + (text.length > 20 ? "..." : ""),
+            content: editor.innerHTML,
+            preview: text.substring(0, 60) + "...",
+            date: new Date().toLocaleDateString()
+        };
+        
+        library.unshift(doc);
+        if (library.length > 12) library.pop();
+        localStorage.setItem('ret_lib', JSON.stringify(library));
+        loadLibrary();
+        alert("Guardado en Plantillas");
+    }
+
+    function loadLibrary() {
+        const container = document.getElementById('library');
+        container.innerHTML = library.map(doc => `
+            <div class="doc-card" onclick="abrirDoc(${doc.id})">
+                <b>${doc.title}</b>
+                ${doc.preview}
+                <div style="position:absolute; bottom:8px; right:10px; font-size:9px; color:gray">${doc.date}</div>
+            </div>`).join('');
+    }
+
+    function abrirDoc(id) {
+        const doc = library.find(d => d.id === id);
+        if (doc) { document.getElementById('editor').innerHTML = doc.content; updateStats(); toggleMenu(); }
+    }
+
+    function nuevoProyecto() {
+        if (confirm("¿Crear nuevo proyecto? Asegúrate de haber guardado el actual.")) {
+            document.getElementById('editor').innerHTML = "";
+            updateStats();
+            toggleMenu();
+        }
+    }
+
+    function updateStats() {
+        const text = document.getElementById('editor').innerText;
+        document.getElementById('page-stats').innerText = `${text.length} caracteres | ${text.trim() === "" ? 0 : text.trim().split(/\s+/).length} palabras`;
+    }
+
+    function toggleMenu() {
+        const sb = document.getElementById('sidebar');
+        const ov = document.getElementById('overlay');
+        const isOpen = sb.classList.toggle('open');
+        ov.style.display = isOpen ? 'block' : 'none';
+    }
+
+    function saveUser() {
+        const mail = document.getElementById('u-email').value;
+        if (mail) { localStorage.setItem('ret_user', mail); location.reload(); }
+    }
+
+    function logout() { localStorage.removeItem('ret_user'); location.reload(); }
+</script>
+</body>
+</html>
