@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Retórica V15 - Configuración de Voces</title>
+    <style>
+        :root { --p: #0a0f1a; --bg: #ffffff; --accent: #2563eb; --muted: #64748b; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+        body { background: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* Login */
+        #v-auth { position: fixed; inset: 0; background: var(--p); z-index: 11000; display: flex; align-items: center; justify-content: center; color: white; }
+        .auth-box { background: white; padding: 40px; border-radius: 25px; color: var(--p); text-align: center; width: 90%; max-width: 380px; }
+
+        /* Header y Controles Superiores */
+        header { padding: 10px 15px; border-bottom: 1px solid #eee; background: #fff; flex-shrink: 0; }
+        .top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+        .action-btns { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
+        .action-btns::-webkit-scrollbar { display: none; }
+        
+        .btn-round { padding: 8px 15px; border-radius: 20px; border: 1px solid #ddd; background: #f8fafc; font-size: 12px; font-weight: bold; white-space: nowrap; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+        .btn-accent { background: var(--accent); color: white; border: none; }
+
+        /* Editor */
+        #editor { flex: 1; padding: 25px; overflow-y: auto; font-size: 19px; outline: none; padding-bottom: 60vh; line-height: 1.6; }
+
+        /* Menú Sidebar */
+        #sidebar { position: fixed; top: 0; left: -100%; width: 85%; max-width: 320px; height: 100%; background: white; z-index: 10000; transition: 0.3s; padding: 20px; box-shadow: 5px 0 15px rgba(0,0,0,0.2); overflow-y: auto; }
+        #sidebar.open { left: 0; }
+        #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 9999; }
+
+        /* Biblioteca */
+        .library-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .doc-card { background: #f1f5f9; padding: 12px; border-radius: 12px; height: 110px; overflow: hidden; font-size: 11px; border: 1px solid #e2e8f0; cursor: pointer; }
+        
+        /* Configuración de Voz */
+        .voice-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee; font-size: 13px; }
+        .voice-controls { background: #f9f9f9; padding: 15px; border-radius: 12px; margin-top: 15px; border: 1px solid #ddd; }
+        select { width: 100%; padding: 10px; border-radius: 8px; margin: 10px 0; border: 1px solid #ccc; }
+
+        #page-stats { padding: 10px 20px; font-size: 11px; color: var(--muted); border-top: 1px solid #eee; background: #fafafa; }
+    </style>
+</head>
+<body>
+
+<div id="v-auth">
+    <div class="auth-box">
+        <h2>RETÓRICA</h2>
+        <input type="email" id="u-email" style="width:100%; padding:15px; margin:20px 0; border-radius:12px; border:1px solid #ddd" placeholder="Correo">
+        <button onclick="saveUser()" style="width:100%; padding:15px; background:var(--accent); color:white; border:none; border-radius:12px; font-weight:bold">ENTRAR</button>
+    </div>
+</div>
+
+<div id="overlay" onclick="toggleMenu()"></div>
+
+<nav id="sidebar">
+    <button onclick="toggleMenu()" style="float:right; border:none; background:none; font-size:20px">✕</button>
+    <h2 style="margin-bottom:20px">Estudio</h2>
+    
+    <button class="btn-round btn-accent" style="width:100%; margin-bottom:15px; justify-content:center" onclick="nuevoProyecto()">+ NUEVO PROYECTO</button>
+
+    <p style="font-size:11px; font-weight:bold; color:var(--accent); margin-top:10px;">BIBLIOTECA (6 FILAS)</p>
+    <div class="library-grid" id="library"></div>
+
+    <div class="voice-controls">
+        <p style="font-size:12px; font-weight:bold;">⚙️ CONFIGURACIÓN DE VOCES</p>
+        <select id="voice-select"></select>
+        <button onclick="addVoiceToBar()" style="width:100%; padding:8px; background:var(--p); color:white; border-radius:8px; border:none; font-size:12px; cursor:pointer;">Añadir Voz a Barra Superior</button>
+        
+        <div id="voice-management-list" style="margin-top:15px;">
+            <!-- Lista de voces activas para ocultar/mostrar -->
+        </div>
+    </div>
+
+    <button onclick="logout()" style="margin-top:30px; color:red; border:none; background:none; font-weight:bold; width:100%; text-align:left;">Cerrar Sesión</button>
+</nav>
+
+<div id="main-app" style="display:none; flex:1; flex-direction:column;">
+    <header>
+        <div class="top-bar">
+            <div style="font-size:28px; cursor:pointer" onclick="toggleMenu()">☰</div>
+            <div style="font-weight:900; letter-spacing:1px">RETÓRICA</div>
+            <button class="btn-round btn-accent" onclick="guardarManual()">💾 GUARDAR</button>
+        </div>
+        <div class="action-btns" id="action-btns-container">
+            <button class="btn-round" onclick="dictar()">🎤 Dictado</button>
+            <button class="btn-round" onclick="leerTodo()">🔊 Leer Todo</button>
+            <!-- Las voces configuradas aparecerán aquí -->
+        </div>
+    </header>
+    
+    <div id="editor" contenteditable="true" oninput="updateStats()" placeholder="Escribe tu relámpago..."></div>
+    
+    <div id="page-stats">0 caracteres | 0 palabras</div>
+</div>
+
+<script>
+    let voices = [];
+    let favoriteVoices = JSON.parse(localStorage.getItem('ret_fav_voices')) || [];
+    let library = JSON.parse(localStorage.getItem('ret_library')) || [];
+
+    window.onload = () => {
+        if (localStorage.getItem('ret_user')) {
+            document.getElementById('v-auth').style.display = 'none';
+            document.getElementById('main-app').style.display = 'flex';
+            loadLibrary();
+            initVoiceSystem();
+        }
+    };
+
+    function initVoiceSystem() {
+        const loadVoices = () => {
+            voices = window.speechSynthesis.getVoices();
+            const select = document.getElementById('voice-select');
+            select.innerHTML = voices.map((v, i) => `<option value="${i}">${v.name} (${v.lang})</option>`).join('');
+            renderVoiceButtons();
+        };
+        loadVoices();
+        if (window.speechSynthesis.onvoiceschanged !== undefined) {
+            window.speechSynthesis.onvoiceschanged = loadVoices;
+        }
+    }
+
+    function addVoiceToBar() {
+        const idx = document.getElementById('voice-select').value;
+        const v = voices[idx];
+        if (!favoriteVoices.find(fav => fav.name === v.name)) {
+            favoriteVoices.push({ name: v.name, lang: v.lang, index: idx, visible: true });
+            saveAndRender();
+        }
+    }
+
+    function toggleVoiceVisibility(index) {
+        favoriteVoices[index].visible = !favoriteVoices[index].visible;
+        saveAndRender();
+    }
+
+    function removeVoice(index) {
+        favoriteVoices.splice(index, 1);
+        saveAndRender();
+    }
+
+    function saveAndRender() {
+        localStorage.setItem('ret_fav_voices', JSON.stringify(favoriteVoices));
+        renderVoiceButtons();
+    }
+
+    function renderVoiceButtons() {
+        const container = document.getElementById('action-btns-container');
+        const management = document.getElementById('voice-management-list');
+        
+        // Limpiar botones dinámicos (mantener Dictado y Leer Todo)
+        container.innerHTML = `<button class="btn-round" onclick="dictar()">🎤 Dictado</button>
+                               <button class="btn-round" onclick="leerTodo()">🔊 Leer Todo</button>`;
+        management.innerHTML = '<p style="font-size:10px; color:gray; margin-bottom:5px;">GESTIONAR BOTONES:</p>';
+
+        favoriteVoices.forEach((v, i) => {
+            if (v.visible) {
+                container.innerHTML += `<button class="btn-round" onclick="ejecutarLectura(${v.index})">👤 ${v.name.split(' ')[0]}</button>`;
+            }
+            management.innerHTML += `
+                <div class="voice-item">
+                    <span>${v.name.split(' ')[0]}</span>
+                    <div>
+                        <button onclick="toggleVoiceVisibility(${i})" style="border:none; background:none; cursor:pointer;">${v.visible ? '👁️' : '🚫'}</button>
+                        <button onclick="removeVoice(${i})" style="border:none; background:none; color:red; margin-left:10px; cursor:pointer;">✕</button>
+                    </div>
+                </div>`;
+        });
+    }
+
+    function ejecutarLectura(voiceIdx) {
+        window.speechSynthesis.cancel();
+        const selection = window.getSelection().toString();
+        const text = selection || document.getElementById('editor').innerText;
+        
+        if (!text.trim()) return;
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.voice = voices[voiceIdx];
+        window.speechSynthesis.speak(utterance);
+    }
+
+    function leerTodo() {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(document.getElementById('editor').innerText);
+        window.speechSynthesis.speak(utterance);
+    }
+
+    function dictar() {
+        const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        rec.lang = 'es-MX';
+        rec.onresult = (e) => {
+            document.getElementById('editor').innerHTML += " " + e.results[0][0].transcript;
+            updateStats();
+        };
+        rec.start();
+    }
+
+    function guardarManual() {
+        const editor = document.getElementById('editor');
+        if (!editor.innerText.trim()) return alert("No hay contenido para guardar");
+        
+        const doc = {
+            id: Date.now(),
+            title: editor.innerText.substring(0, 15) + "...",
+            content: editor.innerHTML,
+            preview: editor.innerText.substring(0, 60) + "...",
+            date: new Date().toLocaleDateString()
+        };
+        
+        library.unshift(doc);
+        if (library.length > 12) library.pop();
+        localStorage.setItem('ret_library', JSON.stringify(library));
+        loadLibrary();
+        alert("Proyecto guardado en la biblioteca.");
+    }
+
+    function loadLibrary() {
+        const container = document.getElementById('library');
+        container.innerHTML = library.map(doc => `
+            <div class="doc-card" onclick="abrirDoc(${doc.id})">
+                <b>${doc.title}</b><br>${doc.preview}
+            </div>`).join('');
+    }
+
+    function abrirDoc(id) {
+        const doc = library.find(d => d.id === id);
+        if (doc) {
+            document.getElementById('editor').innerHTML = doc.content;
+            updateStats();
+            toggleMenu();
+        }
+    }
+
+    function nuevoProyecto() {
+        if (confirm("¿Limpiar editor para un nuevo proyecto?")) {
+            document.getElementById('editor').innerHTML = "";
+            updateStats();
+            toggleMenu();
+        }
+    }
+
+    function updateStats() {
+        const text = document.getElementById('editor').innerText;
+        document.getElementById('page-stats').innerText = `${text.length} caracteres | ${text.trim() === "" ? 0 : text.trim().split(/\s+/).length} palabras`;
+    }
+
+    function toggleMenu() {
+        const sb = document.getElementById('sidebar');
+        const ov = document.getElementById('overlay');
+        const isOpen = sb.classList.toggle('open');
+        ov.style.display = isOpen ? 'block' : 'none';
+    }
+
+    function saveUser() {
+        const mail = document.getElementById('u-email').value;
+        if (mail) { localStorage.setItem('ret_user', mail); location.reload(); }
+    }
+
+    function logout() { localStorage.removeItem('ret_user'); location.reload(); }
+</script>
+</body>
+</html>
