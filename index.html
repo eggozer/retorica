@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Retórica V26 - Estándar Global</title>
+    <style>
+        :root { --p: #0a0f1a; --bg: #ffffff; --accent: #2563eb; --muted: #64748b; --card: #f1f5f9; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* Pantalla de Acceso */
+        #v-auth { position: fixed; inset: 0; background: var(--p); z-index: 11000; display: flex; align-items: center; justify-content: center; }
+        .auth-box { background: white; padding: 40px; border-radius: 30px; text-align: center; width: 90%; max-width: 400px; }
+
+        /* Barra Superior */
+        header { padding: 12px 15px; border-bottom: 1px solid #eee; background: #fff; flex-shrink: 0; }
+        .top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+        .action-btns { display: flex; gap: 8px; overflow-x: auto; padding: 5px 0; }
+        
+        .btn-round { padding: 8px 16px; border-radius: 25px; border: 1px solid #ddd; background: #f8fafc; font-size: 13px; font-weight: bold; white-space: nowrap; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+        .btn-accent { background: var(--accent); color: white; border: none; }
+
+        /* Editor de Guiones */
+        #editor { flex: 1; padding: 25px; overflow-y: auto; font-size: 19px; outline: none; line-height: 1.7; word-wrap: break-word; color: #1a1a1a; }
+        #editor:empty:before { content: "Escribe aquí..."; color: #ccc; }
+
+        /* Panel Lateral (Biblioteca) */
+        #sidebar { position: fixed; top: 0; left: -100%; width: 88%; max-width: 340px; height: 100%; background: white; z-index: 10000; transition: 0.3s; padding: 20px; box-shadow: 10px 0 30px rgba(0,0,0,0.2); overflow-y: auto; }
+        #sidebar.open { left: 0; }
+        #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; backdrop-filter: blur(2px); }
+
+        .library-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 25px; }
+        .doc-card { background: var(--card); padding: 12px; border-radius: 15px; height: 110px; border: 1px solid #e2e8f0; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; }
+        .doc-card b { font-size: 13px; color: var(--p); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+
+        /* Configuración de Voces */
+        .voice-panel { background: #f8fafc; padding: 20px; border-radius: 20px; border: 1px solid #e2e8f0; margin-top: 15px; }
+        .v-label { font-size: 10px; font-weight: 800; color: var(--accent); letter-spacing: 1px; margin-bottom: 8px; display: block; text-transform: uppercase; }
+        select { width: 100%; padding: 12px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #cbd5e1; background: white; font-size: 14px; outline: none; -webkit-appearance: none; }
+        
+        #fav-list div { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed #ddd; font-size: 12px; }
+        #page-stats { padding: 10px 20px; font-size: 11px; color: var(--muted); background: #f8fafc; border-top: 1px solid #eee; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div id="v-auth">
+    <div class="auth-box">
+        <h1 style="letter-spacing:4px; margin-bottom:10px">RETÓRICA</h1>
+        <input type="text" id="u-user" style="width:100%; padding:16px; margin-bottom:15px; border-radius:15px; border:1px solid #ddd;" placeholder="Nombre de usuario">
+        <button onclick="login()" style="width:100%; padding:16px; background:var(--accent); color:white; border:none; border-radius:15px; font-weight:bold;">INGRESAR</button>
+    </div>
+</div>
+
+<div id="overlay" onclick="toggleMenu()"></div>
+
+<nav id="sidebar">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
+        <h2 style="font-weight:900; color:var(--p)">BIBLIOTECA</h2>
+        <button style="width:45px; height:45px; border-radius:50%; border:none; background:var(--accent); color:white; font-size:24px;" onclick="nuevoDoc()">+</button>
+    </div>
+    
+    <div class="library-grid" id="library"></div>
+
+    <div class="voice-panel">
+        <span class="v-label">1. Idioma Mundial</span>
+        <select id="lang-filter" onchange="filterVoices()"></select>
+        
+        <span class="v-label">2. Número de Voz (Sistema)</span>
+        <select id="voice-select"></select>
+        
+        <button onclick="addVoice()" style="width:100%; padding:14px; background:var(--p); color:white; border-radius:12px; border:none; font-weight:bold; margin-bottom:15px;">Vincular a Barra</button>
+        <div id="fav-list"></div>
+    </div>
+
+    <button onclick="logout()" style="margin-top:40px; width:100%; padding:10px; color:#ef4444; border:1px solid #fee2e2; background:#fef2f2; border-radius:10px; font-size:12px; font-weight:bold;">CERRAR SESIÓN</button>
+</nav>
+
+<div id="main-app" style="display:none; flex:1; flex-direction:column;">
+    <header>
+        <div class="top-bar">
+            <div style="font-size:28px; cursor:pointer; color:var(--p)" onclick="toggleMenu()">☰</div>
+            <div style="font-weight:900; letter-spacing:2px; color:var(--p)">RETÓRICA</div>
+            <button class="btn-round btn-accent" onclick="guardarDoc()">💾 GUARDAR</button>
+        </div>
+        <div class="action-btns" id="top-bar-voices">
+            <button class="btn-round" onclick="dictar()">🎤 Dictado</button>
+            <button class="btn-round" onclick="leerTodo()">🔊 Leer Todo</button>
+        </div>
+    </header>
+
+    <div id="editor" contenteditable="true" oninput="updateStats()"></div>
+    <div id="page-stats">0 caracteres | 0 palabras</div>
+</div>
+
+<script>
+    let voices = [];
+    let favorites = JSON.parse(localStorage.getItem('ret_favs_v26')) || [];
+    let docs = JSON.parse(localStorage.getItem('ret_docs_v26')) || [];
+
+    const langNames = {
+        'es_MX': 'Español (México)', 'es_ES': 'Español (España)', 'es_US': 'Español (EE.UU.)',
+        'en_US': 'Inglés (EE.UU.)', 'en_GB': 'Inglés (Reino Unido)', 'fr_FR': 'Francés',
+        'pt_BR': 'Portugués (Brasil)', 'as_IN': 'Asamés (India)', 'bn_IN': 'Bengalí (India)'
+    };
+
+    window.onload = () => {
+        if (localStorage.getItem('ret_user')) {
+            document.getElementById('v-auth').style.display = 'none';
+            document.getElementById('main-app').style.display = 'flex';
+            loadLibrary();
+            initVoices();
+        }
+    };
+
+    function initVoices() {
+        const synth = window.speechSynthesis;
+        let attempts = 0;
+
+        const load = () => {
+            voices = synth.getVoices();
+            if (voices.length > 0) {
+                const langSel = document.getElementById('lang-filter');
+                const uniqueLangs = [...new Set(voices.map(v => v.lang))].sort();
+                
+                langSel.innerHTML = uniqueLangs.map(l => {
+                    const key = l.replace('-', '_');
+                    return `<option value="${l}">${langNames[key] || l}</option>`;
+                }).join('');
+                
+                filterVoices();
+                renderFavs();
+            } else if (attempts < 10) {
+                attempts++;
+                setTimeout(load, 100);
+            }
+        };
+
+        if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = load;
+        load();
+    }
+
+    function filterVoices() {
+        const selectedLang = document.getElementById('lang-filter').value;
+        const voiceSel = document.getElementById('voice-select');
+        voiceSel.innerHTML = voices.filter(v => v.lang === selectedLang)
+                                   .map(v => `<option value="${v.name}">${v.name}</option>`).join('');
+    }
+
+    function addVoice() {
+        const name = document.getElementById('voice-select').value;
+        const vInfo = voices.find(v => v.name === name);
+        if (vInfo && !favorites.find(f => f.name === name)) {
+            favorites.push({ name: name, lang: vInfo.lang });
+            localStorage.setItem('ret_favs_v26', JSON.stringify(favorites));
+            renderFavs();
+        }
+    }
+
+    function renderFavs() {
+        const bar = document.getElementById('top-bar-voices');
+        const list = document.getElementById('fav-list');
+        bar.innerHTML = `<button class="btn-round" onclick="dictar()">🎤 Dictado</button>
+                         <button class="btn-round" onclick="leerTodo()">🔊 Leer Todo</button>`;
+        list.innerHTML = '';
+        
+        favorites.forEach((v, index) => {
+            const shortLang = v.lang.split('-')[0].toUpperCase();
+            bar.innerHTML += `<button class="btn-round" onclick="leerConVoz('${v.name}')">${shortLang} 👤</button>`;
+            list.innerHTML += `<div><span>${v.name}</span><b onclick="removeFav(${index})" style="color:#ff4444; padding:5px; cursor:pointer">✕</b></div>`;
+        });
+    }
+
+    function removeFav(i) { favorites.splice(i, 1); localStorage.setItem('ret_favs_v26', JSON.stringify(favorites)); renderFavs(); }
+
+    function leerTodo() {
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(new SpeechSynthesisUtterance(document.getElementById('editor').innerText));
+    }
+
+    function leerConVoz(name) {
+        window.speechSynthesis.cancel();
+        const ut = new SpeechSynthesisUtterance(document.getElementById('editor').innerText);
+        ut.voice = voices.find(v => v.name === name);
+        window.speechSynthesis.speak(ut);
+    }
+
+    function dictar() {
+        const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!Speech) return alert("Dispositivo no compatible con dictado");
+        const rec = new Speech();
+        rec.lang = 'es-MX';
+        rec.onresult = (e) => { document.getElementById('editor').innerText += " " + e.results[0][0].transcript; updateStats(); };
+        rec.start();
+    }
+
+    function guardarDoc() {
+        const text = document.getElementById('editor').innerText.trim();
+        if (!text) return;
+        const newDoc = { id: Date.now(), title: text.substring(0,25), body: document.getElementById('editor').innerHTML, date: new Date().toLocaleDateString() };
+        docs = [newDoc, ...docs].slice(0, 12);
+        localStorage.setItem('ret_docs_v26', JSON.stringify(docs));
+        loadLibrary();
+        alert("Nota guardada en biblioteca");
+    }
+
+    function loadLibrary() {
+        document.getElementById('library').innerHTML = docs.map(d => `
+            <div class="doc-card" onclick="cargarDoc(${d.id})">
+                <b>${d.title}...</b>
+                <span style="font-size:9px; color:var(--muted)">${d.date}</span>
+            </div>
+        `).join('');
+    }
+
+    function cargarDoc(id) {
+        const d = docs.find(doc => doc.id === id);
+        if (d) { document.getElementById('editor').innerHTML = d.body; updateStats(); toggleMenu(); }
+    }
+
+    function nuevoDoc() { document.getElementById('editor').innerHTML = ""; updateStats(); toggleMenu(); }
+
+    function updateStats() {
+        const t = document.getElementById('editor').innerText;
+        document.getElementById('page-stats').innerText = `${t.length} caracteres | ${t.trim() === "" ? 0 : t.trim().split(/\s+/).length} palabras`;
+    }
+
+    function toggleMenu() {
+        const s = document.getElementById('sidebar');
+        s.classList.toggle('open');
+        document.getElementById('overlay').style.display = s.classList.contains('open') ? 'block' : 'none';
+    }
+
+    function login() {
+        const user = document.getElementById('u-user').value;
+        if (user) { localStorage.setItem('ret_user', user); location.reload(); }
+    }
+
+    function logout() { if(confirm("¿Cerrar sesión?")) { localStorage.clear(); location.reload(); } }
+</script>
+</body>
+</html>
