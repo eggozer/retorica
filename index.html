@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Retórica V29 - Compilación Final</title>
+    <style>
+        :root { --p: #0a0f1a; --bg: #ffffff; --accent: #2563eb; --card: #f1f5f9; --text: #1e293b; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; color: var(--text); }
+
+        /* Auth */
+        #v-auth { position: fixed; inset: 0; background: var(--p); z-index: 11000; display: flex; align-items: center; justify-content: center; }
+        .auth-box { background: white; padding: 40px; border-radius: 30px; text-align: center; width: 92%; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+
+        /* Header Dinámico */
+        header { padding: 12px 15px; border-bottom: 1px solid #edf2f7; background: #fff; flex-shrink: 0; z-index: 100; }
+        .top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+        
+        /* Nivel 1: Fijos */
+        .fixed-tools { display: flex; gap: 10px; margin-bottom: 12px; }
+        .btn-fijo { flex: 1; height: 48px; border-radius: 14px; border: 1.5px solid #e2e8f0; background: #fff; font-weight: 800; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
+        .btn-fijo:active { transform: scale(0.95); background: #f8fafc; }
+
+        /* Nivel 2: Carrusel */
+        .voice-carousel { display: flex; gap: 10px; overflow-x: auto; padding: 4px 0; scrollbar-width: none; -webkit-overflow-scrolling: touch; border-top: 1px solid #f1f5f9; padding-top: 12px; }
+        .voice-carousel::-webkit-scrollbar { display: none; }
+        
+        .btn-v { padding: 8px 18px; border-radius: 20px; border: none; background: var(--card); font-size: 13px; font-weight: 700; white-space: nowrap; flex-shrink: 0; color: var(--p); display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+
+        /* Editor */
+        #editor { flex: 1; padding: 25px; overflow-y: auto; font-size: 20px; outline: none; line-height: 1.8; word-wrap: break-word; background: #fff; }
+        #editor:empty:before { content: "Escribe tu idea aquí..."; color: #94a3b8; }
+
+        /* Sidebar & Lib */
+        #sidebar { position: fixed; top: 0; left: -100%; width: 85%; max-width: 320px; height: 100%; background: white; z-index: 10000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); padding: 25px; overflow-y: auto; }
+        #sidebar.open { left: 0; }
+        #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; backdrop-filter: blur(3px); }
+
+        .lib-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+        .card { background: #f8fafc; padding: 15px; border-radius: 18px; height: 115px; border: 1px solid #e2e8f0; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; }
+        .card b { font-size: 12px; line-height: 1.3; color: var(--p); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        .card i { font-size: 9px; color: var(--muted); font-style: normal; font-weight: bold; }
+
+        /* Panel Config */
+        .v-config { background: #f1f5f9; padding: 20px; border-radius: 25px; margin-top: 20px; border: 1px solid #e2e8f0; }
+        .v-config span { font-size: 10px; font-weight: 900; color: var(--accent); display: block; margin-bottom: 8px; letter-spacing: 0.5px; }
+        select { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #cbd5e1; background: white; font-size: 14px; margin-bottom: 15px; outline: none; }
+
+        #stats { padding: 12px 20px; font-size: 11px; font-weight: 800; color: #64748b; background: #fff; border-top: 1px solid #f1f5f9; }
+    </style>
+</head>
+<body>
+
+<div id="v-auth">
+    <div class="auth-box">
+        <h1 style="letter-spacing:5px; font-weight:900; margin-bottom:10px">RETÓRICA</h1>
+        <p style="font-size:12px; color:#64748b; margin-bottom:20px">Escritura y Voz Profesional</p>
+        <input type="text" id="in-user" style="width:100%; padding:16px; margin-bottom:15px; border-radius:15px; border:1px solid #e2e8f0;" placeholder="Usuario">
+        <button onclick="login()" style="width:100%; padding:18px; background:var(--p); color:white; border:none; border-radius:15px; font-weight:900;">INGRESAR</button>
+    </div>
+</div>
+
+<div id="overlay" onclick="menu()"></div>
+
+<nav id="sidebar">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2 style="font-weight:900">BIBLIOTECA</h2>
+        <button onclick="nuevo()" style="width:44px; height:44px; border-radius:50%; border:none; background:var(--accent); color:white; font-size:24px;">+</button>
+    </div>
+    <div class="lib-grid" id="lib"></div>
+
+    <div class="v-config">
+        <span>1. IDIOMA PREDETERMINADO</span>
+        <select id="sel-lang" onchange="updV()"></select>
+        <span>2. VOZ (NÚMEROS ROMANOS)</span>
+        <select id="sel-voice"></select>
+        <button onclick="addV()" style="width:100%; padding:14px; background:var(--accent); color:white; border-radius:12px; border:none; font-weight:800;">Fijar en Carrusel</button>
+        <div id="favs" style="margin-top:15px"></div>
+    </div>
+    <button onclick="logout()" style="margin-top:30px; width:100%; padding:12px; color:#ef4444; border:none; background:none; font-size:12px; font-weight:bold;">BORRAR DATOS Y SALIR</button>
+</nav>
+
+<div id="app" style="display:none; flex:1; flex-direction:column;">
+    <header>
+        <div class="top-bar">
+            <div style="font-size:30px; cursor:pointer" onclick="menu()">☰</div>
+            <div style="font-weight:900; letter-spacing:3px">RETÓRICA</div>
+            <button onclick="save()" style="padding:10px 20px; border-radius:20px; background:var(--p); color:white; border:none; font-weight:900; font-size:12px">GUARDAR</button>
+        </div>
+        
+        <div class="fixed-tools">
+            <button class="btn-fijo" onclick="dictado()">🎤 Dictado</button>
+            <button class="btn-fijo" onclick="leer(null)">🔊 Leer Todo</button>
+        </div>
+
+        <div class="voice-carousel" id="car-v"></div>
+    </header>
+
+    <div id="editor" contenteditable="true" oninput="stats()"></div>
+    <div id="stats">0 caracteres | 0 palabras</div>
+</div>
+
+<script>
+    let vArr = [];
+    let favs = JSON.parse(localStorage.getItem('ret_v_fav')) || [];
+    let docs = JSON.parse(localStorage.getItem('ret_v_doc')) || [];
+
+    const lNames = { 'es_MX': 'Español (MX)', 'es_ES': 'Español (ES)', 'es_US': 'Español (US)', 'en_US': 'Inglés (US)' };
+
+    window.onload = () => {
+        if (localStorage.getItem('ret_user')) {
+            document.getElementById('v-auth').style.display = 'none';
+            document.getElementById('app').style.display = 'flex';
+            renderLib();
+            initV();
+        }
+    };
+
+    function initV() {
+        const s = window.speechSynthesis;
+        const l = () => {
+            vArr = s.getVoices();
+            if (vArr.length > 0) {
+                const selL = document.getElementById('sel-lang');
+                const uL = [...new Set(vArr.map(v => v.lang))].sort();
+                selL.innerHTML = uL.map(lang => `<option value="${lang}">${lNames[lang.replace('-', '_')] || lang}</option>`).join('');
+                updV();
+                renderFavs();
+            }
+        };
+        if (s.onvoiceschanged !== undefined) s.onvoiceschanged = l;
+        l();
+    }
+
+    function updV() {
+        const l = document.getElementById('sel-lang').value;
+        const selV = document.getElementById('sel-voice');
+        selV.innerHTML = vArr.filter(v => v.lang === l).map(v => `<option value="${v.name}">${v.name}</option>`).join('');
+    }
+
+    function addV() {
+        const n = document.getElementById('sel-voice').value;
+        const info = vArr.find(v => v.name === n);
+        if (info && !favs.find(f => f.name === n)) {
+            favs.push({ name: n, lang: info.lang });
+            localStorage.setItem('ret_v_fav', JSON.stringify(favs));
+            renderFavs();
+        }
+    }
+
+    function renderFavs() {
+        const car = document.getElementById('car-v');
+        const list = document.getElementById('favs');
+        car.innerHTML = ""; list.innerHTML = "";
+        favs.forEach((f, i) => {
+            const short = f.lang.split('-')[0].toUpperCase();
+            const icon = f.name.match(/ii|iv|vi/i) ? "👨" : "👩";
+            car.innerHTML += `<button class="btn-v" onclick="leer('${f.name}')">${short} ${icon}</button>`;
+            list.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:11px"><span>${f.name}</span><b onclick="remV(${i})" style="color:red">✕</b></div>`;
+        });
+    }
+
+    function remV(i) { favs.splice(i,1); localStorage.setItem('ret_v_fav', JSON.stringify(favs)); renderFavs(); }
+
+    function leer(n) {
+        speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(document.getElementById('editor').innerText);
+        if(n) u.voice = vArr.find(v => v.name === n);
+        speechSynthesis.speak(u);
+    }
+
+    function dictado() {
+        const R = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if(!R) return alert("No soportado");
+        const rec = new R(); rec.lang = 'es-MX';
+        rec.onresult = (e) => { document.getElementById('editor').innerText += " " + e.results[0][0].transcript; stats(); };
+        rec.start();
+    }
+
+    function save() {
+        const t = document.getElementById('editor').innerText.trim();
+        if(!t) return;
+        const d = { id: Date.now(), title: t.substring(0,35), body: document.getElementById('editor').innerHTML, date: new Date().toLocaleDateString() };
+        docs = [d, ...docs].slice(0, 12);
+        localStorage.setItem('ret_v_doc', JSON.stringify(docs));
+        renderLib();
+        alert("Guardado Manual");
+    }
+
+    function renderLib() {
+        document.getElementById('lib').innerHTML = docs.map(d => `<div class="card" onclick="load(${d.id})"><b>${d.title}...</b><i>${d.date}</i></div>`).join('');
+    }
+
+    function load(id) {
+        const d = docs.find(x => x.id === id);
+        if(d) { document.getElementById('editor').innerHTML = d.body; stats(); menu(); }
+    }
+
+    function nuevo() { document.getElementById('editor').innerHTML = ""; stats(); menu(); }
+
+    function stats() {
+        const t = document.getElementById('editor').innerText;
+        document.getElementById('stats').innerText = `${t.length} caracteres | ${t.trim()===""?0:t.trim().split(/\s+/).length} palabras`;
+    }
+
+    function menu() {
+        const s = document.getElementById('sidebar');
+        s.classList.toggle('open');
+        document.getElementById('overlay').style.display = s.classList.contains('open') ? 'block' : 'none';
+    }
+
+    function login() { const u = document.getElementById('in-user').value; if(u){localStorage.setItem('ret_user', u); location.reload();} }
+    function logout() { if(confirm("¿Borrar todo?")) { localStorage.clear(); location.reload(); } }
+</script>
+</body>
+</html>
