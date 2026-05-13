@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Retórica - Depuración Final</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        :root { --p: #0a0f1a; --accent: #2563eb; --bg: #ffffff; --card: #f1f5f9; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* Auth */
+        #auth-screen { position: fixed; inset: 0; background: var(--p); z-index: 10000; display: none; align-items: center; justify-content: center; }
+        .auth-card { background: white; padding: 30px; border-radius: 25px; text-align: center; width: 90%; max-width: 400px; }
+        .auth-card input { width: 100%; padding: 15px; margin: 15px 0; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; }
+
+        /* Header */
+        header { background: #fff; border-bottom: 1px solid #eee; flex-shrink: 0; z-index: 500; }
+        .bar-top { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; }
+        .logo { font-weight: 900; letter-spacing: 3px; font-size: 18px; color: var(--p); }
+        .hamb { font-size: 28px; cursor: pointer; background: none; border: none; padding: 5px; }
+
+        /* Herramientas */
+        .toolbar { padding: 0 15px 10px 15px; }
+        .row-tools { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; }
+        .row-tools::-webkit-scrollbar { display: none; }
+        .btn-t { padding: 8px 15px; border-radius: 20px; border: 1px solid #e2e8f0; background: #f8fafc; font-size: 11px; font-weight: bold; white-space: nowrap; cursor: pointer; }
+        .btn-save { background: var(--p); color: white; border: none; }
+
+        /* Editor */
+        #editor { flex: 1; padding: 25px; overflow-y: auto; font-size: 19px; outline: none; line-height: 1.7; background: #fff; }
+        #editor:empty:before { content: "Escribe aquí..."; color: #cbd5e1; }
+
+        /* Sidebar - Biblioteca */
+        #sidebar { position: fixed; top: 0; left: -100%; width: 310px; height: 100%; background: #fff; z-index: 1001; transition: 0.3s; box-shadow: 5px 0 25px rgba(0,0,0,0.15); padding: 20px; display: flex; flex-direction: column; }
+        #sidebar.open { left: 0; }
+        #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1000; }
+
+        .lib-title { font-weight: 900; font-size: 18px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .doc-list { flex: 1; overflow-y: auto; }
+        
+        /* Tarjeta de Plantilla Corregida */
+        .doc-card { padding: 15px; border-radius: 15px; background: #f1f5f9; margin-bottom: 12px; border: 1px solid #e2e8f0; position: relative; }
+        .doc-card b { display: block; font-size: 13px; color: var(--p); margin-bottom: 5px; text-transform: uppercase; padding-right: 30px; }
+        .doc-card p { font-size: 11px; color: #64748b; line-height: 1.3; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+        .btn-share-item { position: absolute; top: 12px; right: 12px; font-size: 18px; color: var(--accent); cursor: pointer; border: none; background: none; }
+
+        #footer { padding: 8px 15px; font-size: 10px; font-weight: bold; background: #f8fafc; border-top: 1px solid #eee; display: flex; justify-content: space-between; }
+    </style>
+</head>
+<body>
+
+<div id="auth-screen">
+    <div class="auth-card">
+        <h1 style="letter-spacing:5px; font-weight:900;">RETÓRICA</h1>
+        <p style="font-size:12px; color:#64748b; margin-top:5px;">Ingreso / Sincronización</p>
+        <input type="email" id="email-in" placeholder="correo@ejemplo.com">
+        <button onclick="loginManual()" style="width:100%; padding:15px; background:var(--p); color:white; border:none; border-radius:12px; font-weight:900;">ACCEDER</button>
+    </div>
+</div>
+
+<div id="overlay" onclick="toggleMenu()"></div>
+
+<nav id="sidebar">
+    <div class="lib-title">
+        BIBLIOTECA 
+        <button onclick="nuevoDoc()" style="width:35px; height:35px; border-radius:50%; border:none; background:var(--accent); color:white; font-size:20px;">+</button>
+    </div>
+    <div class="doc-list" id="doc-list"></div>
+    <button onclick="logout()" style="margin-top:15px; width:100%; padding:10px; color:#ef4444; border:none; background:none; font-weight:bold; font-size:11px;">CERRAR SESIÓN</button>
+</nav>
+
+<div id="main-app" style="display:flex; flex:1; flex-direction:column;">
+    <header>
+        <div class="bar-top">
+            <button class="hamb" onclick="toggleMenu()">☰</button>
+            <div class="logo">RETÓRICA</div>
+            <button class="btn-t btn-save" onclick="guardar()">GUARDAR</button>
+        </div>
+        <div class="toolbar">
+            <div class="row-tools">
+                <button class="btn-t" onclick="dictado()">🎤 DICTADO</button>
+                <button class="btn-t" onclick="leer()">🔊 LECTURA</button>
+                <button class="btn-t" onclick="formato('bold')"><b>B</b></button>
+                <button class="btn-t" onclick="formato('italic')"><i>I</i></button>
+                <button class="btn-t" onclick="exportarPDF()">.PDF</button>
+                <button class="btn-t" onclick="exportarDOC()">.DOC</button>
+                <button class="btn-t" onclick="exportarTXT()">.TXT</button>
+            </div>
+        </div>
+    </header>
+
+    <div id="editor" contenteditable="true" oninput="updStats()"></div>
+    
+    <div id="footer">
+        <span id="char-count">0 caracteres</span>
+        <span id="user-display">Local</span>
+    </div>
+</div>
+
+<script>
+    var userEmail = "";
+    var currentDocId = null; // Para saber si estamos editando uno existente
+
+    window.onload = function() {
+        var savedEmail = localStorage.getItem('ret_active_user');
+        if (savedEmail) {
+            userEmail = savedEmail;
+            initApp();
+        }
+        renderBiblioteca();
+    };
+
+    function loginManual() {
+        var email = document.getElementById('email-in').value;
+        if (email.indexOf('@') > -1) {
+            userEmail = email;
+            localStorage.setItem('ret_active_user', email);
+            document.getElementById('auth-screen').style.display = 'none';
+            initApp();
+        }
+    }
+
+    function initApp() {
+        document.getElementById('user-display').innerText = userEmail;
+        renderBiblioteca();
+    }
+
+    function toggleMenu() {
+        var m = document.getElementById('sidebar');
+        var o = document.getElementById('overlay');
+        m.className = (m.className === 'open') ? '' : 'open';
+        o.style.display = (m.className === 'open') ? 'block' : 'none';
+    }
+
+    function guardar() {
+        var html = document.getElementById('editor').innerHTML;
+        var text = document.getElementById('editor').innerText;
+        if (!text.trim()) return;
+
+        var storage = JSON.parse(localStorage.getItem('ret_v5_db') || "[]");
+        
+        if (currentDocId) {
+            // ACTUALIZAR ARCHIVO EXISTENTE
+            for (var i = 0; i < storage.length; i++) {
+                if (storage[i].id === currentDocId) {
+                    storage[i].titulo = text.substring(0, 30);
+                    storage[i].extracto = text.substring(0, 150);
+                    storage[i].html = html;
+                    storage[i].date = new Date().toLocaleDateString();
+                    break;
+                }
+            }
+        } else {
+            // CREAR NUEVO
+            var id = Date.now();
+            var doc = {
+                id: id,
+                owner: userEmail || "local",
+                titulo: text.substring(0, 30),
+                extracto: text.substring(0, 150),
+                html: html,
+                date: new Date().toLocaleDateString()
+            };
+            storage.unshift(doc);
+            currentDocId = id; // Ahora este es el documento activo
+        }
+
+        localStorage.setItem('ret_v5_db', JSON.stringify(storage));
+        renderBiblioteca();
+        alert("Cambios guardados");
+    }
+
+    function renderBiblioteca() {
+        var storage = JSON.parse(localStorage.getItem('ret_v5_db') || "[]");
+        var list = document.getElementById('doc-list');
+        list.innerHTML = "";
+        
+        var docs = storage.filter(function(d) {
+            return d.owner === userEmail || d.owner === "local";
+        });
+
+        for (var i = 0; i < docs.length; i++) {
+            var d = docs[i];
+            var card = document.createElement('div');
+            card.className = 'doc-card';
+            
+            // Título + 2-4 líneas de extracto
+            card.innerHTML = "<b>" + d.titulo + "</b><p>" + d.extracto + "...</p>";
+            
+            // Botón compartir dentro de la tarjeta
+            var btnS = document.createElement('button');
+            btnS.className = 'btn-share-item';
+            btnS.innerHTML = '🔗';
+            btnS.onclick = (function(txt) {
+                return function(e) {
+                    e.stopPropagation();
+                    compartir(txt);
+                };
+            })(d.extracto); // Enviamos el texto plano
+            
+            card.appendChild(btnS);
+
+            card.onclick = (function(docObj) {
+                return function() {
+                    document.getElementById('editor').innerHTML = docObj.html;
+                    currentDocId = docObj.id; // Marcamos ID como activo
+                    updStats();
+                    toggleMenu();
+                };
+            })(d);
+            
+            list.appendChild(card);
+        }
+    }
+
+    function compartir(txt) {
+        if (navigator.share) {
+            navigator.share({ title: 'Retórica Share', text: txt }).catch(function(){});
+        } else {
+            window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(txt), '_blank');
+        }
+    }
+
+    function formato(cmd) {
+        document.execCommand(cmd, false, null);
+    }
+
+    function dictado() {
+        var Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!Speech) return alert("No compatible");
+        var rec = new Speech(); rec.lang = 'es-MX';
+        rec.onresult = function(e) {
+            document.execCommand('insertText', false, " " + e.results[0][0].transcript);
+            updStats();
+        };
+        rec.start();
+    }
+
+    function leer() {
+        window.speechSynthesis.cancel();
+        var msg = new SpeechSynthesisUtterance(document.getElementById('editor').innerText);
+        window.speechSynthesis.speak(msg);
+    }
+
+    function nuevoDoc() {
+        currentDocId = null; // Reset de ID para que sea archivo nuevo al guardar
+        document.getElementById('editor').innerHTML = "";
+        updStats();
+        toggleMenu();
+    }
+
+    function exportarPDF() {
+        const { jsPDF } = window.jspdf;
+        var doc = new jsPDF();
+        var lines = doc.splitTextToSize(document.getElementById('editor').innerText, 180);
+        doc.text(lines, 10, 10);
+        doc.save("nota.pdf");
+    }
+
+    function exportarDOC() {
+        var blob = new Blob(['\ufeff', document.getElementById('editor').innerText], { type: 'application/msword' });
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "nota.doc";
+        a.click();
+    }
+
+    function exportarTXT() {
+        var blob = new Blob([document.getElementById('editor').innerText], {type: "text/plain"});
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "nota.txt";
+        a.click();
+    }
+
+    function updStats() {
+        document.getElementById('char-count').innerText = document.getElementById('editor').innerText.length + " caracteres";
+    }
+
+    function logout() {
+        localStorage.removeItem('ret_active_user');
+        location.reload();
+    }
+</script>
+</body>
+</html>
