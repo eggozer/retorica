@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Retórica V6 - Android 5 Edition</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        :root { --p: #0a0f1a; --accent: #2563eb; --bg: #ffffff; --card: #f1f5f9; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* Pantalla de Acceso Simplificada para Android 5 */
+        #auth-screen { position: fixed; inset: 0; background: var(--p); z-index: 10000; display: none; align-items: center; justify-content: center; }
+        .auth-card { background: white; padding: 30px; border-radius: 25px; text-align: center; width: 90%; max-width: 400px; }
+        .auth-card input { width: 100%; padding: 15px; margin: 15px 0; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; outline: none; }
+
+        /* Header Estilo Screenshot */
+        header { background: #fff; border-bottom: 1px solid #eee; flex-shrink: 0; z-index: 500; }
+        .bar-top { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; }
+        .logo { font-weight: 900; letter-spacing: 3px; font-size: 18px; color: var(--p); }
+        .hamb { font-size: 28px; cursor: pointer; background: none; border: none; padding: 5px; }
+
+        /* Herramientas Limpias */
+        .toolbar { padding: 0 15px 10px 15px; border-bottom: 1px solid #f1f5f9; }
+        .row-tools { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; }
+        .row-tools::-webkit-scrollbar { display: none; }
+        .btn-t { padding: 10px 18px; border-radius: 15px; border: 1px solid #e2e8f0; background: #f8fafc; font-size: 12px; font-weight: bold; white-space: nowrap; cursor: pointer; }
+        .btn-save { background: var(--p); color: white; border: none; padding: 10px 20px; border-radius: 15px; }
+
+        /* Editor */
+        #editor { flex: 1; padding: 25px; overflow-y: auto; font-size: 19px; outline: none; line-height: 1.7; background: #fff; }
+        #editor:empty:before { content: "Escribe tu guion aquí..."; color: #cbd5e1; }
+
+        /* Sidebar - Biblioteca y Exportaciones */
+        #sidebar { position: fixed; top: 0; left: -100%; width: 310px; height: 100%; background: #fff; z-index: 1001; transition: 0.3s; box-shadow: 5px 0 25px rgba(0,0,0,0.15); padding: 20px; display: flex; flex-direction: column; }
+        #sidebar.open { left: 0; }
+        #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1000; }
+
+        .section-title { font-weight: 900; font-size: 14px; color: var(--accent); margin: 20px 0 10px 0; letter-spacing: 1px; }
+        .doc-list { flex: 1; overflow-y: auto; }
+        
+        /* Tarjetas Biblioteca */
+        .doc-card { padding: 15px; border-radius: 18px; background: #f1f5f9; margin-bottom: 12px; border: 1px solid #e2e8f0; position: relative; }
+        .doc-card b { display: block; font-size: 13px; color: var(--p); margin-bottom: 5px; text-transform: uppercase; padding-right: 30px; }
+        .doc-card p { font-size: 11px; color: #64748b; line-height: 1.3; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+        .btn-share-item { position: absolute; top: 12px; right: 12px; font-size: 18px; color: var(--accent); cursor: pointer; border: none; background: none; }
+
+        /* Menú Guardar Como */
+        .export-group { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+        .btn-exp { padding: 10px; border-radius: 10px; border: 1px solid #ddd; background: #fff; font-size: 10px; font-weight: bold; cursor: pointer; }
+
+        #footer { padding: 8px 15px; font-size: 10px; font-weight: bold; background: #f8fafc; border-top: 1px solid #eee; display: flex; justify-content: space-between; }
+    </style>
+</head>
+<body>
+
+<div id="auth-screen">
+    <div class="auth-card">
+        <h1 style="letter-spacing:5px; font-weight:900;">RETÓRICA</h1>
+        <p style="font-size:11px; color:#64748b; margin-top:5px;">Sincronizar cuenta de Email</p>
+        <input type="text" id="email-in" placeholder="ejemplo@correo.com">
+        <button onclick="loginManual()" style="width:100%; padding:15px; background:var(--p); color:white; border:none; border-radius:12px; font-weight:900;">CONECTAR</button>
+    </div>
+</div>
+
+<div id="overlay" onclick="toggleMenu()"></div>
+
+<nav id="sidebar">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2 style="font-weight:900">BIBLIOTECA</h2>
+        <button onclick="nuevoDoc()" style="width:35px; height:35px; border-radius:50%; border:none; background:var(--accent); color:white; font-size:20px;">+</button>
+    </div>
+    
+    <div class="doc-list" id="doc-list"></div>
+
+    <div class="section-title">GUARDAR COMO...</div>
+    <div class="export-group">
+        <button class="btn-exp" onclick="exportarPDF()">.PDF</button>
+        <button class="btn-exp" onclick="exportarDOC()">.DOC</button>
+        <button class="btn-exp" onclick="exportarTXT()">.TXT</button>
+    </div>
+
+    <button onclick="logout()" style="margin-top:25px; width:100%; padding:10px; color:#ef4444; border:none; background:none; font-weight:bold; font-size:11px;">CERRAR SESIÓN</button>
+</nav>
+
+<div id="main-app" style="display:flex; flex:1; flex-direction:column;">
+    <header>
+        <div class="bar-top">
+            <button class="hamb" onclick="toggleMenu()">☰</button>
+            <div class="logo">RETÓRICA</div>
+            <button class="btn-save" onclick="guardar()">GUARDAR</button>
+        </div>
+        <div class="toolbar">
+            <div class="row-tools">
+                <button class="btn-t" onclick="dictado()">🎤 DICTADO</button>
+                <button class="btn-t" onclick="leer()">🔊 LECTURA</button>
+                <button class="btn-t" onclick="formato('bold')"><b>NEGRITA</b></button>
+                <button class="btn-t" onclick="formato('italic')"><i>CURSIVA</i></button>
+            </div>
+        </div>
+    </header>
+
+    <div id="editor" contenteditable="true" oninput="updStats()"></div>
+    
+    <div id="footer">
+        <span id="char-count">0 caracteres</span>
+        <span id="user-display">Local</span>
+    </div>
+</div>
+
+<script>
+    var activeEmail = "";
+    var currentId = null;
+
+    window.onload = function() {
+        var sesion = localStorage.getItem('ret_session_email');
+        if (sesion) {
+            activeEmail = sesion;
+            init();
+        } else {
+            // Si no hay sesión, se puede trabajar local, pero mostramos el login opcional
+            document.getElementById('user-display').innerText = "Invitado";
+            renderLib();
+        }
+    };
+
+    function loginManual() {
+        var val = document.getElementById('email-in').value;
+        // Validación simple para evitar errores en navegadores viejos
+        if (val.indexOf('@') > 0 && val.indexOf('.') > 0) {
+            activeEmail = val;
+            localStorage.setItem('ret_session_email', val);
+            document.getElementById('auth-screen').style.display = 'none';
+            init();
+        } else {
+            alert("Email no válido");
+        }
+    }
+
+    function init() {
+        document.getElementById('user-display').innerText = activeEmail;
+        renderLib();
+    }
+
+    function toggleMenu() {
+        var m = document.getElementById('sidebar');
+        var o = document.getElementById('overlay');
+        var isOpen = m.className === 'open';
+        m.className = isOpen ? '' : 'open';
+        o.style.display = isOpen ? 'none' : 'block';
+    }
+
+    function guardar() {
+        var html = document.getElementById('editor').innerHTML;
+        var text = document.getElementById('editor').innerText;
+        if (!text.trim()) return;
+
+        var storage = JSON.parse(localStorage.getItem('ret_v6_data') || "[]");
+        
+        if (currentId) {
+            // Actualizar existente
+            for (var i = 0; i < storage.length; i++) {
+                if (storage[i].id === currentId) {
+                    storage[i].titulo = text.substring(0, 30);
+                    storage[i].extracto = text.substring(0, 150);
+                    storage[i].html = html;
+                    storage[i].fecha = new Date().toLocaleDateString();
+                    break;
+                }
+            }
+        } else {
+            // Crear nuevo
+            var id = Date.now();
+            var nuevo = {
+                id: id,
+                owner: activeEmail || "local",
+                titulo: text.substring(0, 30),
+                extracto: text.substring(0, 150),
+                html: html,
+                fecha: new Date().toLocaleDateString()
+            };
+            storage.unshift(nuevo);
+            currentId = id;
+        }
+
+        localStorage.setItem('ret_v6_data', JSON.stringify(storage));
+        renderLib();
+        alert("Archivo actualizado");
+    }
+
+    function renderLib() {
+        var storage = JSON.parse(localStorage.getItem('ret_v6_data') || "[]");
+        var list = document.getElementById('doc-list');
+        list.innerHTML = "";
+        
+        var misDocs = storage.filter(function(d) {
+            return d.owner === activeEmail || d.owner === "local";
+        });
+
+        for (var i = 0; i < misDocs.length; i++) {
+            var d = misDocs[i];
+            var card = document.createElement('div');
+            card.className = 'doc-card';
+            card.innerHTML = "<b>" + d.titulo + "</b><p>" + d.extracto + "...</p>";
+            
+            var sBtn = document.createElement('button');
+            sBtn.className = 'btn-share-item';
+            sBtn.innerHTML = '🔗';
+            sBtn.onclick = (function(t){
+                return function(e) {
+                    e.stopPropagation();
+                    if (navigator.share) {
+                        navigator.share({ text: t }).catch(function(){});
+                    } else {
+                        window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(t), '_blank');
+                    }
+                };
+            })(d.extracto);
+            
+            card.appendChild(sBtn);
+            card.onclick = (function(obj){
+                return function() {
+                    document.getElementById('editor').innerHTML = obj.html;
+                    currentId = obj.id;
+                    updStats();
+                    toggleMenu();
+                };
+            })(d);
+            
+            list.appendChild(card);
+        }
+    }
+
+    function formato(cmd) {
+        document.execCommand(cmd, false, null);
+    }
+
+    function dictado() {
+        var S = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!S) return alert("No disponible");
+        var r = new S(); r.lang = 'es-MX';
+        r.onresult = function(e) {
+            document.execCommand('insertText', false, " " + e.results[0][0].transcript);
+            updStats();
+        };
+        r.start();
+    }
+
+    function leer() {
+        speechSynthesis.cancel();
+        var m = new SpeechSynthesisUtterance(document.getElementById('editor').innerText);
+        speechSynthesis.speak(m);
+    }
+
+    function nuevoDoc() {
+        currentId = null;
+        document.getElementById('editor').innerHTML = "";
+        updStats();
+        toggleMenu();
+    }
+
+    function exportarPDF() {
+        const { jsPDF } = window.jspdf;
+        var doc = new jsPDF();
+        var l = doc.splitTextToSize(document.getElementById('editor').innerText, 180);
+        doc.text(l, 10, 10);
+        doc.save("guion_retorica.pdf");
+    }
+
+    function exportarDOC() {
+        var b = new Blob(['\ufeff', document.getElementById('editor').innerText], { type: 'application/msword' });
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(b); a.download = "guion_retorica.doc"; a.click();
+    }
+
+    function exportarTXT() {
+        var b = new Blob([document.getElementById('editor').innerText], {type: "text/plain"});
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(b); a.download = "guion_retorica.txt"; a.click();
+    }
+
+    function updStats() {
+        document.getElementById('char-count').innerText = document.getElementById('editor').innerText.length + " caracteres";
+    }
+
+    function logout() {
+        if(confirm("¿Cerrar sesión?")) {
+            localStorage.removeItem('ret_session_email');
+            location.reload();
+        }
+    }
+</script>
+</body>
+</html>
