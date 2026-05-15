@@ -3,37 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Retórica V8 - index.html</title>
+    <title>Retórica V9 - Android 5 Stable</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         :root { --p: #0a0f1a; --accent: #2563eb; --bg: #ffffff; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
         
-        body { background: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        /* Layout principal para evitar pérdida de botones con el teclado */
+        html, body { height: 100%; overflow: hidden; background: var(--bg); }
+        .app-container { display: flex; flex-direction: column; height: 100vh; }
 
-        /* HEADER FIJO (Solución punto 1) */
-        header { 
-            position: sticky; top: 0; background: #fff; 
-            border-bottom: 1px solid #eee; z-index: 1000; flex-shrink: 0; 
-        }
+        /* HEADER: No se mueve ni se oculta */
+        header { background: #fff; border-bottom: 1px solid #eee; flex-shrink: 0; }
         .bar-top { display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; }
         .logo { font-weight: 900; letter-spacing: 2px; font-size: 16px; color: var(--p); }
         .hamb { font-size: 24px; cursor: pointer; background: none; border: none; }
 
-        .toolbar { padding: 5px 15px 10px 15px; display: flex; gap: 8px; overflow-x: auto; }
+        /* Barra de herramientas con scroll lateral si es necesario */
+        .toolbar { padding: 5px 15px 10px 15px; display: flex; gap: 8px; overflow-x: auto; white-space: nowrap; }
         .btn-t { 
             padding: 10px 15px; border-radius: 12px; border: 1px solid #e2e8f0; 
-            background: #f8fafc; font-size: 11px; font-weight: bold; white-space: nowrap; 
+            background: #f8fafc; font-size: 11px; font-weight: bold; cursor: pointer;
         }
         .btn-save { background: var(--p); color: white; border: none; padding: 8px 15px; border-radius: 12px; font-weight: bold; }
 
-        /* EDITOR */
+        /* EDITOR: Scroll independiente para que no empuje el header */
         #editor { 
             flex: 1; padding: 20px; overflow-y: auto; font-size: 18px; 
             outline: none; line-height: 1.6; background: #fff; 
+            -webkit-overflow-scrolling: touch;
         }
+        #editor:empty:before { content: "Escribe o usa el micrófono..."; color: #cbd5e1; }
 
-        /* BIBLIOTECA RESPONSIVA (Solución punto 2) */
+        /* SIDEBAR / BIBLIOTECA */
         #sidebar { 
             position: fixed; top: 0; left: -100%; width: 85%; max-width: 350px; 
             height: 100%; background: #fff; z-index: 2000; transition: 0.3s; 
@@ -42,126 +44,141 @@
         #sidebar.open { left: 0; }
         #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1500; }
 
-        .doc-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
+        /* PLANTILLAS RESPONSIVAS (Solución punto 4) */
+        .doc-list { 
+            flex: 1; overflow-y: auto; display: flex; flex-direction: column; 
+            gap: 12px; margin-top: 15px; 
+        }
         
         .doc-card { 
             width: 100%; padding: 15px; border-radius: 15px; background: #f1f5f9; 
-            border: 1px solid #e2e8f0; position: relative;
+            border: 1px solid #e2e8f0; transition: 0.2s; flex-shrink: 1;
         }
-        .doc-card b { font-size: 13px; color: var(--p); display: block; margin-bottom: 5px; }
-        .doc-card p { font-size: 11px; color: #64748b; margin-bottom: 10px; }
+        .doc-card:active { background: #e2e8f0; }
+        .doc-card b { font-size: 13px; color: var(--p); display: block; margin-bottom: 4px; text-transform: uppercase; }
+        .doc-card p { font-size: 11px; color: #64748b; line-height: 1.3; }
 
-        /* BOTONES DE CARD (Solución punto 4) */
-        .card-actions { display: flex; gap: 5px; }
-        .btn-card { flex: 1; padding: 6px; border-radius: 8px; border: none; font-size: 10px; font-weight: bold; cursor: pointer; }
+        /* ACCIONES DE PLANTILLA (Solución punto 3) */
+        .card-actions { 
+            display: none; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid #cbd5e1;
+        }
+        /* Se muestran solo cuando se "selecciona" (simulado con una clase activa) */
+        .doc-card.selected .card-actions { display: flex; }
+
+        .btn-card { flex: 1; padding: 8px; border-radius: 8px; border: none; font-size: 10px; font-weight: bold; }
         .btn-del { background: #fee2e2; color: #ef4444; }
         .btn-sh { background: #dcfce7; color: #22c55e; }
+        .btn-load { background: var(--accent); color: white; }
 
-        .footer { padding: 5px 15px; font-size: 10px; background: #f8fafc; border-top: 1px solid #eee; display: flex; justify-content: space-between; }
+        .footer { padding: 5px 15px; font-size: 10px; background: #f8fafc; border-top: 1px solid #eee; display: flex; justify-content: space-between; flex-shrink: 0; }
     </style>
 </head>
 <body>
 
-<div id="overlay" onclick="toggleMenu()"></div>
+<div class="app-container">
+    <div id="overlay" onclick="toggleMenu()"></div>
 
-<nav id="sidebar">
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-        <h2 style="font-weight:900;">BIBLIOTECA</h2>
-        <button onclick="nuevoDoc()" style="background:var(--accent); color:white; border:none; width:30px; height:30px; border-radius:50%;">+</button>
-    </div>
-    
-    <div class="doc-list" id="doc-list"></div>
-
-    <div style="margin-top:20px;">
-        <p style="font-size:10px; font-weight:bold; color:var(--accent); margin-bottom:10px;">EXPORTAR TRABAJO ACTUAL</p>
-        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:5px;">
-            <button class="btn-t" onclick="exportarPDF()">PDF</button>
-            <button class="btn-t" onclick="exportarDOC()">DOC</button>
-            <button class="btn-t" onclick="exportarTXT()">TXT</button>
+    <nav id="sidebar">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h2 style="font-weight:900;">BIBLIOTECA</h2>
+            <button onclick="nuevoDoc()" style="background:var(--accent); color:white; border:none; width:35px; height:35px; border-radius:50%; font-weight:bold;">+</button>
         </div>
-    </div>
-</nav>
+        <p style="font-size:10px; color:#64748b; margin-top:5px;">Toca una plantilla para ver opciones</p>
+        
+        <div class="doc-list" id="doc-list"></div>
 
-<header>
-    <div class="bar-top">
-        <button class="hamb" onclick="toggleMenu()">☰</button>
-        <div class="logo">RETÓRICA</div>
-        <button class="btn-save" onclick="guardar()">GUARDAR</button>
-    </div>
-    <div class="toolbar">
-        <button class="btn-t" onclick="dictado()" id="mic-btn">🎤 DICTADO</button>
-        <button class="btn-t" onclick="leer()">🔊 OÍR SELECCIÓN</button>
-        <button class="btn-t" onclick="formato('bold')"><b>B</b></button>
-        <button class="btn-t" onclick="formato('italic')"><i>I</i></button>
-    </div>
-</header>
+        <div style="margin-top:20px; padding-top:15px; border-top:2px solid #f1f5f9;">
+            <p style="font-size:10px; font-weight:900; margin-bottom:8px;">EXPORTAR ACTUAL</p>
+            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:5px;">
+                <button class="btn-t" onclick="exportarPDF()">PDF</button>
+                <button class="btn-t" onclick="exportarDOC()">DOC</button>
+                <button class="btn-t" onclick="exportarTXT()">TXT</button>
+            </div>
+        </div>
+    </nav>
 
-<div id="editor" contenteditable="true" oninput="updStats()"></div>
+    <header>
+        <div class="bar-top">
+            <button class="hamb" onclick="toggleMenu()">☰</button>
+            <div class="logo">RETÓRICA</div>
+            <button class="btn-save" onclick="guardar()">GUARDAR</button>
+        </div>
+        <div class="toolbar">
+            <button class="btn-t" onclick="dictado()" id="mic-btn">🎤 MIC</button>
+            <button class="btn-t" onclick="leer()">🔊 LECTURA</button>
+            <button class="btn-t" onclick="formato('bold')"><b>B</b></button>
+            <button class="btn-t" onclick="formato('italic')"><i>I</i></button>
+        </div>
+    </header>
 
-<div class="footer">
-    <span id="char-count">0 caracteres</span>
-    <span>v8.0.1</span>
+    <div id="editor" contenteditable="true" oninput="updStats()"></div>
+
+    <div class="footer">
+        <span id="char-count">0 caracteres</span>
+        <span>v9.0</span>
+    </div>
 </div>
 
 <script>
     let activeId = null;
 
-    window.onload = () => { renderLib(); };
+    window.onload = function() { renderLib(); };
 
     function toggleMenu() {
         const s = document.getElementById('sidebar');
         const o = document.getElementById('overlay');
-        s.classList.toggle('open');
-        o.style.display = s.classList.contains('open') ? 'block' : 'none';
+        const isOpen = s.classList.toggle('open');
+        o.style.display = isOpen ? 'block' : 'none';
+        if(isOpen) renderLib();
     }
 
     function updStats() {
         document.getElementById('char-count').innerText = document.getElementById('editor').innerText.length + " caracteres";
     }
 
-    // RESPUESTA PUNTO 3: Para evitar archivos duplicados al descargar, 
-    // lo ideal es guardar en la "Biblioteca" interna. El navegador siempre 
-    // creará un archivo nuevo al descargar por seguridad de Android/iOS.
     function guardar() {
         const html = document.getElementById('editor').innerHTML;
         const text = document.getElementById('editor').innerText;
         if(!text.trim()) return;
 
-        let db = JSON.parse(localStorage.getItem('ret_db') || "[]");
+        let db = JSON.parse(localStorage.getItem('ret_db_v9') || "[]");
         
         if(activeId) {
-            const index = db.findIndex(d => d.id === activeId);
-            db[index].html = html;
-            db[index].preview = text.substring(0, 80);
+            const idx = db.findIndex(d => d.id === activeId);
+            if(idx !== -1) {
+                db[idx].html = html;
+                db[idx].prev = text.substring(0, 60);
+            }
         } else {
             activeId = Date.now();
             db.unshift({
                 id: activeId,
-                title: text.substring(0, 25) || "Sin título",
-                preview: text.substring(0, 80),
+                title: text.substring(0, 20).toUpperCase() || "NUEVO",
+                prev: text.substring(0, 60),
                 html: html
             });
         }
-        localStorage.setItem('ret_db', JSON.stringify(db));
-        renderLib();
-        alert("Sincronizado en Biblioteca");
+        localStorage.setItem('ret_db_v9', JSON.stringify(db));
+        alert("Sincronizado");
     }
 
     function renderLib() {
-        const db = JSON.parse(localStorage.getItem('ret_db') || "[]");
+        const db = JSON.parse(localStorage.getItem('ret_db_v9') || "[]");
         const list = document.getElementById('doc-list');
         list.innerHTML = "";
 
         db.forEach(doc => {
             const card = document.createElement('div');
             card.className = 'doc-card';
+            card.id = 'card-' + doc.id;
             card.innerHTML = `
-                <div onclick="cargarDoc(${doc.id})">
+                <div onclick="selectCard(${doc.id})">
                     <b>${doc.title}</b>
-                    <p>${doc.preview}...</p>
+                    <p>${doc.prev}...</p>
                 </div>
                 <div class="card-actions">
-                    <button class="btn-card btn-sh" onclick="compartirDoc('${doc.id}')">COMPARTIR</button>
+                    <button class="btn-card btn-load" onclick="cargarDoc(${doc.id})">ABRIR</button>
+                    <button class="btn-card btn-sh" onclick="compartirDoc(${doc.id})">COMPARTIR</button>
                     <button class="btn-card btn-del" onclick="borrarDoc(${doc.id})">BORRAR</button>
                 </div>
             `;
@@ -169,8 +186,15 @@
         });
     }
 
+    // Punto 3: Seleccionar plantilla para mostrar Compartir/Borrar
+    function selectCard(id) {
+        const all = document.querySelectorAll('.doc-card');
+        all.forEach(c => c.classList.remove('selected'));
+        document.getElementById('card-' + id).classList.add('selected');
+    }
+
     function cargarDoc(id) {
-        const db = JSON.parse(localStorage.getItem('ret_db') || "[]");
+        const db = JSON.parse(localStorage.getItem('ret_db_v9') || "[]");
         const doc = db.find(d => d.id === id);
         document.getElementById('editor').innerHTML = doc.html;
         activeId = id;
@@ -179,27 +203,28 @@
     }
 
     function borrarDoc(id) {
-        if(confirm("¿Borrar de la biblioteca?")) {
-            let db = JSON.parse(localStorage.getItem('ret_db') || "[]");
+        event.stopPropagation();
+        if(confirm("¿Eliminar definitivamente?")) {
+            let db = JSON.parse(localStorage.getItem('ret_db_v9') || "[]");
             db = db.filter(d => d.id !== id);
-            localStorage.setItem('ret_db', JSON.stringify(db));
+            localStorage.setItem('ret_db_v9', JSON.stringify(db));
             if(activeId === id) nuevoDoc();
             renderLib();
         }
     }
 
     function compartirDoc(id) {
-        const db = JSON.parse(localStorage.getItem('ret_db') || "[]");
-        const doc = db.find(d => d.id == id);
-        const temporal = document.createElement("div");
-        temporal.innerHTML = doc.html;
-        const textoLimpio = temporal.innerText;
+        event.stopPropagation();
+        const db = JSON.parse(localStorage.getItem('ret_db_v9') || "[]");
+        const doc = db.find(d => d.id === id);
+        const temp = document.createElement("div");
+        temp.innerHTML = doc.html;
+        const txt = temp.innerText;
 
         if (navigator.share) {
-            navigator.share({ title: doc.title, text: textoLimpio });
+            navigator.share({ title: doc.title, text: txt });
         } else {
-            alert("Copiado al portapapeles");
-            navigator.clipboard.writeText(textoLimpio);
+            alert("Contenido listo para copiar");
         }
     }
 
@@ -207,30 +232,30 @@
         activeId = null;
         document.getElementById('editor').innerHTML = "";
         updStats();
-        toggleMenu();
+        if(document.getElementById('sidebar').classList.contains('open')) toggleMenu();
     }
 
     function dictado() {
-        const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!Recognition) return alert("No soportado");
-        const rec = new Recognition();
-        rec.lang = 'es-MX';
-        document.getElementById('mic-btn').style.color = "red";
-        rec.onresult = (e) => {
+        const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!Rec) return alert("No disponible");
+        const sr = new Rec();
+        sr.lang = 'es-MX';
+        document.getElementById('mic-btn').style.background = "#fee2e2";
+        sr.onresult = (e) => {
             document.execCommand('insertText', false, e.results[0][0].transcript);
         };
-        rec.onend = () => { document.getElementById('mic-btn').style.color = "black"; };
-        rec.start();
+        sr.onend = () => { document.getElementById('mic-btn').style.background = "#f8fafc"; };
+        sr.start();
     }
 
     function leer() {
         window.speechSynthesis.cancel();
-        const sel = window.getSelection().toString();
-        const texto = sel || document.getElementById('editor').innerText;
-        if(texto) {
-            const utterance = new SpeechSynthesisUtterance(texto);
-            utterance.lang = 'es-MX';
-            window.speechSynthesis.speak(utterance);
+        const s = window.getSelection().toString();
+        const t = s || document.getElementById('editor').innerText;
+        if(t) {
+            const ut = new SpeechSynthesisUtterance(t);
+            ut.lang = 'es-MX';
+            window.speechSynthesis.speak(ut);
         }
     }
 
@@ -238,21 +263,23 @@
 
     function exportarPDF() {
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        doc.text(document.getElementById('editor').innerText, 10, 10);
-        doc.save("retorica.pdf");
+        const d = new jsPDF();
+        const txt = document.getElementById('editor').innerText;
+        const split = d.splitTextToSize(txt, 180);
+        d.text(split, 10, 10);
+        d.save("retorica.pdf");
     }
 
     function exportarDOC() {
-        const contenido = document.getElementById('editor').innerText;
-        const blob = new Blob(['\ufeff', contenido], { type: 'application/msword' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a"); a.href = url; a.download = "retorica.doc"; a.click();
+        const blob = new Blob(['\ufeff', document.getElementById('editor').innerText], { type: 'application/msword' });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob); a.download = "retorica.doc"; a.click();
     }
 
     function exportarTXT() {
         const blob = new Blob([document.getElementById('editor').innerText], {type: "text/plain"});
-        const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "retorica.txt"; a.click();
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob); a.download = "retorica.txt"; a.click();
     }
 </script>
 </body>
