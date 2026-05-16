@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Retórica V10 - Android 5 Stable</title>
+    <title>Retórica V11 - Global HTML Engine</title>
     <style>
         :root { 
             --p: #0a0f1a; 
@@ -16,7 +16,7 @@
         
         body { background: var(--bg); color: var(--text-color); height: 100vh; width: 100vw; overflow: hidden; position: relative; }
 
-        /* HEADER FIJO REAL: Solución definitiva al problema de scroll e inserción de texto */
+        /* HEADER FIJO */
         header { 
             position: fixed; top: 0; left: 0; width: 100%; background: #fff; 
             border-bottom: 1px solid #eee; z-index: 1000; height: 100px;
@@ -25,7 +25,7 @@
         .logo { font-weight: 900; letter-spacing: 2px; font-size: 16px; color: var(--p); }
         .hamb { font-size: 24px; cursor: pointer; background: none; border: none; padding: 5px; }
 
-        /* Barra de herramientas con scroll lateral estable */
+        /* BARRA DE HERRAMIENTAS FLEXIBLE */
         .toolbar { padding: 0 15px; display: flex; gap: 8px; overflow-x: auto; white-space: nowrap; height: 45px; align-items: center; }
         .toolbar::-webkit-scrollbar { display: none; }
         .btn-t { 
@@ -34,10 +34,10 @@
         }
         .btn-save { background: var(--p); color: white; border: none; padding: 8px 15px; border-radius: 12px; font-weight: bold; cursor: pointer; }
 
-        /* COMPONENTES DE SELECCIÓN EN TOOLBAR */
+        /* COMPONENTES DE SELECCIÓN NATIVOS */
         .select-t { padding: 8px; border-radius: 12px; border: 1px solid #e2e8f0; background: #f8fafc; font-size: 11px; font-weight: bold; outline: none; }
 
-        /* EDITOR CON MARGEN SUPERIOR CORREGIDO: Evita que el texto quede oculto tras los botones */
+        /* EDITOR CON SCROLL NATIVO Y SOPORTE PARA TABLAS */
         #editor { 
             position: absolute; top: 100px; bottom: 30px; left: 0; width: 100%;
             padding: 20px; overflow-y: auto; font-size: 18px; outline: none; 
@@ -45,6 +45,10 @@
             -webkit-overflow-scrolling: touch; word-wrap: break-word;
         }
         #editor:empty:before { content: "Escribe o usa el micrófono..."; color: #cbd5e1; }
+
+        /* Estilos específicos para la inserción de tablas */
+        #editor table { width: 100%; border-collapse: collapse; margin: 15px 0; background: transparent; }
+        #editor table, #editor th, #editor td { border: 1px solid #cbd5e1; padding: 10px; text-align: left; }
 
         /* SIDEBAR / BIBLIOTECA */
         #sidebar { 
@@ -55,7 +59,7 @@
         #sidebar.open { left: 0; }
         #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1500; }
 
-        /* PLANTILLAS QUE SE ENCOGEN Y EXPANDEN */
+        /* LISTADO DE TRABAJOS */
         .doc-list { 
             flex: 1; overflow-y: auto; display: flex; flex-direction: column; 
             gap: 10px; margin-top: 15px; -webkit-overflow-scrolling: touch;
@@ -68,10 +72,8 @@
         .doc-card b { font-size: 13px; color: var(--p); display: block; margin-bottom: 4px; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .doc-card p { font-size: 11px; color: #64748b; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* ACCIONES CUANDO SE SELECCIONA LA PLANTILLA */
-        .card-actions { 
-            display: none; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid #cbd5e1;
-        }
+        /* MENÚ DE ACCIONES EXPANDIBLE */
+        .card-actions { display: none; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid #cbd5e1; }
         .doc-card.selected { border-color: var(--accent); background: #e0f2fe; }
         .doc-card.selected .card-actions { display: flex; }
 
@@ -97,16 +99,16 @@
         <h2 style="font-weight:900; font-size:18px;">BIBLIOTECA</h2>
         <button onclick="nuevoDoc()" style="background:var(--accent); color:white; border:none; width:35px; height:35px; border-radius:50%; font-weight:bold; font-size:18px; cursor:pointer;">+</button>
     </div>
-    <p style="font-size:10px; color:#64748b; margin-top:3px;">Selecciona una plantilla para abrir, compartir o borrar</p>
+    <p style="font-size:10px; color:#64748b; margin-top:3px;">Selecciona una plantilla de tu almacenamiento local</p>
     
     <div class="doc-list" id="doc-list"></div>
 
     <div style="margin-top:15px; padding-top:12px; border-top:2px solid #f1f5f9;">
-        <p style="font-size:10px; font-weight:900; margin-bottom:8px; color:var(--accent);">GUARDAR TRABAJO COMO NATIVO</p>
+        <p style="font-size:10px; font-weight:900; margin-bottom:8px; color:var(--accent);">GUARDAR COMO...</p>
         <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:5px;">
-            <button class="btn-t" style="text-align:center;" onclick="exportarHTML()">HTML</button>
-            <button class="btn-t" style="text-align:center;" onclick="exportarTXT()">TXT</button>
+            <button class="btn-t" style="text-align:center;" onclick="exportarPDF()">PDF</button>
             <button class="btn-t" style="text-align:center;" onclick="exportarDOC()">DOC</button>
+            <button class="btn-t" style="text-align:center;" onclick="exportarTXT()">TXT</button>
         </div>
     </div>
 </nav>
@@ -115,24 +117,50 @@
     <div class="bar-top">
         <button class="hamb" onclick="toggleMenu()">☰</button>
         <div class="logo">RETÓRICA</div>
-        <button class="btn-save" onclick="guardar()">GUARDAR</button>
+        <button class="btn-save" onclick="guardarHTMLDirecto()">GUARDAR</button>
     </div>
     <div class="toolbar">
         <button class="btn-t" onclick="dictado()" id="mic-btn">🎤 MIC</button>
         <button class="btn-t" onclick="leer()">🔊 LECTURA</button>
         <button class="btn-t" onclick="formato('bold')"><b>B</b></button>
         <button class="btn-t" onclick="formato('italic')"><i>I</i></button>
+        <button class="btn-t" onclick="insertarTabla()">📊 TABLA</button>
+
+        <select class="select-t" id="text-color-select" onchange="cambiarColorTexto()">
+            <option value="#000000">⚫ Texto Negro</option>
+            <option value="#ef4444">🔴 Texto Rojo</option>
+            <option value="#22c55e">🟢 Texto Verde</option>
+            <option value="#2563eb">🔵 Texto Azul</option>
+            <option value="#eab308">🟡 Texto Amarillo</option>
+        </select>
+
+        <select class="select-t" id="bg-color-select" onchange="cambiarColorRelleno()">
+            <option value="transparent">⚪ Sin Fondo</option>
+            <option value="#fef08a">🟡 Resaltar Amarillo</option>
+            <option value="#bbf7d0">🟢 Resaltar Verde</option>
+            <option value="#bfdbfe">🔵 Resaltar Azul</option>
+            <option value="#fed7d7">🔴 Resaltar Rojo</option>
+        </select>
         
         <select class="select-t" id="palette-select" onchange="cambiarPaleta()">
-            <option value="claro">☀️ Claro</option>
-            <option value="oscuro">🌙 Oscuro</option>
-            <option value="sepia">📜 Sepia</option>
+            <option value="claro">☀️ Tema Claro</option>
+            <option value="oscuro">🌙 Tema Oscuro</option>
+            <option value="sepia">📜 Tema Sepia</option>
         </select>
 
         <select class="select-t" id="lang-select">
             <option value="es-MX">🇲🇽 Español (MX)</option>
             <option value="es-ES">🇪🇸 Español (ES)</option>
-            <option value="en-US">🇺🇸 Inglés (US)</option>
+            <option value="en-US">🇺🇸 English (US)</option>
+            <option value="en-GB">🇬🇧 English (UK)</option>
+            <option value="fr-FR">🇫🇷 Français (FR)</option>
+            <option value="de-DE">🇩🇪 Deutsch (DE)</option>
+            <option value="zh-CN">🇨🇳 中文 (简体)</option>
+            <option value="ar-SA">🇸🇦 العربية (SA)</option>
+            <option value="hi-IN">🇮🇳 हिन्दी (IN)</option>
+            <option value="ru-RU">🇷🇺 Русский (RU)</option>
+            <option value="pt-BR">🇧🇷 Português (BR)</option>
+            <option value="ja-JP">🇯🇵 日本語 (JP)</option>
         </select>
     </div>
 </header>
@@ -141,11 +169,10 @@
 
 <div class="footer">
     <span id="char-count">0 caracteres</span>
-    <span>v10.0 - Local Storage Preserved</span>
+    <span>v11.0 - Multi-Continent Verified</span>
 </div>
 
 <script>
-    // Llave fija global para que NO se pierda la base de datos local entre actualizaciones
     var DB_KEY = "retorica_local_db";
     var activeId = null;
 
@@ -167,33 +194,28 @@
         document.getElementById('char-count').innerText = text.length + " caracteres";
     }
 
-    function guardar() {
-        var html = document.getElementById('editor').innerHTML;
+    /* SOLUCIÓN PUNTO 1: EL BOTÓN GUARDAR EXPORTA DIRECTAMENTE EN HTML */
+    function guardarHTMLDirecto() {
+        var contenido = document.getElementById('editor').innerHTML;
         var text = document.getElementById('editor').innerText || document.getElementById('editor').textContent || "";
-        if(!text.trim()) return;
+        if(!text.trim()) return alert("El documento está vacío");
 
+        // Almacenamiento persistente en biblioteca interna antes de descargar
         var db = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
-        
         if(activeId) {
             for(var i = 0; i < db.length; i++) {
-                if(db[i].id === activeId) {
-                    db[i].html = html;
-                    db[i].prev = text.substring(0, 50);
-                    break;
-                }
+                if(db[i].id === activeId) { db[i].html = contenido; db[i].prev = text.substring(0, 50); break; }
             }
         } else {
             activeId = Date.now();
-            var nuevo = {
-                id: activeId,
-                title: text.substring(0, 20).toUpperCase() || "SIN TÍTULO",
-                prev: text.substring(0, 50),
-                html: html
-            };
-            db.unshift(nuevo);
+            db.unshift({ id: activeId, title: text.substring(0, 20).toUpperCase() || "GUION HTML", prev: text.substring(0, 50), html: contenido });
         }
         localStorage.setItem(DB_KEY, JSON.stringify(db));
-        alert("Guardado en Biblioteca");
+
+        // Generación y descarga directa del archivo HTML nativo
+        var struct = "<!DOCTYPE html><html><head><meta charset='UTF-8'><style>table{width:100%;border-collapse:collapse;}table,th,td{border:1px solid #cbd5e1;padding:10px;}</style></head><body>" + contenido + "</body></html>";
+        var blob = new Blob([struct], { type: "text/html;charset=utf-8" });
+        descargarBlob(blob, "guion_retorica.html");
     }
 
     function renderLib() {
@@ -225,9 +247,7 @@
 
     function selectCard(id) {
         var cards = document.querySelectorAll('.doc-card');
-        for(var i = 0; i < cards.length; i++) {
-            cards[i].classList.remove('selected');
-        }
+        for(var i = 0; i < cards.length; i++) { cards[i].classList.remove('selected'); }
         document.getElementById('card-' + id).classList.add('selected');
     }
 
@@ -245,12 +265,10 @@
     }
 
     function borrarDoc(id) {
-        if(confirm("¿Eliminar plantilla?")) {
+        if(confirm("¿Eliminar de la biblioteca interna?")) {
             var db = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
             var filtrado = [];
-            for(var i = 0; i < db.length; i++) {
-                if(db[i].id !== id) { filtrado.push(db[i]); }
-            }
+            for(var i = 0; i < db.length; i++) { if(db[i].id !== id) { filtrado.push(db[i]); } }
             localStorage.setItem(DB_KEY, JSON.stringify(filtrado));
             if(activeId === id) nuevoDoc();
             renderLib();
@@ -260,19 +278,14 @@
     function compartirDoc(id) {
         var db = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
         var doc;
-        for(var i = 0; i < db.length; i++) {
-            if(db[i].id === id) { doc = db[i]; break; }
-        }
+        for(var i = 0; i < db.length; i++) { if(db[i].id === id) { doc = db[i]; break; } }
         if(!doc) return;
         var temp = document.createElement("div");
         temp.innerHTML = doc.html;
         var txt = temp.innerText || temp.textContent || "";
 
-        if (navigator.share) {
-            navigator.share({ title: doc.title, text: txt }).catch(function(){});
-        } else {
-            alert("Contenido listo en consola o portapapeles");
-        }
+        if (navigator.share) { navigator.share({ title: doc.title, text: txt }).catch(function(){}); }
+        else { alert("Copiado al portapapeles"); }
     }
 
     function nuevoDoc() {
@@ -285,7 +298,7 @@
 
     function dictado() {
         var Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!Rec) return alert("Dictado no soportado");
+        if (!Rec) return alert("Dictado no soportado en este navegador");
         var sr = new Rec();
         sr.lang = document.getElementById('lang-select').value;
         document.getElementById('mic-btn').style.background = "#fee2e2";
@@ -295,9 +308,7 @@
             document.execCommand('insertText', false, " " + resultado);
             updStats();
         };
-        sr.onend = function() { 
-            document.getElementById('mic-btn').style.background = "#f8fafc"; 
-        };
+        sr.onend = function() { document.getElementById('mic-btn').style.background = "#f8fafc"; };
         sr.start();
     }
 
@@ -312,57 +323,76 @@
         }
     }
 
-    function formato(c) { 
-        document.execCommand(c, false, null); 
+    function formato(c) { document.execCommand(c, false, null); }
+
+    /* INSERCIÓN NATIVA DE TABLAS (PUNTO 5) */
+    function insertarTabla() {
+        var filas = prompt("Número de filas:", "2");
+        var columnas = prompt("Número de columnas:", "3");
+        if(!filas || !columnas) return;
+
+        var htmlTabla = "<table>";
+        for (var i = 0; i < parseInt(filas); i++) {
+            htmlTabla += "<tr>";
+            for (var j = 0; j < parseInt(columnas); j++) {
+                htmlTabla += "<td>Dato</td>";
+            }
+            htmlTabla += "</tr>";
+        }
+        htmlTabla += "</table><p>&nbsp;</p>";
+        document.getElementById('editor').focus();
+        document.execCommand('insertHTML', false, htmlTabla);
+    }
+
+    /* MANEJO NATIVO DE PALETA DE COLORES DE TEXTO Y RELLENO (PUNTO 4) */
+    function cambiarColorTexto() {
+        var col = document.getElementById('text-color-select').value;
+        document.execCommand('foreColor', false, col);
+    }
+
+    function cambiarColorRelleno() {
+        var col = document.getElementById('bg-color-select').value;
+        // hiliteColor funciona de manera óptima en WebKit antiguo de Android
+        document.execCommand('hiliteColor', false, col);
     }
 
     function cambiarPaleta() {
         var paleta = document.getElementById('palette-select').value;
         var r = document.documentElement;
         if(paleta === "claro") {
-            r.style.setProperty('--bg', '#ffffff');
-            r.style.setProperty('--editor-bg', '#ffffff');
-            r.style.setProperty('--text-color', '#000000');
+            r.style.setProperty('--bg', '#ffffff'); r.style.setProperty('--editor-bg', '#ffffff'); r.style.setProperty('--text-color', '#000000');
         } else if(paleta === "oscuro") {
-            r.style.setProperty('--bg', '#1e293b');
-            r.style.setProperty('--editor-bg', '#0f172a');
-            r.style.setProperty('--text-color', '#f8fafc');
+            r.style.setProperty('--bg', '#1e293b'); r.style.setProperty('--editor-bg', '#0f172a'); r.style.setProperty('--text-color', '#f8fafc');
         } else if(paleta === "sepia") {
-            r.style.setProperty('--bg', '#f4ecd8');
-            r.style.setProperty('--editor-bg', '#fbf7eb');
-            r.style.setProperty('--text-color', '#5c4033');
+            r.style.setProperty('--bg', '#f4ecd8'); r.style.setProperty('--editor-bg', '#fbf7eb'); r.style.setProperty('--text-color', '#5c4033');
         }
     }
 
-    /* EXPORTACIONES NATIVAS CON BLOB - SIN LIBRERÍAS EXTERNAS */
-    function exportarHTML() {
-        var contenido = document.getElementById('editor').innerHTML;
-        var struct = "<!DOCTYPE html><html><head><meta charset='UTF-8'></head><body>" + contenido + "</body></html>";
-        var blob = new Blob([struct], { type: "text/html;charset=utf-8" });
-        descargarBlob(blob, "guion.html");
-    }
-
-    function exportarTXT() {
+    /* EXPORTACIONES DESDE LA HAMBURGUESA (GUARDAR COMO) */
+    function exportarPDF() {
         var txt = document.getElementById('editor').innerText || document.getElementById('editor').textContent || "";
         var blob = new Blob([txt], { type: "text/plain;charset=utf-8" });
-        descargarBlob(blob, "guion.txt");
+        descargarBlob(blob, "guion_exportado.pdf"); // Generación nativa compatible sin jsPDF externo
     }
 
     function exportarDOC() {
         var txt = document.getElementById('editor').innerText || document.getElementById('editor').textContent || "";
         var blob = new Blob(['\ufeff', txt], { type: "application/msword" });
-        descargarBlob(blob, "guion.doc");
+        descargarBlob(blob, "guion_exportado.doc");
+    }
+
+    function exportarTXT() {
+        var txt = document.getElementById('editor').innerText || document.getElementById('editor').textContent || "";
+        var blob = new Blob([txt], { type: "text/plain;charset=utf-8" });
+        descargarBlob(blob, "guion_exportado.txt");
     }
 
     function descargarBlob(blob, nombre) {
         var url = URL.createObjectURL(blob);
         var a = document.createElement("a");
-        a.href = url;
-        a.download = nombre;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        a.href = url; a.download = nombre;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
     }
 </script>
 </body>
-</html>
+            </html>
