@@ -115,23 +115,79 @@
     <button class="btn-t" style="margin-top:15px; width:100%; background:#f0fdf4; color:#16a34a; border-color:#bbf7d0;" onclick="sincronizarP2P()">📲 SINCRONIZAR P2P (QR)</button>
     <button class="btn-t" style="margin-top:8px; width:100%; background:#fef2f2; color:#dc2626; border-color:#fecaca;" onclick="importarPorTexto()">📥 RECIBIR CÓDIGO CLON</button>
 
-    <div style="margin-top:15px; padding-top:12px; border-top:2px solid #f1f5f9;">editable="true" oninput="comprobarVacioYStats()"></div>
+    <div style="margin-top:15px; padding-top:12px; border-top:2px solid #f1f5f9;">
+        <p style="font-size:10px; font-weight:900; margin-bottom:8px; color:var(--accent);">GUARDAR COMO...</p>
+        <div style="display:grid; grid-template-columns: 1fr; gap:5px;">
+            <button class="btn-t" style="text-align:center;" onclick="exportarPDFEditable()">PDF EDITABLE</button>
+            <button class="btn-t" style="text-align:center;" onclick="exportarDOC()">DOC</button>
+        </div>
+    </div>
+</nav>
+
+<header>
+    <div class="bar-top">
+        <button class="hamb" onclick="toggleMenu()">☰</button>
+        <div class="logo-container">
+            <svg class="sun-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 18.36l1.42-1.42M18.36 4.22l1.42-1.42"/></svg>
+            <div class="logo">RETÓRICA</div>
+        </div>
+        <button class="btn-save" onclick="guardarHTMLDirecto()">GUARDAR</button>
+    </div>
+    <div class="toolbar">
+        <button class="btn-t" onclick="ejecutarComando('undo')">↩️</button>
+        <button class="btn-t" onclick="ejecutarComando('redo')">↪️</button>
+        
+        <button class="btn-t" onclick="dictado()" id="mic-btn">🎤 MIC</button>
+        <button class="btn-t" onclick="lectura()" id="read-btn">🔊 LECTURA</button>
+
+        <button class="btn-t" onclick="insertarTabla()">📊 TABLA</button>
+        <select class="select-t" id="table-border-width">
+            <option value="1px">🔲 1px</option>
+            <option value="2px">🔲 2px</option>
+            <option value="3px">🔲 3px</option>
+        </select>
+        <select class="select-t" id="table-border-color">
+            <option value="#cbd5e1">🎨 Gris</option>
+            <option value="#000000">🎨 Negro</option>
+            <option value="#ef4444">🎨 Rojo</option>
+        </select>
+
+        <button class="btn-t" onclick="formato('bold')"><b>B</b></button>
+        <button class="btn-t" onclick="formato('italic')"><i>I</i></button>
+
+        <select class="select-t" id="text-color-select" onchange="cambiarColorTexto()">
+            <option value="#000000">⚫ Texto</option>
+            <option value="#ef4444">🔴 Rojo</option>
+        </select>
+
+        <select class="select-t" id="bg-color-select" onchange="cambiarColorRelleno()">
+            <option value="transparent">⚪ Fondo</option>
+            <option value="#fef08a">🟡 Resaltar</option>
+        </select>
+        
+        <select class="select-t" id="palette-select" onchange="cambiarPaleta()">
+            <option value="claro">☀️ Claro</option>
+            <option value="oscuro">🌙 Oscuro</option>
+        </select>
+
+        <select class="select-t" id="lang-select">
+            <option value="es-MX">🇲🇽 Es (MX)</option>
+            <option value="en-US">🇺🇸 En (US)</option>
+        </select>
+    </div>
+</header>
+
+<div id="editor" contenteditable="true" oninput="comprobarVacioYStats()"></div>
 
 <div class="footer">
     <span id="char-count">0 caracteres</span>
-    <span>v17.0 - Production Core</span>
+    <span>v14.0 - Core Estable</span>
 </div>
 
 <script>
     var DB_KEY = "retorica_local_db";
     var activeId = null;
     var qrControl = null;
-    
-    var audioContext = null;
-    var mediaStreamSource = null;
-    var scriptProcessor = null;
-    var buffersGrabacion = [];
-    var estaGrabandoMic = false;
 
     window.onload = function() { renderLib(); };
 
@@ -176,26 +232,164 @@
         document.execCommand('insertHTML', false, htmlTabla);
     }
 
-    /* MÓDULO EXCLUSIVO PARA GRABACIÓN DE AUDIO DESDE MICRÓFONO EN ARCHIVO WAVE (1-B) */
-    function gestionarGrabacionAudio() {
-        if (estaGrabandoMic) {
-            detenerGrabacionMic();
-            return;
-        }
-        buffersGrabacion = [];
-        navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then(function(stream) {
-            estaGrabandoMic = true;
-            document.getElementById('wave-btn').classList.add('btn-active');
-            document.getElementById('wave-btn').innerText = "🛑 PARAR REC";
+    function exportarPDFEditable() {
+        var contenido = document.getElementById('editor').innerHTML;
+        var struct = "\n<!DOCTYPE html><html><head><meta charset='UTF-8'></head><body>" + contenido + "</body></html>";
+        descargarBlob(new Blob([struct], { type: "application/pdf;charset=utf-8" }), "guion_editable.pdf");
+    }
 
-            var AudioCtx = window.AudioContext || window.webkitAudioContext;
-            audioContext = new AudioCtx();
-            mediaStreamSource = audioContext.createMediaStreamSource(stream);
-            scriptProcessor = audioContext.createScriptProcessor(4096, 1, 1);
-            
-            scriptProcessor.onaudioprocess = function(event) {
-                if (!estaGrabandoMic) return;
-                buffersGrabacion.push(new Float32Array(event.inputBuffer.getChannelData(0)));
+    function exportarDOC() {
+        var txt = document.getElementById('editor').innerText || document.getElementById('editor').textContent || "";
+        descargarBlob(new Blob(['\ufeff', txt], { type: "application/msword" }), "guion.doc");
+    }
+
+    function guardarHTMLDirecto() {
+        var contenido = document.getElementById('editor').innerHTML;
+        var text = document.getElementById('editor').innerText || document.getElementById('editor').textContent || "";
+        if(!text.trim()) return alert("El documento está vacío");
+
+        var db = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
+        if(activeId) {
+            for(var i = 0; i < db.length; i++) {
+                if(db[i].id === activeId) { db[i].html = contenido; db[i].prev = text.substring(0, 50); break; }
+            }
+        } else {
+            activeId = Date.now();
+            db.unshift({ id: activeId, title: text.substring(0, 20).toUpperCase() || "GUION HTML", prev: text.substring(0, 50), html: contenido });
+        }
+        localStorage.setItem(DB_KEY, JSON.stringify(db));
+        exportarPDFEditable();
+    }
+
+    function renderLib() {
+        var db = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
+        var list = document.getElementById('doc-list');
+        list.innerHTML = "";
+
+        for(var i = 0; i < db.length; i++) {
+            var doc = db[i];
+            var card = document.createElement('div');
+            card.className = 'doc-card';
+            card.id = 'card-' + doc.id;
+            card.innerHTML = (function(d){
+                return '<div onclick="selectCard(' + d.id + ')">' +
+                    '<b>' + d.title + '</b>' +
+                    '<p>' + d.prev + '...</p>' +
+                '</div>' +
+                '<div class="card-actions">' +
+                    '<button class="btn-card btn-load" onclick="cargarDoc(' + d.id + ')">ABRIR</button>' +
+                    '<button class="btn-card btn-del" onclick="borrarDoc(' + d.id + ')">BORRAR</button>' +
+                '</div>';
+            })(doc);
+            list.appendChild(card);
+        }
+    }
+
+    function selectCard(id) {
+        var cards = document.querySelectorAll('.doc-card');
+        for(var i = 0; i < cards.length; i++) { cards[i].classList.remove('selected'); }
+        document.getElementById('card-' + id).classList.add('selected');
+    }
+
+    function cargarDoc(id) {
+        var db = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
+        for(var i = 0; i < db.length; i++) {
+            if(db[i].id === id) {
+                document.getElementById('editor').innerHTML = db[i].html;
+                activeId = id;
+                comprobarVacioYStats();
+                toggleMenu();
+                break;
+            }
+        }
+    }
+
+    function borrarDoc(id) {
+        if(confirm("¿Eliminar plantilla?")) {
+            var db = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
+            var filtrado = [];
+            for(var i = 0; i < db.length; i++) { if(db[i].id !== id) { filtrado.push(db[i]); } }
+            localStorage.setItem(DB_KEY, JSON.stringify(filtrado));
+            if(activeId === id) nuevoDoc();
+            renderLib();
+        }
+    }
+
+    function nuevoDoc() { activeId = null; document.getElementById('editor').innerHTML = ""; comprobarVacioYStats(); }
+
+    function sincronizarP2P() {
+        var contenido = document.getElementById('editor').innerHTML;
+        if(!contenido.trim()) return alert("No hay texto para sincronizar");
+        var payload = btoa(unescape(encodeURIComponent(contenido)));
+        document.getElementById('qrcode').innerHTML = "";
+        document.getElementById('qr-modal').style.display = "flex";
+        if(!qrControl) {
+            qrControl = new QRCode(document.getElementById("qrcode"), { text: payload, width: 200, height: 200, correctLevel : QRCode.CorrectLevel.L });
+        } else {
+            qrControl.clear(); qrControl.makeCode(payload);
+        }
+    }
+
+    function cerrarQR() { document.getElementById('qr-modal').style.display = "none"; }
+
+    function importarPorTexto() {
+        var codigo = prompt("Introduce el código de clonación:");
+        if(!codigo) return;
+        try {
+            document.getElementById('editor').innerHTML = decodeURIComponent(escape(atob(codigo)));
+            activeId = null; comprobarVacioYStats(); alert("Clonado con éxito"); toggleMenu();
+        } catch(e) {
+            document.getElementById('editor').innerText = codigo; comprobarVacioYStats(); toggleMenu();
+        }
+    }
+
+    function dictado() {
+        var Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!Rec) return alert("Dictado por voz no disponible en este dispositivo");
+        var sr = new Rec();
+        sr.lang = document.getElementById('lang-select').value;
+        document.getElementById('mic-btn').classList.add('btn-active');
+        sr.onresult = function(e) {
+            document.execCommand('insertText', false, " " + e.results[0][0].transcript);
+            comprobarVacioYStats();
+        };
+        sr.onend = function() { document.getElementById('mic-btn').classList.remove('btn-active'); };
+        sr.start();
+    }
+
+    function lectura() {
+        window.speechSynthesis.cancel();
+        var txt = window.getSelection().toString();
+        if (!txt.trim()) { txt = document.getElementById('editor').innerText || document.getElementById('editor').textContent || ""; }
+        if (!txt.trim()) return;
+        var ut = new SpeechSynthesisUtterance(txt);
+        ut.lang = document.getElementById('lang-select').value;
+        window.speechSynthesis.speak(ut);
+    }
+
+    function formato(c) { document.execCommand(c, false, null); }
+    function cambiarColorTexto() { document.execCommand('foreColor', false, document.getElementById('text-color-select').value); }
+    function cambiarColorRelleno() { document.execCommand('hiliteColor', false, document.getElementById('bg-color-select').value); }
+
+    function cambiarPaleta() {
+        var paleta = document.getElementById('palette-select').value;
+        var r = document.documentElement;
+        if(paleta === "claro") {
+            r.style.setProperty('--bg', '#ffffff'); r.style.setProperty('--editor-bg', '#ffffff'); r.style.setProperty('--text-color', '#000000');
+        } else if(paleta === "oscuro") {
+            r.style.setProperty('--bg', '#1e293b'); r.style.setProperty('--editor-bg', '#0f172a'); r.style.setProperty('--text-color', '#f8fafc');
+        }
+    }
+
+    function descargarBlob(blob, nombre) {
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url; a.download = nombre;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    }
+</script>
+</body>
+</html>ew Float32Array(event.inputBuffer.getChannelData(0)));
             };
 
             mediaStreamSource.connect(scriptProcessor);
