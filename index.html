@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Retórica V14 - Código Estable de Ayer</title>
+    <title>Retórica V17 - Original Wave Build</title>
     <style>
         :root { 
             --p: #0a0f1a; 
@@ -137,8 +137,10 @@
         <button class="btn-t" onclick="ejecutarComando('undo')">↩️</button>
         <button class="btn-t" onclick="ejecutarComando('redo')">↪️</button>
         
-        <button class="btn-t" onclick="dictado()" id="mic-btn">🎤 MIC</button>
-        <button class="btn-t" onclick="lectura()" id="read-btn">🔊 LECTURA</button>
+        <button class="btn-t" onclick="dictado()" id="mic-btn">🎤 DICTADO</button>
+        <button class="btn-t" onclick="gestionarGrabacionAudio()" id="wave-btn">🎙️ REC WAV</button>
+        
+        <button class="btn-t" onclick="procesarLecturaInteligente()" id="read-btn">🔊 LECTURA</button>
 
         <button class="btn-t" onclick="insertarTabla()">📊 TABLA</button>
         <select class="select-t" id="table-border-width">
@@ -161,27 +163,7 @@
         </select>
 
         <select class="select-t" id="bg-color-select" onchange="cambiarColorRelleno()">
-            <option value="transparent">⚪ Fondo</option>
-            <option value="#fef08a">🟡 Resaltar</option>
-        </select>
-        
-        <select class="select-t" id="palette-select" onchange="cambiarPaleta()">
-            <option value="claro">☀️ Claro</option>
-            <option value="oscuro">🌙 Oscuro</option>
-        </select>
-
-        <select class="select-t" id="lang-select">
-            <option value="es-MX">🇲🇽 Es (MX)</option>
-            <option value="en-US">🇺🇸 En (US)</option>
-        </select>
-    </div>
-</header>
-
-<div id="editor" contenteditable="true" oninput="comprobarVacioYStats()"></div>
-
-<div class="footer">
-    <span id="char-count">0 caracteres</span>
-    <span>v14.0 - Core Estable</span>
+            <option value="transparent">4.0 - Core Estable</span>
 </div>
 
 <script>
