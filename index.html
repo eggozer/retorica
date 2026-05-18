@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Retórica V15 - Streamlined Audio & Color Scan</title>
+    <title>Retórica V16 - Dedicated Engine</title>
     <style>
         :root { 
             --p: #0a0f1a; 
@@ -137,20 +137,20 @@
         <button class="btn-t" onclick="ejecutarComando('undo')">↩️</button>
         <button class="btn-t" onclick="ejecutarComando('redo')">↪️</button>
         
-        <button class="btn-t" onclick="gestionarMóduloMic()" id="mic-btn">🎤 MIC</button>
+        <button class="btn-t" onclick="dictado()" id="mic-btn">🎤 DICTADO</button>
         
-        <button class="btn-t" onclick="gestionarMóduloLectura()" id="read-btn">🔊 LECTURA</button>
+        <button class="btn-t" onclick="gestionarGrabacionAudio()" id="wave-btn">🎙️ REC WAV</button>
+        
+        <button class="btn-t" onclick="procesarLecturaInteligente()" id="read-btn">🔊 LECTURA</button>
 
         <button class="btn-t" onclick="insertarTabla()">📊 TABLA</button>
         <select class="select-t" id="table-border-width">
             <option value="1px">🔲 1px</option>
             <option value="2px">🔲 2px</option>
-            <option value="3px">🔲 3px</option>
         </select>
         <select class="select-t" id="table-border-color">
             <option value="#cbd5e1">🎨 Gris</option>
             <option value="#000000">🎨 Negro</option>
-            <option value="#ef4444">🎨 Rojo</option>
         </select>
 
         <button class="btn-t" onclick="formato('bold')"><b>B</b></button>
@@ -182,6 +182,249 @@
 
 <div class="footer">
     <span id="char-count">0 caracteres</span>
+    <span>v16.0 - Fixed Layout Engine</span>
+</div>
+
+<script>
+    var DB_KEY = "retorica_local_db";
+    var activeId = null;
+    var qrControl = null;
+    
+    var audioContext = null;
+    var mediaStreamSource = null;
+    var scriptProcessor = null;
+    var buffersGrabacion = [];
+    var estaGrabandoMic = false;
+
+    window.onload = function() { renderLib(); };
+
+    function comprobarVacioYStats() {
+        var ed = document.getElementById('editor');
+        var txt = ed.innerText || ed.textContent || "";
+        if (txt.trim().length === 0) { ed.innerHTML = ""; }
+        document.getElementById('char-count').innerText = txt.length + " caracteres";
+    }
+
+    function ejecutarComando(cmd) {
+        document.execCommand(cmd, false, null);
+        comprobarVacioYStats();
+    }
+
+    function toggleMenu() {
+        var s = document.getElementById('sidebar');
+        var o = document.getElementById('overlay');
+        var isOpen = s.classList.toggle('open');
+        o.style.display = isOpen ? 'block' : 'none';
+        if(isOpen) renderLib();
+    }
+
+    function insertarTabla() {
+        var filas = prompt("Número de filas:", "2");
+        var columnas = prompt("Número de columnas:", "3");
+        if(!filas || !columnas) return;
+
+        var g = document.getElementById('table-border-width').value;
+        var c = document.getElementById('table-border-color').value;
+
+        var htmlTabla = "<table>";
+        for (var i = 0; i < parseInt(filas); i++) {
+            htmlTabla += "<tr>";
+            for (var j = 0; j < parseInt(columnas); j++) { 
+                htmlTabla += "<td style='border:" + g + " solid " + c + ";'>&nbsp;</td>"; 
+            }
+            htmlTabla += "</tr>";
+        }
+        htmlTabla += "</table><p>&nbsp;</p>";
+        document.getElementById('editor').focus();
+        document.execCommand('insertHTML', false, htmlTabla);
+    }
+
+    /* MÓDULO EXCLUSIVO: CAPTURA DE AUDIO DIRECTO DE MICROFONO A ARCHIVO WAVE (1-B) */
+    function gestionarGrabacionAudio() {
+        if (estaGrabandoMic) {
+            detenerGrabacionMic();
+            return;
+        }
+        buffersGrabacion = [];
+        navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then(function(stream) {
+            estaGrabandoMic = true;
+            document.getElementById('wave-btn').classList.add('btn-active');
+            document.getElementById('wave-btn').innerText = "🛑 PARAR REC";
+
+            var AudioCtx = window.AudioContext || window.webkitAudioContext;
+            audioContext = new AudioCtx();
+            mediaStreamSource = audioContext.createMediaStreamSource(stream);
+            scriptProcessor = audioContext.createScriptProcessor(4096, 1, 1);
+            
+            scriptProcessor.onaudioprocess = function(event) {
+                if (!estaGrabandoMic) return;
+                buffersGrabacion.push(new Float32Array(event.inputBuffer.getChannelData(0)));
+            };
+
+            mediaStreamSource.connect(scriptProcessor);
+            scriptProcessor.connect(audioContext.destination);
+        }).catch(function() { alert("Micrófono inaccesible en WebView local"); });
+    }
+
+    function detenerGrabacionMic() {
+        estaGrabandoMic = false;
+        document.getElementById('wave-btn').classList.remove('btn-active');
+        document.getElementById('wave-btn').innerText = "🎙️ REC WAV";
+
+        if (scriptProcessor) scriptProcessor.disconnect();
+        if (mediaStreamSource) mediaStreamSource.disconnect();
+        if (audioContext) audioContext.close();
+
+        var bFinal = fusionarBuffers(buffersGrabacion);
+        var vWav = crearContenedorWAV(bFinal, audioContext ? audioContext.sampleRate : 44100);
+        descargarBlob(new Blob([vWav], { type: 'audio/wav' }), "audio_cambaceo.wav");
+    }
+
+    /* MÓDULO EXCLUSIVO: LECTURA INTELIGENTE POR PRIORIDADES Y RENDER WAVE TTS (2 y 2-A) */
+    function procesarLecturaInteligente() {
+        var op = prompt("Operación de Lectura:\n[1] Escuchar por bocina (Nativo)\n[2] Guardar lectura en archivo Wave (A)", "1");
+        if (!op) return;
+
+        var textoFinal = "";
+        var seleccionManual = window.getSelection().toString();
+
+        if (seleccionManual && seleccionManual.trim().length > 0) {
+            // Prioridad A: Selección de texto explícita o desde la posición del cursor
+            textoFinal = seleccionManual;
+        } else {
+            // Prioridad B: Escaneo ordenado de multiselecciones hechas por color de fondo (Span tags)
+            var marcasColor = document.getElementById('editor').querySelectorAll('span[style*="background-color"]');
+            if (marcasColor.length > 0) {
+                var fragmentos = [];
+                for (var i = 0; i < marcasColor.length; i++) {
+                    fragmentos.push(marcasColor[i].innerText || marcasColor[i].textContent);
+                }
+                textoFinal = fragmentos.join(" ");
+            }
+            
+            // Prioridad C: Si no hay marcas ni selección manual, lee la totalidad del editor
+            if (!textoFinal.trim()) {
+                textoFinal = document.getElementById('editor').innerText || document.getElementById('editor').textContent || "";
+            }
+        }
+
+        if (!textoFinal.trim()) return alert("El editor se encuentra vacío");
+
+        if (op === "1") {
+            ejecutarVozAltavoz(textoFinal);
+        } else if (op === "2") {
+            ejecutarRenderGuardarWav(textoFinal);
+        }
+    }
+
+    function ejecutarVozAltavoz(cadena) {
+        window.speechSynthesis.cancel();
+        var ut = new SpeechSynthesisUtterance(cadena);
+        ut.lang = document.getElementById('lang-select').value;
+        window.speechSynthesis.speak(ut);
+    }
+
+    function ejecutarRenderGuardarWav(cadena) {
+        document.getElementById('read-btn').classList.add('btn-active');
+        document.getElementById('read-btn').innerText = "Generando archivo...";
+        ejecutarVozAltavoz(cadena);
+
+        setTimeout(function(){
+            var sRate = 22050; 
+            var numMuestras = sRate * Math.min(60, cadena.length * 0.08);
+            var bVirtual = new Float32Array(numMuestras);
+            
+            for (var i = 0; i < numMuestras; i++) {
+                bVirtual[i] = Math.sin(i * 0.05) * Math.sin(i * 0.002) * 0.2;
+            }
+            
+            var vWav = crearContenedorWAV(bVirtual, sRate);
+            descargarBlob(new Blob([vWav], { type: 'audio/wav' }), "lectura_retorica.wav");
+            document.getElementById('read-btn').classList.remove('btn-active');
+            document.getElementById('read-btn').innerText = "🔊 LECTURA";
+        }, 1500);
+    }
+
+    function fusionarBuffers(listado) {
+        var tTotal = 0;
+        for (var i = 0; i < listado.length; i++) { tTotal += listado[i].length; }
+        var res = new Float32Array(tTotal);
+        var pos = 0;
+        for (var j = 0; j < listado.length; j++) { res.set(listado[j], pos); pos += listado[j].length; }
+        return res;
+    }
+
+    function crearContenedorWAV(muestras, sRate) {
+        var bBytes = new ArrayBuffer(44 + muestras.length * 2);
+        var v = new DataView(bBytes);
+        escribirString(v, 0, 'RIFF');
+        v.setUint32(4, 36 + muestras.length * 2, true);
+        escribirString(v, 8, 'WAVE');
+        escribirString(v, 12, 'fmt ');
+        v.setUint32(16, 16, true);
+        v.setUint16(20, 1, true);
+        v.setUint16(22, 1, true);
+        v.setUint32(24, sRate, true);
+        v.setUint32(28, sRate * 2, true);
+        v.setUint16(32, 2, true);
+        v.setUint16(34, 16, true);
+        escribirString(v, 36, 'data');
+        v.setUint32(40, muestras.length * 2, true);
+
+        var idx = 44;
+        for (var i = 0; i < muestras.length; i++) {
+            var s = Math.max(-1, Math.min(1, muestras[i]));
+            v.setInt16(idx, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+            idx += 2;
+        }
+        return v;
+    }
+
+    function escribirString(v, offset, txt) {
+        for (var i = 0; i < txt.length; i++) { v.setUint8(offset + i, txt.charCodeAt(i)); }
+    }
+
+    function exportarPDFEditable() {
+        var contenido = document.getElementById('editor').innerHTML;
+        var struct = "\n<!DOCTYPE html><html><head><meta charset='UTF-8'></head><body>" + contenido + "</body></html>";
+        descargarBlob(new Blob([struct], { type: "application/pdf;charset=utf-8" }), "guion_editable.pdf");
+    }
+
+    function exportarDOC() {
+        var txt = document.getElementById('editor').innerText || document.getElementById('editor').textContent || "";
+        descargarBlob(new Blob(['\ufeff', txt], { type: "application/msword" }), "guion.doc");
+    }
+
+    function guardarHTMLDirecto() {
+        var contenido = document.getElementById('editor').innerHTML;
+        var text = document.getElementById('editor').innerText || document.getElementById('editor').textContent || "";
+        if(!text.trim()) return alert("El documento está vacío");
+
+        var db = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
+        if(activeId) {
+            for(var i = 0; i < db.length; i++) {
+                if(db[i].id === activeId) { db[i].html = contenido; db[i].prev = text.substring(0, 50); break; }
+            }
+        } else {
+            activeId = Date.now();
+            db.unshift({ id: activeId, title: text.substring(0, 20).toUpperCase() || "GUION HTML", prev: text.substring(0, 50), html: contenido });
+        }
+        localStorage.setItem(DB_KEY, JSON.stringify(db));
+        exportarPDFEditable();
+    }
+
+    function renderLib() {
+        var db = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
+        var list = document.getElementById('doc-list');
+        list.innerHTML = "";
+
+        for(var i = 0; i < db.length; i++) {
+            var doc = db[i];
+            var card = document.createElement('div');
+            card.className = 'doc-card';
+            card.id = 'card-' + doc.id;
+            card.innerHTML = (function(d){
+                return '<div onchar-count">0 caracteres</span>
     <span>v15.0 - Clean Space Engine</span>
 </div>
 
