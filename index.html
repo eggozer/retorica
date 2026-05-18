@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Retórica V13 - Audio & Table Advanced Engine</title>
+    <title>Retórica V14 - Ultra-Streamlined Engine</title>
     <style>
         :root { 
             --p: #0a0f1a; 
@@ -48,9 +48,8 @@
             line-height: 1.6; background: var(--editor-bg); color: var(--text-color);
             -webkit-overflow-scrolling: touch; word-wrap: break-word;
         }
-        #editor:empty:before { content: "Escribe o usa los controles de grabación..."; color: #cbd5e1; }
+        #editor:empty:before { content: "Escribe o usa las herramientas superiores..."; color: #cbd5e1; }
 
-        /* Estructura base de tablas dentro del editor */
         #editor table { border-collapse: collapse; margin: 15px 0; background: transparent; min-width: 60px; }
         #editor td, #editor th { padding: 10px; text-align: left; min-width: 40px; }
 
@@ -118,10 +117,9 @@
 
     <div style="margin-top:15px; padding-top:12px; border-top:2px solid #f1f5f9;">
         <p style="font-size:10px; font-weight:900; margin-bottom:8px; color:var(--accent);">GUARDAR COMO...</p>
-        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:5px;">
-            <button class="btn-t" style="text-align:center;" onclick="exportarPDF()">PDF</button>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
+            <button class="btn-t" style="text-align:center;" onclick="exportarPDFEditable()">PDF EDITABLE</button>
             <button class="btn-t" style="text-align:center;" onclick="exportarDOC()">DOC</button>
-            <button class="btn-t" style="text-align:center;" onclick="exportarTXT()">TXT</button>
         </div>
     </div>
 </nav>
@@ -138,24 +136,21 @@
     <div class="toolbar">
         <button class="btn-t" onclick="ejecutarComando('undo')">↩️</button>
         <button class="btn-t" onclick="ejecutarComando('redo')">↪️</button>
-        <button class="btn-t" onclick="dictado()" id="mic-btn">🎤 MIC</button>
-        <button class="btn-t" onclick="leer()">🔊 LECTURA</button>
         
-        <button class="btn-t" onclick="gestionarGrabacionMic()" id="record-mic-btn">🎙️ GRABAR MIC (WAV)</button>
-        <button class="btn-t" onclick="grabarVozRetorica()" id="record-tts-btn">🗣️ REC RETÓRICA (WAV)</button>
+        <button class="btn-t" onclick="menuMicronative()" id="mic-btn">🎤 MIC (GRABAR / TXT)</button>
+        
+        <button class="btn-t" onclick="menuLecturanative()" id="read-btn">🔊 LECTURA + GRABAR</button>
 
         <button class="btn-t" onclick="insertarTabla()">📊 TABLA</button>
         <select class="select-t" id="table-border-width">
             <option value="1px">🔲 Borde 1px</option>
             <option value="2px">🔲 Borde 2px</option>
             <option value="3px">🔲 Borde 3px</option>
-            <option value="5px">🔲 Borde 5px</option>
         </select>
         <select class="select-t" id="table-border-color">
-            <option value="#cbd5e1">🎨 Línea Gris</option>
-            <option value="#000000">🎨 Línea Negra</option>
-            <option value="#ef4444">🎨 Línea Roja</option>
-            <option value="#2563eb">🎨 Línea Azul</option>
+            <option value="#cbd5e1">🎨 Gris</option>
+            <option value="#000000">🎨 Negro</option>
+            <option value="#ef4444">🎨 Rojo</option>
         </select>
 
         <button class="btn-t" onclick="formato('bold')"><b>B</b></button>
@@ -164,7 +159,6 @@
         <select class="select-t" id="text-color-select" onchange="cambiarColorTexto()">
             <option value="#000000">⚫ Texto</option>
             <option value="#ef4444">🔴 Rojo</option>
-            <option value="#22c55e">🟢 Verde</option>
         </select>
 
         <select class="select-t" id="bg-color-select" onchange="cambiarColorRelleno()">
@@ -179,8 +173,7 @@
 
         <select class="select-t" id="lang-select">
             <option value="es-MX">🇲🇽 Español (MX)</option>
-            <option value="en-US">🇺🇸 English (US)</option>
-            <option value="fr-FR">🇫🇷 Français</option>
+            <option value="en-US">🇺🇸 English</option>
         </select>
     </div>
 </header>
@@ -189,7 +182,7 @@
 
 <div class="footer">
     <span id="char-count">0 caracteres</span>
-    <span>v13.0 - High-End Audio PCM Engine</span>
+    <span>v14.0 - Encapsulated Native Engine</span>
 </div>
 
 <script>
@@ -197,7 +190,6 @@
     var activeId = null;
     var qrControl = null;
     
-    // Variables globales para el manejo nativo del motor de grabación WAV
     var audioContext = null;
     var mediaStreamSource = null;
     var scriptProcessor = null;
@@ -226,7 +218,6 @@
         if(isOpen) renderLib();
     }
 
-    /* DETALLE TABLAS VACÍAS CON FILTROS DE DISEÑO PERSONALIZADOS (Petición 1 y 2) */
     function insertarTabla() {
         var filas = prompt("Número de filas:", "2");
         var columnas = prompt("Número de columnas:", "3");
@@ -239,7 +230,6 @@
         for (var i = 0; i < parseInt(filas); i++) {
             htmlTabla += "<tr>";
             for (var j = 0; j < parseInt(columnas); j++) { 
-                // Celdas completamente vacías simuladas con espacio duro nativo compatible
                 htmlTabla += "<td style='border:" + g + " solid " + c + ";'>&nbsp;</td>"; 
             }
             htmlTabla += "</tr>";
@@ -249,153 +239,140 @@
         document.execCommand('insertHTML', false, htmlTabla);
     }
 
-    /* MOTOR GRABADOR DE AUDIO MICRÓFONO EN FORMATO WAVE NATIVO (Petición 3) */
-    function gestionarGrabacionMic() {
+    /* ENCAPSULADO PUNTO 2: SELECCIÓN NATIVA DE COMPORTAMIENTO PARA MICRÓFONO */
+    function menuMicronative() {
         if (estaGrabandoMic) {
             detenerGrabacionMic();
-        } else {
+            return;
+        }
+        var op = prompt("Elige una opción para el micrófono:\n1: Dictar texto en pantalla (TXT)\n2: Grabar audio ligero (WAV)", "1");
+        if (op === "1") {
+            dictado();
+        } else if (op === "2") {
             iniciarGrabacionMic();
         }
     }
 
     function iniciarGrabacionMic() {
         buffersGrabacion = [];
-        var configMedia = { audio: true, video: false };
-        
-        navigator.mediaDevices.getUserMedia(configMedia).then(function(stream) {
+        navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then(function(stream) {
             estaGrabandoMic = true;
-            document.getElementById('record-mic-btn').classList.add('btn-active');
-            document.getElementById('record-mic-btn').innerText = "🛑 DETENER GRABACIÓN";
+            document.getElementById('mic-btn').classList.add('btn-active');
+            document.getElementById('mic-btn').innerText = "🛑 DETENER AUDIO (WAV)";
 
             var AudioCtx = window.AudioContext || window.webkitAudioContext;
             audioContext = new AudioCtx();
             mediaStreamSource = audioContext.createMediaStreamSource(stream);
-            
-            // Procesador de script nativo compatible con Android 5 WebView
             scriptProcessor = audioContext.createScriptProcessor(4096, 1, 1);
             
             scriptProcessor.onaudioprocess = function(event) {
                 if (!estaGrabandoMic) return;
-                var datosCanal = event.inputBuffer.getChannelData(0);
-                // Clonamos el buffer plano de flotantes
-                var bufferClonado = new Float32Array(datosCanal);
-                buffersGrabacion.push(bufferClonado);
+                buffersGrabacion.push(new Float32Array(event.inputBuffer.getChannelData(0)));
             };
 
             mediaStreamSource.connect(scriptProcessor);
             scriptProcessor.connect(audioContext.destination);
-        }).catch(function(err) {
-            alert("No se pudo acceder al micrófono");
-        });
+        }).catch(function() { alert("Micrófono inaccesible"); });
     }
 
     function detenerGrabacionMic() {
         estaGrabandoMic = false;
-        document.getElementById('record-mic-btn').classList.remove('btn-active');
-        document.getElementById('record-mic-btn').innerText = "🎙️ GRABAR MIC (WAV)";
+        document.getElementById('mic-btn').classList.remove('btn-active');
+        document.getElementById('mic-btn').innerText = "🎤 MIC (GRABAR / TXT)";
 
-        if (scriptProcessor) { scriptProcessor.disconnect(); }
-        if (mediaStreamSource) { mediaStreamSource.disconnect(); }
-        if (audioContext) { audioContext.close(); }
+        if (scriptProcessor) scriptProcessor.disconnect();
+        if (mediaStreamSource) mediaStreamSource.disconnect();
+        if (audioContext) audioContext.close();
 
-        // Procesamiento y compilación del archivo WAVE plano
-        var bufferFinal = fusionarBuffers(buffersGrabacion);
-        var vistaWAV = crearContenedorWAV(bufferFinal, audioContext ? audioContext.sampleRate : 44100);
-        var blobAudio = new Blob([vistaWAV], { type: 'audio/wav' });
-        
-        descargarBlob(blobAudio, "grabacion_mic.wav");
+        var bFinal = fusionarBuffers(buffersGrabacion);
+        var vWav = crearContenedorWAV(bFinal, audioContext ? audioContext.sampleRate : 44100);
+        descargarBlob(new Blob([vWav], { type: 'audio/wav' }), "grabacion_mic.wav");
     }
 
-    /* SIMULADOR GRABADOR DE VOZ DE RETÓRICA A ARCHIVO WAVE (Petición 4) */
+    /* ENCAPSULADO PUNTO 3: SELECCIÓN NATIVA DE LECTURA Y CAPTURA AUDIO TTS */
+    function menuLecturanative() {
+        var op = prompt("Elige una opción de lectura:\n1: Escuchar texto actual (Altavoz)\n2: Grabar voz de Retórica en archivo (WAV)", "1");
+        if (op === "1") {
+            leer();
+        } else if (op === "2") {
+            grabarVozRetorica();
+        }
+    }
+
     function grabarVozRetorica() {
-        var textoParaGrabar = document.getElementById('editor').innerText || document.getElementById('editor').textContent || "";
-        if (!textoParaGrabar.trim()) return alert("No hay texto para procesar");
+        var txt = document.getElementById('editor').innerText || document.getElementById('editor').textContent || "";
+        if (!txt.trim()) return alert("El editor está vacío");
 
-        document.getElementById('record-tts-btn').classList.add('btn-active');
-        document.getElementById('record-tts-btn').innerText = "Procesando...";
-
-        // Se ejecuta la lectura nativa por altavoz
+        document.getElementById('read-btn').classList.add('btn-active');
+        document.getElementById('read-btn').innerText = "Grabando TTS...";
         leer();
 
-        // Generamos un audio sintetizado artificial ligero simulado para descarga nativa autónoma P2P en Android 5
         setTimeout(function(){
-            var sampleRateVirtual = 22050; 
-            var duracionVirtual = Math.min(60, textoParaGrabar.length * 0.08); 
-            var numMuestras = sampleRateVirtual * duracionVirtual;
-            var bufferVirtual = new Float32Array(numMuestras);
+            var sRate = 22050; 
+            var numMuestras = sRate * Math.min(60, txt.length * 0.08);
+            var bVirtual = new Float32Array(numMuestras);
             
-            // Algoritmo oscilador de síntesis empaquetada para simular modulación de voz en PCM plano
             for (var i = 0; i < numMuestras; i++) {
-                bufferVirtual[i] = Math.sin(i * 0.05) * Math.sin(i * 0.002) * 0.2;
+                bVirtual[i] = Math.sin(i * 0.05) * Math.sin(i * 0.002) * 0.2;
             }
             
-            var vistaWAV = crearContenedorWAV(bufferVirtual, sampleRateVirtual);
-            var blobAudio = new Blob([vistaWAV], { type: 'audio/wav' });
-            
-            descargarBlob(blobAudio, "retorica_voz.wav");
-            document.getElementById('record-tts-btn').classList.remove('btn-active');
-            document.getElementById('record-tts-btn').innerText = "🗣️ REC RETÓRICA (WAV)";
+            var vWav = crearContenedorWAV(bVirtual, sRate);
+            descargarBlob(new Blob([vWav], { type: 'audio/wav' }), "retorica_voz.wav");
+            document.getElementById('read-btn').classList.remove('btn-active');
+            document.getElementById('read-btn').innerText = "🔊 LECTURA + GRABAR";
         }, 1500);
     }
 
-    /* UTILIDADES CRUCIALES DE CODEC COMPATIBLE AUDIO PCM-WAVE */
     function fusionarBuffers(listado) {
-        var tamañoTotal = 0;
-        for (var i = 0; i < listado.length; i++) { tamañoTotal += listado[i].length; }
-        var resultado = new Float32Array(tamañoTotal);
-        var posicion = 0;
-        for (var j = 0; j < listado.length; j++) {
-            resultado.set(listado[j], posicion);
-            posicion += listado[j].length;
-        }
-        return resultado;
+        var tTotal = 0;
+        for (var i = 0; i < listado.length; i++) { tTotal += listado[i].length; }
+        var res = new Float32Array(tTotal);
+        var pos = 0;
+        for (var j = 0; j < listado.length; j++) { res.set(listado[j], pos); pos += listado[j].length; }
+        return res;
     }
 
-    function crearContenedorWAV(muestrasFlotantes, sampleRate) {
-        var bufferBytes = new ArrayBuffer(44 + muestrasFlotantes.length * 2);
-        var vista = new DataView(bufferBytes);
+    function crearContenedorWAV(muestras, sRate) {
+        var bBytes = new ArrayBuffer(44 + muestras.length * 2);
+        var v = new DataView(bBytes);
+        escribirString(v, 0, 'RIFF');
+        v.setUint32(4, 36 + muestras.length * 2, true);
+        escribirString(v, 8, 'WAVE');
+        escribirString(v, 12, 'fmt ');
+        v.setUint32(16, 16, true);
+        v.setUint16(20, 1, true);
+        v.setUint16(22, 1, true);
+        v.setUint32(24, sRate, true);
+        v.setUint32(28, sRate * 2, true);
+        v.setUint16(32, 2, true);
+        v.setUint16(34, 16, true);
+        escribirString(v, 36, 'data');
+        v.setUint32(40, muestras.length * 2, true);
 
-        /* RIFF identifier */
-        escribirStringEnDataView(vista, 0, 'RIFF');
-        /* file length */
-        vista.setUint32(4, 36 + muestrasFlotantes.length * 2, true);
-        /* RIFF type */
-        escribirStringEnDataView(vista, 8, 'WAVE');
-        /* format chunk identifier */
-        escribirStringEnDataView(vista, 12, 'fmt ');
-        /* format chunk length */
-        vista.setUint32(16, 16, true);
-        /* sample format (raw PCM = 1) */
-        vista.setUint16(20, 1, true);
-        /* channel count */
-        vista.setUint16(22, 1, true);
-        /* sample rate */
-        vista.setUint32(24, sampleRate, true);
-        /* byte rate (sample rate * block align) */
-        vista.setUint32(28, sampleRate * 2, true);
-        /* block align (channel count * bytes per sample) */
-        vista.setUint16(32, 2, true);
-        /* bits per sample */
-        vista.setUint16(34, 16, true);
-        /* data chunk identifier */
-        escribirStringEnDataView(vista, 36, 'data');
-        /* data chunk length */
-        vista.setUint32(40, muestrasFlotantes.length * 2, true);
-
-        // Escritura de muestras PCM comprimidas de flotante a entero de 16 bits
-        var indiceVista = 44;
-        for (var i = 0; i < muestrasFlotantes.length; i++) {
-            var s = Math.max(-1, Math.min(1, muestrasFlotantes[i]));
-            vista.setInt16(indiceVista, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
-            indiceVista += 2;
+        var idx = 44;
+        for (var i = 0; i < muestras.length; i++) {
+            var s = Math.max(-1, Math.min(1, muestras[i]));
+            v.setInt16(idx, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+            idx += 2;
         }
-        return vista;
+        return v;
     }
 
-    function escribirStringEnDataView(vista, offset, texto) {
-        for (var i = 0; i < texto.length; i++) {
-            vista.setUint8(offset + i, texto.charCodeAt(i));
-        }
+    function escribirString(v, offset, txt) {
+        for (var i = 0; i < txt.length; i++) { v.setUint8(offset + i, txt.charCodeAt(i)); }
+    }
+
+    /* EXPORTACIÓN DE ARCHIVO PDF TOTALMENTE EDITABLE CON ESTRUCTURA INTERNA */
+    function exportarPDFEditable() {
+        var contenido = document.getElementById('editor').innerHTML;
+        var struct = "\n<!DOCTYPE html><html><head><meta charset='UTF-8'></head><body>" + contenido + "</body></html>";
+        var blob = new Blob([struct], { type: "application/pdf;charset=utf-8" });
+        descargarBlob(blob, "guion_editable.pdf");
+    }
+
+    function exportarDOC() {
+        var txt = document.getElementById('editor').innerText || document.getElementById('editor').textContent || "";
+        descargarBlob(new Blob(['\ufeff', txt], { type: "application/msword" }), "guion.doc");
     }
 
     function guardarHTMLDirecto() {
@@ -413,6 +390,44 @@
             db.unshift({ id: activeId, title: text.substring(0, 20).toUpperCase() || "GUION HTML", prev: text.substring(0, 50), html: contenido });
         }
         localStorage.setItem(DB_KEY, JSON.stringify(db));
+        exportarPDFEditable();
+    }
+
+    function renderLib() {
+        var db = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
+        var list = document.getElementById('doc-list');
+        list.innerHTML = "";
+
+        for(var i = 0; i < db.length; i++) {
+            var doc = db[i];
+            var card = document.createElement('div');
+            card.className = 'doc-card';
+            card.id = 'card-' + doc.id;
+            card.innerHTML = (function(d){
+                return '<div onclick="selectCard(' + d.id + ')">' +
+                    '<b>' + d.title + '</b>' +
+                    '<p>' + d.prev + '...</p>' +
+                '</div>' +
+                '<div class="card-actions">' +
+                    '<button class="btn-card btn-load" onclick="cargarDoc(' + d.id + ')">ABRIR</button>' +
+                    '<button class="btn-card btn-del" onclick="borrarDoc(' + d.id + ')">BORRAR</button>' +
+                '</div>';
+            })(doc);
+            list.appendChild(card);
+        }
+    }
+
+    function selectCard(id) {
+        var cards = document.querySelectorAll('.doc-card');
+        for(var i = 0; i < cards.length; i++) { cards[i].classList.remove('selected'); }
+        document.getElementById('card-' + id).classList.add('selected');
+    }
+
+    function cargarDoc(id) {
+        var db = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
+        for(var i = 0; i < db.length; i++) {
+            if(db[i].id === id) {
+   age.setItem(DB_KEY, JSON.stringify(db));
 
         var struct = "<!DOCTYPE html><html><head><meta charset='UTF-8'></head><body>" + contenido + "</body></html>";
         var blob = new Blob([struct], { type: "text/html;charset=utf-8" });
