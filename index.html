@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Retórica V14 - Ultra-Streamlined Engine</title>
+    <title>Retórica V15 - Streamlined Audio & Color Scan</title>
     <style>
         :root { 
             --p: #0a0f1a; 
@@ -48,7 +48,7 @@
             line-height: 1.6; background: var(--editor-bg); color: var(--text-color);
             -webkit-overflow-scrolling: touch; word-wrap: break-word;
         }
-        #editor:empty:before { content: "Escribe o usa las herramientas superiores..."; color: #cbd5e1; }
+        #editor:empty:before { content: "Escribe o usa las herramientas de voz..."; color: #cbd5e1; }
 
         #editor table { border-collapse: collapse; margin: 15px 0; background: transparent; min-width: 60px; }
         #editor td, #editor th { padding: 10px; text-align: left; min-width: 40px; }
@@ -117,7 +117,7 @@
 
     <div style="margin-top:15px; padding-top:12px; border-top:2px solid #f1f5f9;">
         <p style="font-size:10px; font-weight:900; margin-bottom:8px; color:var(--accent);">GUARDAR COMO...</p>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
+        <div style="display:grid; grid-template-columns: 1fr; gap:5px;">
             <button class="btn-t" style="text-align:center;" onclick="exportarPDFEditable()">PDF EDITABLE</button>
             <button class="btn-t" style="text-align:center;" onclick="exportarDOC()">DOC</button>
         </div>
@@ -137,15 +137,15 @@
         <button class="btn-t" onclick="ejecutarComando('undo')">↩️</button>
         <button class="btn-t" onclick="ejecutarComando('redo')">↪️</button>
         
-        <button class="btn-t" onclick="menuMicronative()" id="mic-btn">🎤 MIC (GRABAR / TXT)</button>
+        <button class="btn-t" onclick="gestionarMóduloMic()" id="mic-btn">🎤 MIC</button>
         
-        <button class="btn-t" onclick="menuLecturanative()" id="read-btn">🔊 LECTURA + GRABAR</button>
+        <button class="btn-t" onclick="gestionarMóduloLectura()" id="read-btn">🔊 LECTURA</button>
 
         <button class="btn-t" onclick="insertarTabla()">📊 TABLA</button>
         <select class="select-t" id="table-border-width">
-            <option value="1px">🔲 Borde 1px</option>
-            <option value="2px">🔲 Borde 2px</option>
-            <option value="3px">🔲 Borde 3px</option>
+            <option value="1px">🔲 1px</option>
+            <option value="2px">🔲 2px</option>
+            <option value="3px">🔲 3px</option>
         </select>
         <select class="select-t" id="table-border-color">
             <option value="#cbd5e1">🎨 Gris</option>
@@ -172,13 +172,49 @@
         </select>
 
         <select class="select-t" id="lang-select">
-            <option value="es-MX">🇲🇽 Español (MX)</option>
-            <option value="en-US">🇺🇸 English</option>
+            <option value="es-MX">🇲🇽 Es (MX)</option>
+            <option value="en-US">🇺🇸 En (US)</option>
         </select>
     </div>
 </header>
 
 <div id="editor" contenteditable="true" oninput="comprobarVacioYStats()"></div>
+
+<div class="footer">
+    <span id="char-count">0 caracteres</span>
+    <span>v15.0 - Clean Space Engine</span>
+</div>
+
+<script>
+    var DB_KEY = "retorica_local_db";
+    var activeId = null;
+    var qrControl = null;
+    
+    var audioContext = null;
+    var mediaStreamSource = null;
+    var scriptProcessor = null;
+    var buffersGrabacion = [];
+    var estaGrabandoMic = false;
+
+    window.onload = function() { renderLib(); };
+
+    function comprobarVacioYStats() {
+        var ed = document.getElementById('editor');
+        var txt = ed.innerText || ed.textContent || "";
+        if (txt.trim().length === 0) { ed.innerHTML = ""; }
+        document.getElementById('char-count').innerText = txt.length + " caracteres";
+    }
+
+    function ejecutarComando(cmd) {
+        document.execCommand(cmd, false, null);
+        comprobarVacioYStats();
+    }
+
+    function toggleMenu() {
+        var s = document.getElementById('sidebar');
+        var o = document.getElementById('overlay');
+        var isOpen = s.classList.toggle('open');
+        o.style.display = isOpen ? 'iv>
 
 <div class="footer">
     <span id="char-count">0 caracteres</span>
