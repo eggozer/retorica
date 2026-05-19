@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Retórica - Android 5 Compatible</title>
+    <title>Retórica - Corrección Selección</title>
     <style>
         :root { 
             --p: #0a0f1a; 
@@ -29,7 +29,7 @@
         
         .hamb { font-size: 24px; cursor: pointer; background: none; border: none; padding: 5px; outline: none; }
 
-        /* BARRA DE HERRAMIENTAS - FLUIDA SIN COMPRIMIR BOTONES */
+        /* BARRA DE HERRAMIENTAS */
         .toolbar { padding: 0 15px; display: flex; gap: 8px; overflow-x: auto; white-space: nowrap; height: 45px; align-items: center; }
         .toolbar::-webkit-scrollbar { display: none; }
         .btn-t { 
@@ -41,7 +41,7 @@
 
         .select-t { padding: 8px; border-radius: 12px; border: 1px solid #e2e8f0; background: #f8fafc; font-size: 11px; font-weight: bold; outline: none; flex-shrink: 0; }
 
-        /* EDITOR CON AJUSTE INFERIOR ANCHO PARA EVITAR TEXTO TAPADO */
+        /* EDITOR CON ESPACIO PREVENIDO ABAJO */
         #editor { 
             position: absolute; top: 100px; bottom: 40px; left: 0; width: 100%;
             padding: 20px 20px 60px 20px; overflow-y: auto; font-size: 18px; outline: none; 
@@ -70,7 +70,7 @@
         
         .doc-meta { font-size: 9px; color: #94a3b8; display: flex; flex-direction: column; gap: 1px; border-top: 1px dashed #e2e8f0; padding-top: 4px; }
 
-        /* ACCIONES DE TARJETA COMPATIBLES CON ANDROID 5 (SIN GRID) */
+        /* ACCIONES DE TARJETA COMPATIBLES */
         .card-actions { display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid #cbd5e1; }
         .card-actions-inner { width: 100%; }
         .doc-card.selected { border-color: var(--accent); background: #e0f2fe; }
@@ -83,7 +83,7 @@
         .btn-share { background: #f0fdf4; color: #16a34a; }
         .clearfix { clear: both; }
 
-        /* SECCIÓN GUARDAR COMO EN HAMBURGUESA */
+        /* SECCIÓN EXPORTAR EN SIDEBAR */
         .export-section { margin-top: 15px; padding-top: 12px; border-top: 2px solid #f1f5f9; }
         .export-title { font-size: 10px; font-weight: 900; margin-bottom: 8px; color: var(--accent); letter-spacing: 1px; }
         .export-buttons { width: 100%; }
@@ -179,7 +179,7 @@
 
 <div class="footer">
     <span id="char-count">0 caracteres</span>
-    <span>v17.8 - Android 5 WebView</span>
+    <span>v17.9 - Alternancia Fija</span>
 </div>
 
 <script>
@@ -234,7 +234,7 @@
             return;
         }
         var Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!Rec) return alert("Dictado no soportado en este navegador.");
+        if (!Rec) return alert("Dictado no soportado.");
 
         reconocimientoVoz = new Rec();
         reconocimientoVoz.lang = document.getElementById('lang-select').value;
@@ -243,7 +243,7 @@
 
         reconocimientoVoz.onstart = function() {
             estaDictando = true;
-            document.getElementById('mic-btn').classList.add('btn-active');
+            document.getElementById('mic-btn').className = 'btn-t btn-active';
             document.getElementById('mic-btn').innerText = "🛑 PARAR MIC";
         };
         reconocimientoVoz.onresult = function(e) {
@@ -252,10 +252,10 @@
             document.execCommand('insertText', false, " " + txt);
             comprobarVacioYStats();
         };
-        reconocimientoVoz.onerror = function() { alert("Error en micrófono local."); };
+        reconocimientoVoz.onerror = function() { alert("Error en micrófono."); };
         reconocimientoVoz.onend = function() {
             estaDictando = false;
-            document.getElementById('mic-btn').classList.remove('btn-active');
+            document.getElementById('mic-btn').className = 'btn-t';
             document.getElementById('mic-btn').innerText = "🎤 MIC (DICTADO)";
         };
         reconocimientoVoz.start();
@@ -273,7 +273,7 @@
             }
         }
         if (!txt || !txt.trim()) { txt = document.getElementById('editor').innerText || document.getElementById('editor').textContent || ""; }
-        if (!txt.trim()) return alert("No hay texto para leer.");
+        if (!txt.trim()) return alert("No hay texto.");
 
         var ut = new SpeechSynthesisUtterance(txt);
         ut.lang = document.getElementById('lang-select').value;
@@ -297,7 +297,7 @@
                     break; 
                 }
             }
-            alert("Documento actualizado internamente.");
+            alert("Documento actualizado.");
         } else {
             activeId = Date.now();
             var tit = contenidoTexto.substring(0, 20).toUpperCase() || "NUEVO GUION";
@@ -309,7 +309,7 @@
                 created: ahora,
                 updated: ahora
             });
-            alert("Guardado con éxito en la Biblioteca Local.");
+            alert("Guardado en Biblioteca.");
         }
         localStorage.setItem(DB_KEY, JSON.stringify(db));
     }
@@ -334,42 +334,42 @@
                 card.className = 'doc-card selected';
             }
 
-            var fechaCreacion = doc.created || "No registrada";
-            var fechaModif = doc.updated || "No registrada";
+            var fC = doc.created || "No registrada";
+            var fM = doc.updated || "No registrada";
 
-            card.innerHTML = (function(d, fC, fM){
-                return '<div onclick="selectCard(' + d.id + ')">' +
-                    '<b>' + d.title + '</b>' +
-                    '<p>' + d.prev + '...</p>' +
-                    '<div class="doc-meta">' +
-                        '<span>📅 Creado: ' + fC + '</span>' +
-                        '<span>🔄 Modificado: ' + fM + '</span>' +
-                    '</div>' +
+            card.innerHTML = '<div onclick="selectCard(' + doc.id + ')">' +
+                '<b>' + doc.title + '</b>' +
+                '<p>' + doc.prev + '...</p>' +
+                '<div class="doc-meta">' +
+                    '<span>📅 Creado: ' + fC + '</span>' +
+                    '<span>🔄 Modificado: ' + fM + '</span>' +
                 '</div>' +
-                '<div class="card-actions">' +
-                    '<div class="card-actions-inner">' +
-                        '<button class="btn-card btn-load" onclick="cargarDoc(' + d.id + ')">ABRIR</button>' +
-                        '<button class="btn-card btn-copy" onclick="copiarTextoDoc(' + d.id + ')">COPIAR</button>' +
-                        '<button class="btn-card btn-share" onclick="compartirDoc(' + d.id + ')">COMPARTIR</button>' +
-                        '<button class="btn-card btn-del" onclick="borrarDoc(' + d.id + ')">BORRAR</button>' +
-                        '<div class="clearfix"></div>' +
-                    '</div>' +
-                '</div>';
-            })(doc, fechaCreacion, fechaModif);
+            '</div>' +
+            '<div class="card-actions">' +
+                '<div class="card-actions-inner">' +
+                    '<button class="btn-card btn-load" onclick="cargarDoc(' + doc.id + ')">ABRIR</button>' +
+                    '<button class="btn-card btn-copy" onclick="copiarTextoDoc(' + doc.id + ')">COPIAR</button>' +
+                    '<button class="btn-card btn-share" onclick="compartirDoc(' + doc.id + ')">COMPARTIR</button>' +
+                    '<button class="btn-card btn-del" onclick="borrarDoc(' + doc.id + ')">BORRAR</button>' +
+                    '<div class="clearfix"></div>' +
+                '</div>' +
+            '</div>';
             
             list.appendChild(card);
         }
     }
 
-    /* 1. SELECCIÓN CON TOGGLE REAL (SI YA ESTÁ SELECCIONADA, SE CIERRA) */
+    /* CORRECCIÓN DE SELECCIÓN Y DESELECCIÓN DIRECTA EN EL ELEMENTO */
     function selectCard(id) {
-        var card = document.getElementById('card-' + id);
-        if(card.classList.contains('selected')) {
-            card.classList.remove('selected');
+        var elemento = document.getElementById('card-' + id);
+        if (elemento.className.indexOf('selected') !== -1) {
+            elemento.className = 'doc-card';
         } else {
-            var cards = document.querySelectorAll('.doc-card');
-            for(var i = 0; i < cards.length; i++) { cards[i].classList.remove('selected'); }
-            card.classList.add('selected');
+            var listas = document.getElementsByClassName('doc-card');
+            for (var i = 0; i < listas.length; i++) {
+                listas[i].className = 'doc-card';
+            }
+            elemento.className = 'doc-card selected';
         }
     }
 
@@ -392,12 +392,11 @@
             if(db[i].id === id) {
                 var divTmp = document.createElement("div");
                 divTmp.innerHTML = db[i].html;
-                var textoLimpio = divTmp.innerText || divTmp.textContent || "";
-                
-                navigator.clipboard.writeText(textoLimpio).then(function() {
-                    alert("Texto copiado al portapapeles.");
+                var txt = divTmp.innerText || divTmp.textContent || "";
+                navigator.clipboard.writeText(txt).then(function() {
+                    alert("Copiado.");
                 }).catch(function() {
-                    alert("No se pudo copiar.");
+                    alert("Error al copiar.");
                 });
                 break;
             }
@@ -410,13 +409,12 @@
             if(db[i].id === id) {
                 var divTmp = document.createElement("div");
                 divTmp.innerHTML = db[i].html;
-                var textoLimpio = divTmp.innerText || divTmp.textContent || "";
-
+                var txt = divTmp.innerText || divTmp.textContent || "";
                 if (navigator.share) {
-                    navigator.share({ title: db[i].title, text: textoLimpio }).catch(function(){});
+                    navigator.share({ title: db[i].title, text: txt }).catch(function(){});
                 } else {
-                    navigator.clipboard.writeText(textoLimpio);
-                    alert("Texto copiado al portapapeles para compartir.");
+                    navigator.clipboard.writeText(txt);
+                    alert("Copiado para compartir.");
                 }
                 break;
             }
@@ -424,7 +422,7 @@
     }
 
     function borrarDoc(id) {
-        if(confirm("¿Eliminar este documento?")) {
+        if(confirm("¿Eliminar documento?")) {
             var db = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
             var filtrado = [];
             for(var i = 0; i < db.length; i++) { if(db[i].id !== id) { filtrado.push(db[i]); } }
@@ -440,10 +438,7 @@
         comprobarVacioYStats(); 
     }
 
-    /* 2.A - FUNCIONES DE EXPORTACIÓN REUBICADAS LOCALES */
-    function exportarPDFNormal() {
-        window.print();
-    }
+    function exportarPDFNormal() { window.print(); }
 
     function exportarPDFEditable() {
         var contenido = document.getElementById('editor').innerHTML;
