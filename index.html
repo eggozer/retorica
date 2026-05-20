@@ -2,29 +2,31 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-   <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#2563eb">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2563eb">
 
-<script>
-  // Registra el Service Worker con el alcance correcto para GitHub Pages
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function() {
-    navigator.serviceWorker.register('sw.js', { scope: '/retorica/' }).then(function(reg) {
-      console.log('Service Worker registrado con éxito', reg.scope);
-    }).catch(function(err) {
-      console.log('Error al registrar el Service Worker', err);
-    });
-  });
-}
-</script>
+    <script>
+        // Registrar el Service Worker con alcance específico para evitar pérdidas de datos
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/retorica/sw.js', { scope: '/retorica/' })
+                .then(function(reg) {
+                    console.log('Service Worker activo en ruta:', reg.scope);
+                }).catch(function(err) {
+                    console.log('Error de registro:', err);
+                });
+            });
+        }
+    </script>
+
     <title>Retórica - Corrección Selección</title>
     <style>
-        :root { 
-            --p: #0a0f1a; 
-            --accent: #2563eb; 
-            --bg: #ffffff; 
-            --editor-bg: #ffffff; 
+        :root {
+            --p: #0a0f1a;
+            --accent: #2563eb;
+            --bg: #ffffff;
+            --editor-bg: #ffffff;
             --text-color: #000000;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
