@@ -7,16 +7,16 @@
 <meta name="theme-color" content="#2563eb">
 
 <script>
-  // Registrar el Service Worker automáticamente al cargar
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-      navigator.serviceWorker.register('sw.js').then(function(reg) {
-        console.log('Service Worker registrado con éxito', reg.scope);
-      }).catch(function(err) {
-        console.log('Error al registrar el Service Worker', err);
-      });
+  // Registra el Service Worker con el alcance correcto para GitHub Pages
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('sw.js', { scope: '/retorica/' }).then(function(reg) {
+      console.log('Service Worker registrado con éxito', reg.scope);
+    }).catch(function(err) {
+      console.log('Error al registrar el Service Worker', err);
     });
-  }
+  });
+}
 </script>
     <title>Retórica - Corrección Selección</title>
     <style>
