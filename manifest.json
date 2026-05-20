@@ -1,1 +1,21 @@
-
+{
+  "short_name": "Retórica",
+  "name": "Retórica - Editor de Audio y Texto",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/retorica/index.html",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "theme_color": "#2563eb",
+  "orientation": "portrait"
+}
