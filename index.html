@@ -3,6 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+   <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2563eb">
+
+<script>
+  // Registrar el Service Worker automáticamente al cargar
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('sw.js').then(function(reg) {
+        console.log('Service Worker registrado con éxito', reg.scope);
+      }).catch(function(err) {
+        console.log('Error al registrar el Service Worker', err);
+      });
+    });
+  }
+</script>
     <title>Retórica - Corrección Selección</title>
     <style>
         :root { 
