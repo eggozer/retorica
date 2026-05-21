@@ -1,13 +1,34 @@
-// Service Worker básico para permitir la instalación de Retórica
+const CACHE_NAME = 'retorica-cache-v17.9';
+
 self.addEventListener('install', function(event) {
-  event.waitUntil(self.skipWaiting());
+    event.waitUntil(
+        caches.open(CACHE_NAME).then(function(cache) {
+            return cache.addAll([
+                '/retorica/index.html',
+                '/retorica/manifest.json'
+            ]);
+        }).then(() => self.skipWaiting())
+    );
 });
 
 self.addEventListener('activate', function(event) {
-  event.waitUntil(self.clients.claim());
+    event.waitUntil(
+        caches.keys().then(function(cacheNames) {
+            return Promise.all(
+                cacheNames.map(function(cache) {
+                    if (cache !== CACHE_NAME) {
+                        return caches.delete(cache);
+                    }
+                })
+            );
+        }).then(() => self.clients.claim())
+    );
 });
 
 self.addEventListener('fetch', function(event) {
-  // Permite cargar los archivos normalmente de la red
-  event.respondWith(fetch(event.request));
+    event.respondWith(
+        caches.match(event.request).then(function(response) {
+            return response || fetch(event.request);
+        })
+    );
 });
