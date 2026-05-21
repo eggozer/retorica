@@ -2,38 +2,22 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="manifest" href="manifest.json">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="manifest" href="/retorica/manifest.json">
     <meta name="theme-color" content="#2563eb">
-
-    <script>
-        // Registrar el Service Worker con alcance específico para evitar pérdidas de datos
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/retorica/sw.js', { scope: '/retorica/' })
-                .then(function(reg) {
-                    console.log('Service Worker activo en ruta:', reg.scope);
-                }).catch(function(err) {
-                    console.log('Error de registro:', err);
-                });
-            });
-        }
-    </script>
-
-    <title>Retórica - Corrección Selección</title>
+    <title>Retórica</title>
     <style>
-        :root {
-            --p: #0a0f1a;
-            --accent: #2563eb;
-            --bg: #ffffff;
-            --editor-bg: #ffffff;
+        :root { 
+            --p: #0a0f1a; 
+            --accent: #2563eb; 
+            --bg: #ffffff; 
+            --editor-bg: #ffffff; 
             --text-color: #000000;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
         
         body { background: var(--bg); color: var(--text-color); height: 100vh; width: 100vw; overflow: hidden; position: relative; }
 
-        /* HEADER FIJO */
         header { 
             position: fixed; top: 0; left: 0; width: 100%; background: #fff; 
             border-bottom: 1px solid #eee; z-index: 1000; height: 100px;
@@ -46,7 +30,6 @@
         
         .hamb { font-size: 24px; cursor: pointer; background: none; border: none; padding: 5px; outline: none; }
 
-        /* BARRA DE HERRAMIENTAS */
         .toolbar { padding: 0 15px; display: flex; gap: 8px; overflow-x: auto; white-space: nowrap; height: 45px; align-items: center; }
         .toolbar::-webkit-scrollbar { display: none; }
         .btn-t { 
@@ -58,7 +41,6 @@
 
         .select-t { padding: 8px; border-radius: 12px; border: 1px solid #e2e8f0; background: #f8fafc; font-size: 11px; font-weight: bold; outline: none; flex-shrink: 0; }
 
-        /* EDITOR CON ESPACIO PREVENIDO ABAJO */
         #editor { 
             position: absolute; top: 100px; bottom: 40px; left: 0; width: 100%;
             padding: 20px 20px 60px 20px; overflow-y: auto; font-size: 18px; outline: none; 
@@ -70,7 +52,6 @@
         #editor table { border-collapse: collapse; margin: 15px 0; background: transparent; min-width: 60px; }
         #editor td, #editor th { padding: 10px; text-align: left; min-width: 40px; }
 
-        /* SIDEBAR / BIBLIOTECA */
         #sidebar { 
             position: fixed; top: 0; left: -100%; width: 85%; max-width: 340px; 
             height: 100%; background: #fff; z-index: 2000; transition: 0.3s; 
@@ -87,7 +68,6 @@
         
         .doc-meta { font-size: 9px; color: #94a3b8; display: flex; flex-direction: column; gap: 1px; border-top: 1px dashed #e2e8f0; padding-top: 4px; }
 
-        /* ACCIONES DE TARJETA COMPATIBLES */
         .card-actions { display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid #cbd5e1; }
         .card-actions-inner { width: 100%; }
         .doc-card.selected { border-color: var(--accent); background: #e0f2fe; }
@@ -100,13 +80,11 @@
         .btn-share { background: #f0fdf4; color: #16a34a; }
         .clearfix { clear: both; }
 
-        /* SECCIÓN EXPORTAR EN SIDEBAR */
         .export-section { margin-top: 15px; padding-top: 12px; border-top: 2px solid #f1f5f9; }
         .export-title { font-size: 10px; font-weight: 900; margin-bottom: 8px; color: var(--accent); letter-spacing: 1px; }
         .export-buttons { width: 100%; }
         .btn-exp { width: 31%; margin: 1%; padding: 8px 2px; border-radius: 10px; border: 1px solid #e2e8f0; background: #f8fafc; font-size: 9px; font-weight: bold; cursor: pointer; float: left; text-align: center; outline: none; }
 
-        /* PIE DE PÁGINA */
         .footer { 
             position: fixed; bottom: 0; left: 0; width: 100%; height: 30px;
             padding: 0 15px; font-size: 10px; background: #f8fafc; 
@@ -196,7 +174,7 @@
 
 <div class="footer">
     <span id="char-count">0 caracteres</span>
-    <span>v17.9 - Alternancia Fija</span>
+    <span>v18.0 - Completo</span>
 </div>
 
 <script>
@@ -205,7 +183,16 @@
     var reconocimientoVoz = null;
     var estaDictando = false;
 
-    window.onload = function() { renderLib(); };
+    window.onload = function() {
+        renderLib();
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/retorica/sw.js', { scope: '/retorica/' }).then(function(reg) {
+                console.log('SW activo:', reg.scope);
+            }).catch(function(err) {
+                console.log('SW error:', err);
+            });
+        }
+    };
 
     function comprobarVacioYStats() {
         var ed = document.getElementById('editor');
@@ -376,7 +363,6 @@
         }
     }
 
-    /* CORRECCIÓN DE SELECCIÓN Y DESELECCIÓN DIRECTA EN EL ELEMENTO */
     function selectCard(id) {
         var elemento = document.getElementById('card-' + id);
         if (elemento.className.indexOf('selected') !== -1) {
@@ -455,15 +441,17 @@
         comprobarVacioYStats(); 
     }
 
-    function exportarPDFNormal() { window.print(); }
+    function exportarPDFNormal() { toggleMenu(); window.print(); }
 
     function exportarPDFEditable() {
+        toggleMenu();
         var contenido = document.getElementById('editor').innerHTML;
         var struct = "\n<!DOCTYPE html><html><head><meta charset='UTF-8'></head><body>" + contenido + "</body></html>";
         descargarBlob(new Blob([struct], { type: "text/html;charset=utf-8" }), "guion_editable.html");
     }
 
     function exportarDOC() {
+        toggleMenu();
         var txt = document.getElementById('editor').innerText || document.getElementById('editor').textContent || "";
         descargarBlob(new Blob(['\ufeff', txt], { type: "application/msword" }), "guion.doc");
     }
