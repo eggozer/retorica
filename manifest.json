@@ -1,14 +1,14 @@
 {
   "short_name": "Retórica",
-  "name": "Retórica - Editor de Audio y Texto",
+  "name": "Retórica",
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "/retorica/icon-192.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "icon-512.png",
+      "src": "/retorica/icon-512.png",
       "type": "image/png",
       "sizes": "512x512"
     }
