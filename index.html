@@ -126,6 +126,7 @@
 
         #install-container { display: none; padding: 5px; text-align: center; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; margin-bottom: 10px; }
         #btn-install-app { width: 100%; background: #16a34a; color: white; border: none; padding: 8px; font-size: 11px; font-weight: bold; border-radius: 8px; cursor: pointer; }
+        #btn-update-app { width: 100%; background: #ea580c; color: white; border: none; padding: 8px; font-size: 11px; font-weight: bold; border-radius: 8px; cursor: pointer; display: none; }
 
         #modal-tutorial { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 3000; align-items: center; justify-content: center; padding: 20px; }
         .modal-content { background: #fff; padding: 20px; border-radius: 16px; max-width: 450px; width: 100%; max-height: 85vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
@@ -157,6 +158,7 @@
 
     <div id="install-container">
         <button id="btn-install-app">📥 INSTALAR APLICACIÓN</button>
+        <button id="btn-update-app" onclick="forzarActualizacionApp()">🔄 ACTUALIZACIÓN DISPONIBLE</button>
     </div>
     
     <div id="lbl-cerrar-menu" style="background: #f8fafc; padding: 8px; font-size: 10px; text-align: center; color: #94a3b8; border-radius: 8px; cursor: pointer; margin-bottom: 10px;" onclick="toggleMenu()">
@@ -264,7 +266,7 @@
 
 <div class="footer">
     <span id="char-count">0 caracteres</span>
-    <span id="status-log" style="color: #2563eb; font-weight: bold;">v22.0 - Core Internacional Monetizado</span>
+    <span id="status-log" style="color: #2563eb; font-weight: bold;">v23.0 - Auto-Update Activo</span>
 </div>
 
 <script>
@@ -278,6 +280,7 @@
     var fragmentosAudio = [];
     var estaGrabandoNota = false;
     var deferredPrompt = null;
+    var servicioWorkerRegistrado = null;
 
     var traducciones = {
         "es-MX": { title: "RETÓRICA", save: "GUARDAR", mic: "🎤 MIC (DICTADO)", micStop: "🛑 PARAR MIC", rec: "🎙️ GRABAR AUDIO (WA)", recStop: "🛑 PARAR AUDIO", read: "🔊 LECTURA", readStop: "🛑 PARAR LECTURA", table: "📊 TABLA", libTitle: "BIBLIOTECA", closeMenu: "◀ TOCAR AQUÍ PARA CERRAR MENÚ", saveAs: "GUARDAR INTERNAMENTE COMO..." },
@@ -290,16 +293,38 @@
         "zh-CN": { title: "修辞学 APP", save: "保存内容", mic: "🎤 语音听写", micStop: "🛑 停止听写", rec: "🎙️ 录制音频", recStop: "🛑 停止录音", read: "🔊 朗读文本", readStop: "🛑 停止朗读", table: "📊 插入表格", libTitle: "个人文库", closeMenu: "◀ 点击关闭侧边栏", saveAs: "存入内部数据库..." },
         "ja-JP": { title: "レトリカル", save: "保存する", mic: "🎤 音声入力", micStop: "🛑 入力停止", rec: "🎙️ オーディオ録音", recStop: "🛑 録音停止", read: "🔊 テキスト読上", readStop: "🛑 読上停止", table: "📊 テーブル", libTitle: "ライブラリ", closeMenu: "◀ メニューを閉じる", saveAs: "インポート形式..." },
         "ar-SA": { title: "البلاغة", save: "حفظ", mic: "🎤 إملاء صوتي", micStop: "🛑 إيقاف الإملاء", rec: "🎙️ تسجيل صوتي", recStop: "🛑 إيقاف التسجيل", read: "🔊 قراءة النص", readStop: "🛑 إيقاف القراءة", table: "📊 جدول", libTitle: "المكتبة", closeMenu: "◀ إغلاق القائمة", saveAs: "حفظ داخلي باسم..." },
-        "hi-IN": { title: "वाक्पटुता", save: "सुरक्षित करें", mic: "🎤 श्रुतलेखन", micStop: "🛑 रोकें", rec: "🎙️ ऑडियो रिकॉर्ड", recStop: "🛑 रिकॉर्डिंग रोकें", read: "🔊 पाठ वाचन", readStop: "🛑 वाचन रोकें", table: "📊 तालिका", libTitle: "लाइब्रेरी", closeMenu: "◀ मेनू बंद करें", saveAs: "आंतरिक रूप से सहेजें..." }
+        "hi-IN": { title: "वाक्पटुता", save: "सुरक्षित करें", mic: "🎤 श्रुतलेखन", micStop: "🛑 रोकें", rec: "🎙️ ऑडियो रिकॉर्ड", recStop: "RECORD_STOP", read: "🔊 पाठ वाचन", readStop: "🛑 वाचन रोकें", table: "📊 तालिका", libTitle: "लाइब्रेरी", closeMenu: "◀ मेनू बंद करें", saveAs: "आंतरिक रूप से सहेजें..." }
     };
 
     window.onload = function() {
         renderLib();
+        
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/retorica/sw.js', { scope: '/retorica/' }).then(function(reg) {
-                logEstado("Sincro PWA Activa Offline.");
+                servicioWorkerRegistrado = reg;
+                logEstado("PWA Sincronizada.");
+
+                if (reg.waiting) {
+                    mostrarBotonActualizar();
+                }
+
+                reg.addEventListener('updatefound', function() {
+                    var nuevoWorker = reg.installing;
+                    nuevoWorker.addEventListener('statechange', function() {
+                        if (nuevoWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            mostrarBotonActualizar();
+                        }
+                    });
+                });
             }).catch(function(err) {
                 logEstado("Modo Local Habilitado.");
+            });
+
+            var retrasoRefresco = false;
+            navigator.serviceWorker.addEventListener('controllerchange', function() {
+                if (retrasoRefresco) return;
+                retrasoRefresco = true;
+                window.location.reload();
             });
         }
 
@@ -307,6 +332,7 @@
             e.preventDefault();
             deferredPrompt = e;
             document.getElementById('install-container').style.display = 'block';
+            document.getElementById('btn-install-app').style.display = 'block';
         });
 
         document.getElementById('btn-install-app').addEventListener('click', function() {
@@ -314,7 +340,7 @@
                 deferredPrompt.prompt();
                 deferredPrompt.userChoice.then(function(choiceResult) {
                     if (choiceResult.outcome === 'accepted') {
-                        document.getElementById('install-container').style.display = 'none';
+                        document.getElementById('btn-install-app').style.display = 'none';
                     }
                     deferredPrompt = null;
                 });
@@ -350,6 +376,21 @@
         }, false);
         comprobarVacioYStats();
     };
+
+    function mostrarBotonActualizar() {
+        document.getElementById('install-container').style.display = 'block';
+        document.getElementById('btn-install-app').style.display = 'none';
+        document.getElementById('btn-update-app').style.display = 'block';
+        logEstado("¡Nueva versión lista!");
+    }
+
+    function forzarActualizacionApp() {
+        if (servicioWorkerRegistrado && servicioWorkerRegistrado.waiting) {
+            servicioWorkerRegistrado.waiting.postMessage({ action: 'skipWaiting' });
+        } else {
+            window.location.reload();
+        }
+    }
 
     function logEstado(msg) {
         document.getElementById('status-log').innerText = msg;
