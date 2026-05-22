@@ -11,14 +11,12 @@
     <title>Retórica</title>
     
     <script>
-        // Forzado de compatibilidad avanzada y Polyfills nativos ligeros para WebView de Android 5
         if (!window.Promise) {
             document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/bluebird/3.7.2/bluebird.min.js"><\/script>');
         }
         if (!window.fetch) {
             document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/3.6.2/fetch.min.js"><\/script>');
         }
-        // Parche de inicialización de APIs multimedia para WebViews antiguos
         window.AudioContext = window.AudioContext || window.webkitAudioContext;
         navigator.mediaDevices = navigator.mediaDevices || {};
         if (!navigator.mediaDevices.getUserMedia) {
@@ -86,6 +84,10 @@
         .btn-audio-ctrl { flex: 1; padding: 5px; font-size: 10px; font-weight: bold; border-radius: 6px; border: none; cursor: pointer; }
         .btn-audio-del { background: #fee2e2; color: #ef4444; }
         .btn-audio-share { background: #e0f2fe; color: #0369a1; }
+
+        .tutorial-box { background: #f8fafc; border-left: 4px solid var(--accent); padding: 15px; margin-bottom: 20px; border-radius: 0 12px 12px 0; font-size: 14px; color: #334155; }
+        .tutorial-box h4 { font-weight: bold; margin-bottom: 8px; color: var(--p); }
+        .tutorial-box ul { padding-left: 20px; margin-top: 5px; }
 
         #sidebar { 
             position: fixed; top: 0; left: -100%; width: 85%; max-width: 340px; 
@@ -183,10 +185,8 @@
         <button class="btn-t" onclick="ejecutarComando('redo')">↪️</button>
         
         <button class="btn-t" onclick="alternarDictadoMic()" id="mic-btn">🎤 MIC (DICTADO)</button>
-        <button class="btn-t" onclick="alternarGrabacionNota()" id="rec-audio-btn">🎙️ GRABAR AUDIO (WA)</button>
-        
         <button class="btn-t" onclick="ejecutarLecturaLocal()" id="read-btn">🔊 LECTURA</button>
-        <button class="btn-t" onclick="convertirLecturaAAudio()" id="read-record-btn">📻 GRABAR LECTURA</button>
+        <button class="btn-t" onclick="alternarGrabacionNota()" id="rec-audio-btn">🎙️ GRABAR AUDIO (WA)</button>
 
         <button class="btn-t" onclick="insertarTabla()" id="btn-tabla-ui">📊 TABLA</button>
         <select class="select-t" id="table-border-width">
@@ -212,23 +212,39 @@
             <option value="oscuro">🌙 Oscuro</option>
         </select>
 
-        <select class="select-t" id="lang-select" onchange="traducirTodoElContenedor()">
-            <option value="es-MX">🇲🇽 Es (MX)</option>
-            <option value="en-US">🇺🇸 En (US)</option>
-            <option value="fr-FR">🇫🇷 Fr (FR)</option>
-            <option value="pt-BR">🇧🇷 Pt (BR)</option>
-            <option value="it-IT">🇮🇹 It (IT)</option>
+        <select class="select-t" id="lang-app-select" onchange="traducirInterfazUI()">
+            <option value="es-MX">📱 App: Español</option>
+            <option value="en-US">📱 App: English</option>
+            <option value="fr-FR">📱 App: Français</option>
+            <option value="pt-BR">📱 App: Português</option>
+            <option value="it-IT">📱 App: Italiano</option>
         </select>
-        
-        <button class="btn-t" onclick="traducirInterfazUI()" id="btn-translate-ui">🌐 TRADUCIR APP</button>
+
+        <select class="select-t" id="lang-voice-select">
+            <option value="es-MX">🗣️ Voz: Español</option>
+            <option value="en-US">🗣️ Voz: English</option>
+            <option value="fr-FR">🗣️ Voz: Français</option>
+            <option value="pt-BR">🗣️ Voz: Português</option>
+            <option value="it-IT">🗣️ Voz: Italiano</option>
+        </select>
     </div>
 </header>
 
-<div id="editor" contenteditable="true" oninput="comprobarVacioYStats()"></div>
+<div id="editor" contenteditable="true" oninput="comprobarVacioYStats()">
+    <div class="tutorial-box" contenteditable="false">
+        <h4>⚙️ CONFIGURACIÓN DE VOZ (HOMBRE / MUJER)</h4>
+        <p>Para cambiar el tipo de voz del sistema en su dispositivo globalmente:</p>
+        <ul>
+            <li><b>Android:</b> Vaya a Ajustes ➔ Sistema (o Administración General) ➔ Idioma e introducción de texto ➔ Síntesis de voz (Texto a voz). En "Motor preferido", toque el engranaje para descargar e instalar paquetes de datos de voz y seleccionar entre las variantes masculinas/femeninas numéricas disponibles.</li>
+            <li><b>iOS:</b> Vaya a Ajustes ➔ Accesibilidad ➔ Contenido leído ➔ Voces. Elija su idioma preferido y descargue las variantes mejoradas (por ejemplo, Jorge, Mónica, Paulina) para alternar el género del lector.</li>
+        </ul>
+    </div>
+    <p>&nbsp;</p>
+</div>
 
 <div class="footer">
     <span id="char-count">0 caracteres</span>
-    <span id="status-log" style="color: #2563eb; font-weight: bold;">v20.0 - Sincro WebView Activa</span>
+    <span id="status-log" style="color: #2563eb; font-weight: bold;">v21.0 - Motores de Voz Divididos</span>
 </div>
 
 <script>
@@ -240,23 +256,15 @@
     var grabadorMedia = null;
     var fragmentosAudio = [];
     var estaGrabandoNota = false;
-    var estaGrabandoLectura = false;
     
     var deferredPrompt = null;
 
     var traducciones = {
-        "es-MX": { title: "RETÓRICA", save: "GUARDAR", mic: "🎤 MIC (DICTADO)", micStop: "🛑 PARAR MIC", rec: "🎙️ GRABAR AUDIO (WA)", recStop: "🛑 PARAR AUDIO", read: "🔊 LECTURA", readRec: "📻 GRABAR LECTURA", table: "📊 TABLA", trans: "🌐 TRADUCIR APP", libTitle: "BIBLIOTECA", closeMenu: "◀ TOCAR AQUÍ PARA CERRAR MENÚ", saveAs: "GUARDAR INTERNAMENTE COMO..." },
-        "en-US": { title: "RHETORIC", save: "SAVE", mic: "🎤 MIC (DICTATION)", micStop: "🛑 STOP MIC", rec: "🎙️ RECORD AUDIO (WA)", recStop: "🛑 STOP AUDIO", read: "🔊 READ OUT", readRec: "📻 RECORD READING", table: "📊 TABLE", trans: "🌐 TRANSLATE APP", libTitle: "LIBRARY", closeMenu: "◀ CLICK HERE TO CLOSE MENU", saveAs: "SAVE INTERNALLY AS..." },
-        "fr-FR": { title: "RHÉTORIQUE", save: "ENREGISTRER", mic: "🎤 MIC (DICTÉE)", micStop: "🛑 ARRÊTER MIC", rec: "🎙️ ENREGISTRER AUDIO", recStop: "🛑 ARRÊTER AUDIO", read: "🔊 LECTURE", readRec: "📻 ENREGISTRER LECTURE", table: "📊 TABLEAU", trans: "🌐 TRADUIRE L'APP", libTitle: "BIBLIOTHÈQUE", closeMenu: "◀ FERMER LE MENU", saveAs: "ENREGISTRER INTERNEMENT..." },
-        "pt-BR": { title: "RETÓRICA", save: "SALVAR", mic: "🎤 MIC (DITADO)", micStop: "🛑 PARAR MIC", rec: "🎙️ GRAVAR ÁUDIO", recStop: "🛑 PARAR ÁUDIO", read: "🔊 LEITURA", readRec: "📻 GRAVAR LEITURA", table: "📊 TABELA", trans: "🌐 TRADUZIR APP", libTitle: "BIBLIOTECA", closeMenu: "◀ FECHAR MENU", saveAs: "SALVAR INTERNAMENTE..." },
-        "it-IT": { title: "RETORICA", save: "SALVA", mic: "🎤 MIC (DETTATURA)", micStop: "🛑 STOP MIC", rec: "🎙️ REGISTRA AUDIO", recStop: "🛑 STOP AUDIO", read: "🔊 LETTURA", readRec: "📻 REGISTRA LETTURA", table: "📊 TABELLA", trans: "🌐 TRADUCI APP", libTitle: "BIBLIOTECA", closeMenu: "◀ CHIUDI MENU", saveAs: "SALVA INTERNAMENTE..." }
-    };
-
-    var diccionarioTexto = {
-        "en-US": {"Escribe": "Write", "herramientas": "tools", "Biblioteca": "Library", "Guardado": "Saved", "caracteres": "characters", "hola": "hello", "guion": "script"},
-        "fr-FR": {"Escribe": "Écrire", "herramientas": "outils", "Biblioteca": "Bibliothèque", "Guardado": "Enregistré", "caracteres": "caractères", "hola": "bonjour", "guion": "script"},
-        "pt-BR": {"Escribe": "Escrever", "herramientas": "ferramentas", "Biblioteca": "Biblioteca", "Guardado": "Salvo", "caracteres": "caracteres", "hola": "olá", "guion": "roteiro"},
-        "it-IT": {"Escribe": "Scrivi", "herramientas": "strumenti", "Biblioteca": "Biblioteca", "Guardado": "Salvato", "caracteres": "caratteri", "hola": "ciao", "guion": "sceneggiatura"}
+        "es-MX": { title: "RETÓRICA", save: "GUARDAR", mic: "🎤 MIC (DICTADO)", micStop: "🛑 PARAR MIC", rec: "🎙️ GRABAR AUDIO (WA)", recStop: "🛑 PARAR AUDIO", read: "🔊 LECTURA", table: "📊 TABLA", libTitle: "BIBLIOTECA", closeMenu: "◀ TOCAR AQUÍ PARA CERRAR MENÚ", saveAs: "GUARDAR INTERNAMENTE COMO..." },
+        "en-US": { title: "RHETORIC", save: "SAVE", mic: "🎤 MIC (DICTATION)", micStop: "🛑 STOP MIC", rec: "🎙️ RECORD AUDIO (WA)", recStop: "🛑 STOP AUDIO", read: "🔊 READ OUT", table: "📊 TABLE", libTitle: "LIBRARY", closeMenu: "◀ CLICK HERE TO CLOSE MENU", saveAs: "SAVE INTERNALLY AS..." },
+        "fr-FR": { title: "RHÉTORIQUE", save: "ENREGISTRER", mic: "🎤 MIC (DICTÉE)", micStop: "🛑 ARRÊTER MIC", rec: "🎙️ ENREGISTRER AUDIO", recStop: "🛑 ARRÊTER AUDIO", read: "🔊 LECTURE", table: "📊 TABLEAU", libTitle: "BIBLIOTHÈQUE", closeMenu: "◀ FERMER LE MENU", saveAs: "ENREGISTRER INTERNEMENT..." },
+        "pt-BR": { title: "RETÓRICA", save: "SALVAR", mic: "🎤 MIC (DITADO)", micStop: "🛑 PARAR MIC", rec: "🎙️ GRAVAR ÁUDIO", recStop: "🛑 PARAR ÁUDIO", read: "🔊 LEITURA", table: "📊 TABELA", libTitle: "BIBLIOTECA", closeMenu: "◀ FECHAR MENU", saveAs: "SALVAR INTERNAMENTE..." },
+        "it-IT": { title: "RETORICA", save: "SALVA", mic: "🎤 MIC (DETTATURA)", micStop: "🛑 STOP MIC", rec: "🎙️ REGISTRA AUDIO", recStop: "🛑 STOP AUDIO", read: "🔊 LETTURA", table: "📊 TABELLA", libTitle: "BIBLIOTECA", closeMenu: "◀ CHIUDI MENU", saveAs: "SALVA INTERNAMENTE..." }
     };
 
     window.onload = function() {
@@ -288,7 +296,6 @@
             }
         });
 
-        // Evita que el teclado oculte el cursor y el texto dinámicamente
         document.addEventListener('selectionchange', function() {
             if (document.activeElement === document.getElementById('editor')) {
                 setTimeout(function() {
@@ -305,7 +312,6 @@
             }
         });
 
-        // Arrastre táctil para ocultar menú a la izquierda
         var sidebar = document.getElementById('sidebar');
         var xInicio = null;
         sidebar.addEventListener('touchstart', function(e) { xInicio = e.touches[0].clientX; }, false);
@@ -317,6 +323,7 @@
                 xInicio = null;
             }
         }, false);
+        comprobarVacioYStats();
     };
 
     function logEstado(msg) {
@@ -326,7 +333,6 @@
     function comprobarVacioYStats() {
         var ed = document.getElementById('editor');
         var txt = ed.innerText || ed.textContent || "";
-        if (txt.trim().length === 0) { ed.innerHTML = ""; }
         document.getElementById('char-count').innerText = txt.length + " caracteres";
     }
 
@@ -370,14 +376,14 @@
         if (!Rec) return alert("Dictado no soportado.");
 
         reconocimientoVoz = new Rec();
-        reconocimientoVoz.lang = document.getElementById('lang-select').value;
+        reconocimientoVoz.lang = document.getElementById('lang-voice-select').value;
         reconocimientoVoz.continuous = false;
         reconocimientoVoz.interimResults = false;
 
         reconocimientoVoz.onstart = function() {
             estaDictando = true;
             document.getElementById('mic-btn').className = 'btn-t btn-active';
-            var idm = document.getElementById('lang-select').value;
+            var idm = document.getElementById('lang-app-select').value;
             document.getElementById('mic-btn').innerText = (traducciones[idm] || traducciones["es-MX"]).micStop;
         };
         reconocimientoVoz.onresult = function(e) {
@@ -390,14 +396,14 @@
         reconocimientoVoz.onend = function() {
             estaDictando = false;
             document.getElementById('mic-btn').className = 'btn-t';
-            var idm = document.getElementById('lang-select').value;
+            var idm = document.getElementById('lang-app-select').value;
             document.getElementById('mic-btn').innerText = (traducciones[idm] || traducciones["es-MX"]).mic;
         };
         reconocimientoVoz.start();
     }
 
     function alternarGrabacionNota() {
-        var idm = document.getElementById('lang-select').value;
+        var idm = document.getElementById('lang-app-select').value;
         var strings = traducciones[idm] || traducciones["es-MX"];
         if (estaGrabandoNota) {
             if (grabadorMedia) grabadorMedia.stop();
@@ -470,58 +476,21 @@
     function ejecutarLecturaLocal() {
         window.speechSynthesis.cancel();
         var txt = window.getSelection().toString();
-        if (!txt.trim()) { txt = document.getElementById('editor').innerText || document.getElementById('editor').textContent || ""; }
+        if (!txt.trim()) { 
+            var cln = document.getElementById('editor').cloneNode(true);
+            var tBox = cln.querySelector('.tutorial-box');
+            if(tBox) cln.removeChild(tBox);
+            txt = cln.innerText || cln.textContent || ""; 
+        }
         if (!txt.trim()) return;
 
         var ut = new SpeechSynthesisUtterance(txt);
-        ut.lang = document.getElementById('lang-select').value;
+        ut.lang = document.getElementById('lang-voice-select').value;
         window.speechSynthesis.speak(ut);
     }
 
-    function convertirLecturaAAudio() {
-        var ed = document.getElementById('editor');
-        var txt = ed.innerText || ed.textContent || "";
-        if(!txt.trim()) return;
-
-        logEstado("Compilando texto a pista sintética local...");
-        setTimeout(function() {
-            var audioId = "synth-" + Date.now();
-            var bloqueAudio = '<div class="audio-container" id="' + audioId + '" contenteditable="false">' +
-                '<b>🔊 Lectura Sintética Guardada:</b>' +
-                '<audio src="" controls="controls"></audio>' +
-                '<div class="audio-actions">' +
-                    '<button class="btn-audio-ctrl btn-audio-share" onclick="compartirFicheroAudio(\'' + audioId + '\')">📤 COMPARTIR</button>' +
-                    '<button class="btn-audio-ctrl btn-audio-del" onclick="eliminarBloqueAudio(\'' + audioId + '\')">❌ BORRAR</button>' +
-                '</div>' +
-            '</div><p>&nbsp;</p>';
-            
-            ed.focus();
-            document.execCommand('insertHTML', false, bloqueAudio);
-            comprobarVacioYStats();
-            logEstado("Pista guardada sin conexión.");
-        }, 1200);
-    }
-
-    function traducirTodoElContenedor() {
-        if (navigator.onLine) { logEstado("Validando paquetes idiomáticos en red..."); }
-        var lang = document.getElementById('lang-select').value;
-        var ed = document.getElementById('editor');
-        var txt = ed.innerHTML;
-        
-        var dict = diccionarioTexto[lang];
-        if(dict) {
-            for(var clave in dict) {
-                var regex = new RegExp(clave, "gi");
-                txt = txt.replace(regex, dict[clave]);
-            }
-            ed.innerHTML = txt;
-            comprobarVacioYStats();
-            logEstado("Texto traducido localmente.");
-        }
-    }
-
     function traducirInterfazUI() {
-        var targetLang = document.getElementById('lang-select').value;
+        var targetLang = document.getElementById('lang-app-select').value;
         var strings = traducciones[targetLang] || traducciones["es-MX"];
         
         document.getElementById('app-title-ui').innerText = strings.title;
@@ -529,9 +498,7 @@
         document.getElementById('mic-btn').innerText = estaDictando ? strings.micStop : strings.mic;
         document.getElementById('rec-audio-btn').innerText = estaGrabandoNota ? strings.recStop : strings.rec;
         document.getElementById('read-btn').innerText = strings.read;
-        document.getElementById('read-record-btn').innerText = strings.readRec;
         document.getElementById('btn-tabla-ui').innerText = strings.table;
-        document.getElementById('btn-translate-ui').innerText = strings.trans;
         document.getElementById('lbl-biblioteca').innerText = strings.libTitle;
         document.getElementById('lbl-cerrar-menu').innerText = strings.closeMenu;
         document.getElementById('lbl-guardar-como').innerText = strings.saveAs;
@@ -649,7 +616,6 @@
         }
     }
 
-    var scriptFin = document.createElement('script');
     function cargarDoc(id) {
         var db = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
         for(var i = 0; i < db.length; i++) {
