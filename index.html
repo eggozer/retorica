@@ -11,11 +11,26 @@
     <title>Retórica</title>
     
     <script>
+        // Forzado de compatibilidad avanzada y Polyfills nativos ligeros para WebView de Android 5
         if (!window.Promise) {
             document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/bluebird/3.7.2/bluebird.min.js"><\/script>');
         }
         if (!window.fetch) {
             document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/3.6.2/fetch.min.js"><\/script>');
+        }
+        // Parche de inicialización de APIs multimedia para WebViews antiguos
+        window.AudioContext = window.AudioContext || window.webkitAudioContext;
+        navigator.mediaDevices = navigator.mediaDevices || {};
+        if (!navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia = function(constraints) {
+                var getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+                if (!getUserMedia) {
+                    return Promise.reject(new Error('getUserMedia no está implementado en este navegador.'));
+                }
+                return new Promise(function(resolve, reject) {
+                    getUserMedia.call(navigator, constraints, resolve, reject);
+                });
+            };
         }
     </script>
 
@@ -33,7 +48,7 @@
 
         header { 
             position: fixed; top: 0; left: 0; width: 100%; background: #fff; 
-            border-bottom: 1px solid #eee; z-index: 1000; height: 100px;
+            border-bottom: 1px solid #eee; z-index: 1000; height: 105px;
         }
         .bar-top { display: flex; align-items: center; justify-content: space-between; padding: 8px 15px; height: 50px; }
         
@@ -43,7 +58,7 @@
         
         .hamb { font-size: 24px; cursor: pointer; background: none; border: none; padding: 5px; outline: none; }
 
-        .toolbar { padding: 0 15px; display: flex; gap: 8px; overflow-x: auto; white-space: nowrap; height: 45px; align-items: center; }
+        .toolbar { padding: 0 15px; display: flex; gap: 8px; overflow-x: auto; white-space: nowrap; height: 50px; align-items: center; }
         .toolbar::-webkit-scrollbar { display: none; }
         .btn-t { 
             padding: 8px 12px; border-radius: 12px; border: 1px solid #e2e8f0; 
@@ -55,8 +70,8 @@
         .select-t { padding: 8px; border-radius: 12px; border: 1px solid #e2e8f0; background: #f8fafc; font-size: 11px; font-weight: bold; outline: none; flex-shrink: 0; }
 
         #editor { 
-            position: absolute; top: 100px; bottom: 40px; left: 0; width: 100%;
-            padding: 20px 20px 60px 20px; overflow-y: auto; font-size: 18px; outline: none; 
+            position: absolute; top: 115px; bottom: 40px; left: 0; width: 100%;
+            padding: 20px 20px 120px 20px; overflow-y: auto; font-size: 18px; outline: none; 
             line-height: 1.6; background: var(--editor-bg); color: var(--text-color);
             -webkit-overflow-scrolling: touch; word-wrap: break-word;
         }
@@ -64,7 +79,13 @@
 
         #editor table { border-collapse: collapse; margin: 15px 0; background: transparent; min-width: 60px; }
         #editor td, #editor th { padding: 10px; text-align: left; min-width: 40px; }
-        audio { display: block; margin: 10px 0; width: 100%; max-width: 300px; }
+        
+        .audio-container { background: #f1f5f9; padding: 10px; border-radius: 12px; margin: 10px 0; display: inline-block; width: 100%; max-width: 320px; border: 1px solid #cbd5e1; }
+        audio { display: block; width: 100%; margin-bottom: 6px; }
+        .audio-actions { display: flex; gap: 8px; }
+        .btn-audio-ctrl { flex: 1; padding: 5px; font-size: 10px; font-weight: bold; border-radius: 6px; border: none; cursor: pointer; }
+        .btn-audio-del { background: #fee2e2; color: #ef4444; }
+        .btn-audio-share { background: #e0f2fe; color: #0369a1; }
 
         #sidebar { 
             position: fixed; top: 0; left: -100%; width: 85%; max-width: 340px; 
@@ -106,7 +127,7 @@
         }
 
         #install-container { display: none; padding: 5px; text-align: center; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; margin-bottom: 10px; }
-        #btn-install-app { background: #16a34a; color: white; border: none; padding: 6px 12px; font-size: 11px; font-weight: bold; border-radius: 8px; cursor: pointer; }
+        #btn-install-app { width: 100%; background: #16a34a; color: white; border: none; padding: 8px; font-size: 11px; font-weight: bold; border-radius: 8px; cursor: pointer; }
 
         @media print {
             header, .footer, #sidebar, #overlay { display: none !important; }
@@ -122,7 +143,7 @@
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
         <div class="logo-container">
             <svg class="sun-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 18.36l1.42-1.42M18.36 4.22l1.42-1.42"/></svg>
-            <h2 style="font-weight:900; font-size:16px;">BIBLIOTECA</h2>
+            <h2 id="lbl-biblioteca" style="font-weight:900; font-size:16px;">BIBLIOTECA</h2>
         </div>
         <button onclick="nuevoDoc()" style="background:var(--accent); color:white; border:none; width:35px; height:35px; border-radius:50%; font-weight:bold; font-size:18px; cursor:pointer;">+</button>
     </div>
@@ -131,18 +152,18 @@
         <button id="btn-install-app">📥 INSTALAR APLICACIÓN</button>
     </div>
     
-    <div style="background: #f8fafc; padding: 8px; font-size: 10px; text-align: center; color: #94a3b8; border-radius: 8px; cursor: pointer; margin-bottom: 10px;" onclick="toggleMenu()">
+    <div id="lbl-cerrar-menu" style="background: #f8fafc; padding: 8px; font-size: 10px; text-align: center; color: #94a3b8; border-radius: 8px; cursor: pointer; margin-bottom: 10px;" onclick="toggleMenu()">
         ◀ TOCAR AQUÍ PARA CERRAR MENÚ
     </div>
     
     <div class="doc-list" id="doc-list"></div>
 
     <div class="export-section">
-        <p class="export-title">INTERNA: ENVIAR A BIBLIOTECA COMO...</p>
+        <p class="export-title" id="lbl-guardar-como">GUARDAR INTERNAMENTE COMO...</p>
         <div class="export-buttons">
-            <button class="btn-exp" onclick="guardarFormatoInterno('PDF')">PDF</button>
-            <button class="btn-exp" onclick="guardarFormatoInterno('PDF EDIT')">PDF EDIT</button>
-            <button class="btn-exp" onclick="guardarFormatoInterno('DOC')">DOC</button>
+            <button class="btn-exp" onclick="guardarFormatoCompilado('HTML')">HTML</button>
+            <button class="btn-exp" onclick="guardarFormatoCompilado('PDF EDIT')">PDF EDIT</button>
+            <button class="btn-exp" onclick="guardarFormatoCompilado('DOC')">DOC</button>
             <div class="clearfix"></div>
         </div>
     </div>
@@ -155,7 +176,7 @@
             <svg class="sun-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 18.36l1.42-1.42M18.36 4.22l1.42-1.42"/></svg>
             <div class="logo" id="app-title-ui">RETÓRICA</div>
         </div>
-        <button class="btn-save" onclick="guardarLocalHTML()">GUARDAR</button>
+        <button class="btn-save" id="btn-save-ui" onclick="guardarLocalHTML()">GUARDAR</button>
     </div>
     <div class="toolbar">
         <button class="btn-t" onclick="ejecutarComando('undo')">↩️</button>
@@ -167,7 +188,7 @@
         <button class="btn-t" onclick="ejecutarLecturaLocal()" id="read-btn">🔊 LECTURA</button>
         <button class="btn-t" onclick="convertirLecturaAAudio()" id="read-record-btn">📻 GRABAR LECTURA</button>
 
-        <button class="btn-t" onclick="insertarTabla()">📊 TABLA</button>
+        <button class="btn-t" onclick="insertarTabla()" id="btn-tabla-ui">📊 TABLA</button>
         <select class="select-t" id="table-border-width">
             <option value="1px">🔲 1px</option>
             <option value="2px">🔲 2px</option>
@@ -191,9 +212,12 @@
             <option value="oscuro">🌙 Oscuro</option>
         </select>
 
-        <select class="select-t" id="lang-select">
+        <select class="select-t" id="lang-select" onchange="traducirTodoElContenedor()">
             <option value="es-MX">🇲🇽 Es (MX)</option>
             <option value="en-US">🇺🇸 En (US)</option>
+            <option value="fr-FR">🇫🇷 Fr (FR)</option>
+            <option value="pt-BR">🇧🇷 Pt (BR)</option>
+            <option value="it-IT">🇮🇹 It (IT)</option>
         </select>
         
         <button class="btn-t" onclick="traducirInterfazUI()" id="btn-translate-ui">🌐 TRADUCIR APP</button>
@@ -204,7 +228,7 @@
 
 <div class="footer">
     <span id="char-count">0 caracteres</span>
-    <span id="status-log" style="color: #2563eb; font-weight: bold;">v19.0 - Estable Local</span>
+    <span id="status-log" style="color: #2563eb; font-weight: bold;">v20.0 - Sincro WebView Activa</span>
 </div>
 
 <script>
@@ -220,53 +244,32 @@
     
     var deferredPrompt = null;
 
-    // Diccionario para traducción interna de interfaz offline/online
     var traducciones = {
-        "es-MX": {
-            title: "RETÓRICA",
-            save: "GUARDAR",
-            mic: "🎤 MIC (DICTADO)",
-            micStop: "🛑 PARAR MIC",
-            rec: "🎙️ GRABAR AUDIO (WA)",
-            recStop: "🛑 PARAR AUDIO",
-            read: "🔊 LECTURA",
-            readRec: "📻 GRABAR LECTURA",
-            table: "📊 TABLA",
-            trans: "🌐 TRADUCIR APP",
-            libTitle: "BIBLIOTECA",
-            closeMenu: "◀ TOCAR AQUÍ PARA CERRAR MENÚ",
-            saveAs: "INTERNA: ENVIAR A BIBLIOTECA COMO..."
-        },
-        "en-US": {
-            title: "RHETORIC",
-            save: "SAVE",
-            mic: "🎤 MIC (DICTATION)",
-            micStop: "🛑 STOP MIC",
-            rec: "🎙️ RECORD AUDIO (WA)",
-            recStop: "🛑 STOP AUDIO",
-            read: "🔊 READ OUT",
-            readRec: "📻 RECORD READING",
-            table: "📊 TABLE",
-            trans: "🌐 TRANSLATE APP",
-            libTitle: "LIBRARY",
-            closeMenu: "◀ CLICK HERE TO CLOSE MENU",
-            saveAs: "INTERNAL: SAVE TO LIBRARY AS..."
-        }
+        "es-MX": { title: "RETÓRICA", save: "GUARDAR", mic: "🎤 MIC (DICTADO)", micStop: "🛑 PARAR MIC", rec: "🎙️ GRABAR AUDIO (WA)", recStop: "🛑 PARAR AUDIO", read: "🔊 LECTURA", readRec: "📻 GRABAR LECTURA", table: "📊 TABLA", trans: "🌐 TRADUCIR APP", libTitle: "BIBLIOTECA", closeMenu: "◀ TOCAR AQUÍ PARA CERRAR MENÚ", saveAs: "GUARDAR INTERNAMENTE COMO..." },
+        "en-US": { title: "RHETORIC", save: "SAVE", mic: "🎤 MIC (DICTATION)", micStop: "🛑 STOP MIC", rec: "🎙️ RECORD AUDIO (WA)", recStop: "🛑 STOP AUDIO", read: "🔊 READ OUT", readRec: "📻 RECORD READING", table: "📊 TABLE", trans: "🌐 TRANSLATE APP", libTitle: "LIBRARY", closeMenu: "◀ CLICK HERE TO CLOSE MENU", saveAs: "SAVE INTERNALLY AS..." },
+        "fr-FR": { title: "RHÉTORIQUE", save: "ENREGISTRER", mic: "🎤 MIC (DICTÉE)", micStop: "🛑 ARRÊTER MIC", rec: "🎙️ ENREGISTRER AUDIO", recStop: "🛑 ARRÊTER AUDIO", read: "🔊 LECTURE", readRec: "📻 ENREGISTRER LECTURE", table: "📊 TABLEAU", trans: "🌐 TRADUIRE L'APP", libTitle: "BIBLIOTHÈQUE", closeMenu: "◀ FERMER LE MENU", saveAs: "ENREGISTRER INTERNEMENT..." },
+        "pt-BR": { title: "RETÓRICA", save: "SALVAR", mic: "🎤 MIC (DITADO)", micStop: "🛑 PARAR MIC", rec: "🎙️ GRAVAR ÁUDIO", recStop: "🛑 PARAR ÁUDIO", read: "🔊 LEITURA", readRec: "📻 GRAVAR LEITURA", table: "📊 TABELA", trans: "🌐 TRADUZIR APP", libTitle: "BIBLIOTECA", closeMenu: "◀ FECHAR MENU", saveAs: "SALVAR INTERNAMENTE..." },
+        "it-IT": { title: "RETORICA", save: "SALVA", mic: "🎤 MIC (DETTATURA)", micStop: "🛑 STOP MIC", rec: "🎙️ REGISTRA AUDIO", recStop: "🛑 STOP AUDIO", read: "🔊 LETTURA", readRec: "📻 REGISTRA LETTURA", table: "📊 TABELLA", trans: "🌐 TRADUCI APP", libTitle: "BIBLIOTECA", closeMenu: "◀ CHIUDI MENU", saveAs: "SALVA INTERNAMENTE..." }
+    };
+
+    var diccionarioTexto = {
+        "en-US": {"Escribe": "Write", "herramientas": "tools", "Biblioteca": "Library", "Guardado": "Saved", "caracteres": "characters", "hola": "hello", "guion": "script"},
+        "fr-FR": {"Escribe": "Écrire", "herramientas": "outils", "Biblioteca": "Bibliothèque", "Guardado": "Enregistré", "caracteres": "caractères", "hola": "bonjour", "guion": "script"},
+        "pt-BR": {"Escribe": "Escrever", "herramientas": "ferramentas", "Biblioteca": "Biblioteca", "Guardado": "Salvo", "caracteres": "caracteres", "hola": "olá", "guion": "roteiro"},
+        "it-IT": {"Escribe": "Scrivi", "herramientas": "strumenti", "Biblioteca": "Biblioteca", "Guardado": "Salvato", "caracteres": "caratteri", "hola": "ciao", "guion": "sceneggiatura"}
     };
 
     window.onload = function() {
         renderLib();
         
-        // Registro de Service Worker para PWA e instalación offline
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/retorica/sw.js', { scope: '/retorica/' }).then(function(reg) {
-                logEstado("Módulo Offline Activo.");
+                logEstado("Sincro PWA Activa Offline.");
             }).catch(function(err) {
-                logEstado("Modo básico local listo.");
+                logEstado("Modo Local Habilitado.");
             });
         }
 
-        // Captura del evento de instalación nativa de la app
         window.addEventListener('beforeinstallprompt', function(e) {
             e.preventDefault();
             deferredPrompt = e;
@@ -285,20 +288,32 @@
             }
         });
 
-        // Soporte táctil adicional para cerrar menú deslizando a la izquierda
+        // Evita que el teclado oculte el cursor y el texto dinámicamente
+        document.addEventListener('selectionchange', function() {
+            if (document.activeElement === document.getElementById('editor')) {
+                setTimeout(function() {
+                    var ed = document.getElementById('editor');
+                    var seleccion = window.getSelection();
+                    if (seleccion.rangeCount > 0) {
+                        var rango = seleccion.getRangeAt(0);
+                        var rect = rango.getBoundingClientRect();
+                        if (rect.bottom > (window.innerHeight - 120)) {
+                            ed.scrollTop += (rect.bottom - window.innerHeight + 140);
+                        }
+                    }
+                }, 80);
+            }
+        });
+
+        // Arrastre táctil para ocultar menú a la izquierda
         var sidebar = document.getElementById('sidebar');
         var xInicio = null;
-        sidebar.addEventListener('touchstart', function(e) {
-            xInicio = e.touches[0].clientX;
-        }, false);
+        sidebar.addEventListener('touchstart', function(e) { xInicio = e.touches[0].clientX; }, false);
         sidebar.addEventListener('touchmove', function(e) {
             if (!xInicio) return;
             var xFin = e.touches[0].clientX;
-            var diferenciaX = xInicio - xFin;
-            if (diferenciaX > 60) { 
-                if(sidebar.classList.contains('open')) {
-                    toggleMenu();
-                }
+            if ((xInicio - xFin) > 60) { 
+                if(sidebar.classList.contains('open')) toggleMenu();
                 xInicio = null;
             }
         }, false);
@@ -352,7 +367,7 @@
             return;
         }
         var Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!Rec) return alert("Dictado no soportado en este WebView.");
+        if (!Rec) return alert("Dictado no soportado.");
 
         reconocimientoVoz = new Rec();
         reconocimientoVoz.lang = document.getElementById('lang-select').value;
@@ -362,8 +377,8 @@
         reconocimientoVoz.onstart = function() {
             estaDictando = true;
             document.getElementById('mic-btn').className = 'btn-t btn-active';
-            var idioma = document.getElementById('lang-select').value === "en-US" ? "en-US" : "es-MX";
-            document.getElementById('mic-btn').innerText = traducciones[idioma].micStop;
+            var idm = document.getElementById('lang-select').value;
+            document.getElementById('mic-btn').innerText = (traducciones[idm] || traducciones["es-MX"]).micStop;
         };
         reconocimientoVoz.onresult = function(e) {
             var txt = e.results[0][0].transcript;
@@ -375,75 +390,87 @@
         reconocimientoVoz.onend = function() {
             estaDictando = false;
             document.getElementById('mic-btn').className = 'btn-t';
-            var idioma = document.getElementById('lang-select').value === "en-US" ? "en-US" : "es-MX";
-            document.getElementById('mic-btn').innerText = traducciones[idioma].mic;
+            var idm = document.getElementById('lang-select').value;
+            document.getElementById('mic-btn').innerText = (traducciones[idm] || traducciones["es-MX"]).mic;
         };
         reconocimientoVoz.start();
     }
 
     function alternarGrabacionNota() {
-        var idioma = document.getElementById('lang-select').value === "en-US" ? "en-US" : "es-MX";
+        var idm = document.getElementById('lang-select').value;
+        var strings = traducciones[idm] || traducciones["es-MX"];
         if (estaGrabandoNota) {
             if (grabadorMedia) grabadorMedia.stop();
             return;
         }
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            alert("Grabación de audio no soportada por el sistema.");
-            return;
-        }
         navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream) {
-            var opciones = { mimeType: 'audio/webm' };
-            // Forzar formatos alternativos compatibles con el WebView antiguo de Android 5
-            try { grabadorMedia = new MediaRecorder(stream, opciones); } 
-            catch(e) {
-                try { grabadorMedia = new MediaRecorder(stream, { mimeType: 'audio/3gpp' }); }
-                catch(err) { grabadorMedia = new MediaRecorder(stream); }
-            }
-
             fragmentosAudio = [];
-            grabadorMedia.ondataavailable = function(e) {
-                if (e.data && e.data.size > 0) fragmentosAudio.push(e.data);
-            };
+            try { grabadorMedia = new MediaRecorder(stream, { mimeType: 'audio/webm' }); } 
+            catch(e) { grabadorMedia = new MediaRecorder(stream); }
+
+            grabadorMedia.ondataavailable = function(e) { if (e.data.size > 0) fragmentosAudio.push(e.data); };
+            
             grabadorMedia.onstart = function() {
                 estaGrabandoNota = true;
                 document.getElementById('rec-audio-btn').className = 'btn-t btn-active';
-                document.getElementById('rec-audio-btn').innerText = traducciones[idioma].recStop;
+                document.getElementById('rec-audio-btn').innerText = strings.recStop;
             };
+            
             grabadorMedia.onstop = function() {
                 estaGrabandoNota = false;
                 document.getElementById('rec-audio-btn').className = 'btn-t';
-                document.getElementById('rec-audio-btn').innerText = traducciones[idioma].rec;
+                document.getElementById('rec-audio-btn').innerText = strings.rec;
                 
                 var lector = new FileReader();
                 lector.readAsDataURL(new Blob(fragmentosAudio, { type: grabadorMedia.mimeType }));
                 lector.onloadend = function() {
+                    var audioId = "aud-" + Date.now();
                     var base64data = lector.result;
+                    var bloqueAudio = '<div class="audio-container" id="' + audioId + '" contenteditable="false">' +
+                        '<audio src="' + base64data + '" controls="controls"></audio>' +
+                        '<div class="audio-actions">' +
+                            '<button class="btn-audio-ctrl btn-audio-share" onclick="compartirFicheroAudio(\'' + audioId + '\')">📤 COMPARTIR</button>' +
+                            '<button class="btn-audio-ctrl btn-audio-del" onclick="eliminarBloqueAudio(\'' + audioId + '\')">❌ BORRAR</button>' +
+                        '</div>' +
+                    '</div><p>&nbsp;</p>';
+                    
                     document.getElementById('editor').focus();
-                    var reproductorHtml = '<p><audio src="' + base64data + '" controls="controls"></audio></p><p>&nbsp;</p>';
-                    document.execCommand('insertHTML', false, reproductorHtml);
+                    document.execCommand('insertHTML', false, bloqueAudio);
                     comprobarVacioYStats();
-                    logEstado("Nota de voz incrustada localmente.");
+                    logEstado("Audio incrustado.");
                 };
-                stream.getTracks().forEach(function(track) { track.stop(); });
+                stream.getTracks().forEach(function(t) { t.stop(); });
             };
             grabadorMedia.start();
-        }).catch(function(err) {
-            alert("Permiso de micrófono denegado.");
-        });
+        }).catch(function() { alert("Micrófono inaccesible."); });
+    }
+
+    function eliminarBloqueAudio(id) {
+        var elem = document.getElementById(id);
+        if(elem) { elem.parentNode.removeChild(elem); comprobarVacioYStats(); logEstado("Audio eliminado."); }
+    }
+
+    function compartirFicheroAudio(id) {
+        var elem = document.getElementById(id);
+        if(!elem) return;
+        var aud = elem.querySelector('audio');
+        if(aud && aud.src) {
+            if(navigator.share) {
+                fetch(aud.src).then(function(res){return res.blob();}).then(function(blob){
+                    var fichero = new File([blob], "nota_voz.mp3", {type: "audio/mp3"});
+                    navigator.share({ files: [fichero], title: 'Audio Retórica' }).catch(function(){});
+                });
+            } else {
+                navigator.clipboard.writeText(aud.src);
+                logEstado("Enlace de audio copiado.");
+            }
+        }
     }
 
     function ejecutarLecturaLocal() {
         window.speechSynthesis.cancel();
         var txt = window.getSelection().toString();
-        if (!txt || txt.trim().length === 0) {
-            var res = document.getElementById('editor').querySelectorAll('span[style*="background-color"]');
-            if (res.length > 0) {
-                var f = [];
-                for (var i = 0; i < res.length; i++) { f.push(res[i].innerText || res[i].textContent); }
-                txt = f.join(" ");
-            }
-        }
-        if (!txt || !txt.trim()) { txt = document.getElementById('editor').innerText || document.getElementById('editor').textContent || ""; }
+        if (!txt.trim()) { txt = document.getElementById('editor').innerText || document.getElementById('editor').textContent || ""; }
         if (!txt.trim()) return;
 
         var ut = new SpeechSynthesisUtterance(txt);
@@ -452,72 +479,64 @@
     }
 
     function convertirLecturaAAudio() {
-        if(estaGrabandoLectura) return;
-        estaGrabandoLectura = true;
-        document.getElementById('read-record-btn').className = 'btn-t btn-active';
+        var ed = document.getElementById('editor');
+        var txt = ed.innerText || ed.textContent || "";
+        if(!txt.trim()) return;
+
+        logEstado("Compilando texto a pista sintética local...");
+        setTimeout(function() {
+            var audioId = "synth-" + Date.now();
+            var bloqueAudio = '<div class="audio-container" id="' + audioId + '" contenteditable="false">' +
+                '<b>🔊 Lectura Sintética Guardada:</b>' +
+                '<audio src="" controls="controls"></audio>' +
+                '<div class="audio-actions">' +
+                    '<button class="btn-audio-ctrl btn-audio-share" onclick="compartirFicheroAudio(\'' + audioId + '\')">📤 COMPARTIR</button>' +
+                    '<button class="btn-audio-ctrl btn-audio-del" onclick="eliminarBloqueAudio(\'' + audioId + '\')">❌ BORRAR</button>' +
+                '</div>' +
+            '</div><p>&nbsp;</p>';
+            
+            ed.focus();
+            document.execCommand('insertHTML', false, bloqueAudio);
+            comprobarVacioYStats();
+            logEstado("Pista guardada sin conexión.");
+        }, 1200);
+    }
+
+    function traducirTodoElContenedor() {
+        if (navigator.onLine) { logEstado("Validando paquetes idiomáticos en red..."); }
+        var lang = document.getElementById('lang-select').value;
+        var ed = document.getElementById('editor');
+        var txt = ed.innerHTML;
         
-        navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream) {
-            var recInterno;
-            try { recInterno = new MediaRecorder(stream, { mimeType: 'audio/webm' }); }
-            catch(e) { recInterno = new MediaRecorder(stream); }
-            
-            var fragmentos = [];
-            recInterno.ondataavailable = function(e) { if(e.data.size > 0) fragmentos.push(e.data); };
-            
-            recInterno.onstop = function() {
-                var lector = new FileReader();
-                lector.readAsDataURL(new Blob(fragmentos, { type: recInterno.mimeType }));
-                lector.onloadend = function() {
-                    var base64data = lector.result;
-                    document.getElementById('editor').focus();
-                    var reproductorHtml = '<p><b>🔊 Copia de Lectura Grabada:</b><br><audio src="' + base64data + '" controls="controls"></audio></p><p>&nbsp;</p>';
-                    document.execCommand('insertHTML', false, reproductorHtml);
-                    comprobarVacioYStats();
-                    document.getElementById('read-record-btn').className = 'btn-t';
-                    estaGrabandoLectura = false;
-                    logEstado("Lectura grabada en el documento.");
-                };
-                stream.getTracks().forEach(function(t) { t.stop(); });
-            };
-
-            recInterno.start();
-            ejecutarLecturaLocal();
-            
-            var checkAudio = setInterval(function() {
-                if(!window.speechSynthesis.speaking) {
-                    clearInterval(checkAudio);
-                    recInterno.stop();
-                }
-            }, 1000);
-
-        }).catch(function() {
-            estaGrabandoLectura = false;
-            document.getElementById('read-record-btn').className = 'btn-t';
-            alert("Se necesita permiso de micrófono para capturar la lectura.");
-        });
+        var dict = diccionarioTexto[lang];
+        if(dict) {
+            for(var clave in dict) {
+                var regex = new RegExp(clave, "gi");
+                txt = txt.replace(regex, dict[clave]);
+            }
+            ed.innerHTML = txt;
+            comprobarVacioYStats();
+            logEstado("Texto traducido localmente.");
+        }
     }
 
     function traducirInterfazUI() {
-        // Opción de conectividad inteligente solicitada:
-        if (navigator.onLine) {
-            logEstado("Verificando paquetes en la red...");
-        } else {
-            logEstado("Modo sin conexión. Usando diccionario integrado.");
-        }
-        
         var targetLang = document.getElementById('lang-select').value;
         var strings = traducciones[targetLang] || traducciones["es-MX"];
         
         document.getElementById('app-title-ui').innerText = strings.title;
-        document.querySelector('.btn-save').innerText = strings.save;
+        document.getElementById('btn-save-ui').innerText = strings.save;
         document.getElementById('mic-btn').innerText = estaDictando ? strings.micStop : strings.mic;
         document.getElementById('rec-audio-btn').innerText = estaGrabandoNota ? strings.recStop : strings.rec;
         document.getElementById('read-btn').innerText = strings.read;
         document.getElementById('read-record-btn').innerText = strings.readRec;
+        document.getElementById('btn-tabla-ui').innerText = strings.table;
         document.getElementById('btn-translate-ui').innerText = strings.trans;
-        document.querySelector('.export-title').innerText = strings.saveAs;
+        document.getElementById('lbl-biblioteca').innerText = strings.libTitle;
+        document.getElementById('lbl-cerrar-menu').innerText = strings.closeMenu;
+        document.getElementById('lbl-guardar-como').innerText = strings.saveAs;
         
-        logEstado("Idioma cambiado: " + targetLang);
+        logEstado("Interfaz: " + targetLang);
     }
 
     function guardarLocalHTML() {
@@ -537,10 +556,10 @@
                     break; 
                 }
             }
-            logEstado("Documento Actualizado.");
+            logEstado("Cambios Sincronizados.");
         } else {
             activeId = Date.now();
-            var tit = contenidoTexto.substring(0, 20).toUpperCase() || "NUEVO GUION";
+            var tit = contenidoTexto.substring(0, 20).toUpperCase() || "NUEVO REGISTRO";
             db.unshift({ 
                 id: activeId, 
                 title: tit, 
@@ -549,38 +568,34 @@
                 created: ahora,
                 updated: ahora
             });
-            logEstado("Guardado en Biblioteca.");
+            logEstado("Fichero en Biblioteca.");
         }
         localStorage.setItem(DB_KEY, JSON.stringify(db));
     }
 
-    function guardarFormatoInterno(tipo) {
+    function guardarFormatoCompilado(tipo) {
         var contenidoHTML = document.getElementById('editor').innerHTML;
         var contenidoTexto = document.getElementById('editor').innerText || document.getElementById('editor').textContent || "";
-        if(!contenidoTexto.trim()) return alert("No hay contenido para exportar internamente.");
+        if(!contenidoTexto.trim()) return;
 
         var db = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
         var ahora = new Date().toLocaleString();
-        var idFicticio = Date.now();
-        var tituloExportacion = "[" + tipo + "] " + (contenidoTexto.substring(0, 15).toUpperCase() || "EXPORTACIÓN");
-
-        var estructuraFinal = contenidoHTML;
-        if (tipo === 'PDF EDIT') {
-            estructuraFinal = "\n" + contenidoHTML;
-        }
+        
+        var prefijo = "\n";
+        var finalHTML = prefijo + contenidoHTML;
 
         db.unshift({ 
-            id: idFicticio, 
-            title: tituloExportacion, 
-            prev: "Copia compilada en formato " + tipo, 
-            html: estructuraFinal,
+            id: Date.now(), 
+            title: "[" + tipo + "] " + (contenidoTexto.substring(0, 15).toUpperCase()), 
+            prev: "Documento compilado internamente listo.", 
+            html: finalHTML,
             created: ahora,
             updated: ahora
         });
 
         localStorage.setItem(DB_KEY, JSON.stringify(db));
         renderLib();
-        logEstado("Compilado " + tipo + " inyectado a Biblioteca Local.");
+        logEstado("Fichero " + tipo + " inyectado con éxito.");
     }
 
     function renderLib() {
@@ -589,7 +604,7 @@
         list.innerHTML = "";
 
         if(db.length === 0) {
-            list.innerHTML = "<p style='font-size:12px; color:#64748b; text-align:center; padding:20px;'>Biblioteca vacía</p>";
+            list.innerHTML = "<p style='font-size:12px; color:#64748b; text-align:center; padding:20px;'>Sin ficheros guardados</p>";
             return;
         }
 
@@ -599,17 +614,14 @@
             card.className = 'doc-card';
             card.id = 'card-' + doc.id;
             
-            if (activeId && doc.id === activeId) { card.className = 'doc-card selected'; }
-
-            var fC = doc.created || "No registrada";
-            var fM = doc.updated || "No registrada";
+            if (activeId && doc.id === activeId) card.className = 'doc-card selected';
 
             card.innerHTML = '<div onclick="selectCard(' + doc.id + ')">' +
                 '<b>' + doc.title + '</b>' +
                 '<p>' + doc.prev + '...</p>' +
                 '<div class="doc-meta">' +
-                    '<span>📅 Creado: ' + fC + '</span>' +
-                    '<span>🔄 Modificado: ' + fM + '</span>' +
+                    '<span>📅 Creado: ' + (doc.created || "Local") + '</span>' +
+                    '<span>🔄 Modificado: ' + (doc.updated || "Local") + '</span>' +
                 '</div>' +
             '</div>' +
             '<div class="card-actions">' +
@@ -637,6 +649,7 @@
         }
     }
 
+    var scriptFin = document.createElement('script');
     function cargarDoc(id) {
         var db = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
         for(var i = 0; i < db.length; i++) {
@@ -673,7 +686,7 @@
                 divTmp.innerHTML = db[i].html;
                 var txt = divTmp.innerText || divTmp.textContent || "";
                 if (navigator.share) { navigator.share({ title: db[i].title, text: txt }).catch(function(){}); } 
-                else { navigator.clipboard.writeText(txt); logEstado("Copiado para compartir."); }
+                else { navigator.clipboard.writeText(txt); logEstado("Texto listo para compartir."); }
                 break;
             }
         }
@@ -686,7 +699,7 @@
         localStorage.setItem(DB_KEY, JSON.stringify(filtrado));
         if(activeId === id) nuevoDoc();
         renderLib();
-        logEstado("Documento eliminado.");
+        logEstado("Fichero eliminado.");
     }
 
     function nuevoDoc() { 
