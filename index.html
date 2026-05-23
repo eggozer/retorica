@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
     <link rel="manifest" href="/retorica/manifest.json">
     <link rel="icon" type="image/png" sizes="192x192" href="/retorica/icon-192.png">
     <link rel="apple-touch-icon" href="/retorica/icon-192.png">
@@ -139,9 +139,17 @@
         .modal-content li { margin-bottom: 8px; line-height: 1.4; }
         .btn-modal-close { background: var(--p); color: white; width: 100%; padding: 10px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 15px; }
 
+        @media (min-width: 1024px) {
+            header { height: 70px; display: flex; align-items: center; justify-content: space-between; padding: 0 40px; }
+            .bar-top { width: auto; gap: 30px; height: auto; padding: 0; }
+            .toolbar { width: auto; overflow-x: visible; white-space: normal; height: auto; gap: 12px; }
+            #editor { top: 85px; max-width: 900px; left: 50%; transform: translateX(-50%); border: 1px solid #e2e8f0; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); bottom: 50px; padding: 40px; }
+            .footer { padding: 0 40px; }
+        }
+
         @media print {
             header, .footer, #sidebar, #overlay { display: none !important; }
-            #editor { position: static; padding: 0; overflow: visible; background: transparent; color: #000; }
+            #editor { position: static; padding: 0; overflow: visible; background: transparent; color: #000; transform: none; }
         }
     </style>
 </head>
@@ -269,7 +277,7 @@
 
 <div class="footer">
     <span id="char-count">0 caracteres</span>
-    <span id="status-log" style="color: #2563eb; font-weight: bold;">v24.0 - Almacenamiento Estructurado</span>
+    <span id="status-log" style="color: #2563eb; font-weight: bold;">v24.1 - Adaptabilidad Total</span>
 </div>
 
 <script>
