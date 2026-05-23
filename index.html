@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <link rel="manifest" href="/retorica/manifest.json">
     <link rel="icon" type="image/png" sizes="192x192" href="/retorica/icon-192.png">
     <link rel="apple-touch-icon" href="/retorica/icon-192.png">
@@ -44,7 +44,14 @@
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
         
-        body { background: var(--bg); color: var(--text-color); height: 100vh; width: 100vw; overflow: hidden; position: relative; }
+        body { 
+            background: var(--bg); 
+            color: var(--text-color); 
+            height: 100vh; 
+            width: 100vw; 
+            overflow: hidden; 
+            position: relative;
+        }
 
         header { 
             position: fixed; top: 0; left: 0; width: 100%; background: #fff; 
@@ -74,6 +81,7 @@
             padding: 20px 20px 120px 20px; overflow-y: auto; font-size: 18px; outline: none; 
             line-height: 1.6; background: var(--editor-bg); color: var(--text-color);
             -webkit-overflow-scrolling: touch; word-wrap: break-word;
+            max-width: 100%;
         }
         #editor:empty:before { content: "Escribe o usa las herramientas de voz..."; color: #cbd5e1; }
 
@@ -143,7 +151,11 @@
             header { height: 70px; display: flex; align-items: center; justify-content: space-between; padding: 0 40px; }
             .bar-top { width: auto; gap: 30px; height: auto; padding: 0; }
             .toolbar { width: auto; overflow-x: visible; white-space: normal; height: auto; gap: 12px; }
-            #editor { top: 85px; max-width: 900px; left: 50%; transform: translateX(-50%); border: 1px solid #e2e8f0; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); bottom: 50px; padding: 40px; }
+            #editor { 
+                top: 85px; max-width: 900px; left: 50%; transform: translateX(-50%); 
+                border: 1px solid #e2e8f0; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
+                bottom: 50px; padding: 40px; 
+            }
             .footer { padding: 0 40px; }
         }
 
@@ -165,7 +177,7 @@
         </div>
         <div style="display: flex; gap: 8px; align-items: center;">
             <button onclick="nuevoDoc()" style="background:var(--accent); color:white; border:none; width:35px; height:35px; border-radius:50%; font-weight:bold; font-size:18px; cursor:pointer;">+</button>
-            <button id="btn-close-menu-arrow" onclick="toggleMenu()">◀</button>
+            <button id="btn-close-menu-arrow" onclick="toggleMenu()">&lt;=</button>
         </div>
     </div>
 
@@ -277,11 +289,12 @@
 
 <div class="footer">
     <span id="char-count">0 caracteres</span>
-    <span id="status-log" style="color: #2563eb; font-weight: bold;">v24.1 - Adaptabilidad Total</span>
+    <span id="status-log" style="color: #2563eb; font-weight: bold;">v24.2 - Almacenamiento Local</span>
 </div>
 
 <script>
     var DB_KEY = "retorica_local_db";
+    var DB_FOLDERS_KEY = "retorica_carpetas_db";
     var activeId = null;
     var reconocimientoVoz = null;
     var estaDictando = false;
@@ -299,6 +312,7 @@
     };
 
     window.onload = function() {
+        inicializarBaseCarpetas();
         renderLib();
         
         if ('serviceWorker' in navigator) {
@@ -347,6 +361,14 @@
 
         comprobarVacioYStats();
     };
+
+    function inicializarBaseCarpetas() {
+        var carpetas = localStorage.getItem(DB_FOLDERS_KEY);
+        if (!carpetas) {
+            var porDefecto = ["Trabajo/Megacable", "TarjetaSD/Discursos", "TarjetaSD/Compilados", "RAÍZ"];
+            localStorage.setItem(DB_FOLDERS_KEY, JSON.stringify(porDefecto));
+        }
+    }
 
     function mostrarBotonActualizar() {
         document.getElementById('install-container').style.display = 'block';
@@ -601,12 +623,41 @@
         document.getElementById('lbl-guardar-como').innerText = strings.saveAs;
     }
 
+    function solicitarCarpetaDestino() {
+        var carpetas = JSON.parse(localStorage.getItem(DB_FOLDERS_KEY) || "[]");
+        var listaCarpetas = "";
+        for (var i = 0; i < carpetas.length; i++) {
+            listaCarpetas += (i + 1) + ". " + carpetas[i] + "\n";
+        }
+        
+        var opcion = prompt(
+            "Selecciona o crea una ruta de destino para el Guardado Local:\n\n" +
+            listaCarpetas + "\n" +
+            "O escribe una NUEVA ruta directamente (Ej: TarjetaSD/Personal):", 
+            "Trabajo/Megacable"
+        );
+
+        if (opcion === null) return null;
+
+        var num = parseInt(opcion);
+        if (!isNaN(num) && num > 0 && num <= carpetas.length) {
+            return carpetas[num - 1];
+        } else {
+            var rutaLimpia = opcion.trim();
+            if (rutaLimpia !== "" && carpetas.indexOf(rutaLimpia) === -1) {
+                carpetas.push(rutaLimpia);
+                localStorage.setItem(DB_FOLDERS_KEY, JSON.stringify(carpetas));
+            }
+            return rutaLimpia || "RAÍZ";
+        }
+    }
+
     function guardarLocalHTMLAsistido() {
         var contenidoHTML = document.getElementById('editor').innerHTML;
         var contenidoTexto = document.getElementById('editor').innerText || document.getElementById('editor').textContent || "";
         if(!contenidoTexto.trim()) return alert("Nada que guardar.");
 
-        var carpetaDestino = prompt("Escribe el nombre de la carpeta (Ej: Trabajo/Megacable, TarjetaSD/Discursos o dejar en blanco para raíz):", "Trabajo/Megacable");
+        var carpetaDestino = solicitarCarpetaDestino();
         if(carpetaDestino === null) return; 
 
         var db = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
@@ -617,12 +668,12 @@
                 if(db[i].id === activeId) { 
                     db[i].html = contenidoHTML; 
                     db[i].prev = contenidoTexto.substring(0, 50);
-                    db[i].folder = carpetaDestino || "RAÍZ";
+                    db[i].folder = carpetaDestino;
                     db[i].updated = ahora;
                     break; 
                 }
             }
-            logEstado("Fichero guardado en carpeta.");
+            logEstado("Fichero guardado en: " + carpetaDestino);
         } else {
             activeId = Date.now();
             var tit = contenidoTexto.substring(0, 20).toUpperCase() || "NUEVO DISCURSO";
@@ -631,11 +682,11 @@
                 title: tit, 
                 prev: contenidoTexto.substring(0, 50), 
                 html: contenidoHTML,
-                folder: carpetaDestino || "RAÍZ",
+                folder: carpetaDestino,
                 created: ahora,
                 updated: ahora
             });
-            logEstado("Creado en: " + (carpetaDestino || "Raíz"));
+            logEstado("Creado en: " + carpetaDestino);
         }
         localStorage.setItem(DB_KEY, JSON.stringify(db));
         renderLib();
@@ -646,7 +697,7 @@
         var contenidoTexto = document.getElementById('editor').innerText || document.getElementById('editor').textContent || "";
         if(!contenidoTexto.trim()) return;
 
-        var carpetaDestino = prompt("Guardar compilación [" + tipo + "] en carpeta:", "TarjetaSD/Compilados");
+        var carpetaDestino = solicitarCarpetaDestino();
         if(carpetaDestino === null) return;
 
         var db = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
@@ -656,16 +707,16 @@
         db.unshift({ 
             id: Date.now(), 
             title: "[" + tipo + "] " + (contenidoTexto.substring(0, 15).toUpperCase()), 
-            prev: "Archivo estático listo.", 
+            prev: "Archivo estático listo localmente.", 
             html: finalHTML,
-            folder: carpetaDestino || "COMPILADOS",
+            folder: carpetaDestino,
             created: ahora,
             updated: ahora
         });
 
         localStorage.setItem(DB_KEY, JSON.stringify(db));
         renderLib();
-        logEstado("Compilado inyectado.");
+        logEstado("Compilado inyectado en: " + carpetaDestino);
     }
 
     function renderLib() {
@@ -688,7 +739,7 @@
 
             card.innerHTML = '<div onclick="selectCard(' + doc.id + ')">' +
                 '<b>' + doc.title + '</b>' +
-                '<p style="font-size:10px; color:var(--accent); font-weight:bold; margin-bottom:4px;">📁 Carpeta: ' + (doc.folder || "RAÍZ") + '</p>' +
+                '<p style="font-size:10px; color:var(--accent); font-weight:bold; margin-bottom:4px;">📁 Ruta: ' + (doc.folder || "RAÍZ") + '</p>' +
                 '<p>' + doc.prev + '...</p>' +
                 '<div class="doc-meta">' +
                     '<span>📅 ' + (doc.created || "Local") + '</span>' +
