@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <link rel="manifest" href="/retorica/manifest.json">
     <link rel="icon" type="image/png" sizes="192x192" href="/retorica/icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/retorica/icon-512.png">
     <link rel="apple-touch-icon" href="/retorica/icon-192.png">
     <meta name="theme-color" content="#2563eb">
     <meta name="mobile-web-app-capable" content="yes">
@@ -138,7 +139,7 @@
         #btn-install-app { width: 100%; background: #16a34a; color: white; border: none; padding: 8px; font-size: 11px; font-weight: bold; border-radius: 8px; cursor: pointer; }
         #btn-update-app { width: 100%; background: #ea580c; color: white; border: none; padding: 8px; font-size: 11px; font-weight: bold; border-radius: 8px; cursor: pointer; display: none; }
 
-        #btn-close-menu-arrow { background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 50%; width: 35px; height: 35px; font-size: 16px; font-weight: bold; color: #64748b; cursor: pointer; display: flex; align-items: center; justify-content: center; outline: none; }
+        #btn-close-menu-arrow { background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 50%; width: 35px; height: 35px; font-size: 14px; font-weight: bold; color: #64748b; cursor: pointer; display: flex; align-items: center; justify-content: center; outline: none; }
 
         #modal-tutorial { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 3000; align-items: center; justify-content: center; padding: 20px; }
         .modal-content { background: #fff; padding: 20px; border-radius: 16px; max-width: 450px; width: 100%; max-height: 85vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
@@ -177,7 +178,7 @@
         </div>
         <div style="display: flex; gap: 8px; align-items: center;">
             <button onclick="nuevoDoc()" style="background:var(--accent); color:white; border:none; width:35px; height:35px; border-radius:50%; font-weight:bold; font-size:18px; cursor:pointer;">+</button>
-            <button id="btn-close-menu-arrow" onclick="toggleMenu()">&lt;=</button>
+            <button id="btn-close-menu-arrow" onclick="toggleMenu()">◀</button>
         </div>
     </div>
 
@@ -289,7 +290,7 @@
 
 <div class="footer">
     <span id="char-count">0 caracteres</span>
-    <span id="status-log" style="color: #2563eb; font-weight: bold;">v24.2 - Almacenamiento Local</span>
+    <span id="status-log" style="color: #2563eb; font-weight: bold;">v24.2 - Almacenamiento Local Dirigido</span>
 </div>
 
 <script>
