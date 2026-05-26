@@ -1,43 +1,47 @@
-var CACHE_NAME = "retorica-cache-v23";
-var urlsToCache = [
-  "/retorica/",
-  "/retorica/index.html",
-  "/retorica/manifest.json"
+// 1. CADA VEZ QUE HAGAS CAMBIOS, CAMBIA EL NÚMERO DE LA VERSIÓN
+const CACHE_NAME = 'retorica-cache-v2'; 
+
+const ASSETS = [
+  './',
+  './index.html',
+  './styles.css', // Asegúrate de incluir tus archivos CSS/JS reales
+  './app.js',
+  './manifest.json',
+  // Agrega aquí la ruta exacta de tu nuevo icono si cambió de nombre o ruta
 ];
 
-self.addEventListener("install", function(event) {
+// Instalar el Service Worker y forzar que reemplace al anterior inmediatamente
+self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(function(cache) {
-      return cache.addAll(urlsToCache);
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(ASSETS);
     })
   );
+  self.skipWaiting(); // <--- CRUCIAL: Fuerza al nuevo SW a tomar el control sin esperar
 });
 
-self.addEventListener("activate", function(event) {
+// Limpiar cachés antiguas automáticamente
+self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then(function(cacheNames) {
+    caches.keys().then((cacheNames) => {
       return Promise.all(
-        cacheNames.map(function(cacheName) {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
+        cacheNames.map((cache) => {
+          if (cache !== CACHE_NAME) {
+            console.log('Borrando caché antigua:', cache);
+            return caches.delete(cache);
           }
         })
       );
     })
   );
+  self.clients.claim(); // <--- CRUCIAL: Toma el control de la app inmediatamente
 });
 
-self.addEventListener("fetch", function(event) {
+// Estrategia de Red / Caché
+self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request).then(function(response) {
+    caches.match(event.request).then((response) => {
       return response || fetch(event.request);
     })
   );
-});
-
-// Escucha el mensaje del botón para actualizar la app al instante
-self.addEventListener("message", function(event) {
-  if (event.data && event.data.action === "skipWaiting") {
-    self.skipWaiting();
-  }
 });
