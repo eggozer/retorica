@@ -33,7 +33,7 @@
             overflow: hidden;
         }
 
-        /* SIDEBAR (BIBLIOTECA) */
+        /* SIDEBAR / BIBLIOTECA DELGADA */
         .sidebar {
             width: 320px;
             background-color: var(--bg-sidebar);
@@ -41,6 +41,7 @@
             display: flex;
             flex-direction: column;
             height: 100%;
+            position: relative;
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 100;
             flex-shrink: 0;
@@ -52,7 +53,7 @@
         }
 
         .sidebar-header {
-            padding: 20px;
+            padding: 16px;
             border-bottom: 1px solid var(--border-color);
             display: flex;
             align-items: center;
@@ -62,47 +63,125 @@
         .brand-container {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
         .brand-icon {
-            width: 38px;
-            height: 38px;
-            border-radius: 8px;
-            object-fit: cover;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
         }
 
         .brand-title {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 700;
-            letter-spacing: 1px;
             color: #ffca28;
+            letter-spacing: 0.5px;
         }
 
-        /* El botón de la hamburguesa y cerrar se remueven para usar deslizamiento táctil */
-        #menu-toggle, .close-sidebar-btn {
-            display: none !important;
+        /* BOTÓN FLECHA UBICADO A LA MITAD DERECHA PARA ANDROID 5 */
+        .toggle-sidebar-pestaña {
+            position: absolute;
+            top: 50%;
+            right: -24px;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 50px;
+            background: var(--bg-sidebar);
+            border: 1px solid var(--border-color);
+            border-left: none;
+            border-radius: 0 8px 8px 0;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.8rem;
+            z-index: 105;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.2);
         }
 
         .document-list {
             flex-grow: 1;
             overflow-y: auto;
-            padding: 15px;
+            padding: 12px;
         }
 
+        /* TARJETAS DE PLANTILLA DELGADA */
         .doc-item {
-            padding: 12px 15px;
-            background: rgba(255, 255, 255, 0.03);
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.02);
             border: 1px solid var(--border-color);
             border-radius: 8px;
             margin-bottom: 10px;
-            cursor: pointer;
             transition: all 0.2s ease;
         }
 
         .doc-item.active {
-            background: rgba(30, 98, 236, 0.15);
+            background: rgba(30, 98, 236, 0.08);
             border-color: var(--accent-blue);
+        }
+
+        .doc-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .doc-preview {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+            margin-bottom: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* PASARELA DE BOTONES EN UNA SOLA FILA HORIZONTAL */
+        .doc-actions-pasarela {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            scrollbar-width: none;
+        }
+        
+        .doc-actions-pasarela::-webkit-scrollbar {
+            display: none;
+        }
+
+        .btn-action-mini {
+            padding: 6px 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-main);
+            cursor: pointer;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .btn-action-mini.primary { background: var(--accent-blue); border-color: transparent; }
+        .btn-action-mini.danger { background: rgba(239, 68, 68, 0.2); color: #f87171; border-color: transparent; }
+
+        /* DETALLES DE FECHA COMPACTOS OVE_LAY */
+        .metadata-container {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            background: rgba(0,0,0,0.2);
+            padding: 6px;
+            border-radius: 4px;
+            margin-top: 6px;
+            display: none;
+            border: 1px dashed var(--border-color);
         }
 
         /* CONTENEDOR PRINCIPAL */
@@ -114,132 +193,103 @@
             position: relative;
         }
 
-        /* BARRA SUPERIOR */
         .top-toolbar {
-            height: 65px;
-            padding: 0 20px;
+            height: 60px;
+            padding: 0 16px;
             border-bottom: 1px solid var(--border-color);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background-color: rgba(17, 24, 39, 0.6);
-            backdrop-filter: blur(10px);
+            background: #0f172a;
         }
 
-        .editor-actions {
+        .toolbar-group {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             align-items: center;
         }
 
-        select, button {
+        select, .btn-top {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--border-color);
             color: var(--text-main);
-            padding: 8px 12px;
+            padding: 6px 10px;
             border-radius: 6px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             cursor: pointer;
         }
 
-        #btn-guardar {
+        #btn-main-guardar {
             background: var(--accent-blue);
             font-weight: bold;
+            border-color: transparent;
         }
 
-        /* ÁREA DE EDICIÓN */
         .editor-wrapper {
             flex-grow: 1;
-            padding: 25px;
-            display: flex;
-            flex-direction: column;
+            padding: 20px;
+            background: var(--bg);
         }
 
         #editor {
             width: 100%;
-            flex-grow: 1;
+            height: 100%;
             background: transparent;
             border: none;
             resize: none;
             color: var(--text-main);
             font-size: 1.15rem;
-            line-height: 1.7;
+            line-height: 1.6;
             outline: none;
         }
 
-        /* BOTONERA INFERIOR DE FORMATOS (GUARDAR COMO...) */
         .bottom-formats-bar {
-            padding: 15px 25px;
+            height: 55px;
+            padding: 0 16px;
             border-top: 1px solid var(--border-color);
-            background-color: #0f172a;
+            background: #0f172a;
             display: flex;
-            gap: 12px;
             align-items: center;
-            overflow-x: auto;
+            gap: 10px;
         }
 
         .format-label {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--text-muted);
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-right: 8px;
+            font-weight: bold;
             white-space: nowrap;
         }
 
-        .btn-format {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            padding: 8px 14px;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            white-space: nowrap;
-        }
-
-        .btn-format:hover {
-            background: var(--accent-blue);
-            border-color: transparent;
-        }
-
-        /* Eliminación permanente de modales de ruta intermedios */
-        #pantalla-guardar-en, .modal-ruta {
-            display: none !important;
-        }
-
-        /* TOAST DE NOTIFICACIÓN */
         .toast {
             position: fixed;
-            bottom: 85px;
-            right: 25px;
+            bottom: 70px;
+            right: 20px;
             background: #1e293b;
             border-left: 4px solid var(--accent-blue);
             color: var(--text-main);
-            padding: 12px 20px;
+            padding: 10px 16px;
             border-radius: 6px;
             transform: translateY(150%);
-            transition: transform 0.3s ease;
+            transition: transform 0.2s ease;
             z-index: 1000;
+            font-size: 0.9rem;
         }
 
-        .toast.show {
-            transform: translateY(0);
-        }
+        .toast.show { transform: translateY(0); }
     </style>
 </head>
+
 <body>
 
     <div class="sidebar" id="sidebar">
+        <div class="toggle-sidebar-pestaña" id="btn-toggle-pestaña">◀</div>
+        
         <div class="sidebar-header">
             <div class="brand-container">
-                <img src="icon-192.png?v=2" alt="Retórica Sol" class="brand-icon">
+                <img src="icon-192.png?v=2" alt="Retórica" class="brand-icon">
                 <span class="brand-title">BIBLIOTECA</span>
             </div>
-            <button id="btn-nuevo-sidebar">➕</button>
+            <button id="btn-nuevo" style="background:#ffca28; color:#0a0f1d; font-weight:bold; border:none; padding:6px 12px;">➕</button>
         </div>
         <div class="document-list" id="document-list">
             </div>
@@ -247,79 +297,190 @@
 
     <div class="main-container">
         <div class="top-toolbar">
-            <div class="editor-actions">
+            <div class="toolbar-group">
                 <select id="cambiarPaleta">
                     <option value="oscuro">🌙 Oscuro</option>
                     <option value="claro">☀️ Claro</option>
                 </select>
                 <select id="app-lang">
-                    <option value="es">App: Español</option>
+                    <option value="es">App: ES</option>
                 </select>
                 <select id="voice-lang">
-                    <option value="es-MX">Voz: Español</option>
+                    <option value="es-MX">Voz: MX</option>
                 </select>
             </div>
-            <div class="editor-actions">
-                <button id="btn-mic">🎙️ MIC (DICTADO)</button>
-                <button id="btn-lectura">🔊 LECTURA</button>
-                <button id="btn-guardar">GUARDAR</button>
+            <div class="toolbar-group">
+                <button class="btn-top" id="btn-mic">🎙️ MIC</button>
+                <button class="btn-top" id="btn-lectura">🔊 LEER</button>
+                <button class="btn-top" id="btn-main-guardar">GUARDAR</button>
             </div>
         </div>
 
         <div class="editor-wrapper">
-            <textarea id="editor" placeholder="Escribe aquí tu guion o nota..."></textarea>
+            <textarea id="editor" placeholder="Escribe tu guion de Megacable aquí..."></textarea>
         </div>
 
         <div class="bottom-formats-bar">
             <span class="format-label">Guardar como:</span>
-            <button class="btn-format" id="export-pdf">1.- PDF</button>
-            <button class="btn-format" id="export-pdf-edit">2.- PDF Editable</button>
-            <button class="btn-format" id="export-doc">3.- DOC</button>
+            <button class="btn-top" id="export-pdf" style="font-weight:600;">1.- PDF</button>
+            <button class="btn-top" id="export-pdf-edit" style="font-weight:600;">2.- PDF Editable</button>
+            <button class="btn-top" id="export-doc" style="font-weight:600;">3.- DOC</button>
         </div>
     </div>
 
     <div class="toast" id="toast-notif">Operación exitosa</div>
 
     <script>
+        // --- BASE DE DATOS INDEXEDDB ORIGINAL ---
+        const DB_NAME = "RetoricaDB";
+        const DB_VERSION = 1;
+        const STORE_NAME = "documentos";
+        let db;
+        let currentDocId = null;
 
-// --- VARIABLES GLOBALES Y CONTROL DE CONFIGURACIÓN ---
-        const DB_KEY = "Retorica_Docs_Data";
-        let activeId = null;
+        function initDB() {
+            const request = indexedDB.open(DB_NAME, DB_VERSION);
 
-        // --- MANEJO DE DESLIZAMIENTO TÁCTIL PARA CONTRAER/EXPANDIR MENÚ ---
-        let touchStartX = 0;
-        let touchStartY = 0;
-        const sidebar = document.getElementById('sidebar');
+            request.onerror = function(event) {
+                console.error("Error al abrir IndexedDB:", event.target.error);
+                showToast("Error de almacenamiento interno");
+            };
 
-        document.addEventListener('touchstart', (e) => {
-            touchStartX = e.touches[0].clientX;
-            touchStartY = e.touches[0].clientY;
-        }, { passive: true });
+            request.onsuccess = function(event) {
+                db = event.target.result;
+                renderLib();
+            };
 
-        document.addEventListener('touchend', (e) => {
-            if (!touchStartX || !touchStartY) return;
-
-            let touchEndX = e.changedTouches[0].clientX;
-            let touchEndY = e.changedTouches[0].clientY;
-
-            let diffX = touchStartX - touchEndX;
-            let diffY = touchStartY - touchEndY;
-
-            if (Math.abs(diffX) > Math.abs(diffY)) {
-                if (diffX > 70 && !sidebar.classList.contains('hidden')) {
-                    sidebar.classList.add('hidden');
-                    showToast("Biblioteca oculta");
-                } else if (diffX < -70 && sidebar.classList.contains('hidden')) {
-                    sidebar.classList.remove('hidden');
-                    showToast("Biblioteca desplegada");
+            request.onupgradeneeded = function(event) {
+                const dbInstance = event.target.result;
+                if (!dbInstance.objectStoreNames.contains(STORE_NAME)) {
+                    dbInstance.createObjectStore(STORE_NAME, { keyPath: "id", autoIncrement: true });
                 }
+            };
+        }
+
+        // Inicialización al cargar la ventana
+        window.addEventListener('DOMContentLoaded', () => {
+            initDB();
+            configurarGestosPestaña();
+        });
+
+// --- FUNCIÓN DE RENDERIZADO: PLANTILLAS DELGADAS Y PASARELA DE ACCIONES ---
+        function renderLib() {
+            if (!db) return;
+            const lista = document.getElementById('document-list');
+            lista.innerHTML = "";
+
+            const transaction = db.transaction([STORE_NAME], "readonly");
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.openCursor(null, "prev"); // Mostrar el más reciente primero
+
+            request.onsuccess = function(event) {
+                const cursor = event.target.result;
+                if (cursor) {
+                    const docData = cursor.value;
+                    const item = document.createElement('div');
+                    item.className = `doc-item ${docData.id === currentDocId ? 'active' : ''}`;
+                    item.dataset.id = docData.id;
+
+                    // Procesamiento del texto para extraer Título y 2-3 líneas de cuerpo real
+                    const lineas = docData.texto.split('\n').filter(l => l.trim() !== "");
+                    const tituloNota = lineas[0] || "Nota sin título";
+                    const vistaPreviaNota = lineas.slice(1, 4).join(' ') || "Sin texto adicional...";
+
+                    // Estructura de plantilla delgada con pasarela horizontal y botón detalles
+                    item.innerHTML = `
+                        <div class="doc-title">${tituloNota}</div>
+                        <div class="doc-preview">${vistaPreviaNota}</div>
+                        
+                        <div class="doc-actions-pasarela">
+                            <button class="btn-action-mini primary" onclick="event.stopPropagation(); cargarDocEnEditor(${docData.id});">Abrir</button>
+                            <button class="btn-action-mini" onclick="event.stopPropagation(); copiarTextoNota(${docData.id});">Copiar</button>
+                            <button class="btn-action-mini" onclick="event.stopPropagation(); compartirNota(${docData.id});">Compartir</button>
+                            <button class="btn-action-mini" onclick="event.stopPropagation(); alternarDetallesMetadata(${docData.id});">ℹ️ Detalles</button>
+                            <button class="btn-action-mini danger" onclick="event.stopPropagation(); borrarDoc(${docData.id});">Borrar</button>
+                        </div>
+                        
+                        <div class="metadata-container" id="meta-${docData.id}">
+                            <div><strong>Creado:</strong> ${docData.fechaCreacion || docData.fecha || 'No registrada'}</div>
+                            <div><strong>Modificado:</strong> ${docData.fechaModificacion || docData.fecha || 'No registrada'}</div>
+                        </div>
+                    `;
+
+                    lista.appendChild(item);
+                    cursor.continue();
+                }
+            };
+        }
+
+        // --- ACCIONES DE LA BIBLIOTECA DELGADA ---
+        function cargarDocEnEditor(id) {
+            const transaction = db.transaction([STORE_NAME], "readonly");
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.get(id);
+
+            request.onsuccess = function(event) {
+                const doc = event.target.result;
+                if (doc) {
+                    currentDocId = doc.id;
+                    document.getElementById('editor').value = doc.texto;
+                    renderLib();
+                    showToast("Documento abierto");
+                }
+            };
+        }
+
+        function alternarDetallesMetadata(id) {
+            const el = document.getElementById(`meta-${id}`);
+            if (el.style.display === "block") {
+                el.style.style.display = "none";
+            } else {
+                el.style.display = "block";
             }
-            touchStartX = 0;
-            touchStartY = 0;
-        }, { passive: true });
+        }
 
+        function copiarTextoNota(id) {
+            const transaction = db.transaction([STORE_NAME], "readonly");
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.get(id);
 
-        // --- SISTEMA DE PROCESAMIENTO Y DESCARGA LOCAL DIRECTA ---
+            request.onsuccess = function(event) {
+                const doc = event.target.result;
+                if (doc && doc.texto) {
+                    navigator.clipboard.writeText(doc.texto).then(() => {
+                        showToast("Texto copiado al portapapeles");
+                    }).catch(() => {
+                        // Alternativa para navegadores antiguos de Android 5
+                        const textAreaAux = document.createElement("textarea");
+                        textAreaAux.value = doc.texto;
+                        document.body.appendChild(textAreaAux);
+                        textAreaAux.select();
+                        document.execCommand("copy");
+                        document.body.removeChild(textAreaAux);
+                        showToast("Texto copiado (retrocompatible)");
+                    });
+                }
+            };
+        }
+
+        function compartirNota(id) {
+            const transaction = db.transaction([STORE_NAME], "readonly");
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.get(id);
+
+            request.onsuccess = function(event) {
+                const doc = event.target.result;
+                if (doc && doc.texto) {
+                    if (navigator.share) {
+                        navigator.share({ title: 'Retórica Nota', text: doc.texto }).catch(console.error);
+                    } else {
+                        showToast("Usa el botón 'Copiar', compartir no soportado en este navegador");
+                    }
+                }
+            };
+        }
+
+// --- PROCESAMIENTO DE DESCARGAS DIRECTAS LOCALES ---
         function obtenerNombreArchivo() {
             const texto = document.getElementById('editor').value.trim();
             if (!texto) return "documento_sin_titulo";
@@ -335,28 +496,56 @@
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(a.href);
-            showToast(`Guardado local: ${extension.toUpperCase()}`);
+            showToast(`Descargado: ${extension.toUpperCase()}`);
         }
 
-        // El botón principal superior de GUARDAR genera y descarga el archivo HTML local directamente
-        function guardarComoHtml() {
-            const contenido = document.getElementById('editor').value;
-            const htmlEstructura = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${obtenerNombreArchivo()}</title><style>body{font-family:sans-serif;padding:30px;line-height:1.6;color:#1e293b;}</style></head><body><p>${contenido.replace(/\n/g, '<br>')}</p></body></html>`;
-            procesarDescargaInmediata(htmlEstructura, 'text/html;charset=utf-8', 'html');
-            
-            // Sincroniza en paralelo el estado del texto en el almacenamiento interno de la app
-            guardarEstadoInterno();
+        // El botón principal superior guarda el estado en base de datos e inmediatamente descarga el HTML local directo
+        function guardarYDescargarHtml() {
+            const texto = document.getElementById('editor').value;
+            if (!texto.trim()) return showToast("Editor vacío");
+
+            const transaction = db.transaction([STORE_NAME], "readwrite");
+            const store = transaction.objectStore(STORE_NAME);
+            const fechaActual = new Date().toLocaleString();
+
+            if (currentDocId === null) {
+                // Nuevo documento
+                const nuevoDocData = { texto: texto, fechaCreacion: fechaActual, fechaModificacion: fechaActual };
+                const request = store.add(nuevoDocData);
+                request.onsuccess = function(e) {
+                    currentDocId = e.target.result;
+                    ejecutarDescargaHtmlPura(texto);
+                };
+            } else {
+                // Actualizar documento existente
+                const requestObtener = store.get(currentDocId);
+                requestObtener.onsuccess = function(e) {
+                    const data = e.target.result;
+                    data.texto = texto;
+                    data.fechaModificacion = fechaActual;
+                    const requestActualizar = store.put(data);
+                    requestActualizar.onsuccess = function() {
+                        ejecutarDescargaHtmlPura(texto);
+                    };
+                };
+            }
         }
 
-        document.getElementById('btn-guardar').addEventListener('click', guardarComoHtml);
+        function ejecutarDescargaHtmlPura(contenido) {
+            const estructura = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${obtenerNombreArchivo()}</title><style>body{font-family:sans-serif;padding:30px;line-height:1.6;}</style></head><body><p>${contenido.replace(/\n/g, '<br>')}</p></body></html>`;
+            procesarDescargaInmediata(estructura, 'text/html;charset=utf-8', 'html');
+            renderLib();
+        }
 
-        // Opciones de Guardar Como... de la barra inferior (PDF, PDF Editable, DOC)
+        document.getElementById('btn-main-guardar').addEventListener('click', guardarYDescargarHtml);
+
+        // Formatos de exportación local directa (Botonera Inferior)
         document.getElementById('export-pdf').addEventListener('click', () => {
             const texto = document.getElementById('editor').value;
             if(!texto.trim()) return showToast("Editor vacío");
             
             const elementoRaiz = document.createElement('div');
-            elementoRaiz.style.padding = '20px';
+            elementoRaiz.style.padding = '25px';
             elementoRaiz.style.color = '#000000';
             elementoRaiz.innerHTML = texto.replace(/\n/g, '<br>');
             
@@ -369,79 +558,53 @@
             };
             
             html2pdf().set(opcionesPdf).from(elementoRaiz).save().then(() => {
-                showToast("PDF generado localmente");
+                showToast("PDF guardado localmente");
             });
         });
 
         document.getElementById('export-pdf-edit').addEventListener('click', () => {
             const contenido = document.getElementById('editor').value;
-            const pdfEditableEstructura = `<html><body style="padding:20px;background-color:#ffffff;"><form><textarea style="width:100%;height:90vh;font-size:16px;font-family:sans-serif;padding:10px;color:#000000;border:1px solid #ccc;">${contenido}</textarea></form></body></html>`;
+            const pdfEditableEstructura = `<html><body style="padding:20px;"><form><textarea style="width:100%;height:90vh;font-size:16px;padding:10px;">${contenido}</textarea></form></body></html>`;
             procesarDescargaInmediata(pdfEditableEstructura, 'text/html;charset=utf-8', 'pdf.html');
         });
 
         document.getElementById('export-doc').addEventListener('click', () => {
             const contenido = document.getElementById('editor').value;
-            const docEstructura = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><title>Documento</title></head><body style="font-family:Arial;">${contenido.replace(/\n/g, '<p></p>')}</body></html>`;
+            const docEstructura = `<html xmlns:w='urn:schemas-microsoft-com:office:word'><body>${contenido.replace(/\n/g, '<p></p>')}</body></html>`;
             procesarDescargaInmediata(docEstructura, 'application/msword;charset=utf-8', 'doc');
         });
 
-// --- PERSISTENCIA Y PERSISTENCIA COMPATIBLE EN LOCALSTORAGE ---
-        function obtenerDocs() {
-            const localData = localStorage.getItem(DB_KEY);
-            return localData ? JSON.parse(localData) : [];
-        }
 
-        function guardarEstadoInterno() {
-            const texto = document.getElementById('editor').value;
-            if (!texto.trim()) return;
+        // --- MANEJO DE LA PESTAÑA LATERAL DE CONTROL (ANDR_ID 5 Y UNIVERSAL) ---
+        function configurarGestosPestaña() {
+            const btnPestaña = document.getElementById('btn-toggle-pestaña');
+            const sidebarElement = document.getElementById('sidebar');
 
-            let documentos = obtenerDocs();
-            const fechaActual = new Date().toLocaleString();
-
-            if (activeId === null) {
-                const nuevo = { id: Date.now(), texto: texto, fecha: fechaActual };
-                documentos.push(nuevo);
-                activeId = nuevo.id;
-            } else {
-                documentos = documentos.map(doc => {
-                    if (doc.id === activeId) return { ...doc, texto: texto, fecha: fechaActual };
-                    return doc;
-                });
-            }
-            localStorage.setItem(DB_KEY, JSON.stringify(documentos));
-            renderLib();
-        }
-
-        function renderLib() {
-            const lista = document.getElementById('document-list');
-            lista.innerHTML = "";
-            const documentos = obtenerDocs();
-
-            documentos.forEach(doc => {
-                const item = document.createElement('div');
-                item.className = `doc-item ${doc.id === activeId ? 'active' : ''}`;
-                
-                const primerRenglon = doc.texto.split('\n')[0].substring(0, 25) || "Nota sin título";
-                
-                item.innerHTML = `
-                    <div style="font-weight:500; font-size:0.95rem; margin-bottom:4px;">${primerRenglon}</div>
-                    <div style="font-size:0.75rem; color:var(--text-muted); display:flex; justify-content:space-between; align-items:center;">
-                        <span>${doc.fecha}</span>
-                        <span onclick="event.stopPropagation(); borrarDoc(${doc.id});" style="color:#ef4444; cursor:pointer; font-weight:bold; padding:2px 6px;">🗑️ Borrar</span>
-                    </div>
-                `;
-                
-                item.onclick = () => {
-                    activeId = doc.id;
-                    document.getElementById('editor').value = doc.texto;
-                    renderLib();
-                };
-                
-                lista.appendChild(item);
+            // Clic seguro en pestaña lateral (Ideal para pantallas antiguas)
+            btnPestaña.addEventListener('click', () => {
+                sidebarElement.classList.toggle('hidden');
+                btnPestaña.textContent = sidebarElement.classList.contains('hidden') ? "▶" : "◀";
             });
+
+            // Soporte de deslizamiento táctil complementario
+            let startX = 0;
+            document.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; }, { passive: true });
+            document.addEventListener('touchend', (e) => {
+                let diffX = startX - e.changedTouches[0].clientX;
+                if (Math.abs(diffX) > 80) {
+                    if (diffX > 0 && !sidebarElement.classList.contains('hidden')) {
+                        sidebarElement.classList.add('hidden'); // Deslizar izquierda oculta
+                        btnPestaña.textContent = "▶";
+                    } else if (diffX < 0 && sidebarElement.classList.contains('hidden')) {
+                        sidebarElement.classList.remove('hidden'); // Deslizar derecha muestra
+                        btnPestaña.textContent = "◀";
+                    }
+                }
+            }, { passive: true });
         }
 
-// --- RECONOCIMIENTO DE VOZ UNIVERSAL Y REARMADO POR SILENCIO (6S) ---
+
+        // --- RECONOCIMIENTO DE VOZ (DICTADO CON UMBRAL DE 6S) ---
         const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let reconocimiento;
         let timerSilencio;
@@ -454,7 +617,7 @@
 
             reconocimiento.onstart = () => {
                 grabando = true;
-                document.getElementById('btn-mic').textContent = "🛑 GRABANDO...";
+                document.getElementById('btn-mic').textContent = "🛑 GRABANDO";
                 resetearTimerSilencio();
             };
 
@@ -467,7 +630,7 @@
 
             reconocimiento.onend = () => {
                 grabando = false;
-                document.getElementById('btn-mic').textContent = "🎙️ MIC (DICTADO)";
+                document.getElementById('btn-mic').textContent = "🎙️ MIC";
                 clearTimeout(timerSilencio);
             };
         }
@@ -477,9 +640,9 @@
             timerSilencio = setTimeout(() => {
                 if (grabando) {
                     reconocimiento.stop();
-                    showToast("Micrófono pausado por silencio");
+                    showToast("Micrófono cerrado por inactividad (6s)");
                 }
-            }, 6000); // Umbral de inactividad de 6 segundos exactos
+            }, 6000);
         }
 
         document.getElementById('btn-mic').addEventListener('click', () => {
@@ -493,7 +656,7 @@
         });
 
 
-        // --- MOTOR DE SÍNTESIS DE VOZ (LECTURA) ---
+        // --- SÍNTESIS DE VOZ (LECTURA) ---
         document.getElementById('btn-lectura').addEventListener('click', () => {
             const texto = document.getElementById('editor').value;
             if (!texto.trim()) return showToast("Nada que leer");
@@ -503,85 +666,54 @@
                 const lectura = new SpeechSynthesisUtterance(texto);
                 lectura.lang = document.getElementById('voice-lang').value;
                 window.speechSynthesis.speak(lectura);
-                showToast("Leyendo texto...");
             } else {
                 showToast("Lectura no soportada");
             }
         });
 
-
-        // --- COMPONENTE TOAST DE NOTIFICACIONES ---
-        function showToast(mensaje) {
-            const toast = document.getElementById('toast-notif');
-            toast.textContent = mensaje;
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 2500);
-        }
-
-
-        // --- COMPATIBILIDAD DE CONTROLADORES DE SERVICE WORKER ---
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .then(reg => console.log('PWA Lista para usar de forma local', reg.scope))
-                    .catch(err => console.warn('Aviso de Service Worker:', err));
-            });
-        }
-// --- SECCIÓN FINAL: FUNCIONES ORIGINALES DE OPERACIÓN DE REPOSITORIO (816 - 846) ---
+        // --- SISTEMA DE CONTROL DE ACCIONES FINALES ---
         function borrarDoc(id) {
-            var dbDocs = JSON.parse(localStorage.getItem(DB_KEY)) || [];
-            var filtrado = [];
-            for (var i = 0; i < dbDocs.length; i++) {
-                if (dbDocs[i].id !== id) {
-                    filtrado.push(dbDocs[i]);
-                }
-            }
-            localStorage.setItem(DB_KEY, JSON.stringify(filtrado));
-            if (activeId === id) nuevoDoc();
-            renderLib();
+            if (!confirm("¿Deseas eliminar este documento permanentemente?")) return;
+            const transaction = db.transaction([STORE_NAME], "readwrite");
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.delete(id);
+
+            request.onsuccess = function() {
+                if (currentDocId === id) nuevoDoc();
+                renderLib();
+                showToast("Documento eliminado");
+            };
         }
 
         function nuevoDoc() {
-            activeId = null;
+            currentDocId = null;
             document.getElementById('editor').value = "";
             renderLib();
-            showToast("Nuevo lienzo limpio");
+            showToast("Lienzo nuevo creado");
         }
 
-        document.getElementById('btn-nuevo-sidebar').addEventListener('click', nuevoDoc);
+        document.getElementById('btn-nuevo').addEventListener('click', nuevoDoc);
 
-        function formato(c) { 
-            document.execCommand(c, false, null); 
-        }
-        
-        function cambiarColorTexto() { 
-            document.execCommand('foreColor', false, '#ff0000'); 
-        }
-        
-        function cambiarColorRelleno() { 
-            document.execCommand('hiliteColor', false, '#ffff00'); 
+        function showToast(msg) {
+            const toast = document.getElementById('toast-notif');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2200);
         }
 
-        function cambiarPaleta() {
-            var paleta = document.getElementById('cambiarPaleta').value;
-            var rootElement = document.documentElement;
+        document.getElementById('cambiarPaleta').addEventListener('change', function() {
+            const paleta = this.value;
+            const r = document.documentElement;
             if (paleta === "claro") {
-                rootElement.style.setProperty('--bg', '#ffffff');
-                rootElement.style.setProperty('--text-main', '#1e293b');
-                rootElement.style.setProperty('--bg-sidebar', '#f3f4f6');
-            } else if (paleta === "oscuro") {
-                rootElement.style.setProperty('--bg', '#0a0f1d');
-                rootElement.style.setProperty('--text-main', '#f3f4f6');
-                rootElement.style.setProperty('--bg-sidebar', '#111827');
+                r.style.setProperty('--bg', '#ffffff');
+                r.style.setProperty('--text-main', '#1e293b');
+                r.style.setProperty('--bg-sidebar', '#f3f4f6');
+            } else {
+                r.style.setProperty('--bg', '#0a0f1d');
+                r.style.setProperty('--text-main', '#f3f4f6');
+                r.style.setProperty('--bg-sidebar', '#111827');
             }
-        }
-
-        document.getElementById('cambiarPaleta').addEventListener('change', cambiarPaleta);
-
-        // Arranque e inicialización nativa
-        window.onload = () => {
-            renderLib();
-        };
+        });
     </script>
 </body>
 </html>
