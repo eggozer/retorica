@@ -79,7 +79,7 @@
             color: #ffca28;
         }
 
-        /* Remoción absoluta de botones físicos para alternar menú (Punto 1) */
+        /* El botón de la hamburguesa y cerrar se remueven para usar deslizamiento táctil */
         #menu-toggle, .close-sidebar-btn {
             display: none !important;
         }
@@ -206,7 +206,7 @@
             border-color: transparent;
         }
 
-        /* Supresión completa de modales de ruta intermedias */
+        /* Eliminación permanente de modales de ruta intermedios */
         #pantalla-guardar-en, .modal-ruta {
             display: none !important;
         }
@@ -272,16 +272,17 @@
 
         <div class="bottom-formats-bar">
             <span class="format-label">Guardar como:</span>
-            <button class="btn-format" id="export-pdf">PDF</button>
-            <button class="btn-format" id="export-pdf-edit">PDF Editable</button>
-            <button class="btn-format" id="export-doc">DOC</button>
+            <button class="btn-format" id="export-pdf">1.- PDF</button>
+            <button class="btn-format" id="export-pdf-edit">2.- PDF Editable</button>
+            <button class="btn-format" id="export-doc">3.- DOC</button>
         </div>
     </div>
 
     <div class="toast" id="toast-notif">Operación exitosa</div>
 
     <script>
-        // --- VARIABLES GLOBALES Y CONTROL DE CONFIGURACIÓN ---
+
+// --- VARIABLES GLOBALES Y CONTROL DE CONFIGURACIÓN ---
         const DB_KEY = "Retorica_Docs_Data";
         let activeId = null;
 
@@ -318,7 +319,7 @@
         }, { passive: true });
 
 
-        // --- SISTEMA DE PROCESAMIENTO Y DESCARGA LOCAL DIRECTA (PUNTOS 1 Y 4) ---
+        // --- SISTEMA DE PROCESAMIENTO Y DESCARGA LOCAL DIRECTA ---
         function obtenerNombreArchivo() {
             const texto = document.getElementById('editor').value.trim();
             if (!texto) return "documento_sin_titulo";
@@ -337,19 +338,19 @@
             showToast(`Guardado local: ${extension.toUpperCase()}`);
         }
 
-        // El botón principal de GUARDAR genera y descarga el archivo HTML local directamente
+        // El botón principal superior de GUARDAR genera y descarga el archivo HTML local directamente
         function guardarComoHtml() {
             const contenido = document.getElementById('editor').value;
             const htmlEstructura = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${obtenerNombreArchivo()}</title><style>body{font-family:sans-serif;padding:30px;line-height:1.6;color:#1e293b;}</style></head><body><p>${contenido.replace(/\n/g, '<br>')}</p></body></html>`;
             procesarDescargaInmediata(htmlEstructura, 'text/html;charset=utf-8', 'html');
             
-            // Sincroniza en paralelo el estado del texto en el LocalStorage interno
+            // Sincroniza en paralelo el estado del texto en el almacenamiento interno de la app
             guardarEstadoInterno();
         }
 
         document.getElementById('btn-guardar').addEventListener('click', guardarComoHtml);
 
-        // Formatos de Guardar Como... de la barra inferior
+        // Opciones de Guardar Como... de la barra inferior (PDF, PDF Editable, DOC)
         document.getElementById('export-pdf').addEventListener('click', () => {
             const texto = document.getElementById('editor').value;
             if(!texto.trim()) return showToast("Editor vacío");
@@ -384,8 +385,7 @@
             procesarDescargaInmediata(docEstructura, 'application/msword;charset=utf-8', 'doc');
         });
 
-
-        // --- PERSISTENCIA Y PERSISTENCIA COMPATIBLE EN LOCALSTORAGE ---
+// --- PERSISTENCIA Y PERSISTENCIA COMPATIBLE EN LOCALSTORAGE ---
         function obtenerDocs() {
             const localData = localStorage.getItem(DB_KEY);
             return localData ? JSON.parse(localData) : [];
@@ -441,8 +441,7 @@
             });
         }
 
-
-        // --- RECONOCIMIENTO DE VOZ UNIVERSAL Y REARMADO POR SILENCIO (6S) ---
+// --- RECONOCIMIENTO DE VOZ UNIVERSAL Y REARMADO POR SILENCIO (6S) ---
         const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let reconocimiento;
         let timerSilencio;
@@ -480,7 +479,7 @@
                     reconocimiento.stop();
                     showToast("Micrófono pausado por silencio");
                 }
-            }, 6000);
+            }, 6000); // Umbral de inactividad de 6 segundos exactos
         }
 
         document.getElementById('btn-mic').addEventListener('click', () => {
@@ -528,9 +527,7 @@
                     .catch(err => console.warn('Aviso de Service Worker:', err));
             });
         }
-
-
-        // --- SECCIÓN FINAL: FUNCIONES ORIGINALES DE OPERACIÓN DE REPOSITORIO (816 - 846) ---
+// --- SECCIÓN FINAL: FUNCIONES ORIGINALES DE OPERACIÓN DE REPOSITORIO (816 - 846) ---
         function borrarDoc(id) {
             var dbDocs = JSON.parse(localStorage.getItem(DB_KEY)) || [];
             var filtrado = [];
@@ -581,6 +578,7 @@
 
         document.getElementById('cambiarPaleta').addEventListener('change', cambiarPaleta);
 
+        // Arranque e inicialización nativa
         window.onload = () => {
             renderLib();
         };
