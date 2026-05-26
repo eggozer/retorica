@@ -33,7 +33,7 @@
             overflow: hidden;
         }
 
-        /* SIDEBAR / BIBLIOTECA DELGADA */
+        /* SIDEBAR / BIBLIOTECA COMPACTA */
         .sidebar {
             width: 320px;
             background-color: var(--bg-sidebar);
@@ -43,7 +43,7 @@
             height: 100%;
             position: relative;
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 100;
+            z-index: 110;
             flex-shrink: 0;
         }
 
@@ -63,30 +63,34 @@
         .brand-container {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
-        .brand-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: 6px;
+        /* CORRECCIÓN PUNTO 2: ICONO DEL SOL ALINEADO E IMAGEN DE LOGO */
+        .brand-icon-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            color: #ffca28;
+            line-height: 1;
         }
 
         .brand-title {
             font-size: 1.1rem;
             font-weight: 700;
-            color: #ffca28;
+            color: var(--text-main);
             letter-spacing: 0.5px;
         }
 
-        /* BOTÓN FLECHA UBICADO A LA MITAD DERECHA PARA ANDROID 5 */
+        /* CORRECCIÓN PUNTO 1: PESTAÑA VERTICAL REUBICADA A LA MITAD DERECHA */
         .toggle-sidebar-pestaña {
             position: absolute;
             top: 50%;
             right: -24px;
             transform: translateY(-50%);
             width: 24px;
-            height: 50px;
+            height: 60px;
             background: var(--bg-sidebar);
             border: 1px solid var(--border-color);
             border-left: none;
@@ -96,9 +100,9 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 0.8rem;
-            z-index: 105;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+            font-size: 0.85rem;
+            z-index: 120;
+            box-shadow: 3px 0 6px rgba(0,0,0,0.3);
         }
 
         .document-list {
@@ -107,7 +111,7 @@
             padding: 12px;
         }
 
-        /* TARJETAS DE PLANTILLA DELGADA */
+        /* TARJETAS DELGADAS EXCLUSIVAS DE NUEVO DISEÑO */
         .doc-item {
             padding: 12px;
             background: rgba(255, 255, 255, 0.02);
@@ -143,7 +147,7 @@
             overflow: hidden;
         }
 
-        /* PASARELA DE BOTONES EN UNA SOLA FILA HORIZONTAL */
+        /* PASARELA HORIZONTAL CON DESLIZAMIENTO */
         .doc-actions-pasarela {
             display: flex;
             gap: 6px;
@@ -172,7 +176,6 @@
         .btn-action-mini.primary { background: var(--accent-blue); border-color: transparent; }
         .btn-action-mini.danger { background: rgba(239, 68, 68, 0.2); color: #f87171; border-color: transparent; }
 
-        /* DETALLES DE FECHA COMPACTOS OVE_LAY */
         .metadata-container {
             font-size: 0.7rem;
             color: var(--text-muted);
@@ -184,7 +187,7 @@
             border: 1px dashed var(--border-color);
         }
 
-        /* CONTENEDOR PRINCIPAL */
+        /* CUERPO CENTRAL DE TRABAJO */
         .main-container {
             flex-grow: 1;
             display: flex;
@@ -227,13 +230,14 @@
 
         .editor-wrapper {
             flex-grow: 1;
-            padding: 20px;
+            padding: 16px;
             background: var(--bg);
+            position: relative;
         }
 
         #editor {
             width: 100%;
-            height: 100%;
+            height: calc(100% - 25px);
             background: transparent;
             border: none;
             resize: none;
@@ -243,26 +247,55 @@
             outline: none;
         }
 
-        .bottom-formats-bar {
-            height: 55px;
-            padding: 0 16px;
+        .stats-bar {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            padding-top: 4px;
             border-top: 1px solid var(--border-color);
-            background: #0f172a;
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
 
-        .format-label {
-            font-size: 0.8rem;
+        /* SECCIÓN INFERIOR COMPACTA DE LA HAMBURGUESA */
+        .sidebar-footer-menu {
+            padding: 12px;
+            border-top: 1px solid var(--border-color);
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        .footer-menu-title {
+            font-size: 0.75rem;
+            font-weight: 700;
             color: var(--text-muted);
-            font-weight: bold;
-            white-space: nowrap;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .footer-buttons-container {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .btn-footer-action {
+            width: 100%;
+            padding: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-main);
+            cursor: pointer;
+            text-align: left;
+        }
+        
+        .btn-footer-action:hover {
+            background: rgba(255,255,255,0.08);
         }
 
         .toast {
             position: fixed;
-            bottom: 70px;
+            bottom: 20px;
             right: 20px;
             background: #1e293b;
             border-left: 4px solid var(--accent-blue);
@@ -271,7 +304,7 @@
             border-radius: 6px;
             transform: translateY(150%);
             transition: transform 0.2s ease;
-            z-index: 1000;
+            z-index: 2000;
             font-size: 0.9rem;
         }
 
@@ -286,13 +319,23 @@
         
         <div class="sidebar-header">
             <div class="brand-container">
-                <img src="icon-192.png?v=2" alt="Retórica" class="brand-icon">
+                <div class="brand-icon-wrapper">☀️</div>
                 <span class="brand-title">BIBLIOTECA</span>
             </div>
-            <button id="btn-nuevo" style="background:#ffca28; color:#0a0f1d; font-weight:bold; border:none; padding:6px 12px;">➕</button>
+            <button id="btn-nuevo" style="background:#ffca28; color:#0a0f1d; font-weight:bold; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">➕</button>
         </div>
+
         <div class="document-list" id="document-list">
             </div>
+
+        <div class="sidebar-footer-menu">
+            <div class="footer-menu-title">Guardar como:</div>
+            <div class="footer-buttons-container">
+                <button class="btn-footer-action" id="export-pdf">1.- PDF</button>
+                <button class="btn-footer-action" id="export-pdf-edit">2.- PDF Editable</button>
+                <button class="btn-footer-action" id="export-doc">3.- DOC</button>
+            </div>
+        </div>
     </div>
 
     <div class="main-container">
@@ -317,21 +360,16 @@
         </div>
 
         <div class="editor-wrapper">
-            <textarea id="editor" placeholder="Escribe tu guion de Megacable aquí..."></textarea>
-        </div>
-
-        <div class="bottom-formats-bar">
-            <span class="format-label">Guardar como:</span>
-            <button class="btn-top" id="export-pdf" style="font-weight:600;">1.- PDF</button>
-            <button class="btn-top" id="export-pdf-edit" style="font-weight:600;">2.- PDF Editable</button>
-            <button class="btn-top" id="export-doc" style="font-weight:600;">3.- DOC</button>
+            <textarea id="editor" placeholder="Escribe aquí tu guion o nota de Megacable..."></textarea>
+            <div class="stats-bar" id="stats-bar">Caracteres: 0 | Palabras: 0 | Líneas: 0</div>
         </div>
     </div>
 
     <div class="toast" id="toast-notif">Operación exitosa</div>
 
     <script>
-        // --- BASE DE DATOS INDEXEDDB ORIGINAL ---
+
+// --- BASE DE DATOS INDEXEDDB COMPATIBLE ---
         const DB_NAME = "RetoricaDB";
         const DB_VERSION = 1;
         const STORE_NAME = "documentos";
@@ -343,7 +381,7 @@
 
             request.onerror = function(event) {
                 console.error("Error al abrir IndexedDB:", event.target.error);
-                showToast("Error de almacenamiento interno");
+                showToast("Error de acceso al almacenamiento");
             };
 
             request.onsuccess = function(event) {
@@ -359,13 +397,7 @@
             };
         }
 
-        // Inicialización al cargar la ventana
-        window.addEventListener('DOMContentLoaded', () => {
-            initDB();
-            configurarGestosPestaña();
-        });
-
-// --- FUNCIÓN DE RENDERIZADO: PLANTILLAS DELGADAS Y PASARELA DE ACCIONES ---
+        // --- RENDERIZADO DE PLANTILLAS DELGADAS CON CONTENIDO REAL Y PASARELA ---
         function renderLib() {
             if (!db) return;
             const lista = document.getElementById('document-list');
@@ -373,7 +405,7 @@
 
             const transaction = db.transaction([STORE_NAME], "readonly");
             const store = transaction.objectStore(STORE_NAME);
-            const request = store.openCursor(null, "prev"); // Mostrar el más reciente primero
+            const request = store.openCursor(null, "prev"); // Documentos más recientes primero
 
             request.onsuccess = function(event) {
                 const cursor = event.target.result;
@@ -383,12 +415,12 @@
                     item.className = `doc-item ${docData.id === currentDocId ? 'active' : ''}`;
                     item.dataset.id = docData.id;
 
-                    // Procesamiento del texto para extraer Título y 2-3 líneas de cuerpo real
+                    // CORRECCIÓN PUNTO 1: Extraer primer renglón como Título y siguientes 2 o 3 como texto real
                     const lineas = docData.texto.split('\n').filter(l => l.trim() !== "");
                     const tituloNota = lineas[0] || "Nota sin título";
-                    const vistaPreviaNota = lineas.slice(1, 4).join(' ') || "Sin texto adicional...";
+                    const vistaPreviaNota = lineas.slice(1, 4).join(' ') || "Sin contenido adicional...";
 
-                    // Estructura de plantilla delgada con pasarela horizontal y botón detalles
+                    // CORRECCIÓN PUNTO 2: Maquetado delgado con botones en pasarela y botón detalles
                     item.innerHTML = `
                         <div class="doc-title">${tituloNota}</div>
                         <div class="doc-preview">${vistaPreviaNota}</div>
@@ -397,7 +429,7 @@
                             <button class="btn-action-mini primary" onclick="event.stopPropagation(); cargarDocEnEditor(${docData.id});">Abrir</button>
                             <button class="btn-action-mini" onclick="event.stopPropagation(); copiarTextoNota(${docData.id});">Copiar</button>
                             <button class="btn-action-mini" onclick="event.stopPropagation(); compartirNota(${docData.id});">Compartir</button>
-                            <button class="btn-action-mini" onclick="event.stopPropagation(); alternarDetallesMetadata(${docData.id});">ℹ️ Detalles</button>
+                            <button class="btn-action-mini" onclick="event.stopPropagation(); alternarMetadataDetalles(${docData.id});">ℹ️ Detalles</button>
                             <button class="btn-action-mini danger" onclick="event.stopPropagation(); borrarDoc(${docData.id});">Borrar</button>
                         </div>
                         
@@ -413,7 +445,7 @@
             };
         }
 
-        // --- ACCIONES DE LA BIBLIOTECA DELGADA ---
+        // --- ACCIONES INTERNAS DE LA BIBLIOTECA ---
         function cargarDocEnEditor(id) {
             const transaction = db.transaction([STORE_NAME], "readonly");
             const store = transaction.objectStore(STORE_NAME);
@@ -424,18 +456,19 @@
                 if (doc) {
                     currentDocId = doc.id;
                     document.getElementById('editor').value = doc.texto;
+                    actualizarContadores();
                     renderLib();
-                    showToast("Documento abierto");
+                    showToast("Nota cargada en el editor");
                 }
             };
         }
 
-        function alternarDetallesMetadata(id) {
-            const el = document.getElementById(`meta-${id}`);
-            if (el.style.display === "block") {
-                el.style.style.display = "none";
+        function alternarMetadataDetalles(id) {
+            const contenedor = document.getElementById(`meta-${id}`);
+            if (contenedor.style.display === "block") {
+                contenedor.style.display = "none";
             } else {
-                el.style.display = "block";
+                contenedor.style.display = "block";
             }
         }
 
@@ -447,18 +480,17 @@
             request.onsuccess = function(event) {
                 const doc = event.target.result;
                 if (doc && doc.texto) {
-                    navigator.clipboard.writeText(doc.texto).then(() => {
-                        showToast("Texto copiado al portapapeles");
-                    }).catch(() => {
-                        // Alternativa para navegadores antiguos de Android 5
-                        const textAreaAux = document.createElement("textarea");
-                        textAreaAux.value = doc.texto;
-                        document.body.appendChild(textAreaAux);
-                        textAreaAux.select();
+                    if (navigator.clipboard) {
+                        navigator.clipboard.writeText(doc.texto).then(() => showToast("Copiado al portapapeles"));
+                    } else {
+                        const aux = document.createElement("textarea");
+                        aux.value = doc.texto;
+                        document.body.appendChild(aux);
+                        aux.select();
                         document.execCommand("copy");
-                        document.body.removeChild(textAreaAux);
-                        showToast("Texto copiado (retrocompatible)");
-                    });
+                        document.body.removeChild(aux);
+                        showToast("Copiado (Retrocompatible)");
+                    }
                 }
             };
         }
@@ -472,19 +504,19 @@
                 const doc = event.target.result;
                 if (doc && doc.texto) {
                     if (navigator.share) {
-                        navigator.share({ title: 'Retórica Nota', text: doc.texto }).catch(console.error);
+                        navigator.share({ title: 'Retórica Guion', text: doc.texto }).catch(console.error);
                     } else {
-                        showToast("Usa el botón 'Copiar', compartir no soportado en este navegador");
+                        showToast("Compartir no soportado en este navegador");
                     }
                 }
             };
         }
 
-// --- PROCESAMIENTO DE DESCARGAS DIRECTAS LOCALES ---
+// --- CORRECCIÓN PUNTO 4: SISTEMA DE DESCARGA LOCAL CONTROLADA POR CÓDIGO ---
         function obtenerNombreArchivo() {
             const texto = document.getElementById('editor').value.trim();
-            if (!texto) return "documento_sin_titulo";
-            return texto.split('\n')[0].replace(/[\\/:*?"<>|]/g, "").substring(0, 25) || "documento_sin_titulo";
+            if (!texto) return "guion_megacable";
+            return texto.split('\n')[0].replace(/[\\/:*?"<>|]/g, "").substring(0, 25) || "guion_megacable";
         }
 
         function procesarDescargaInmediata(contenido, tipoMime, extension) {
@@ -496,20 +528,18 @@
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(a.href);
-            showToast(`Descargado: ${extension.toUpperCase()}`);
+            showToast(`Descargado local: ${extension.toUpperCase()}`);
         }
 
-        // El botón principal superior guarda el estado en base de datos e inmediatamente descarga el HTML local directo
-        function guardarYDescargarHtml() {
+        function guardarYDescargarHtmlDirecto() {
             const texto = document.getElementById('editor').value;
-            if (!texto.trim()) return showToast("Editor vacío");
+            if (!texto.trim()) return showToast("Editor vacío, nada que guardar");
 
             const transaction = db.transaction([STORE_NAME], "readwrite");
             const store = transaction.objectStore(STORE_NAME);
             const fechaActual = new Date().toLocaleString();
 
             if (currentDocId === null) {
-                // Nuevo documento
                 const nuevoDocData = { texto: texto, fechaCreacion: fechaActual, fechaModificacion: fechaActual };
                 const request = store.add(nuevoDocData);
                 request.onsuccess = function(e) {
@@ -517,14 +547,12 @@
                     ejecutarDescargaHtmlPura(texto);
                 };
             } else {
-                // Actualizar documento existente
                 const requestObtener = store.get(currentDocId);
                 requestObtener.onsuccess = function(e) {
                     const data = e.target.result;
                     data.texto = texto;
                     data.fechaModificacion = fechaActual;
-                    const requestActualizar = store.put(data);
-                    requestActualizar.onsuccess = function() {
+                    store.put(data).onsuccess = function() {
                         ejecutarDescargaHtmlPura(texto);
                     };
                 };
@@ -532,14 +560,15 @@
         }
 
         function ejecutarDescargaHtmlPura(contenido) {
-            const estructura = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${obtenerNombreArchivo()}</title><style>body{font-family:sans-serif;padding:30px;line-height:1.6;}</style></head><body><p>${contenido.replace(/\n/g, '<br>')}</p></body></html>`;
+            const estructura = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${obtenerNombreArchivo()}</title><style>body{font-family:sans-serif;padding:25px;line-height:1.6;}</style></head><body><p>${contenido.replace(/\n/g, '<br>')}</p></body></html>`;
+            // Descarga directa controlada por código puro sin modales de selección de ruta
             procesarDescargaInmediata(estructura, 'text/html;charset=utf-8', 'html');
             renderLib();
         }
 
-        document.getElementById('btn-main-guardar').addEventListener('click', guardarYDescargarHtml);
+        document.getElementById('btn-main-guardar').addEventListener('click', guardarYDescargarHtmlDirecto);
 
-        // Formatos de exportación local directa (Botonera Inferior)
+        // --- BOTONERA DE EXPORTACIÓN DEL MENÚ INFERIOR DE LA HAMBURGUESA ---
         document.getElementById('export-pdf').addEventListener('click', () => {
             const texto = document.getElementById('editor').value;
             if(!texto.trim()) return showToast("Editor vacío");
@@ -558,13 +587,13 @@
             };
             
             html2pdf().set(opcionesPdf).from(elementoRaiz).save().then(() => {
-                showToast("PDF guardado localmente");
+                showToast("PDF generado de forma local");
             });
         });
 
         document.getElementById('export-pdf-edit').addEventListener('click', () => {
             const contenido = document.getElementById('editor').value;
-            const pdfEditableEstructura = `<html><body style="padding:20px;"><form><textarea style="width:100%;height:90vh;font-size:16px;padding:10px;">${contenido}</textarea></form></body></html>`;
+            const pdfEditableEstructura = `<html><body style="padding:25px;"><form><textarea style="width:100%;height:90vh;font-size:16px;">${contenido}</textarea></form></body></html>`;
             procesarDescargaInmediata(pdfEditableEstructura, 'text/html;charset=utf-8', 'pdf.html');
         });
 
@@ -575,36 +604,30 @@
         });
 
 
-        // --- MANEJO DE LA PESTAÑA LATERAL DE CONTROL (ANDR_ID 5 Y UNIVERSAL) ---
+        // --- CORRECCIÓN PUNTO 1: CONTROL DE PESTAÑA Y GESTOS EN ANDROID 5 ---
         function configurarGestosPestaña() {
             const btnPestaña = document.getElementById('btn-toggle-pestaña');
             const sidebarElement = document.getElementById('sidebar');
 
-            // Clic seguro en pestaña lateral (Ideal para pantallas antiguas)
             btnPestaña.addEventListener('click', () => {
                 sidebarElement.classList.toggle('hidden');
                 btnPestaña.textContent = sidebarElement.classList.contains('hidden') ? "▶" : "◀";
             });
 
-            // Soporte de deslizamiento táctil complementario
+            // Lógica táctil complementaria para deslizar con los dedos
             let startX = 0;
-            document.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; }, { passive: true });
-            document.addEventListener('touchend', (e) => {
+            sidebarElement.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; }, { passive: true });
+            sidebarElement.addEventListener('touchend', (e) => {
                 let diffX = startX - e.changedTouches[0].clientX;
-                if (Math.abs(diffX) > 80) {
-                    if (diffX > 0 && !sidebarElement.classList.contains('hidden')) {
-                        sidebarElement.classList.add('hidden'); // Deslizar izquierda oculta
-                        btnPestaña.textContent = "▶";
-                    } else if (diffX < 0 && sidebarElement.classList.contains('hidden')) {
-                        sidebarElement.classList.remove('hidden'); // Deslizar derecha muestra
-                        btnPestaña.textContent = "◀";
-                    }
+                if (diffX > 70 && !sidebarElement.classList.contains('hidden')) {
+                    sidebarElement.classList.add('hidden'); // Ocultar al deslizar a la izquierda
+                    btnPestaña.textContent = "▶";
                 }
             }, { passive: true });
         }
 
 
-        // --- RECONOCIMIENTO DE VOZ (DICTADO CON UMBRAL DE 6S) ---
+        // --- RECONOCIMIENTO DE VOZ CON REARMADO DE 6S ---
         const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let reconocimiento;
         let timerSilencio;
@@ -625,6 +648,7 @@
                 const transcripcion = e.results[e.resultIndex][0].transcript;
                 const txtarea = document.getElementById('editor');
                 txtarea.value += (txtarea.value ? ' ' : '') + transcripcion;
+                actualizarContadores();
                 resetearTimerSilencio();
             };
 
@@ -640,7 +664,7 @@
             timerSilencio = setTimeout(() => {
                 if (grabando) {
                     reconocimiento.stop();
-                    showToast("Micrófono cerrado por inactividad (6s)");
+                    showToast("Micrófono cerrado por inactividad");
                 }
             }, 6000);
         }
@@ -656,7 +680,7 @@
         });
 
 
-        // --- SÍNTESIS DE VOZ (LECTURA) ---
+        // --- SÍNTESIS DE VOZ Y CONTADORES ORIGINALES ---
         document.getElementById('btn-lectura').addEventListener('click', () => {
             const texto = document.getElementById('editor').value;
             if (!texto.trim()) return showToast("Nada que leer");
@@ -666,19 +690,26 @@
                 const lectura = new SpeechSynthesisUtterance(texto);
                 lectura.lang = document.getElementById('voice-lang').value;
                 window.speechSynthesis.speak(lectura);
-            } else {
-                showToast("Lectura no soportada");
             }
         });
 
-        // --- SISTEMA DE CONTROL DE ACCIONES FINALES ---
+        function actualizarContadores() {
+            const texto = document.getElementById('editor').value;
+            const chars = texto.length;
+            const palabras = texto.trim() === "" ? 0 : texto.trim().split(/\s+/).length;
+            const lineas = texto === "" ? 0 : texto.split('\n').length;
+            document.getElementById('stats-bar').textContent = `Caracteres: ${chars} | Palabras: ${palabras} | Líneas: ${lineas}`;
+        }
+
+        document.getElementById('editor').addEventListener('input', actualizarContadores);
+
+
+        // --- ELIMINAR NOTA Y NUEVO LIENZO ---
         function borrarDoc(id) {
-            if (!confirm("¿Deseas eliminar este documento permanentemente?")) return;
+            if (!confirm("¿Deseas eliminar este guion permanentemente?")) return;
             const transaction = db.transaction([STORE_NAME], "readwrite");
             const store = transaction.objectStore(STORE_NAME);
-            const request = store.delete(id);
-
-            request.onsuccess = function() {
+            store.delete(id).onsuccess = function() {
                 if (currentDocId === id) nuevoDoc();
                 renderLib();
                 showToast("Documento eliminado");
@@ -688,8 +719,9 @@
         function nuevoDoc() {
             currentDocId = null;
             document.getElementById('editor').value = "";
+            actualizarContadores();
             renderLib();
-            showToast("Lienzo nuevo creado");
+            showToast("Nuevo lienzo limpio");
         }
 
         document.getElementById('btn-nuevo').addEventListener('click', nuevoDoc);
@@ -701,19 +733,14 @@
             setTimeout(() => toast.classList.remove('show'), 2200);
         }
 
-        document.getElementById('cambiarPaleta').addEventListener('change', function() {
-            const paleta = this.value;
-            const r = document.documentElement;
-            if (paleta === "claro") {
-                r.style.setProperty('--bg', '#ffffff');
-                r.style.setProperty('--text-main', '#1e293b');
-                r.style.setProperty('--bg-sidebar', '#f3f4f6');
-            } else {
-                r.style.setProperty('--bg', '#0a0f1d');
-                r.style.setProperty('--text-main', '#f3f4f6');
-                r.style.setProperty('--bg-sidebar', '#111827');
-            }
-        });
+        // --- SERVICE WORKER DE LA PWA ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('Retórica PWA activa de forma local', reg.scope))
+                    .catch(err => console.warn('SW aviso:', err));
+            });
+        }
     </script>
 </body>
 </html>
