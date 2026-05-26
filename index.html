@@ -312,7 +312,7 @@
     </style>
 </head>
 
-<body>
+    <body>
 
     <div class="sidebar" id="sidebar">
         <div class="toggle-sidebar-pestaña" id="btn-toggle-pestaña">◀</div>
@@ -369,7 +369,7 @@
 
     <script>
 
-// --- BASE DE DATOS INDEXEDDB COMPATIBLE ---
+        // --- BASE DE DATOS INDEXEDDB COMPATIBLE ---
         const DB_NAME = "RetoricaDB";
         const DB_VERSION = 1;
         const STORE_NAME = "documentos";
@@ -512,7 +512,7 @@
             };
         }
 
-// --- CORRECCIÓN PUNTO 4: SISTEMA DE DESCARGA LOCAL CONTROLADA POR CÓDIGO ---
+        // --- CORRECCIÓN PUNTO 4: SISTEMA DE DESCARGA LOCAL CONTROLADA POR CÓDIGO ---
         function obtenerNombreArchivo() {
             const texto = document.getElementById('editor').value.trim();
             if (!texto) return "guion_megacable";
