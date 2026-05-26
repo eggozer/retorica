@@ -1,13 +1,13 @@
 // 1. CADA VEZ QUE HAGAS CAMBIOS, CAMBIA EL NÚMERO DE LA VERSIÓN
-const CACHE_NAME = 'retorica-cache-v2'; 
+const CACHE_NAME = 'retorica-cache-v3'; 
 
 const ASSETS = [
   './',
   './index.html',
-  './styles.css', // Asegúrate de incluir tus archivos CSS/JS reales
-  './app.js',
   './manifest.json',
-  // Agrega aquí la ruta exacta de tu nuevo icono si cambió de nombre o ruta
+  './sw.js',
+  './icon-192.png',
+  './icon-512.png'
 ];
 
 // Instalar el Service Worker y forzar que reemplace al anterior inmediatamente
