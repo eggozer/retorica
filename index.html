@@ -3,61 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Retórica</title>
+    <title>Retórica - Bloc de Notas</title>
     <link rel="manifest" href="./manifest.json?v=3">
-    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=2">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
     <style>
         :root {
-            --bg: #0a0f1d;
+            --bg-main: #0a0f1d;
             --bg-sidebar: #111827;
-            --accent-blue: #1e62ec;
+            --bg-card: #1f2937;
+            --bg-card-active: #374151;
+            --accent: #ffca28;
             --text-main: #f3f4f6;
             --text-muted: #9ca3af;
-            --border-color: rgba(255, 255, 255, 0.08);
+            --border: #2d3748;
+            --danger: #ef4444;
         }
 
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-            background-color: var(--bg);
+            background-color: var(--bg-main);
             color: var(--text-main);
             display: flex;
             height: 100vh;
             overflow: hidden;
         }
 
-        /* SIDEBAR / BIBLIOTECA COMPACTA */
+        /* --- MENÚ LATERAL (BIBLIOTECA) --- */
         .sidebar {
-            width: 320px;
+            width: 280px;
             background-color: var(--bg-sidebar);
-            border-right: 1px solid var(--border-color);
+            border-right: 1px solid var(--border);
             display: flex;
             flex-direction: column;
             height: 100%;
             position: relative;
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 110;
+            transition: transform 0.3s ease;
+            z-index: 10;
             flex-shrink: 0;
         }
 
         .sidebar.hidden {
-            transform: translateX(-320px);
-            margin-right: -320px;
+            transform: translateX(-280px);
+            margin-right: -280px;
         }
 
+        /* CORRECCIÓN PUNTO 1: Pestaña vertical flotante a media altura */
+        .toggle-sidebar-pestaña {
+            position: absolute;
+            right: -24px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 55px;
+            background-color: var(--bg-sidebar);
+            color: var(--accent);
+            border: 1px solid var(--border);
+            border-left: none;
+            border-radius: 0 8px 8px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: bold;
+            box-shadow: 3px 0 5px rgba(0,0,0,0.2);
+            z-index: 11;
+        }
+
+        /* CORRECCIÓN PUNTO 2: Icono del sol centrado con Flexbox */
         .sidebar-header {
             padding: 16px;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border);
             display: flex;
             align-items: center;
             justify-content: space-between;
+            height: 60px;
         }
 
         .brand-container {
@@ -66,204 +94,124 @@
             gap: 8px;
         }
 
-        /* CORRECCIÓN PUNTO 2: ICONO DEL SOL ALINEADO E IMAGEN DE LOGO */
         .brand-icon-wrapper {
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.3rem;
-            color: #ffca28;
             line-height: 1;
+            width: 24px;
+            height: 24px;
         }
 
         .brand-title {
-            font-size: 1.1rem;
             font-weight: 700;
+            font-size: 0.95rem;
+            letter-spacing: 1px;
             color: var(--text-main);
-            letter-spacing: 0.5px;
         }
 
-        /* CORRECCIÓN PUNTO 1: PESTAÑA VERTICAL REUBICADA A LA MITAD DERECHA */
-        .toggle-sidebar-pestaña {
-            position: absolute;
-            top: 50%;
-            right: -24px;
-            transform: translateY(-50%);
-            width: 24px;
-            height: 60px;
-            background: var(--bg-sidebar);
-            border: 1px solid var(--border-color);
-            border-left: none;
-            border-radius: 0 8px 8px 0;
-            color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 0.85rem;
-            z-index: 120;
-            box-shadow: 3px 0 6px rgba(0,0,0,0.3);
-        }
-
+        /* Listado de notas en la biblioteca */
         .document-list {
-            flex-grow: 1;
+            flex: 1;
             overflow-y: auto;
-            padding: 12px;
+            padding: 10px;
         }
 
-        /* TARJETAS DELGADAS EXCLUSIVAS DE NUEVO DISEÑO */
+        /* Plantillas Delgadas de Notas */
         .doc-item {
-            padding: 12px;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            margin-bottom: 10px;
-            transition: all 0.2s ease;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
         }
 
         .doc-item.active {
-            background: rgba(30, 98, 236, 0.08);
-            border-color: var(--accent-blue);
+            background-color: var(--bg-card-active);
+            border-color: var(--accent);
         }
 
         .doc-title {
+            font-size: 0.85rem;
             font-weight: 600;
-            font-size: 0.95rem;
             color: var(--text-main);
-            margin-bottom: 4px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            margin-bottom: 3px;
         }
 
         .doc-preview {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: var(--text-muted);
-            line-height: 1.4;
-            margin-bottom: 8px;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
+            margin-bottom: 8px;
+            line-height: 1.3;
         }
 
-        /* PASARELA HORIZONTAL CON DESLIZAMIENTO */
+        /* Pasarela deslizable horizontal de botones */
         .doc-actions-pasarela {
             display: flex;
             gap: 6px;
             overflow-x: auto;
             padding-bottom: 4px;
-            scrollbar-width: none;
+            scrollbar-width: none; /* Ocultar barra en Firefox */
         }
-        
+
         .doc-actions-pasarela::-webkit-scrollbar {
-            display: none;
+            display: none; /* Ocultar barra en Chrome/Android */
         }
 
         .btn-action-mini {
-            padding: 6px 10px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            border-radius: 4px;
-            border: 1px solid var(--border-color);
-            background: rgba(255, 255, 255, 0.04);
+            background-color: var(--bg-main);
             color: var(--text-main);
+            border: 1px solid var(--border);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
             cursor: pointer;
             white-space: nowrap;
             flex-shrink: 0;
         }
 
-        .btn-action-mini.primary { background: var(--accent-blue); border-color: transparent; }
-        .btn-action-mini.danger { background: rgba(239, 68, 68, 0.2); color: #f87171; border-color: transparent; }
+        .btn-action-mini.primary {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
 
+        .btn-action-mini.danger {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        /* Contenedor de detalles ocultable */
         .metadata-container {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            background: rgba(0,0,0,0.2);
+            display: none;
+            background: rgba(0, 0, 0, 0.2);
             padding: 6px;
             border-radius: 4px;
             margin-top: 6px;
-            display: none;
-            border: 1px dashed var(--border-color);
-        }
-
-        /* CUERPO CENTRAL DE TRABAJO */
-        .main-container {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            position: relative;
-        }
-
-        .top-toolbar {
-            height: 60px;
-            padding: 0 16px;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: #0f172a;
-        }
-
-        .toolbar-group {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
-        select, .btn-top {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            cursor: pointer;
-        }
-
-        #btn-main-guardar {
-            background: var(--accent-blue);
-            font-weight: bold;
-            border-color: transparent;
-        }
-
-        .editor-wrapper {
-            flex-grow: 1;
-            padding: 16px;
-            background: var(--bg);
-            position: relative;
-        }
-
-        #editor {
-            width: 100%;
-            height: calc(100% - 25px);
-            background: transparent;
-            border: none;
-            resize: none;
-            color: var(--text-main);
-            font-size: 1.15rem;
-            line-height: 1.6;
-            outline: none;
-        }
-
-        .stats-bar {
-            font-size: 0.75rem;
+            font-size: 0.65rem;
             color: var(--text-muted);
-            padding-top: 4px;
-            border-top: 1px solid var(--border-color);
+            border-left: 2px solid var(--accent);
         }
 
-        /* SECCIÓN INFERIOR COMPACTA DE LA HAMBURGUESA */
+        /* CORRECCIÓN PUNTO 3: Menú inferior fijo "Guardar como" */
         .sidebar-footer-menu {
             padding: 12px;
-            border-top: 1px solid var(--border-color);
-            background: rgba(0, 0, 0, 0.15);
+            border-top: 1px solid var(--border);
+            background-color: rgba(0, 0, 0, 0.15);
         }
 
         .footer-menu-title {
             font-size: 0.75rem;
-            font-weight: 700;
+            font-weight: bold;
             color: var(--text-muted);
             margin-bottom: 8px;
             text-transform: uppercase;
@@ -278,41 +226,143 @@
 
         .btn-footer-action {
             width: 100%;
-            padding: 8px;
+            background-color: var(--bg-card);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            padding: 7px;
+            border-radius: 4px;
             font-size: 0.8rem;
             font-weight: 600;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            color: var(--text-main);
-            cursor: pointer;
             text-align: left;
-        }
-        
-        .btn-footer-action:hover {
-            background: rgba(255,255,255,0.08);
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
+        .btn-footer-action:active {
+            background-color: var(--bg-card-active);
+            border-color: var(--accent);
+        }
+
+        /* --- CONTENEDOR CENTRAL DE EDICIÓN --- */
+        .main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            background-color: var(--bg-main);
+        }
+
+        .top-toolbar {
+            height: 60px;
+            border-bottom: 1px solid var(--border);
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .toolbar-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        select {
+            background-color: var(--bg-card);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            padding: 6px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            outline: none;
+        }
+
+        .btn-top {
+            background-color: var(--bg-card);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-top#btn-main-guardar {
+            background-color: var(--accent);
+            color: #0a0f1d;
+            border: none;
+        }
+
+        /* Área de escritura */
+        .editor-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+            overflow: hidden;
+        }
+
+        textarea {
+            flex: 1;
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font-size: 1rem;
+            line-height: 1.5;
+            resize: none;
+            outline: none;
+            padding: 5px;
+        }
+
+        .stats-bar {
+            height: 24px;
+            border-top: 1px solid var(--border);
+            padding-top: 8px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+        }
+
+        /* Notificaciones en pantalla (Toast) */
         .toast {
             position: fixed;
             bottom: 20px;
-            right: 20px;
-            background: #1e293b;
-            border-left: 4px solid var(--accent-blue);
-            color: var(--text-main);
-            padding: 10px 16px;
-            border-radius: 6px;
-            transform: translateY(150%);
-            transition: transform 0.2s ease;
-            z-index: 2000;
-            font-size: 0.9rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background-color: var(--accent);
+            color: #0a0f1d;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 100;
+            pointer-events: none;
         }
 
-        .toast.show { transform: translateY(0); }
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Modo Claro */
+        body.light-theme {
+            --bg-main: #f9fafb;
+            --bg-sidebar: #f3f4f6;
+            --bg-card: #ffffff;
+            --bg-card-active: #e5e7eb;
+            --text-main: #111827;
+            --text-muted: #6b7280;
+            --border: #d1d5db;
+        }
     </style>
 </head>
-
-    <body>
+<body>
 
     <div class="sidebar" id="sidebar">
         <div class="toggle-sidebar-pestaña" id="btn-toggle-pestaña">◀</div>
@@ -320,13 +370,12 @@
         <div class="sidebar-header">
             <div class="brand-container">
                 <div class="brand-icon-wrapper">☀️</div>
-                <span class="brand-title">BIBLIOTECA</span>
+                <span class="brand-title">RETÓRICA</span>
             </div>
-            <button id="btn-nuevo" style="background:#ffca28; color:#0a0f1d; font-weight:bold; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">➕</button>
+            <button id="btn-nuevo" style="background:var(--accent); color:#0a0f1d; font-weight:bold; border:none; padding:6px 10px; border-radius:4px; cursor:pointer;">➕</button>
         </div>
 
-        <div class="document-list" id="document-list">
-            </div>
+        <div class="document-list" id="document-list"></div>
 
         <div class="sidebar-footer-menu">
             <div class="footer-menu-title">Guardar como:</div>
@@ -345,11 +394,9 @@
                     <option value="oscuro">🌙 Oscuro</option>
                     <option value="claro">☀️ Claro</option>
                 </select>
-                <select id="app-lang">
-                    <option value="es">App: ES</option>
-                </select>
                 <select id="voice-lang">
-                    <option value="es-MX">Voz: MX</option>
+                    <option value="es-MX">Español (MX)</option>
+                    <option value="es-ES">Español (ES)</option>
                 </select>
             </div>
             <div class="toolbar-group">
@@ -360,7 +407,7 @@
         </div>
 
         <div class="editor-wrapper">
-            <textarea id="editor" placeholder="Escribe aquí tu guion o nota de Megacable..."></textarea>
+            <textarea id="editor" placeholder="Escribe tu guion o nota aquí..."></textarea>
             <div class="stats-bar" id="stats-bar">Caracteres: 0 | Palabras: 0 | Líneas: 0</div>
         </div>
     </div>
@@ -368,19 +415,32 @@
     <div class="toast" id="toast-notif">Operación exitosa</div>
 
     <script>
-
-        // --- BASE DE DATOS INDEXEDDB COMPATIBLE ---
+        // --- BASE DE DATOS INDEXEDDB PERSISTENTE ---
         const DB_NAME = "RetoricaDB";
         const DB_VERSION = 1;
         const STORE_NAME = "documentos";
         let db;
         let currentDocId = null;
 
+        // FUNCIÓN CRUCIAL: Solicita a Android que no borre los datos al limpiar caché
+        function asegurarPersistenciaDatos() {
+            if (navigator.storage && navigator.storage.persist) {
+                navigator.storage.persist().then(granted => {
+                    if (granted) {
+                        console.log("Almacenamiento de notas configurado como PERSISTENTE protegido.");
+                    } else {
+                        console.log("Almacenamiento en modo estándar.");
+                    }
+                });
+            }
+        }
+
         function initDB() {
+            asegurarPersistenciaDatos();
             const request = indexedDB.open(DB_NAME, DB_VERSION);
 
             request.onerror = function(event) {
-                console.error("Error al abrir IndexedDB:", event.target.error);
+                console.error("Error IndexedDB:", event.target.error);
                 showToast("Error de acceso al almacenamiento");
             };
 
@@ -397,7 +457,7 @@
             };
         }
 
-        // --- RENDERIZADO DE PLANTILLAS DELGADAS CON CONTENIDO REAL Y PASARELA ---
+        // --- RENDERIZADO DINÁMICO DE NOTAS REALES ---
         function renderLib() {
             if (!db) return;
             const lista = document.getElementById('document-list');
@@ -405,7 +465,7 @@
 
             const transaction = db.transaction([STORE_NAME], "readonly");
             const store = transaction.objectStore(STORE_NAME);
-            const request = store.openCursor(null, "prev"); // Documentos más recientes primero
+            const request = store.openCursor(null, "prev"); // Mostrar el más reciente primero
 
             request.onsuccess = function(event) {
                 const cursor = event.target.result;
@@ -415,12 +475,11 @@
                     item.className = `doc-item ${docData.id === currentDocId ? 'active' : ''}`;
                     item.dataset.id = docData.id;
 
-                    // CORRECCIÓN PUNTO 1: Extraer primer renglón como Título y siguientes 2 o 3 como texto real
+                    // Extraer primer renglón real como título y los siguientes como vista previa
                     const lineas = docData.texto.split('\n').filter(l => l.trim() !== "");
                     const tituloNota = lineas[0] || "Nota sin título";
                     const vistaPreviaNota = lineas.slice(1, 4).join(' ') || "Sin contenido adicional...";
 
-                    // CORRECCIÓN PUNTO 2: Maquetado delgado con botones en pasarela y botón detalles
                     item.innerHTML = `
                         <div class="doc-title">${tituloNota}</div>
                         <div class="doc-preview">${vistaPreviaNota}</div>
@@ -434,8 +493,8 @@
                         </div>
                         
                         <div class="metadata-container" id="meta-${docData.id}">
-                            <div><strong>Creado:</strong> ${docData.fechaCreacion || docData.fecha || 'No registrada'}</div>
-                            <div><strong>Modificado:</strong> ${docData.fechaModificacion || docData.fecha || 'No registrada'}</div>
+                            <div><strong>Creado:</strong> ${docData.fechaCreacion || 'No registrada'}</div>
+                            <div><strong>Modificado:</strong> ${docData.fechaModificacion || 'No registrada'}</div>
                         </div>
                     `;
 
@@ -445,7 +504,6 @@
             };
         }
 
-        // --- ACCIONES INTERNAS DE LA BIBLIOTECA ---
         function cargarDocEnEditor(id) {
             const transaction = db.transaction([STORE_NAME], "readonly");
             const store = transaction.objectStore(STORE_NAME);
@@ -465,11 +523,7 @@
 
         function alternarMetadataDetalles(id) {
             const contenedor = document.getElementById(`meta-${id}`);
-            if (contenedor.style.display === "block") {
-                contenedor.style.display = "none";
-            } else {
-                contenedor.style.display = "block";
-            }
+            contenedor.style.display = (contenedor.style.display === "block") ? "none" : "block";
         }
 
         function copiarTextoNota(id) {
@@ -504,7 +558,7 @@
                 const doc = event.target.result;
                 if (doc && doc.texto) {
                     if (navigator.share) {
-                        navigator.share({ title: 'Retórica Guion', text: doc.texto }).catch(console.error);
+                        navigator.share({ title: 'Retórica Nota', text: doc.texto }).catch(console.error);
                     } else {
                         showToast("Compartir no soportado en este navegador");
                     }
@@ -512,18 +566,18 @@
             };
         }
 
-        // --- CORRECCIÓN PUNTO 4: SISTEMA DE DESCARGA LOCAL CONTROLADA POR CÓDIGO ---
-        function obtenerNombreArchivo() {
+        // --- CORRECCIÓN PUNTO 4: ACCIÓN DE GUARDADO AUTOMÁTICO SIN EMERGENS DE RUTA ---
+        function obtenerNombreArchivoClean() {
             const texto = document.getElementById('editor').value.trim();
-            if (!texto) return "guion_megacable";
-            return texto.split('\n')[0].replace(/[\\/:*?"<>|]/g, "").substring(0, 25) || "guion_megacable";
+            if (!texto) return "nota_retorica";
+            return texto.split('\n')[0].replace(/[\\/:*?"<>|]/g, "").substring(0, 25) || "nota_retorica";
         }
 
         function procesarDescargaInmediata(contenido, tipoMime, extension) {
             const blob = new Blob([contenido], { type: tipoMime });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
-            a.download = `${obtenerNombreArchivo()}.${extension}`;
+            a.download = `${obtenerNombreArchivoClean()}.${extension}`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -560,15 +614,14 @@
         }
 
         function ejecutarDescargaHtmlPura(contenido) {
-            const estructura = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${obtenerNombreArchivo()}</title><style>body{font-family:sans-serif;padding:25px;line-height:1.6;}</style></head><body><p>${contenido.replace(/\n/g, '<br>')}</p></body></html>`;
-            // Descarga directa controlada por código puro sin modales de selección de ruta
+            const estructura = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${obtenerNombreArchivoClean()}</title><style>body{font-family:sans-serif;padding:25px;line-height:1.6;}</style></head><body><p>${contenido.replace(/\n/g, '<br>')}</p></body></html>`;
             procesarDescargaInmediata(estructura, 'text/html;charset=utf-8', 'html');
             renderLib();
         }
 
         document.getElementById('btn-main-guardar').addEventListener('click', guardarYDescargarHtmlDirecto);
 
-        // --- BOTONERA DE EXPORTACIÓN DEL MENÚ INFERIOR DE LA HAMBURGUESA ---
+        // --- PROCESOS DE BOTONES EXCLUSIVOS DE EXPORTACIÓN (PUNTO 3) ---
         document.getElementById('export-pdf').addEventListener('click', () => {
             const texto = document.getElementById('editor').value;
             if(!texto.trim()) return showToast("Editor vacío");
@@ -576,35 +629,35 @@
             const elementoRaiz = document.createElement('div');
             elementoRaiz.style.padding = '25px';
             elementoRaiz.style.color = '#000000';
+            elementoRaiz.style.background = '#ffffff';
             elementoRaiz.innerHTML = texto.replace(/\n/g, '<br>');
             
             const opcionesPdf = {
                 margin: 15,
-                filename: `${obtenerNombreArchivo()}.pdf`,
+                filename: `${obtenerNombreArchivoClean()}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { scale: 2 },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
             
             html2pdf().set(opcionesPdf).from(elementoRaiz).save().then(() => {
-                showToast("PDF generado de forma local");
+                showToast("PDF generado localmente");
             });
         });
 
         document.getElementById('export-pdf-edit').addEventListener('click', () => {
             const contenido = document.getElementById('editor').value;
-            const pdfEditableEstructura = `<html><body style="padding:25px;"><form><textarea style="width:100%;height:90vh;font-size:16px;">${contenido}</textarea></form></body></html>`;
+            const pdfEditableEstructura = `<html><body style="padding:25px;"><form><textarea style="width:100%;height:90vh;font-size:16px;font-family:sans-serif;">${contenido}</textarea></form></body></html>`;
             procesarDescargaInmediata(pdfEditableEstructura, 'text/html;charset=utf-8', 'pdf.html');
         });
 
         document.getElementById('export-doc').addEventListener('click', () => {
             const contenido = document.getElementById('editor').value;
-            const docEstructura = `<html xmlns:w='urn:schemas-microsoft-com:office:word'><body>${contenido.replace(/\n/g, '<p></p>')}</body></html>`;
+            const docEstructura = `<html xmlns:w='urn:schemas-microsoft-com:office:word'><head><meta charset="utf-8"></head><body>${contenido.replace(/\n/g, '<p></p>')}</body></html>`;
             procesarDescargaInmediata(docEstructura, 'application/msword;charset=utf-8', 'doc');
         });
 
-
-        // --- CORRECCIÓN PUNTO 1: CONTROL DE PESTAÑA Y GESTOS EN ANDROID 5 ---
+        // --- MANEJO DE PESTAÑA Y CONTROL DE GESTOS COMPLEMENTARIOS (PUNTO 1) ---
         function configurarGestosPestaña() {
             const btnPestaña = document.getElementById('btn-toggle-pestaña');
             const sidebarElement = document.getElementById('sidebar');
@@ -614,20 +667,18 @@
                 btnPestaña.textContent = sidebarElement.classList.contains('hidden') ? "▶" : "◀";
             });
 
-            // Lógica táctil complementaria para deslizar con los dedos
             let startX = 0;
             sidebarElement.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; }, { passive: true });
             sidebarElement.addEventListener('touchend', (e) => {
                 let diffX = startX - e.changedTouches[0].clientX;
                 if (diffX > 70 && !sidebarElement.classList.contains('hidden')) {
-                    sidebarElement.classList.add('hidden'); // Ocultar al deslizar a la izquierda
+                    sidebarElement.classList.add('hidden');
                     btnPestaña.textContent = "▶";
                 }
             }, { passive: true });
         }
 
-
-        // --- RECONOCIMIENTO DE VOZ CON REARMADO DE 6S ---
+        // --- SISTEMA RECONOCIMIENTO DE VOZ CON AUTO-REARMADO DE 6 SEGUNDOS ---
         const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let reconocimiento;
         let timerSilencio;
@@ -670,7 +721,7 @@
         }
 
         document.getElementById('btn-mic').addEventListener('click', () => {
-            if (!reconocimiento) return showToast("Dictado no soportado en este navegador");
+            if (!reconocimiento) return showToast("Dictado no soportado en este dispositivo");
             if (grabando) {
                 reconocimiento.stop();
             } else {
@@ -679,8 +730,7 @@
             }
         });
 
-
-        // --- SÍNTESIS DE VOZ Y CONTADORES ORIGINALES ---
+        // --- LECTURA POR SÍNTESIS DE VOZ ---
         document.getElementById('btn-lectura').addEventListener('click', () => {
             const texto = document.getElementById('editor').value;
             if (!texto.trim()) return showToast("Nada que leer");
@@ -693,6 +743,7 @@
             }
         });
 
+        // --- CONTADORES DE TEXTO ---
         function actualizarContadores() {
             const texto = document.getElementById('editor').value;
             const chars = texto.length;
@@ -703,16 +754,15 @@
 
         document.getElementById('editor').addEventListener('input', actualizarContadores);
 
-
-        // --- ELIMINAR NOTA Y NUEVO LIENZO ---
+        // --- GESTIÓN DE NOTAS NUEVAS Y BORRADOS ---
         function borrarDoc(id) {
-            if (!confirm("¿Deseas eliminar este guion permanentemente?")) return;
+            if (!confirm("¿Deseas eliminar esta nota permanentemente?")) return;
             const transaction = db.transaction([STORE_NAME], "readwrite");
             const store = transaction.objectStore(STORE_NAME);
             store.delete(id).onsuccess = function() {
                 if (currentDocId === id) nuevoDoc();
                 renderLib();
-                showToast("Documento eliminado");
+                showToast("Nota eliminada");
             };
         }
 
@@ -721,10 +771,19 @@
             document.getElementById('editor').value = "";
             actualizarContadores();
             renderLib();
-            showToast("Nuevo lienzo limpio");
+            showToast("Lienzo limpio");
         }
 
         document.getElementById('btn-nuevo').addEventListener('click', nuevoDoc);
+
+        // --- CAMBIAR PALETA DE COLORES ---
+        document.getElementById('cambiarPaleta').addEventListener('change', (e) => {
+            if (e.target.value === 'claro') {
+                document.body.classList.add('light-theme');
+            } else {
+                document.body.classList.remove('light-theme');
+            }
+        });
 
         function showToast(msg) {
             const toast = document.getElementById('toast-notif');
@@ -733,14 +792,20 @@
             setTimeout(() => toast.classList.remove('show'), 2200);
         }
 
-        // --- SERVICE WORKER DE LA PWA ---
+        // --- INICIALIZACIÓN GENERAL ---
+        window.addEventListener('DOMContentLoaded', () => {
+            initDB();
+            configurarGestosPestaña();
+        });
+
+        // --- REGISTRO DEL SERVICE WORKER (CON MARCADOR DE VERSIÓN 3) ---
         if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=3')
-            .then(reg => console.log('Retórica PWA activa de forma local', reg.scope))
-            .catch(err => console.warn('SW aviso:', err));
-    });
-}
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js?v=3')
+                    .then(reg => console.log('Retórica PWA activa en segundo plano', reg.scope))
+                    .catch(err => console.warn('Aviso SW:', err));
+            });
+        }
     </script>
 </body>
 </html>
