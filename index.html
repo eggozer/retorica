@@ -1,223 +1,697 @@
-ById('editor').value;
-            if (!texto.trim()) return showToast("Editor vacío, nada que guardar");
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Retórica - Bloc de Notas</title>
+    <link rel="manifest" href="./manifest.json?v=4">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
-            const transaction = db.transaction([STORE_NAME], "readwrite");
-            const store = transaction.objectStore(STORE_NAME);
-            const fechaActual = new Date().toLocaleString();
+    <style>
+        :root {
+            --bg-main: #0a0f1d;
+            --bg-sidebar: #111827;
+            --bg-card: #1f2937;
+            --bg-card-active: #374151;
+            --accent: #ffca28;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border: #2d3748;
+            --danger: #ef4444;
+        }
 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* --- REGLA 1: UNIFICACIÓN GEOMÉTRICA (TODOS LOS BOTONES RECTANGULARES) --- */
+        button, select {
+            border-radius: 4px !important; 
+        }
+
+        /* --- MENÚ LATERAL (BIBLIOTECA) --- */
+        .sidebar {
+            width: 280px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: absolute;
+            left: 0;
+            top: 0;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 99;
+        }
+
+        .sidebar.hidden {
+            transform: translateX(-280px);
+        }
+
+        /* REGLA 4: Flecha de control movida a la parte superior */
+        .toggle-sidebar-pestaña {
+            position: absolute;
+            right: -32px;
+            top: 12px;
+            width: 32px;
+            height: 40px;
+            background-color: var(--bg-sidebar);
+            color: var(--accent);
+            border: 1px solid var(--border);
+            border-left: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+            box-shadow: 3px 2px 5px rgba(0,0,0,0.3);
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            padding: 0 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+            flex-shrink: 0;
+        }
+
+        .brand-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .brand-icon-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            width: 24px;
+            height: 24px;
+        }
+
+        .brand-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+        }
+
+        .btn-nuevo-doc {
+            background: var(--accent);
+            color: #0a0f1d;
+            font-weight: bold;
+            border: none;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .document-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        .doc-item {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 10px;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+
+        .doc-item.active {
+            background-color: var(--bg-card-active);
+            border-color: var(--accent);
+        }
+
+        .doc-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 4px;
+        }
+
+        .doc-preview {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .doc-actions-pasarela {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            scrollbar-width: none;
+        }
+
+        .doc-actions-pasarela::-webkit-scrollbar {
+            display: none;
+        }
+
+        .btn-action-mini {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            padding: 4px 8px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .btn-action-mini.primary { border-color: var(--accent); color: var(--accent); }
+        .btn-action-mini.danger { border-color: var(--danger); color: var(--danger); }
+
+        .sidebar-footer-menu {
+            padding: 12px;
+            border-top: 1px solid var(--border);
+            background-color: rgba(0, 0, 0, 0.2);
+            flex-shrink: 0;
+        }
+
+        .footer-menu-title {
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .footer-buttons-container {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .btn-footer-action {
+            width: 100%;
+            background-color: var(--bg-card);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            padding: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        /* --- CONTENEDOR CENTRAL DE EDICIÓN --- */
+        .main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+            background-color: var(--bg-main);
+            /* REGLA 6: Evita desfasamiento cuando el menú lateral está desplegado */
+            padding-left: 0; 
+            position: relative;
+        }
+
+        /* REGLA 2 Y 5: Barra de herramientas fija, compacta y deslizable en ambos sentidos */
+        .top-toolbar {
+            height: 64px;
+            border-bottom: 1px solid var(--border);
+            padding: 0 8px 0 40px; /* Margen izquierdo para no colisionar con la pestaña superior */
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow-x: auto;
+            white-space: nowrap;
+            flex-shrink: 0; 
+            background-color: var(--bg-main);
+            z-index: 90;
+            scrollbar-width: none;
+        }
+
+        .top-toolbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .toolbar-item {
+            flex-shrink: 0;
+        }
+
+        /* REGLA 2: Iconos puros e intuitivos para evitar saturación */
+        .btn-icon-pure {
+            background-color: var(--bg-card);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            height: 40px;
+            padding: 0 12px;
+            font-size: 1.1rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .btn-text-action {
+            background-color: var(--bg-card);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            height: 40px;
+            padding: 0 14px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-text-action.accent-btn {
+            background-color: var(--accent);
+            color: #0a0f1d;
+            border: none;
+        }
+
+        /* REGLA 3: Botón inteligente de instalación PWA / Actualizaciones */
+        .btn-pwa-status {
+            display: none; 
+            background-color: #10b981;
+            color: white;
+            border: none;
+            height: 40px;
+            padding: 0 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* REGLA 5: Envoltura del editor independiente para mantener las barras estáticas */
+        .editor-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+            overflow: hidden; 
+        }
+
+        textarea {
+            flex: 1;
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font-size: 1.05rem;
+            line-height: 1.6;
+            resize: none;
+            outline: none;
+            overflow-y: auto; 
+        }
+
+        .stats-bar {
+            height: 28px;
+            border-top: 1px solid var(--border);
+            padding-top: 8px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background-color: var(--accent);
+            color: #0a0f1d;
+            padding: 10px 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 999;
+            pointer-events: none;
+        }
+
+        .toast.show { transform: translateX(-50%) translateY(0); }
+
+        body.light-theme {
+            --bg-main: #f9fafb;
+            --bg-sidebar: #f3f4f6;
+            --bg-card: #ffffff;
+            --bg-card-active: #e5e7eb;
+            --text-main: #111827;
+            --text-muted: #6b7280;
+            --border: #d1d5db;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar hidden" id="sidebar">
+        <div class="toggle-sidebar-pestaña" id="btn-toggle-pestaña">▶</div>
+        
+        <div class="sidebar-header">
+            <div class="brand-container">
+                <div class="brand-icon-wrapper">☀️</div>
+                <span class="brand-title">RETÓRICA</span>
+            </div>
+            <button class="btn-nuevo-doc" id="btn-nuevo">➕</button>
+        </div>
+
+        <div class="document-list" id="document-list"></div>
+
+        <div class="sidebar-footer-menu">
+            <div class="footer-menu-title">Guardar como:</div>
+            <div class="footer-buttons-container">
+                <button class="btn-footer-action" id="export-pdf">1.- PDF</button>
+                <button class="btn-footer-action" id="export-pdf-edit">2.- PDF Editable</button>
+                <button class="btn-footer-action" id="export-doc">3.- DOC</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="top-toolbar">
+            <select id="cambiarPaleta" class="toolbar-item">
+                <option value="oscuro">🌙 Oscuro</option>
+                <option value="claro">☀️ Claro</option>
+            </select>
+            <select id="voice-lang" class="toolbar-item">
+                <option value="es-MX">Español (MX)</option>
+                <option value="es-ES">Español (ES)</option>
+            </select>
+            <button class="btn-icon-pure toolbar-item" id="btn-mic" title="Dictado por voz">🎙️</button>
+            <button class="btn-icon-pure toolbar-item" id="btn-lectura" title="Leer texto">🔊</button>
+            <button class="btn-text-action accent-btn toolbar-item" id="btn-main-guardar">GUARDAR HTML</button>
+            <button class="btn-pwa-status toolbar-item" id="btn-pwa-instalar">📥 INSTALAR APP</button>
+            <button class="btn-pwa-status toolbar-item" id="btn-pwa-actualizar" style="background-color:#0284c7;">🔄 ACTUALIZAR</button>
+        </div>
+
+        <div class="editor-wrapper">
+            <textarea id="editor" placeholder="Escribe tu guion o nota aquí..."></textarea>
+            <div class="stats-bar" id="stats-bar">Caracteres: 0 | Palabras: 0 | Líneas: 0</div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast-notif">Operación exitosa</div>
+
+    <script>
+        // --- NÚCLEO E INFRAESTRUCTURA DE ALMACENAMIENTO (INDEXEDDB) ---
+        const DB_NAME = "RetoricaDB";
+        const DB_VERSION = 1;
+        const STORE_NAME = "documentos";
+        let db;
+        let currentDocId = null;
+
+        // PROTECCIÓN TOTAL CONTRA BORRADO DE CACHÉ NATIVA
+        function asegurarPersistenciaDatos() {
+            if (navigator.storage && navigator.storage.persist) {
+                navigator.storage.persist().then(granted => {
+                    console.log(granted ? "Almacenamiento PERSISTENTE garantizado" : "Almacenamiento estándar");
+                });
+            }
+        }
+
+        function initDB() {
+            asegurarPersistenciaDatos();
+            const request = indexedDB.open(DB_NAME, DB_VERSION);
+            request.onsuccess = (e) => { db = e.target.result; renderLib(); };
+            request.onupgradeneeded = (e) => {
+                const dbInstance = e.target.result;
+                if (!dbInstance.objectStoreNames.contains(STORE_NAME)) {
+                    dbInstance.createObjectStore(STORE_NAME, { keyPath: "id", autoIncrement: true });
+                }
+            };
+        }
+
+        // CONTROL VISUAL DE LA BIBLIOTECA
+        function renderLib() {
+            if (!db) return;
+            const lista = document.getElementById('document-list');
+            lista.innerHTML = "";
+            const store = db.transaction([STORE_NAME], "readonly").objectStore(STORE_NAME);
+            
+            store.openCursor(null, "prev").onsuccess = (e) => {
+                const cursor = e.target.result;
+                if (cursor) {
+                    const docData = cursor.value;
+                    const item = document.createElement('div');
+                    item.className = `doc-item ${docData.id === currentDocId ? 'active' : ''}`;
+                    
+                    const lineas = docData.texto.split('\n').filter(l => l.trim() !== "");
+                    const tituloNota = lineas[0] || "Nota sin título";
+                    const vistaPreviaNota = lineas.slice(1, 3).join(' ') || "Sin contenido...";
+
+                    item.innerHTML = `
+                        <div class="doc-title">${tituloNota}</div>
+                        <div class="doc-preview">${vistaPreviaNota}</div>
+                        <div class="doc-actions-pasarela">
+                            <button class="btn-action-mini primary" onclick="event.stopPropagation(); cargarDocEnEditor(${docData.id});">Abrir</button>
+                            <button class="btn-action-mini danger" onclick="event.stopPropagation(); borrarDoc(${docData.id});">Borrar</button>
+                        </div>
+                    `;
+                    item.addEventListener('click', () => cargarDocEnEditor(docData.id));
+                    lista.appendChild(item);
+                    cursor.continue();
+                }
+            };
+        }
+
+        function cargarDocEnEditor(id) {
+            db.transaction([STORE_NAME], "readonly").objectStore(STORE_NAME).get(id).onsuccess = (e) => {
+                const doc = e.target.result;
+                if (doc) {
+                    currentDocId = doc.id;
+                    document.getElementById('editor').value = doc.texto;
+                    actualizarContadores();
+                    renderLib();
+                    showToast("Nota cargada");
+                }
+            };
+        }
+
+        // GESTIÓN DE GUARDADOS AUTOMÁTICOS LOCALES DIRECTOS
+        function obtenerNombreArchivoClean() {
+            const texto = document.getElementById('editor').value.trim();
+            if (!texto) return "nota_retorica";
+            return texto.split('\n')[0].replace(/[\\/:*?"<>|]/g, "").substring(0, 20) || "nota_retorica";
+        }
+
+        function ejecutarDescargaBlob(contenido, tipoMime, extension) {
+            const blob = new Blob([contenido], { type: tipoMime });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `${obtenerNombreArchivoClean()}.${extension}`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(a.href);
+            showToast(`Descargado .${extension.toUpperCase()}`);
+        }
+
+        function guardarYDescargarHtmlDirecto() {
+            const texto = document.getElementById('editor').value;
+            if (!texto.trim()) return showToast("Editor vacío");
+
+            const store = db.transaction([STORE_NAME], "readwrite").objectStore(STORE_NAME);
             if (currentDocId === null) {
-                const nuevoDocData = { texto: texto, fechaCreacion: fechaActual, fechaModificacion: fechaActual };
-                const request = store.add(nuevoDocData);
-                request.onsuccess = function(e) {
+                store.add({ texto: texto }).onsuccess = (e) => {
                     currentDocId = e.target.result;
-                    ejecutarDescargaHtmlPura(texto);
+                    finalizarGuardadoHtml(texto);
                 };
             } else {
-                const requestObtener = store.get(currentDocId);
-                requestObtener.onsuccess = function(e) {
+                store.get(currentDocId).onsuccess = (e) => {
                     const data = e.target.result;
                     data.texto = texto;
-                    data.fechaModificacion = fechaActual;
-                    store.put(data).onsuccess = function() {
-                        ejecutarDescargaHtmlPura(texto);
-                    };
+                    store.put(data).onsuccess = () => finalizarGuardadoHtml(texto);
                 };
             }
         }
 
-        function ejecutarDescargaHtmlPura(contenido) {
-            const estructura = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${obtenerNombreArchivoClean()}</title><style>body{font-family:sans-serif;padding:25px;line-height:1.6;}</style></head><body><p>${contenido.replace(/\n/g, '<br>')}</p></body></html>`;
-            procesarDescargaInmediata(estructura, 'text/html;charset=utf-8', 'html');
+        function finalizarGuardadoHtml(contenido) {
+            const estructura = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${obtenerNombreArchivoClean()}</title><style>body{font-family:sans-serif;padding:30px;line-height:1.6;color:#111827;}</style></head><body><p>${contenido.replace(/\n/g, '<br>')}</p></body></html>`;
+            ejecutarDescargaBlob(estructura, 'text/html;charset=utf-8', 'html');
             renderLib();
         }
 
         document.getElementById('btn-main-guardar').addEventListener('click', guardarYDescargarHtmlDirecto);
 
-        // --- PROCESOS DE BOTONES EXCLUSIVOS DE EXPORTACIÓN (PUNTO 3) ---
+        // --- MOTORES DE EXPORTACIÓN ADICIONALES ---
         document.getElementById('export-pdf').addEventListener('click', () => {
             const texto = document.getElementById('editor').value;
             if(!texto.trim()) return showToast("Editor vacío");
-            
-            const elementoRaiz = document.createElement('div');
-            elementoRaiz.style.padding = '25px';
-            elementoRaiz.style.color = '#000000';
-            elementoRaiz.style.background = '#ffffff';
-            elementoRaiz.innerHTML = texto.replace(/\n/g, '<br>');
-            
-            const opcionesPdf = {
-                margin: 15,
-                filename: `${obtenerNombreArchivoClean()}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-            
-            html2pdf().set(opcionesPdf).from(elementoRaiz).save().then(() => {
-                showToast("PDF generado localmente");
-            });
+            const el = document.createElement('div');
+            el.style.padding = '20px'; el.style.color = '#000'; el.innerHTML = texto.replace(/\n/g, '<br>');
+            html2pdf().set({ margin: 15, filename: `${obtenerNombreArchivoClean()}.pdf` }).from(el).save();
         });
 
         document.getElementById('export-pdf-edit').addEventListener('click', () => {
-            const contenido = document.getElementById('editor').value;
-            const pdfEditableEstructura = `<html><body style="padding:25px;"><form><textarea style="width:100%;height:90vh;font-size:16px;font-family:sans-serif;">${contenido}</textarea></form></body></html>`;
-            procesarDescargaInmediata(pdfEditableEstructura, 'text/html;charset=utf-8', 'pdf.html');
+            const txt = document.getElementById('editor').value;
+            const struct = `<html><body style="padding:20px;"><textarea style="width:100%;height:90vh;font-size:16px;">${txt}</textarea></body></html>`;
+            ejecutarDescargaBlob(struct, 'text/html;charset=utf-8', 'pdf.html');
         });
 
         document.getElementById('export-doc').addEventListener('click', () => {
-            const contenido = document.getElementById('editor').value;
-            const docEstructura = `<html xmlns:w='urn:schemas-microsoft-com:office:word'><head><meta charset="utf-8"></head><body>${contenido.replace(/\n/g, '<p></p>')}</body></html>`;
-            procesarDescargaInmediata(docEstructura, 'application/msword;charset=utf-8', 'doc');
+            const txt = document.getElementById('editor').value;
+            const struct = `<html xmlns:w='urn:schemas-microsoft-com:office:word'><head><meta charset="utf-8"></head><body>${txt.replace(/\n/g, '<p></p>')}</body></html>`;
+            ejecutarDescargaBlob(struct, 'application/msword;charset=utf-8', 'doc');
         });
 
-        // --- MANEJO DE PESTAÑA Y CONTROL DE GESTOS COMPLEMENTARIOS (PUNTO 1) ---
-        function configurarGestosPestaña() {
-            const btnPestaña = document.getElementById('btn-toggle-pestaña');
-            const sidebarElement = document.getElementById('sidebar');
+        // REGLA 4: MANEJO DE PESTAÑA SUPERIOR Y GESTOS BIDIRECCIONALES COMPLETOS
+        function configurarGestosMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const btn = document.getElementById('btn-toggle-pestaña');
 
-            btnPestaña.addEventListener('click', () => {
-                sidebarElement.classList.toggle('hidden');
-                btnPestaña.textContent = sidebarElement.classList.contains('hidden') ? "▶" : "◀";
+            btn.addEventListener('click', () => {
+                sidebar.classList.toggle('hidden');
+                btn.textContent = sidebar.classList.contains('hidden') ? "▶" : "◀";
             });
 
+            // Captura de arrastre táctil (Deslizar para abrir / cerrar)
             let startX = 0;
-            sidebarElement.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; }, { passive: true });
-            sidebarElement.addEventListener('touchend', (e) => {
+            document.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; }, { passive: true });
+            document.addEventListener('touchend', (e) => {
                 let diffX = startX - e.changedTouches[0].clientX;
-                if (diffX > 70 && !sidebarElement.classList.contains('hidden')) {
-                    sidebarElement.classList.add('hidden');
-                    btnPestaña.textContent = "▶";
+                
+                if (diffX > 60 && !sidebar.classList.contains('hidden')) { 
+                    // Deslizar a la izquierda: Cierra el menú
+                    sidebar.classList.add('hidden');
+                    btn.textContent = "▶";
+                } else if (diffX < -60 && sidebar.classList.contains('hidden') && startX < 40) {
+                    // Deslizar desde el borde izquierdo a la derecha: Abre el menú
+                    sidebar.classList.remove('hidden');
+                    btn.textContent = "◀";
                 }
             }, { passive: true });
         }
 
-        // --- SISTEMA RECONOCIMIENTO DE VOZ CON AUTO-REARMADO DE 6 SEGUNDOS ---
-        const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        let reconocimiento;
-        let timerSilencio;
-        let grabando = false;
+        // --- SISTEMA RECONOCIMIENTO Y REARMADO DE VOZ (6 SEGUNDOS) ---
+        const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let reco; let timerSilencio; let activo = false;
 
-        if (Recognition) {
-            reconocimiento = new Recognition();
-            reconocimiento.continuous = true;
-            reconocimiento.interimResults = false;
-
-            reconocimiento.onstart = () => {
-                grabando = true;
-                document.getElementById('btn-mic').textContent = "🛑 GRABANDO";
-                resetearTimerSilencio();
+        if (Speech) {
+            reco = new Speech(); reco.continuous = true;
+            reco.onstart = () => { activo = true; document.getElementById('btn-mic').textContent = "🛑"; resetTimer(); };
+            reco.onresult = (e) => {
+                const trans = e.results[e.resultIndex][0].transcript;
+                const area = document.getElementById('editor');
+                area.value += (area.value ? ' ' : '') + trans;
+                actualizarContadores(); resetTimer();
             };
-
-            reconocimiento.onresult = (e) => {
-                const transcripcion = e.results[e.resultIndex][0].transcript;
-                const txtarea = document.getElementById('editor');
-                txtarea.value += (txtarea.value ? ' ' : '') + transcripcion;
-                actualizarContadores();
-                resetearTimerSilencio();
-            };
-
-            reconocimiento.onend = () => {
-                grabando = false;
-                document.getElementById('btn-mic').textContent = "🎙️ MIC";
-                clearTimeout(timerSilencio);
-            };
+            reco.onend = () => { activo = false; document.getElementById('btn-mic').textContent = "🎙️"; clearTimeout(timerSilencio); };
         }
 
-        function resetearTimerSilencio() {
+        function resetTimer() {
             clearTimeout(timerSilencio);
-            timerSilencio = setTimeout(() => {
-                if (grabando) {
-                    reconocimiento.stop();
-                    showToast("Micrófono cerrado por inactividad");
-                }
-            }, 6000);
+            timerSilencio = setTimeout(() => { if (activo) reco.stop(); }, 6000);
         }
 
         document.getElementById('btn-mic').addEventListener('click', () => {
-            if (!reconocimiento) return showToast("Dictado no soportado en este dispositivo");
-            if (grabando) {
-                reconocimiento.stop();
-            } else {
-                reconocimiento.lang = document.getElementById('voice-lang').value;
-                reconocimiento.start();
-            }
+            if (!reco) return showToast("No soportado");
+            if (activo) { reco.stop(); } else { reco.lang = document.getElementById('voice-lang').value; reco.start(); }
         });
 
-        // --- LECTURA POR SÍNTESIS DE VOZ ---
         document.getElementById('btn-lectura').addEventListener('click', () => {
-            const texto = document.getElementById('editor').value;
-            if (!texto.trim()) return showToast("Nada que leer");
-            
+            const txt = document.getElementById('editor').value;
+            if (!txt.trim()) return showToast("Nada que leer");
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
-                const lectura = new SpeechSynthesisUtterance(texto);
-                lectura.lang = document.getElementById('voice-lang').value;
-                window.speechSynthesis.speak(lectura);
+                const u = new SpeechSynthesisUtterance(txt);
+                u.lang = document.getElementById('voice-lang').value;
+                window.speechSynthesis.speak(u);
             }
         });
 
-        // --- CONTADORES DE TEXTO ---
+        // --- CONTADORES Y EDICIÓN ---
         function actualizarContadores() {
-            const texto = document.getElementById('editor').value;
-            const chars = texto.length;
-            const palabras = texto.trim() === "" ? 0 : texto.trim().split(/\s+/).length;
-            const lineas = texto === "" ? 0 : texto.split('\n').length;
-            document.getElementById('stats-bar').textContent = `Caracteres: ${chars} | Palabras: ${palabras} | Líneas: ${lineas}`;
+            const txt = document.getElementById('editor').value;
+            const chars = txt.length;
+            const words = txt.trim() === "" ? 0 : txt.trim().split(/\s+/).length;
+            const lines = txt === "" ? 0 : txt.split('\n').length;
+            document.getElementById('stats-bar').textContent = `Caracteres: ${chars} | Palabras: ${words} | Líneas: ${lines}`;
         }
-
         document.getElementById('editor').addEventListener('input', actualizarContadores);
 
-        // --- GESTIÓN DE NOTAS NUEVAS Y BORRADOS ---
         function borrarDoc(id) {
-            if (!confirm("¿Deseas eliminar esta nota permanentemente?")) return;
-            const transaction = db.transaction([STORE_NAME], "readwrite");
-            const store = transaction.objectStore(STORE_NAME);
-            store.delete(id).onsuccess = function() {
-                if (currentDocId === id) nuevoDoc();
-                renderLib();
-                showToast("Nota eliminada");
+            if (!confirm("¿Eliminar nota?")) return;
+            db.transaction([STORE_NAME], "readwrite").objectStore(STORE_NAME).delete(id).onsuccess = () => {
+                if (currentDocId === id) { currentDocId = null; document.getElementById('editor').value = ""; actualizarContadores(); }
+                renderLib(); showToast("Nota eliminada");
             };
         }
+        document.getElementById('btn-nuevo').addEventListener('click', () => {
+            currentDocId = null; document.getElementById('editor').value = ""; actualizarContadores(); renderLib(); showToast("Nuevo lienzo");
+        });
 
-        function nuevoDoc() {
-            currentDocId = null;
-            document.getElementById('editor').value = "";
-            actualizarContadores();
-            renderLib();
-            showToast("Lienzo limpio");
-        }
-
-        document.getElementById('btn-nuevo').addEventListener('click', nuevoDoc);
-
-        // --- CAMBIAR PALETA DE COLORES ---
         document.getElementById('cambiarPaleta').addEventListener('change', (e) => {
-            if (e.target.value === 'claro') {
-                document.body.classList.add('light-theme');
-            } else {
-                document.body.classList.remove('light-theme');
-            }
+            document.body.classList.toggle('light-theme', e.target.value === 'claro');
         });
 
         function showToast(msg) {
-            const toast = document.getElementById('toast-notif');
-            toast.textContent = msg;
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 2200);
+            const t = document.getElementById('toast-notif'); t.textContent = msg; t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2000);
         }
 
-        // --- INICIALIZACIÓN GENERAL ---
-        window.addEventListener('DOMContentLoaded', () => {
-            initDB();
-            configurarGestosPestaña();
+        // REGLA 3: MANEJADOR LOGICÓ DE INSTALACIÓN NATIVA PWA
+        let disparadorInstalaPWA;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            disparadorInstalaPWA = e;
+            document.getElementById('btn-pwa-instalar').style.display = 'inline-flex';
         });
 
-        // --- REGISTRO DEL SERVICE WORKER (CON MARCADOR DE VERSIÓN 3) ---
+        document.getElementById('btn-pwa-instalar').addEventListener('click', () => {
+            if (disparadorInstalaPWA) {
+                disparadorInstalaPWA.prompt();
+                disparadorInstalaPWA.userChoice.then((choice) => {
+                    if (choice.outcome === 'accepted') {
+                        document.getElementById('btn-pwa-instalar').style.display = 'none';
+                    }
+                });
+            }
+        });
+
+        window.addEventListener('DOMContentLoaded', () => { initDB(); configurarGestosMenu(); });
+
+        // VINCULACIÓN ASÍNCRONA DE ACTUALIZACIÓN (REGLA 3)
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=3')
-                    .then(reg => console.log('Retórica PWA activa en segundo plano', reg.scope))
-                    .catch(err => console.warn('Aviso SW:', err));
+                navigator.serviceWorker.register('./sw.js?v=4')
+                    .then(reg => {
+                        // Detecta si el sw.js encontró cambios y tiene una versión esperando en la recámara
+                        reg.addEventListener('updatefound', () => {
+                            const nuevoWorker = reg.installing;
+                            nuevoWorker.addEventListener('statechange', () => {
+                                if (nuevoWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    document.getElementById('btn-pwa-actualizar').style.display = 'inline-flex';
+                                }
+                            });
+                        });
+                    });
             });
         }
+
+        document.getElementById('btn-pwa-actualizar').addEventListener('click', () => {
+            window.location.reload();
+        });
     </script>
 </body>
 </html>
