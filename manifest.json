@@ -1,6 +1,6 @@
 {
   "short_name": "Retórica",
-  "name": "Retórica",
+  "name": "Retórica - Bloc de Notas",
   "icons": [
     {
       "src": "icon-192.png",
@@ -14,8 +14,8 @@
     }
   ],
   "start_url": "index.html",
-  "background_color": "#ffffff",
+  "background_color": "#0a0f1d",
+  "theme_color": "#0a0f1d",
   "display": "standalone",
-  "theme_color": "#2563eb",
   "orientation": "portrait"
 }
