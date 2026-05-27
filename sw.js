@@ -1,5 +1,5 @@
-// --- SERVICE WORKER CONTROL DE ENTORNO (V4) ---
-const CACHE_NAME = 'retorica-cache-v4';
+// --- SERVICE WORKER CONTROL DE ENTORNO (V5) ---
+const CACHE_NAME = 'retorica-cache-v5';
 
 const ASSETS = [
   './',
@@ -9,7 +9,6 @@ const ASSETS = [
   './icon-512.png'
 ];
 
-// Instalación inicial forzada
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -19,7 +18,6 @@ self.addEventListener('install', (event) => {
   self.skipWaiting(); 
 });
 
-// Activación y recolección de basura (Limpia lo feo del diseño anterior)
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -35,7 +33,6 @@ self.addEventListener('activate', (event) => {
   self.clients.claim(); 
 });
 
-// Estrategia combinada para velocidad en Android 5 (Red / Local segura)
 self.addEventListener('fetch', (event) => {
   if (!event.request.url.startsWith(self.location.origin)) {
     return;
