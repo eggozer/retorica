@@ -8,7 +8,7 @@ let idDocumentoActual = null;
 let dictadoActivo = false;
 let lecturaActiva = false;
 
-// Variables para el control de deslizamiento táctil (Swipe)
+// Variables globales para captura de Swipe nativo
 let touchStartX = 0;
 let touchEndX = 0;
 
@@ -22,17 +22,15 @@ const btnTema = document.getElementById('btn-toggle-tema');
 const btnGuardar = document.getElementById('btn-main-guardar');
 const toast = document.getElementById('toast-notif');
 
-// CORRECCIÓN 1: Cargar la interfaz primero de forma asíncrona para eliminar retardos
 function inicializarApp() {
     cargarSelectores(comboApp, comboVoz);
     configurarEventosBasicos();
     configurarGestoDeslizamiento();
     
-    // Dejar la carga pesada de la Base de Datos en segundo plano
     initDB().then(() => {
         actualizarContadoresEditor();
-        mostrarNotificacion("Retórica Lista Global");
-    }).catch(err => console.error("Error IndexedDB diferido:", err));
+        mostrarNotificacion("Retórica Modular Inicializada");
+    }).catch(err => console.error("Error IndexedDB:", err));
 }
 
 function configurarEventosBasicos() {
@@ -45,9 +43,13 @@ function configurarEventosBasicos() {
         btnTogglePestaña.onclick = async () => {
             const seOculta = sidebar.classList.toggle('hidden');
             btnTogglePestaña.textContent = seOculta ? "▶" : "◀";
-            btnTogglePestaña.style.left = seOculta ? "12px" : "292px"; // Mover de forma armónica
             
-            if (!seOculta) {
+            if (seOculta) {
+                document.body.classList.remove('sidebar-open');
+                btnTogglePestaña.style.left = "12px";
+            } else {
+                document.body.classList.add('sidebar-open');
+                btnTogglePestaña.style.left = "292px";
                 await renderizarListaDocumentos();
             }
         };
@@ -113,30 +115,35 @@ function configurarEventosBasicos() {
     };
 }
 
-// CORRECCIÓN 2: LÓGICA DE SWIPE PARA CIERRE TÁCTIL INTUITIVO
+// LÓGICA REFORZADA DE SWIPE MULTICAPA PARA CIERRE POR DESLIZAMIENTO
 function configurarGestoDeslizamiento() {
-    const zonaSwipe = document.getElementById('editor-swipe-zone');
     const sidebar = document.getElementById('sidebar');
     const btnTogglePestaña = document.getElementById('btn-toggle-pestaña');
+    const capaInvisible = document.getElementById('swipe-capture-edge');
 
-    zonaSwipe.addEventListener('touchstart', e => {
+    // Escuchar el inicio del toque en el editor y la capa invisible
+    const manejarTouchStart = (e) => {
         touchStartX = e.changedTouches[0].screenX;
-    }, { passive: true });
+    };
 
-    zonaSwipe.addEventListener('touchend', e => {
+    // Escuchar el final del toque y calcular la distancia recorrida
+    const manejarTouchEnd = (e) => {
         touchEndX = e.changedTouches[0].screenX;
-        procesarGestoGirar();
-    }, { passive: true });
-
-    function procesarGestoGirar() {
-        // Si el menú está abierto y el dedo se desliza de derecha a izquierda (Swipe Left)
-        if (!sidebar.classList.contains('hidden') && (touchStartX - touchEndX > 60)) {
+        // Si el menú está abierto y el dedo se mueve hacia la izquierda más de 50 píxeles
+        if (!sidebar.classList.contains('hidden') && (touchStartX - touchEndX > 50)) {
             sidebar.classList.add('hidden');
+            document.body.classList.remove('sidebar-open');
             btnTogglePestaña.textContent = "▶";
             btnTogglePestaña.style.left = "12px";
-            mostrarNotificacion("Menú ocultado");
+            mostrarNotificacion("Biblioteca oculta");
         }
-    }
+    };
+
+    // Registrar los eventos en el área del editor y la capa interceptora
+    editor.addEventListener('touchstart', manejarTouchStart, { passive: true });
+    editor.addEventListener('touchend', manejarTouchEnd, { passive: true });
+    capaInvisible.addEventListener('touchstart', manejarTouchStart, { passive: true });
+    capaInvisible.addEventListener('touchend', manejarTouchEnd, { passive: true });
 }
 
 function actualizarContadoresEditor() {
@@ -165,8 +172,9 @@ async function renderizarListaDocumentos() {
         span.onclick = () => {
             editor.value = doc.contenido; idDocumentoActual = doc.id; actualizarContadoresEditor();
             document.getElementById('sidebar').classList.add('hidden');
-            document.getElementById('btn-toggle-pestaña').textContent = "▶";
-            document.getElementById('btn-toggle-pestaña').style.left = "12px";
+            document.body.classList.remove('sidebar-open');
+            btnTogglePestaña.textContent = "▶";
+            btnTogglePestaña.style.left = "12px";
         };
 
         const btn = document.createElement('button'); btn.textContent = "🗑️"; btn.style = 'background:none; border:none; cursor:pointer; padding:4px;';
