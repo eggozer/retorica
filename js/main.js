@@ -161,6 +161,70 @@ function cambiarEstadoMic(estaActivo) {
     btnMic.style.borderColor = estaActivo ? "var(--danger)" : "var(--border)";
 }
 
+// --- RENDERIZADO SEGURO DE LA BIBLIOTECA EN LA INTERFAZ ---
+async function renderizarListaDocumentos() {
+    const listaContenedor = document.getElementById('document-list');
+    if (!listaContenedor) return;
+
+    listaContenedor.innerHTML = '';
+    const documentos = await obtenerDocumentos();
+
+    if (documentos.length === 0) {
+        listaContenedor.innerHTML = '<p style="color:var(--text-muted); padding:10px; font-size:14px;">No hay notas</p>';
+        return;
+    }
+
+    documentos.forEach(doc => {
+        const div = document.createElement('div');
+        div.className = 'documento-item';
+        div.style.display = 'flex';
+        div.style.justifyContent = 'space-between';
+        div.style.alignItems = 'center';
+        div.style.padding = '8px 4px';
+        div.style.borderBottom = '1px solid var(--border)';
+        div.style.cursor = 'pointer';
+
+        const spanTitulo = document.createElement('span');
+        spanTitulo.textContent = doc.titulo;
+        spanTitulo.style.flex = '1';
+        spanTitulo.style.fontSize = '14px';
+        spanTitulo.onclick = () => {
+            editor.value = doc.contenido;
+            idDocumentoActual = doc.id;
+            actualizarContadoresEditor();
+            mostrarNotificacion("Nota cargada");
+            
+            // Cierre automático tras seleccionar la nota
+            document.getElementById('sidebar').classList.add('hidden');
+            document.getElementById('btn-toggle-pestaña').textContent = "▶";
+        };
+
+        const btnBorrar = document.createElement('button');
+        btnBorrar.textContent = "🗑️";
+        btnBorrar.style.background = 'none';
+        btnBorrar.style.border = 'none';
+        btnBorrar.style.cursor = 'pointer';
+        btnBorrar.style.padding = '4px';
+        btnBorrar.onclick = async (e) => {
+            e.stopPropagation();
+            if (confirm(`¿Eliminar "${doc.titulo}"?`)) {
+                await eliminarDocumento(doc.id);
+                if (idDocumentoActual === doc.id) {
+                    editor.value = '';
+                    idDocumentoActual = null;
+                    actualizarContadoresEditor();
+                }
+                renderizarListaDocumentos();
+                mostrarNotificacion("Nota eliminada");
+            }
+        };
+
+        div.appendChild(spanTitulo);
+        div.appendChild(btnBorrar);
+        listaContenedor.appendChild(div);
+    });
+}
+
 // Asegurar renderizado visual de alertas
 function mostrarNotificacion(mensaje) {
     if (!toast) return;
