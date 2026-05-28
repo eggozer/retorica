@@ -38,13 +38,12 @@ export function cargarSelectores(comboApp, comboVoz) {
 }
 
 export function aplicarTraduccionInterfaz(codigoIdioma, elementos) {
-    const langConfig = LISTA_IDIOMAS.find(l => l.code === codigoIdioma) || LISTA_IDIOMAS[0];
+    const langConfig = LISTA_IDIOMS.find(l => l.code === codigoIdioma) || LISTA_IDIOMAS[0];
     
+    // Corregido para usar .saveAs tal como se declaró arriba
     if (elementos.lblSaveAs) elementos.lblSaveAs.textContent = langConfig.saveAs;
     if (elementos.btnNuevo) elementos.btnNuevo.textContent = langConfig.newDoc;
     
-    // Cambiar dinámicamente el atributo lang del HTML para optimizar accesibilidad
     document.documentElement.lang = codigoIdioma;
-    
     return langConfig;
 }
