@@ -21,7 +21,7 @@ export async function guardarDocumento(id, titulo, contenido) {
     const db = await initDB();
     return new Promise((resolve, reject) => {
         const transaction = db.transaction([STORE_NAME], 'readwrite');
-        const store = transaction.objectStore();
+        const store = transaction.objectStore(STORE_NAME); // Corregido
         const registro = { id, titulo, contenido, fechaModificacion: Date.now() };
         const request = store.put(registro);
         request.onsuccess = () => resolve(true);
@@ -33,7 +33,7 @@ export async function obtenerDocumentos() {
     const db = await initDB();
     return new Promise((resolve, reject) => {
         const transaction = db.transaction([STORE_NAME], 'readonly');
-        const store = transaction.objectStore(STORE_NAME);
+        const store = transaction.objectStore(STORE_NAME); // Corregido
         const request = store.getAll();
         request.onsuccess = () => resolve(request.result || []);
         request.onerror = (e) => reject(e.target.error);
@@ -44,7 +44,7 @@ export async function eliminarDocumento(id) {
     const db = await initDB();
     return new Promise((resolve, reject) => {
         const transaction = db.transaction([STORE_NAME], 'readwrite');
-        const store = transaction.objectStore(STORE_NAME);
+        const store = transaction.objectStore(STORE_NAME); // Corregido
         const request = store.delete(id);
         request.onsuccess = () => resolve(true);
         request.onerror = (e) => reject(e.target.error);
