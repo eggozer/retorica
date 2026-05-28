@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Retórica - Bloc de Notas</title>
     <link rel="manifest" href="./manifest.json?v=7">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -20,60 +20,58 @@
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--bg-main); color: var(--text-main); display: flex; height: 100vh; width: 100vw; overflow: hidden; position: relative; }
-        button, select { border-radius: 4px !important; }
+        button, select { border-radius: 4px !important; height: 40px; padding: 0 10px; background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border); font-size: 0.85rem; }
 
         /* --- MENÚ LATERAL (BIBLIOTECA) --- */
-        .sidebar { width: 280px; background-color: var(--bg-sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; height: 100%; position: absolute; left: 0; top: 0; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 120; }
+        .sidebar { width: 280px; background-color: var(--bg-sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; height: 100%; position: absolute; left: 0; top: 0; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 200; }
         .sidebar.hidden { transform: translateX(-280px); }
         
-        /* Botón Flecha alineado arriba a la izquierda de forma limpia */
-        .toggle-sidebar-pestaña { position: absolute; left: 12px; top: 12px; width: 40px; height: 40px; background-color: var(--bg-card); color: var(--accent); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; z-index: 130; font-size: 1.2rem; transition: left 0.3s ease; }
-        .sidebar-header { padding: 0 16px 0 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; height: 64px; flex-shrink: 0; }
-        .btn-nuevo-doc { background: var(--accent); color: #0a0f1d; font-weight: bold; border: none; padding: 6px 12px; cursor: pointer; font-size: 0.85rem; }
+        /* Flecha flotante integrada al primer nivel */
+        .toggle-sidebar-pestaña { position: absolute; left: 12px; top: 10px; width: 40px; height: 40px; background-color: var(--bg-card); color: var(--accent); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; z-index: 250; font-size: 1.2rem; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 4px; }
+        .sidebar-header { padding: 0 16px 0 60px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; height: 60px; flex-shrink: 0; }
+        .btn-nuevo-doc { background: var(--accent); color: #0a0f1d; font-weight: bold; border: none; padding: 6px 12px; cursor: pointer; font-size: 0.85rem; height: auto; }
         .document-list { flex: 1; overflow-y: auto; padding: 12px; }
         .sidebar-footer-menu { padding: 12px; border-top: 1px solid var(--border); background-color: rgba(0, 0, 0, 0.2); flex-shrink: 0; }
         .footer-menu-title { font-size: 0.75rem; font-weight: bold; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; }
         .footer-buttons-container { display: flex; flex-direction: column; gap: 6px; }
-        .btn-footer-action { width: 100%; background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border); padding: 8px; font-size: 0.8rem; font-weight: 600; text-align: left; cursor: pointer; }
+        .btn-footer-action { width: 100%; text-align: left; cursor: pointer; }
 
-        /* --- CONTENEDOR CENTRAL DE EDICIÓN --- */
-        .main-container { flex: 1; display: flex; flex-direction: column; height: 100%; width: 100%; background-color: var(--bg-main); position: relative; padding-left: 0; }
+        /* --- CONTENEDOR CENTRAL DE DOS NIVELES --- */
+        .main-container { flex: 1; display: flex; flex-direction: column; height: 100%; width: 100%; background-color: var(--bg-main); position: relative; }
         
-        /* Barra de herramientas superior con espacio para la flecha a la izquierda */
-        .top-toolbar { height: 64px; border-bottom: 1px solid var(--border); padding: 0 8px 0 64px; display: flex; align-items: center; gap: 12px; overflow-x: auto; white-space: nowrap; flex-shrink: 0; background-color: var(--bg-main); z-index: 90; scrollbar-width: none; }
-        .top-toolbar::-webkit-scrollbar { display: none; }
-        
-        /* LOGO CENTRADO HASTA ARRIBA CON ICONO DE SOL ☀️ */
-        .brand-title-center { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 6px; font-weight: bold; font-size: 1rem; letter-spacing: 1px; color: var(--text-main); background-color: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); padding: 6px 16px; height: 40px; border-radius: 20px; z-index: 100; pointer-events: none; }
-        
-        /* Ajuste de margen para los racks para que no se encimen con el logo central */
-        .rack-left-offset { margin-left: auto; }
+        /* NIVEL 1: ENCABEZADO SUPERIOR FIJO */
+        .app-header-top { height: 60px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); position: relative; flex-shrink: 0; z-index: 100; }
+        .brand-title-center { display: flex; align-items: center; gap: 8px; font-weight: bold; font-size: 1.1rem; letter-spacing: 1.5px; color: var(--text-main); }
+        .brand-title-center span:first-child { font-size: 1.3rem; }
 
+        /* NIVEL 2: BARRA DE RACKS HERRAMIENTAS */
+        .top-toolbar-racks { height: 54px; border-bottom: 1px solid var(--border); padding: 0 12px; display: flex; align-items: center; gap: 10px; overflow-x: auto; white-space: nowrap; flex-shrink: 0; background-color: var(--bg-main); z-index: 90; scrollbar-width: none; }
+        .top-toolbar-racks::-webkit-scrollbar { display: none; }
+        
         .toolbar-rack { display: inline-flex; align-items: center; gap: 6px; background-color: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 4px 8px; border-radius: 6px; flex-shrink: 0; }
-        .toolbar-item { flex-shrink: 0; }
-        .btn-icon-pure { background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border); height: 40px; padding: 0 12px; font-size: 1.1rem; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
-        .btn-text-action { background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border); height: 40px; padding: 0 14px; font-size: 0.8rem; font-weight: bold; cursor: pointer; }
+        .btn-icon-pure { font-size: 1.1rem; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; width: 42px; }
+        .btn-text-action { font-weight: bold; cursor: pointer; padding: 0 14px; }
         .btn-text-action.accent-btn { background-color: var(--accent); color: #0a0f1d; border: none; }
 
-        /* Área de edición y zona de captura táctil */
+        /* --- ÁREA DE EDICIÓN --- */
         .editor-wrapper { flex: 1; display: flex; flex-direction: column; padding: 16px; overflow: hidden; background-color: transparent; position: relative; }
-        textarea { flex: 1; width: 100%; background: transparent; border: none; color: var(--text-main); font-size: 1.05rem; line-height: 1.6; resize: none; outline: none; overflow-y: auto; z-index: 10; }
-        .stats-bar { height: 28px; border-top: 1px solid var(--border); padding-top: 8px; font-size: 0.75rem; color: var(--text-muted); flex-shrink: 0; }
+        textarea { flex: 1; width: 100%; background: transparent; border: none; color: var(--text-main); font-size: 1.1rem; line-height: 1.6; resize: none; outline: none; overflow-y: auto; z-index: 10; }
+        .stats-bar { height: 24px; border-top: 1px solid var(--border); padding-top: 6px; font-size: 0.75rem; color: var(--text-muted); flex-shrink: 0; }
         
-        /* Capa invisible lateral para detectar el deslizamiento del dedo sin bloquear el teclado */
-        .swipe-capture-edge { position: absolute; top: 0; right: 0; bottom: 0; width: 80px; z-index: 110; background: transparent; display: none; }
+        /* Interceptor para el cierre táctil por Swipe */
+        .swipe-capture-edge { position: absolute; top: 0; right: 0; bottom: 0; width: 60px; z-index: 110; background: transparent; display: none; }
         .sidebar-open .swipe-capture-edge { display: block; }
 
         .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px); background-color: var(--accent); color: #0a0f1d; padding: 10px 20px; font-size: 0.85rem; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: transform 0.3s ease; z-index: 999; pointer-events: none; }
         .toast.show { transform: translateX(-50%) translateY(0); }
     </style>
 </head>
-<body class="sidebar-closed">
+<body>
 
+    <!-- BOTÓN FLECHA FLOTANTE DINÁMICA -->
     <div class="toggle-sidebar-pestaña" id="btn-toggle-pestaña">▶</div>
 
-    <div class="brand-title-center"><span>☀️</span><span>RETÓRICA</span></div>
-
+    <!-- MENÚ LATERAL (BIBLIOTECA) -->
     <div class="sidebar hidden" id="sidebar">
         <div class="sidebar-header">
             <div style="display:flex; align-items:center; gap:6px;"><span style="font-size:1.1rem;">☀️</span><span style="font-weight:700; letter-spacing:0.5px; font-size:0.95rem;">RETÓRICA</span></div>
@@ -90,29 +88,35 @@
         </div>
     </div>
 
+    <!-- ÁREA PRINCIPAL -->
     <div class="main-container">
-        <div class="top-toolbar" id="toolbar-container">
-            
+        <!-- NIVEL 1 -->
+        <header class="app-header-top">
+            <div class="brand-title-center">
+                <span>☀️</span>
+                <span>RETÓRICA</span>
+            </div>
+        </header>
+
+        <!-- NIVEL 2 -->
+        <div class="top-toolbar-racks" id="toolbar-container">
             <div class="toolbar-rack" id="rack-audio">
-                <button class="btn-icon-pure toolbar-item" id="btn-mic" title="Dictado por voz">🎙️</button>
-                <button class="btn-icon-pure toolbar-item" id="btn-lectura" title="Leer texto">🔊</button>
+                <button class="btn-icon-pure" id="btn-mic" title="Dictado por voz">🎙️</button>
+                <button class="btn-icon-pure" id="btn-lectura" title="Leer texto">🔊</button>
             </div>
-
-            <div class="toolbar-rack rack-left-offset" id="rack-idiomas">
-                <select id="app-lang" class="toolbar-item"><option value="es">Español</option></select>
-                <select id="voice-lang" class="toolbar-item"><option value="es-MX">Español (MX)</option></select>
+            <div class="toolbar-rack" id="rack-idiomas">
+                <select id="app-lang" title="Idioma App"><option value="es">Español</option></select>
+                <select id="voice-lang" title="Idioma Voz"><option value="es-MX">Español (MX)</option></select>
             </div>
-
             <div class="toolbar-rack" id="rack-sistema">
-                <button class="btn-icon-pure toolbar-item" id="btn-toggle-tema" title="Alternar Tema">🌙</button>
-                <button class="btn-text-action accent-btn toolbar-item" id="btn-main-guardar">GUARDAR HTML</button>
+                <button class="btn-icon-pure" id="btn-toggle-tema" title="Alternar Tema">🌙</button>
+                <button class="btn-text-action accent-btn" id="btn-main-guardar">GUARDAR HTML</button>
             </div>
-
         </div>
 
+        <!-- EDITOR -->
         <div class="editor-wrapper">
             <div class="swipe-capture-edge" id="swipe-capture-edge"></div>
-            
             <textarea id="editor" placeholder="Escribe tu guion o nota aquí..."></textarea>
             <div class="stats-bar" id="stats-bar">Caracteres: 0 | Palabras: 0 | Líneas: 0</div>
         </div>
