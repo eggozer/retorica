@@ -38,6 +38,22 @@ async function inicializarApp() {
 function configurarEventosBasicos() {
     editor.addEventListener('input', actualizarContadoresEditor);
 
+// --- CONTROL DEL MENÚ LATERAL (BIBLIOTECA) ---
+    const sidebar = document.getElementById('sidebar');
+    const btnTogglePestaña = document.getElementById('btn-toggle-pestaña');
+
+    if (btnTogglePestaña && sidebar) {
+        btnTogglePestaña.onclick = async () => {
+            const seOculta = sidebar.classList.toggle('hidden');
+            btnTogglePestaña.textContent = seOculta ? "▶" : "◀";
+            
+            // Si el menú se abre (ya no está oculto), cargar notas desde IndexedDB
+            if (!seOculta) {
+                await renderizarListaDocumentos();
+            }
+        };
+    }
+    
     // Botón para Limpiar el Editor y Crear un Documento Nuevo
     document.getElementById('btn-nuevo').onclick = () => {
         if (editor.value.trim() && confirm("¿Deseas crear una nueva nota? Asegúrate de haber guardado tus cambios actuales.")) {
