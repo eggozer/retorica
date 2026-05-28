@@ -22,10 +22,8 @@ const toast = document.getElementById('toast-notif');
 
 // 1. INICIALIZACIÓN DE COMPONENTES
 async function inicializarApp() {
-    // Configurar menús de lenguajes e interfaz
     cargarSelectores(comboApp, comboVoz);
     
-    // Conectar base de datos persistente y cargar biblioteca de notas
     try {
         await initDB();
         configurarEventosBasicos();
@@ -38,10 +36,9 @@ async function inicializarApp() {
 
 // 2. CONTROLADORES DE EVENTOS (ACCIONES DE BOTONES)
 function configurarEventosBasicos() {
-    // Evento de escucha para contadores de texto en tiempo real
     editor.addEventListener('input', actualizarContadoresEditor);
 
-// Botón para Limpiar el Editor y Crear un Documento Nuevo
+    // Botón para Limpiar el Editor y Crear un Documento Nuevo
     document.getElementById('btn-nuevo').onclick = () => {
         if (editor.value.trim() && confirm("¿Deseas crear una nueva nota? Asegúrate de haber guardado tus cambios actuales.")) {
             editor.value = '';
@@ -53,7 +50,7 @@ function configurarEventosBasicos() {
             mostrarNotificacion("Editor listo");
         }
     };
-    
+
     // Botón Dictado por Voz (Microfóno)
     btnMic.onclick = () => {
         if (dictadoActivo) {
@@ -73,7 +70,7 @@ function configurarEventosBasicos() {
         }
     };
 
-    // Botón Lectura en Voz Alta
+    // Botón Lectura en Voz Alta (Corregido sin el cierre huérfano)
     btnLectura.onclick = () => {
         const comenzoLectura = leerTexto(editor.value, comboVoz.value.split('-')[0], () => {
             lecturaActiva = false;
@@ -83,7 +80,7 @@ function configurarEventosBasicos() {
         if (comenzoLectura) {
             lecturaActiva = true;
             btnLectura.textContent = "⏹️";
-        } else if (lecturaActiva === false) {
+        } else if (!lecturaActiva) {
             btnLectura.textContent = "🔊";
         }
     };
@@ -106,11 +103,9 @@ function configurarEventosBasicos() {
         const lineas = contenido.split('\n');
         const titulo = lineas[0].substring(0, 25).trim() || "Nota Nueva";
 
-        // 1. Asegurar persistencia interna blindada
         const exito = await guardarDocumento(idDocumentoActual, titulo, contenido);
         
         if (exito) {
-            // 2. Generar descarga real del archivo .html para el móvil
             const blob = new Blob([contenido], { type: 'text/html;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
@@ -150,11 +145,12 @@ function cambiarEstadoMic(estaActivo) {
     btnMic.style.borderColor = estaActivo ? "var(--danger)" : "var(--border)";
 }
 
+// Asegurar renderizado visual de alertas
 function mostrarNotificacion(mensaje) {
+    if (!toast) return;
     toast.textContent = mensaje;
     toast.classList.add('show');
     setTimeout(() => toast.classList.remove('show'), 2500);
 }
 
-// Ejecutar al cargar el documento por completo
 window.addEventListener('DOMContentLoaded', inicializarApp);
