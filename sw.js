@@ -1,5 +1,5 @@
-// --- SERVICE WORKER CONTROL DE ENTORNO (V5) ---
-const CACHE_NAME = 'retorica-cache-v5';
+// --- SERVICE WORKER CONTROL DE ENTORNO (V6) ---
+const CACHE_NAME = 'retorica-cache-v6';
 
 const ASSETS = [
   './',
