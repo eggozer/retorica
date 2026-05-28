@@ -2,10 +2,9 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-color=1.0, user-scalable=no">
     <title>Retórica - Bloc de Notas</title>
     <link rel="manifest" href="./manifest.json?v=7">
-    <!-- Librería externa para PDF conservada en el esqueleto base -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
@@ -24,10 +23,12 @@
         button, select { border-radius: 4px !important; }
 
         /* --- MENÚ LATERAL (BIBLIOTECA) --- */
-        .sidebar { width: 280px; background-color: var(--bg-sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; height: 100%; position: absolute; left: 0; top: 0; transition: transform 0.3s ease; z-index: 120; }
+        .sidebar { width: 280px; background-color: var(--bg-sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; height: 100%; position: absolute; left: 0; top: 0; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 120; }
         .sidebar.hidden { transform: translateX(-280px); }
-        .toggle-sidebar-pestaña { position: absolute; right: -32px; top: 70px; width: 32px; height: 40px; background-color: var(--bg-sidebar); color: var(--accent); border: 1px solid var(--border); border-left: none; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; z-index: 121; }
-        .sidebar-header { padding: 0 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; height: 64px; flex-shrink: 0; }
+        
+        /* Flecha regresada a su lugar arriba de forma fija */
+        .toggle-sidebar-pestaña { position: absolute; left: 12px; top: 12px; width: 40px; height: 40px; background-color: var(--bg-card); color: var(--accent); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; z-index: 130; font-size: 1.2rem; }
+        .sidebar-header { padding: 0 16px 0 60px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; height: 64px; flex-shrink: 0; }
         .btn-nuevo-doc { background: var(--accent); color: #0a0f1d; font-weight: bold; border: none; padding: 6px 12px; cursor: pointer; font-size: 0.85rem; }
         .document-list { flex: 1; overflow-y: auto; padding: 12px; }
         .sidebar-footer-menu { padding: 12px; border-top: 1px solid var(--border); background-color: rgba(0, 0, 0, 0.2); flex-shrink: 0; }
@@ -35,23 +36,22 @@
         .footer-buttons-container { display: flex; flex-direction: column; gap: 6px; }
         .btn-footer-action { width: 100%; background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border); padding: 8px; font-size: 0.8rem; font-weight: 600; text-align: left; cursor: pointer; }
         .btn-pwa-sidebar { display: none; width: 100%; padding: 8px; font-size: 0.8rem; font-weight: bold; border: none; margin-top: 6px; cursor: pointer; text-align: center; }
-        #btn-pwa-instalar { background-color: #10b981; color: white; }
-        #btn-pwa-actualizar { background-color: #0284c7; color: white; }
 
         /* --- CONTENEDOR CENTRAL DE EDICIÓN --- */
-        .main-container { flex: 1; display: flex; flex-direction: column; height: 100%; width: 100%; background-color: var(--bg-main); position: relative; }
+        .main-container { flex: 1; display: flex; flex-direction: column; height: 100%; width: 100%; background-color: var(--bg-main); position: relative; padding-left: 0; }
         
-        /* 3 y 6.- PASARELA HORIZONTAL TOTALMENTE FIJA E INDEPENDIENTE DEL TEXTO */
-        .top-toolbar { height: 64px; border-bottom: 1px solid var(--border); padding: 0 8px 0 40px; display: flex; align-items: center; gap: 12px; overflow-x: auto; white-space: nowrap; flex-shrink: 0; background-color: var(--bg-main); z-index: 90; scrollbar-width: none; }
+        /* Pasarela horizontal con padding para respetar la flecha fija superior */
+        .top-toolbar { height: 64px; border-bottom: 1px solid var(--border); padding: 0 8px 0 64px; display: flex; align-items: center; gap: 12px; overflow-x: auto; white-space: nowrap; flex-shrink: 0; background-color: var(--bg-main); z-index: 90; scrollbar-width: none; }
         .top-toolbar::-webkit-scrollbar { display: none; }
         
+        .brand-title { display: flex; align-items: center; gap: 6px; font-weight: bold; font-size: 0.9rem; letter-spacing: 0.5px; color: var(--text-main); background-color: rgba(255,255,255,0.02); border: 1px solid var(--border); padding: 4px 10px; height: 40px; border-radius: 6px; flex-shrink: 0; }
         .toolbar-rack { display: inline-flex; align-items: center; gap: 6px; background-color: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 4px 8px; border-radius: 6px; flex-shrink: 0; }
         .toolbar-item { flex-shrink: 0; }
         .btn-icon-pure { background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border); height: 40px; padding: 0 12px; font-size: 1.1rem; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
         .btn-text-action { background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border); height: 40px; padding: 0 14px; font-size: 0.8rem; font-weight: bold; cursor: pointer; }
         .btn-text-action.accent-btn { background-color: var(--accent); color: #0a0f1d; border: none; }
 
-        /* 6.- CONTENEDOR DE TEXTO AISLADO CON SCROLL PROPIO (NUNCA SOLAPA EL MENÚ) */
+        /* Área de edición */
         .editor-wrapper { flex: 1; display: flex; flex-direction: column; padding: 16px; overflow: hidden; background-color: transparent; }
         textarea { flex: 1; width: 100%; background: transparent; border: none; color: var(--text-main); font-size: 1.05rem; line-height: 1.6; resize: none; outline: none; overflow-y: auto; }
         .stats-bar { height: 28px; border-top: 1px solid var(--border); padding-top: 8px; font-size: 0.75rem; color: var(--text-muted); flex-shrink: 0; }
@@ -61,18 +61,15 @@
 </head>
 <body>
 
-    <!-- MENÚ LATERAL (BIBLIOTECA) -->
+    <div class="toggle-sidebar-pestaña" id="btn-toggle-pestaña">▶</div>
+
     <div class="sidebar hidden" id="sidebar">
-        <div class="toggle-sidebar-pestaña" id="btn-toggle-pestaña">▶</div>
         <div class="sidebar-header">
-            <div style="display:flex; align-items:center; gap:8px;"><span style="font-weight:700; letter-spacing:1px;">RETÓRICA</span></div>
+            <div style="display:flex; align-items:center; gap:6px;"><span style="font-size:1.1rem;">✍️</span><span style="font-weight:700; letter-spacing:0.5px; font-size:0.95rem;">RETÓRICA</span></div>
             <button class="btn-nuevo-doc" id="btn-nuevo">➕</button>
         </div>
         <div class="document-list" id="document-list"></div>
         <div class="sidebar-footer-menu">
-            <button class="btn-pwa-sidebar" id="btn-pwa-instalar">📥 INSTALL APP</button>
-            <button class="btn-pwa-sidebar" id="btn-pwa-actualizar">🔄 UPDATE APP</button>
-            <div style="height: 10px;"></div>
             <div class="footer-menu-title" id="lbl-save-as">Guardar como:</div>
             <div class="footer-buttons-container">
                 <button class="btn-footer-action" id="export-pdf">1.- PDF</button>
@@ -82,24 +79,21 @@
         </div>
     </div>
 
-    <!-- ÁREA DE TRABAJO PRINCIPAL -->
     <div class="main-container">
-        <!-- BARRA SUPERIOR EN PASARELA DESPLAZABLE -->
         <div class="top-toolbar" id="toolbar-container">
             
-            <!-- RACK AUDIO (Dictado y Lectura) -->
+            <div class="brand-title"><span>✍️</span><span>RETÓRICA</span></div>
+            
             <div class="toolbar-rack" id="rack-audio">
                 <button class="btn-icon-pure toolbar-item" id="btn-mic" title="Dictado por voz">🎙️</button>
                 <button class="btn-icon-pure toolbar-item" id="btn-lectura" title="Leer texto">🔊</button>
             </div>
 
-            <!-- RACK IDIOMAS -->
             <div class="toolbar-rack" id="rack-idiomas">
                 <select id="app-lang" class="toolbar-item" title="Idioma de la App"><option value="es">Español</option></select>
                 <select id="voice-lang" class="toolbar-item" title="Idioma de Dictado"><option value="es-MX">Español (MX)</option></select>
             </div>
 
-            <!-- RACK SISTEMA -->
             <div class="toolbar-rack" id="rack-sistema">
                 <button class="btn-icon-pure toolbar-item" id="btn-toggle-tema" title="Alternar Tema">🌙</button>
                 <button class="btn-text-action accent-btn toolbar-item" id="btn-main-guardar">GUARDAR HTML</button>
@@ -107,8 +101,7 @@
 
         </div>
 
-        <!-- CONTENEDOR DE EDICIÓN TOTALMENTE PROTEGIDO -->
-        <div class="editor-wrapper">
+        <div class="editor-wrapper" id="editor-swipe-zone">
             <textarea id="editor" placeholder="Escribe tu guion o nota aquí..."></textarea>
             <div class="stats-bar" id="stats-bar">Caracteres: 0 | Palabras: 0 | Líneas: 0</div>
         </div>
@@ -116,7 +109,6 @@
 
     <div class="toast" id="toast-notif">Operación exitosa</div>
 
-    <!-- CONEXIÓN CENTRAL CON LA NUEVA ARQUITECTURA MODULAR (CORREGIDA) -->
     <script type="module" src="js/main.js"></script>
 </body>
 </html>
