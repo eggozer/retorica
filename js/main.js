@@ -70,7 +70,7 @@ function configurarEventosBasicos() {
         }
     };
 
-    // Botón Lectura en Voz Alta (Corregido sin el cierre huérfano)
+    // Botón Lectura en Voz Alta
     btnLectura.onclick = () => {
         const comenzoLectura = leerTexto(editor.value, comboVoz.value.split('-')[0], () => {
             lecturaActiva = false;
