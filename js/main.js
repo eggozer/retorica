@@ -81,7 +81,7 @@ function configurarEventosBasicos() {
         btnTema.textContent = esClaro ? "☀️" : "🌙";
     };
 
-    // Botón Guardar Directo (HTML y Persistencia)
+    // Botón Guardar Directo (IndexedDB + Descarga Física HTML)
     btnGuardar.onclick = async () => {
         const contenido = editor.value;
         if (!contenido.trim()) {
@@ -91,12 +91,24 @@ function configurarEventosBasicos() {
 
         if (!idDocumentoActual) idDocumentoActual = Date.now();
         const lineas = contenido.split('\n');
-        const titulo = lineas[0].substring(0, 25) || "Nota Nueva";
+        const titulo = lineas[0].substring(0, 25).trim() || "Nota Nueva";
 
+        // 1. Asegurar persistencia interna blindada
         const exito = await guardarDocumento(idDocumentoActual, titulo, contenido);
+        
         if (exito) {
-            mostrarNotificacion("Nota guardada con éxito");
-            // Aquí puedes enlazar la descarga física si se requiere
+            // 2. Generar descarga real del archivo .html para el móvil
+            const blob = new Blob([contenido], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${titulo}.html`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            mostrarNotificacion("Nota guardada y descargada");
         }
     };
 
