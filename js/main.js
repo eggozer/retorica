@@ -28,7 +28,7 @@ function inicializarApp() {
     
     initDB().then(() => {
         actualizarContadoresEditor();
-        mostrarNotificacion("Retórica Dos Niveles Lista");
+        mostrarNotificacion("Retórica Lista");
     }).catch(err => console.error("Error IndexedDB:", err));
 }
 
@@ -48,7 +48,7 @@ function configurarEventosBasicos() {
                 btnTogglePestaña.style.left = "12px";
             } else {
                 document.body.classList.add('sidebar-open');
-                btnTogglePestaña.style.left = "292px"; // Ajuste milimétrico para no encimarse
+                btnTogglePestaña.style.left = "292px";
                 await renderizarListaDocumentos();
             }
         };
@@ -107,10 +107,22 @@ function configurarEventosBasicos() {
         }
     };
 
+    // CORRECCIÓN: Vinculación con los selectores de la barra superior actualizados
     comboApp.onchange = (e) => {
-        aplicarTraduccionInterfaz(e.target.value, {
-            lblSaveAs: document.getElementById('lbl-save-as'), btnNuevo: document.getElementById('btn-nuevo')
+        const idiomaSeleccionado = e.target.value;
+        
+        // Aplicar traducción completa a los contenedores
+        const config = aplicarTraduccionInterfaz(idiomaSeleccionado, {
+            lblSaveAs: document.getElementById('lbl-save-as'),
+            btnNuevo: document.getElementById('btn-nuevo'),
+            btnGuardar: btnGuardar,
+            editor: editor
         });
+
+        // Hacer que el selector de voz se acople automáticamente al idioma nativo elegido
+        if (config && config.voiceCode) {
+            comboVoz.value = config.voiceCode;
+        }
     };
 }
 
