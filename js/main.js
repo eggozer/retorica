@@ -41,6 +41,19 @@ function configurarEventosBasicos() {
     // Evento de escucha para contadores de texto en tiempo real
     editor.addEventListener('input', actualizarContadoresEditor);
 
+// Botón para Limpiar el Editor y Crear un Documento Nuevo
+    document.getElementById('btn-nuevo').onclick = () => {
+        if (editor.value.trim() && confirm("¿Deseas crear una nueva nota? Asegúrate de haber guardado tus cambios actuales.")) {
+            editor.value = '';
+            idDocumentoActual = null;
+            actualizarContadoresEditor();
+            mostrarNotificacion("Nuevo documento listo");
+        } else if (!editor.value.trim()) {
+            idDocumentoActual = null;
+            mostrarNotificacion("Editor listo");
+        }
+    };
+    
     // Botón Dictado por Voz (Microfóno)
     btnMic.onclick = () => {
         if (dictadoActivo) {
