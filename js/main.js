@@ -8,7 +8,6 @@ let idDocumentoActual = null;
 let dictadoActivo = false;
 let lecturaActiva = false;
 
-// Variables globales para captura de Swipe nativo
 let touchStartX = 0;
 let touchEndX = 0;
 
@@ -29,7 +28,7 @@ function inicializarApp() {
     
     initDB().then(() => {
         actualizarContadoresEditor();
-        mostrarNotificacion("Retórica Modular Inicializada");
+        mostrarNotificacion("Retórica Dos Niveles Lista");
     }).catch(err => console.error("Error IndexedDB:", err));
 }
 
@@ -49,7 +48,7 @@ function configurarEventosBasicos() {
                 btnTogglePestaña.style.left = "12px";
             } else {
                 document.body.classList.add('sidebar-open');
-                btnTogglePestaña.style.left = "292px";
+                btnTogglePestaña.style.left = "292px"; // Ajuste milimétrico para no encimarse
                 await renderizarListaDocumentos();
             }
         };
@@ -115,21 +114,17 @@ function configurarEventosBasicos() {
     };
 }
 
-// LÓGICA REFORZADA DE SWIPE MULTICAPA PARA CIERRE POR DESLIZAMIENTO
 function configurarGestoDeslizamiento() {
     const sidebar = document.getElementById('sidebar');
     const btnTogglePestaña = document.getElementById('btn-toggle-pestaña');
     const capaInvisible = document.getElementById('swipe-capture-edge');
 
-    // Escuchar el inicio del toque en el editor y la capa invisible
     const manejarTouchStart = (e) => {
         touchStartX = e.changedTouches[0].screenX;
     };
 
-    // Escuchar el final del toque y calcular la distancia recorrida
     const manejarTouchEnd = (e) => {
         touchEndX = e.changedTouches[0].screenX;
-        // Si el menú está abierto y el dedo se mueve hacia la izquierda más de 50 píxeles
         if (!sidebar.classList.contains('hidden') && (touchStartX - touchEndX > 50)) {
             sidebar.classList.add('hidden');
             document.body.classList.remove('sidebar-open');
@@ -139,7 +134,6 @@ function configurarGestoDeslizamiento() {
         }
     };
 
-    // Registrar los eventos en el área del editor y la capa interceptora
     editor.addEventListener('touchstart', manejarTouchStart, { passive: true });
     editor.addEventListener('touchend', manejarTouchEnd, { passive: true });
     capaInvisible.addEventListener('touchstart', manejarTouchStart, { passive: true });
