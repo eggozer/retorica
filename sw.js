@@ -1,6 +1,4 @@
-// --- SERVICE WORKER CON DETECTOR DE CAMBIOS DE COMPILACIÓN ---
-
-const NOMBRE_CACHE = 'retorica-cache-v10';
+const NOMBRE_CACHE = 'retorica-cache-v11';
 const ARCHIVOS = [
   './',
   './index.html',
