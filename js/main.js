@@ -15,13 +15,16 @@ let eventoInstalacionPWA = null;
 const editor = document.getElementById('editor');
 const statsText = document.getElementById('stats-text');
 const lblFileDates = document.getElementById('lbl-file-dates');
-const txtRenameFile = document.getElementById('txt-rename-file');
 const btnMic = document.getElementById('btn-mic');
 const btnGrabWA = document.getElementById('btn-grab-audio-wa');
 const btnRenderFL = document.getElementById('btn-render-fl');
 const btnLectura = document.getElementById('btn-lectura');
 const comboApp = document.getElementById('app-lang');
 const comboVoz = document.getElementById('voice-lang');
+const fontSelect = document.getElementById('font-family-select');
+const btnTable = document.getElementById('btn-insert-table');
+const btnOpenLocal = document.getElementById('btn-open-local');
+const fileInputHidden = document.getElementById('file-input-hidden');
 const comboModalidad = document.getElementById('combo-modalidad');
 const btnTema = document.getElementById('btn-toggle-tema');
 const btnGuardar = document.getElementById('btn-main-guardar');
@@ -44,6 +47,22 @@ function inicializarApp() {
     }).catch(err => console.error(err));
 }
 
+function insertarNodoEnCursor(nodo) {
+    editor.focus();
+    const sel = window.getSelection();
+    if (sel.getRangeAt && sel.rangeCount) {
+        const range = sel.getRangeAt(0);
+        range.deleteContents();
+        range.insertNode(nodo);
+        range.setStartAfter(nodo);
+        range.setEndAfter(nodo);
+        sel.removeAllRanges();
+        sel.addRange(range);
+    } else {
+        editor.appendChild(nodo);
+    }
+}
+
 function configurarEventosBasicos() {
     editor.addEventListener('input', () => {
         actualizarContadoresEditor();
@@ -51,9 +70,42 @@ function configurarEventosBasicos() {
     });
 
     comboModalidad.onchange = () => {
-        editor.className = '';
+        editor.className = 'rich-editor';
         if (comboModalidad.value === 'carta') editor.classList.add('modo-carta');
         if (comboModalidad.value === 'oficio') editor.classList.add('modo-oficio');
+    };
+
+    fontSelect.onchange = () => {
+        document.execCommand('fontName', false, fontSelect.value);
+    };
+
+    btnTable.onclick = () => {
+        const tabla = document.createElement('table');
+        tabla.className = 'editor-table';
+        for (let i = 0; i < 2; i++) {
+            const fila = tabla.insertRow();
+            for (let j = 0; j < 3; j++) {
+                const celda = fila.insertCell();
+                celda.innerHTML = '...';
+                celda.contentEditable = "true";
+            }
+        }
+        insertarNodoEnCursor(tabla);
+        ejecutarAutoGuardadoSilencioso();
+    };
+
+    btnOpenLocal.onclick = () => fileInputHidden.click();
+    fileInputHidden.onchange = (e) => {
+        const archivo = e.target.files[0];
+        if (!archivo) return;
+        const lector = new FileReader();
+        lector.onload = (evt) => {
+            editor.innerHTML = evt.target.result;
+            idDocumentoActual = null;
+            actualizarContadoresEditor();
+            mostrarNotificacion("Archivo importado listo");
+        };
+        lector.readAsText(archivo);
     };
 
     btnTogglePestaña.onclick = async () => {
@@ -64,9 +116,9 @@ function configurarEventosBasicos() {
     };
 
     document.getElementById('btn-nuevo').onclick = () => {
-        editor.value = ''; idDocumentoActual = null;
+        editor.innerHTML = ''; idDocumentoActual = null;
         notaAudiosLocales = []; documentoCreadoTimestamp = null;
-        txtRenameFile.value = ''; actualizarContadoresEditor();
+        actualizarContadoresEditor();
         lblFileDates.textContent = "Nota limpia";
         renderizarListaDocumentos();
     };
@@ -76,7 +128,10 @@ function configurarEventosBasicos() {
             detenerDictado(); btnMic.textContent = "🎙️"; dictadoActivo = false;
         } else {
             dictadoActivo = true; btnMic.textContent = "🛑";
-            iniciarDictado(comboApp.value, (t) => { editor.value += (editor.value ? ' ' : '') + t; actualizarContadoresEditor(); }, () => { btnMic.textContent = "🎙️"; dictadoActivo = false; });
+            iniciarDictado(comboApp.value, (text) => {
+                document.execCommand('insertText', false, text + ' ');
+                actualizarContadoresEditor();
+            }, () => { btnMic.textContent = "🎙️"; dictadoActivo = false; });
         }
     };
 
@@ -86,8 +141,12 @@ function configurarEventosBasicos() {
         } else {
             grabandoAudioWA = true; btnGrabWA.textContent = "🛑💬";
             iniciarGrabacionVoz((blobAudio) => {
+                const url = URL.createObjectURL(blobAudio);
+                const aud = document.createElement('audio');
+                aud.controls = true; aud.src = url;
+                insertarNodoEnCursor(aud);
                 notaAudiosLocales.push(Date.now());
-                mostrarNotificacion("Mensaje de voz acoplado");
+                mostrarNotificacion("Audio acoplado al renglón");
                 ejecutarAutoGuardadoSilencioso();
                 renderizarListaDocumentos();
             });
@@ -95,16 +154,28 @@ function configurarEventosBasicos() {
     };
 
     btnRenderFL.onclick = () => {
-        const sel = editor.value.substring(editor.selectionStart, editor.selectionEnd);
-        renderizarTextoAAudio(sel.trim() ? sel : editor.value, comboVoz.value);
-        mostrarNotificacion("Audio exportado");
+        const selObj = window.getSelection();
+        const textoFiltrado = selObj.toString().trim() ? selObj.toString() : editor.innerText;
+        if (!textoFiltrado.trim()) return;
+
+        const synth = window.speechSynthesis;
+        const u = new SpeechSynthesisUtterance(textoFiltrado);
+        u.lang = comboVoz.value;
+        
+        mostrarNotificacion("Renderizando texto a voz...");
+        const aud = document.createElement('audio');
+        aud.controls = true;
+        
+        const rec = new webkitSpeechRecognition();
+        insertarNodoEnCursor(aud);
+        synth.speak(u);
     };
 
     btnLectura.onclick = () => {
         if (lecturaActiva) {
             detenerLecturaManual(); btnLectura.textContent = "🔊"; lecturaActiva = false;
         } else {
-            const act = leerTexto(editor.value, comboVoz.value, () => { btnLectura.textContent = "🔊"; lecturaActiva = false; });
+            const act = leerTexto(editor.innerText, comboVoz.value, () => { btnLectura.textContent = "🔊"; lecturaActiva = false; });
             if (act) { btnLectura.textContent = "⏹️"; lecturaActiva = true; }
         }
     };
@@ -115,16 +186,12 @@ function configurarEventosBasicos() {
     };
 
     btnGuardar.onclick = async () => {
-        if (!editor.value.trim()) return;
+        if (!editor.innerText.trim()) return;
         await ejecutarAutoGuardadoSilencioso();
         lblFileDates.textContent = `Guardado: ${new Date().toLocaleTimeString()}`;
         mostrarNotificacion("Guardado local exitoso");
         await renderizarListaDocumentos();
     };
-
-    txtRenameFile.addEventListener('input', () => {
-        if (idDocumentoActual) ejecutarAutoGuardadoSilencioso().then(() => renderizarListaDocumentos());
-    });
 }
 
 function configurarGestosDeslizamiento() {
@@ -144,7 +211,6 @@ function configurarCicloVidaPWA() {
         e.preventDefault(); eventoInstalacionPWA = e;
         btnInstalarPWA.style.display = 'block';
     });
-
     btnInstalarPWA.onclick = () => {
         if (!eventoInstalacionPWA) return;
         eventoInstalacionPWA.prompt();
@@ -153,12 +219,6 @@ function configurarCicloVidaPWA() {
             eventoInstalacionPWA = null;
         });
     };
-
-    window.addEventListener('appinstalled', () => {
-        btnInstalarPWA.style.display = 'none';
-        mostrarNotificacion("¡Retórica instalada!");
-    });
-
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('./sw.js').then((reg) => {
             reg.addEventListener('updatefound', () => {
@@ -170,7 +230,6 @@ function configurarCicloVidaPWA() {
                 });
             });
         });
-
         btnActualizarPWA.onclick = () => {
             navigator.serviceWorker.getRegistration().then((reg) => {
                 if (reg && reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
@@ -181,15 +240,16 @@ function configurarCicloVidaPWA() {
 }
 
 async function ejecutarAutoGuardadoSilencioso() {
-    if (!editor.value.trim()) return;
+    if (!editor.innerText.trim()) return;
     if (!idDocumentoActual) { idDocumentoActual = Date.now(); documentoCreadoTimestamp = Date.now(); }
-    const defTitle = txtRenameFile.value.trim() || editor.value.split('\n')[0].substring(0, 20) || "Nota Activa";
-    await guardarDocumento(idDocumentoActual, defTitle, editor.value, notaAudiosLocales, comboModalidad.value, "letter", documentoCreadoTimestamp);
+    const inputInterno = document.getElementById(`rename-input-${idDocumentoActual}`);
+    const defTitle = inputInterno ? inputInterno.value.trim() : (editor.innerText.split('\n')[0].substring(0, 16) || "Nota Activa");
+    await guardarDocumento(idDocumentoActual, defTitle, editor.innerHTML, notaAudiosLocales, comboModalidad.value, "letter", documentoCreadoTimestamp);
 }
 
 function actualizarContadoresEditor() {
-    const t = editor.value;
-    statsText.textContent = `Caracteres: ${t.length} | Palabras: ${t.trim() === "" ? 0 : t.trim().split(/\s+/).length} | Líneas: ${t === "" ? 0 : t.split('\n').length}`;
+    const rawText = editor.innerText;
+    statsText.textContent = `Caracteres: ${rawText.length} | Palabras: ${rawText.trim() === "" ? 0 : rawText.trim().split(/\s+/).length} | Líneas: ${rawText === "" ? 0 : rawText.split('\n').length}`;
 }
 
 async function renderizarListaDocumentos() {
@@ -200,47 +260,48 @@ async function renderizarListaDocumentos() {
     docs.forEach(d => {
         const box = document.createElement('div');
         const esActivo = idDocumentoActual === d.id;
-        box.style = `padding:10px; border-bottom:1px solid var(--border); margin-bottom:4px; border-radius:4px; background-color:${esActivo ? 'var(--bg-card-active)' : 'transparent'}; cursor:pointer;`;
+        box.style = `padding:10px; border-bottom:1px solid var(--border); margin-bottom:4px; border-radius:4px; background-color:${esActivo ? 'var(--bg-card-active)' : 'transparent'};`;
         
-        const wavs = d.audios && d.audios.length > 0 ? ` ▶️ (${d.audios.length})` : '';
         box.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; font-weight:bold;">
-                <span class="doc-clickable-title" style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">📄 ${d.titulo}${wavs}</span>
-                ${esActivo ? `<span id="btn-share-inline" title="Compartir" style="margin-right:12px; font-size:16px; padding:2px;">🔗</span><span id="btn-del-inline" title="Borrar" style="font-size:16px; color:var(--danger); padding:2px;">🗑️</span>` : ''}
+            <div style="display:flex; flex-direction:column; gap:6px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; font-weight:bold;">
+                    <span class="doc-clickable-title" style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">📄 ${d.titulo}</span>
+                    ${esActivo ? `<span id="btn-share-inline" style="margin-right:12px; font-size:16px; cursor:pointer;">🔗</span><span id="btn-del-inline" style="font-size:16px; color:var(--danger); cursor:pointer;">🗑️</span>` : ''}
+                </div>
+                ${esActivo ? `<input type="text" id="rename-input-${d.id}" value="${d.titulo}" style="width:100%; height:30px; background:rgba(0,0,0,0.2); font-size:12px;" placeholder="Renombrar plantilla...">` : ''}
             </div>
         `;
 
         box.querySelector('.doc-clickable-title').onclick = () => {
-            idDocumentoActual = d.id; editor.value = d.contenido;
+            idDocumentoActual = d.id; editor.innerHTML = d.contenido;
             notaAudiosLocales = d.audios || []; documentoCreadoTimestamp = d.creado;
-            txtRenameFile.value = d.titulo; comboModalidad.value = d.tipo || "nota";
-            comboModalidad.onchange();
+            comboModalidad.value = d.tipo || "nota"; comboModalidad.onchange();
             lblFileDates.textContent = `Modificado: ${new Date(d.modificado).toLocaleTimeString()}`;
             actualizarContadoresEditor(); renderizarListaDocumentos();
         };
 
         if (esActivo) {
+            const renameInput = box.querySelector(`#rename-input-${d.id}`);
+            renameInput.addEventListener('input', () => {
+                ejecutarAutoGuardadoSilencioso().then(() => {
+                    box.querySelector('.doc-clickable-title').textContent = `📄 ${renameInput.value}`;
+                });
+            });
+
             box.querySelector('#btn-share-inline').onclick = (e) => {
                 e.stopPropagation();
-                if (navigator.share) navigator.share({ title: d.titulo, text: editor.value });
-                else { navigator.clipboard.writeText(editor.value); mostrarNotificacion("Copiado al portapapeles"); }
+                if (navigator.share) navigator.share({ title: d.titulo, text: editor.innerText });
             };
             box.querySelector('#btn-del-inline').onclick = async (e) => {
                 e.stopPropagation();
                 if (confirm(`¿Eliminar "${d.titulo}"?`)) {
-                    await eliminarDocumento(d.id); editor.value = ''; idDocumentoActual = null;
-                    txtRenameFile.value = ''; lblFileDates.textContent = "Sin guardar";
-                    actualizarContadoresEditor(); renderizarListaDocumentos();
+                    await eliminarDocumento(d.id); editor.innerHTML = ''; idDocumentoActual = null;
+                    lblFileDates.textContent = "Sin guardar"; actualizarContadoresEditor(); renderizarListaDocumentos();
                 }
             };
         }
         lista.appendChild(box);
     });
-}
-
-function mostrarNotificacion(m) {
-    if (!toast) return; toast.textContent = m; toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 2000);
 }
 
 window.addEventListener('DOMContentLoaded', inicializarApp);
