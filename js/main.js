@@ -1,5 +1,3 @@
-// --- ORQUESTADOR CENTRAL INTERACTIVO CON CONTROL DE ACTUALIZACIONES ---
-
 import { initDB, guardarDocumento, obtenerDocumentos, eliminarDocumento } from './storage.js';
 import { iniciarDictado, detenerDictado, leerTexto, detenerLecturaManual, iniciarGrabacionVoz, detenerGrabacionVoz, renderizarTextoAAudio } from './audio.js';
 import { cargarSelectores } from './idiomas.js';
@@ -29,6 +27,7 @@ const btnTema = document.getElementById('btn-toggle-tema');
 const btnGuardar = document.getElementById('btn-main-guardar');
 const sidebar = document.getElementById('sidebar');
 const btnTogglePestaña = document.getElementById('btn-toggle-pestaña');
+const toast = document.getElementById('toast-notif');
 
 const btnInstalarPWA = document.getElementById('btn-instalar-pwa');
 const btnActualizarPWA = document.getElementById('btn-actualizar-pwa');
@@ -69,6 +68,7 @@ function configurarEventosBasicos() {
         notaAudiosLocales = []; documentoCreadoTimestamp = null;
         txtRenameFile.value = ''; actualizarContadoresEditor();
         lblFileDates.textContent = "Nota limpia";
+        renderizarListaDocumentos();
     };
 
     btnMic.onclick = () => {
@@ -140,37 +140,32 @@ function configurarGestosDeslizamiento() {
 }
 
 function configurarCicloVidaPWA() {
-    // 1.- MANEJO DE INSTALACIÓN DINÁMICA
     window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        eventoInstalacionPWA = e;
-        btnInstalarPWA.style.display = 'block'; // Muestra solo si no está instalada
+        e.preventDefault(); eventoInstalacionPWA = e;
+        btnInstalarPWA.style.display = 'block';
     });
 
     btnInstalarPWA.onclick = () => {
         if (!eventoInstalacionPWA) return;
         eventoInstalacionPWA.prompt();
         eventoInstalacionPWA.userChoice.then((choice) => {
-            if (choice.outcome === 'accepted') {
-                btnInstalarPWA.style.display = 'none';
-            }
+            if (choice.outcome === 'accepted') btnInstalarPWA.style.display = 'none';
             eventoInstalacionPWA = null;
         });
     };
 
     window.addEventListener('appinstalled', () => {
         btnInstalarPWA.style.display = 'none';
-        mostrarNotificacion("¡Retórica instalada correctamente!");
+        mostrarNotificacion("¡Retórica instalada!");
     });
 
-    // 2.- MANEJO DE ACTUALIZACIONES CALIENTES DE CÓDIGO
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('./sw.js').then((reg) => {
             reg.addEventListener('updatefound', () => {
                 const nuevoWorker = reg.installing;
                 nuevoWorker.addEventListener('statechange', () => {
                     if (nuevoWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                        btnActualizarPWA.style.display = 'block'; // Muestra si hay cambios en GitHub
+                        btnActualizarPWA.style.display = 'block';
                     }
                 });
             });
@@ -178,9 +173,7 @@ function configurarCicloVidaPWA() {
 
         btnActualizarPWA.onclick = () => {
             navigator.serviceWorker.getRegistration().then((reg) => {
-                if (reg && reg.waiting) {
-                    reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-                }
+                if (reg && reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
                 window.location.reload();
             });
         };
@@ -207,17 +200,17 @@ async function renderizarListaDocumentos() {
     docs.forEach(d => {
         const box = document.createElement('div');
         const esActivo = idDocumentoActual === d.id;
-        box.style = `padding:10px; border-bottom:1px solid var(--border); margin-bottom:4px; border-radius:4px; background-color:${esActivo ? 'var(--bg-card-active)' : 'transparent'}`;
+        box.style = `padding:10px; border-bottom:1px solid var(--border); margin-bottom:4px; border-radius:4px; background-color:${esActivo ? 'var(--bg-card-active)' : 'transparent'}; cursor:pointer;`;
         
         const wavs = d.audios && d.audios.length > 0 ? ` ▶️ (${d.audios.length})` : '';
         box.innerHTML = `
-            <div style="display:flex; justify-content:between; align-items:center; font-size:13px; font-weight:bold;">
-                <span style="flex:1;">📄 ${d.titulo}${wavs}</span>
-                ${esActivo ? `<span id="btn-share-inline" title="Compartir" style="margin-right:8px; cursor:pointer;">🔗</span><span id="btn-del-inline" title="Borrar" style="cursor:pointer; color:var(--danger);">🗑️</span>` : ''}
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; font-weight:bold;">
+                <span class="doc-clickable-title" style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">📄 ${d.titulo}${wavs}</span>
+                ${esActivo ? `<span id="btn-share-inline" title="Compartir" style="margin-right:12px; font-size:16px; padding:2px;">🔗</span><span id="btn-del-inline" title="Borrar" style="font-size:16px; color:var(--danger); padding:2px;">🗑️</span>` : ''}
             </div>
         `;
 
-        box.querySelector('span').onclick = () => {
+        box.querySelector('.doc-clickable-title').onclick = () => {
             idDocumentoActual = d.id; editor.value = d.contenido;
             notaAudiosLocales = d.audios || []; documentoCreadoTimestamp = d.creado;
             txtRenameFile.value = d.titulo; comboModalidad.value = d.tipo || "nota";
@@ -236,7 +229,8 @@ async function renderizarListaDocumentos() {
                 e.stopPropagation();
                 if (confirm(`¿Eliminar "${d.titulo}"?`)) {
                     await eliminarDocumento(d.id); editor.value = ''; idDocumentoActual = null;
-                    txtRenameFile.value = ''; renderizarListaDocumentos();
+                    txtRenameFile.value = ''; lblFileDates.textContent = "Sin guardar";
+                    actualizarContadoresEditor(); renderizarListaDocumentos();
                 }
             };
         }
