@@ -1,4 +1,4 @@
-const NOMBRE_CACHE = 'retorica-cache-v11';
+const NOMBRE_CACHE = 'retorica-cache-v12';
 const ARCHIVOS = [
   './',
   './index.html',
