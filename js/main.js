@@ -1,8 +1,8 @@
-// --- CONTROLADOR GENERAL MAESTRO RETÓRICA (MAIN) ---
+// --- ORQUESTADOR CENTRAL INTERACTIVO CON SWIPE DIRECCIONAL ---
 
 import { initDB, guardarDocumento, obtenerDocumentos, eliminarDocumento } from './storage.js';
-import { iniciarDictado, detenerDictado, leerTexto, iniciarGrabacionVoz, detenerGrabacionVoz, renderizarTextoAAudio } from './audio.js';
-import { cargarSelectores, aplicarTraduccionInterfaz } from './idiomas.js';
+import { iniciarDictado, detenerDictado, leerTexto, detenerLecturaManual, iniciarGrabacionVoz, detenerGrabacionVoz, renderizarTextoAAudio } from './audio.js';
+import { cargarSelectores } from './idiomas.js';
 
 let idDocumentoActual = null;
 let dictadoActivo = false;
@@ -10,6 +10,8 @@ let lecturaActiva = false;
 let grabandoAudioWA = false;
 let notaAudiosLocales = [];
 let documentoCreadoTimestamp = null;
+
+let touchStartX = 0;
 
 const editor = document.getElementById('editor');
 const statsText = document.getElementById('stats-text');
@@ -24,16 +26,13 @@ const comboVoz = document.getElementById('voice-lang');
 const comboModalidad = document.getElementById('combo-modalidad');
 const btnTema = document.getElementById('btn-toggle-tema');
 const btnGuardar = document.getElementById('btn-main-guardar');
-const btnCompartir = document.getElementById('btn-compartir-nota');
-const toast = document.getElementById('toast-notif');
-
 const sidebar = document.getElementById('sidebar');
 const btnTogglePestaña = document.getElementById('btn-toggle-pestaña');
 
 function inicializarApp() {
     cargarSelectores(comboApp, comboVoz);
     configurarEventosBasicos();
-    configurarSeguimientoUsuarios();
+    configurarGestosDeslizamiento();
     
     initDB().then(() => {
         actualizarContadoresEditor();
@@ -48,28 +47,23 @@ function configurarEventosBasicos() {
     });
 
     comboModalidad.onchange = () => {
-        if (comboModalidad.value === 'nota') {
-            editor.className = '';
-        } else {
-            editor.className = 'modo-word';
-        }
+        editor.className = '';
+        if (comboModalidad.value === 'carta') editor.classList.add('modo-carta');
+        if (comboModalidad.value === 'oficio') editor.classList.add('modo-oficio');
     };
 
-    if (btnTogglePestaña && sidebar) {
-        btnTogglePestaña.onclick = async () => {
-            const seOculta = sidebar.classList.toggle('hidden');
-            btnTogglePestaña.textContent = seOculta ? "▶" : "◀";
-            btnTogglePestaña.style.left = seOculta ? "12px" : "292px";
-            if (!seOculta) await renderizarListaDocumentos();
-        };
-    }
+    btnTogglePestaña.onclick = async () => {
+        const seOculta = sidebar.classList.toggle('hidden');
+        btnTogglePestaña.textContent = seOculta ? "▶" : "◀";
+        btnTogglePestaña.style.left = seOculta ? "12px" : "292px";
+        if (!seOculta) await renderizarListaDocumentos();
+    };
 
     document.getElementById('btn-nuevo').onclick = () => {
         editor.value = ''; idDocumentoActual = null;
         notaAudiosLocales = []; documentoCreadoTimestamp = null;
-        txtRenameFile.value = '';
-        actualizarContadoresEditor();
-        lblFileDates.textContent = "Nota nueva limpia";
+        txtRenameFile.value = ''; actualizarContadoresEditor();
+        lblFileDates.textContent = "Nota limpia";
     };
 
     btnMic.onclick = () => {
@@ -83,13 +77,12 @@ function configurarEventosBasicos() {
 
     btnGrabWA.onclick = () => {
         if (grabandoAudioWA) {
-            detenerGrabacionVoz();
-            btnGrabWA.textContent = "🎙️💬"; grabandoAudioWA = false;
+            detenerGrabacionVoz(); btnGrabWA.textContent = "🎙️💬"; grabandoAudioWA = false;
         } else {
-            grabandoAudioWA = true; btnGrabWA.textContent = "🛑💬 (Grabando...)";
+            grabandoAudioWA = true; btnGrabWA.textContent = "🛑💬";
             iniciarGrabacionVoz((blobAudio) => {
                 notaAudiosLocales.push(Date.now());
-                mostrarNotificacion("Mensaje de voz guardado en esta plantilla");
+                mostrarNotificacion("Mensaje de voz acoplado");
                 ejecutarAutoGuardadoSilencioso();
                 renderizarListaDocumentos();
             });
@@ -97,15 +90,18 @@ function configurarEventosBasicos() {
     };
 
     btnRenderFL.onclick = () => {
-        const seleccion = editor.value.substring(editor.selectionStart, editor.selectionEnd);
-        const textoAFononizar = seleccion.trim() ? seleccion : editor.value;
-        renderizarTextoAAudio(textoAFononizar, comboVoz.value);
-        mostrarNotificacion("Renderizando track de audio...");
+        const sel = editor.value.substring(editor.selectionStart, editor.selectionEnd);
+        renderizarTextoAAudio(sel.trim() ? sel : editor.value, comboVoz.value);
+        mostrarNotificacion("Audio exportado");
     };
 
     btnLectura.onclick = () => {
-        const comenzo = leerTexto(editor.value, comboVoz.value, () => { lecturaActiva = false; btnLectura.textContent = "🔊"; });
-        btnLectura.textContent = comenzo ? "⏹️" : "🔊";
+        if (lecturaActiva) {
+            detenerLecturaManual(); btnLectura.textContent = "🔊"; lecturaActiva = false;
+        } else {
+            const act = leerTexto(editor.value, comboVoz.value, () => { btnLectura.textContent = "🔊"; lecturaActiva = false; });
+            if (act) { btnLectura.textContent = "⏹️"; lecturaActiva = true; }
+        }
     };
 
     btnTema.onclick = () => {
@@ -114,59 +110,36 @@ function configurarEventosBasicos() {
     };
 
     btnGuardar.onclick = async () => {
-        await ejecutarGuardadoFisicoCompleto();
+        if (!editor.value.trim()) return;
+        await ejecutarAutoGuardadoSilencioso();
+        lblFileDates.textContent = `Guardado: ${new Date().toLocaleTimeString()}`;
+        mostrarNotificacion("Guardado local exitoso");
+        await renderizarListaDocumentos();
     };
 
-    btnCompartir.onclick = () => {
-        if (!editor.value.trim()) return;
-        if (navigator.share) {
-            navigator.share({ title: txtRenameFile.value || 'Guion Retórica', text: editor.value });
-        } else {
-            navigator.clipboard.writeText(editor.value);
-            mostrarNotificacion("Texto copiado al portapapeles para compartir");
+    txtRenameFile.addEventListener('input', () => {
+        if (idDocumentoActual) ejecutarAutoGuardadoSilencioso().then(() => renderizarListaDocumentos());
+    });
+}
+
+function configurarGestosDeslizamiento() {
+    // ABRE DESLIZANDO DESDE LA IZQUIERDA, CIERRA DESLIZANDO A LA IZQUIERDA
+    window.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; }, { passive: true });
+    window.addEventListener('touchend', (e) => {
+        const diffX = e.changedTouches[0].clientX - touchStartX;
+        if (diffX > 80 && sidebar.classList.contains('hidden')) { 
+            sidebar.classList.remove('hidden'); btnTogglePestaña.textContent = "◀"; btnTogglePestaña.style.left = "292px";
+        } else if (diffX < -80 && !sidebar.classList.contains('hidden')) {
+            sidebar.classList.add('hidden'); btnTogglePestaña.textContent = "▶"; btnTogglePestaña.style.left = "12px";
         }
-    };
+    }, { passive: true });
 }
 
 async function ejecutarAutoGuardadoSilencioso() {
     if (!editor.value.trim()) return;
     if (!idDocumentoActual) { idDocumentoActual = Date.now(); documentoCreadoTimestamp = Date.now(); }
-    const titulo = txtRenameFile.value.trim() || editor.value.split('\n')[0].substring(0, 22) || "Nota Automática";
-    await guardarDocumento(idDocumentoActual, titulo, editor.value, notaAudiosLocales, comboModalidad.value, "letter", documentoCreadoTimestamp);
-}
-
-async function ejecutarGuardadoFisicoCompleto() {
-    if (!editor.value.trim()) return;
-    await ejecutarAutoGuardadoSilencioso();
-    mostrarNotificacion("Cambios sincronizados localmente sin descargas repetidas");
-    lblFileDates.textContent = `Modificado: ${new Date().toLocaleTimeString()}`;
-    await renderizarListaDocumentos();
-}
-
-function configurarSeguimientoUsuarios() {
-    const emailInput = document.getElementById('txt-user-email');
-    const lblStatus = document.getElementById('lbl-user-status');
-    
-    const emailGuardado = localStorage.getItem('retorica_user_session');
-    if (emailGuardado) {
-        emailInput.value = emailGuardado;
-        lblStatus.textContent = `Sincronizado: ${emailGuardado}`;
-    }
-
-    document.getElementById('btn-user-login').onclick = () => {
-        if (emailInput.value.trim()) {
-            localStorage.setItem('retorica_user_session', emailInput.value.trim());
-            lblStatus.textContent = `Sincronizado: ${emailInput.value.trim()}`;
-            mostrarNotificacion("Perfil acoplado");
-        }
-    };
-
-    document.getElementById('btn-user-logout').onclick = () => {
-        localStorage.removeItem('retorica_user_session');
-        emailInput.value = '';
-        lblStatus.textContent = "Dispositivo: Autónomo";
-        mostrarNotificacion("Sesión cerrada en este nodo");
-    };
+    const defTitle = txtRenameFile.value.trim() || editor.value.split('\n')[0].substring(0, 20) || "Nota Activa";
+    await guardarDocumento(idDocumentoActual, defTitle, editor.value, notaAudiosLocales, comboModalidad.value, "letter", documentoCreadoTimestamp);
 }
 
 function actualizarContadoresEditor() {
@@ -180,35 +153,42 @@ async function renderizarListaDocumentos() {
     const docs = await obtenerDocumentos();
 
     docs.forEach(d => {
-        const itemBox = document.createElement('div');
-        itemBox.style = 'padding:10px; border-bottom:1px solid var(--border); cursor:pointer; background-color:' + (idDocumentoActual === d.id ? 'var(--bg-card-active)' : 'transparent');
+        const box = document.createElement('div');
+        const esActivo = idDocumentoActual === d.id;
+        box.style = `padding:10px; border-bottom:1px solid var(--border); margin-bottom:4px; border-radius:4px; background-color:${esActivo ? 'var(--bg-card-active)' : 'transparent'}`;
         
-        const titleSpan = document.createElement('div');
-        titleSpan.style = 'font-size:13px; font-weight:bold; display:flex; align-items:center; justify-content:space-between;';
-        
-        // ICONO PLAY WHATSAPP SI CUENTA CON AUDIOS INTERNOS GRABADOS
-        const infoAudios = d.audios && d.audios.length > 0 ? ` ▶️🎵 (${d.audios.length})` : '';
-        titleSpan.innerHTML = `<span>📄 ${d.titulo}${infoAudios}</span>`;
-        
-        const dateDiv = document.createElement('div');
-        dateDiv.style = 'font-size:10px; color:var(--text-muted); margin-top:4px;';
-        dateDiv.textContent = `Modificado: ${new Date(d.modificado).toLocaleDateString()}`;
+        const wavs = d.audios && d.audios.length > 0 ? ` ▶️ (${d.audios.length})` : '';
+        box.innerHTML = `
+            <div style="display:flex; justify-content:between; align-items:center; font-size:13px; font-weight:bold;">
+                <span style="flex:1;">📄 ${d.titulo}${wavs}</span>
+                ${esActivo ? `<span id="btn-share-inline" title="Compartir" style="margin-right:8px; cursor:pointer;">🔗</span><span id="btn-del-inline" title="Borrar" style="cursor:pointer; color:var(--danger);">🗑️</span>` : ''}
+            </div>
+        `;
 
-        itemBox.onclick = () => {
+        box.querySelector('span').onclick = () => {
             idDocumentoActual = d.id; editor.value = d.contenido;
-            notaAudiosLocales = d.audios || [];
-            documentoCreadoTimestamp = d.creado;
-            txtRenameFile.value = d.titulo;
-            comboModalidad.value = d.tipo || "nota";
+            notaAudiosLocales = d.audios || []; documentoCreadoTimestamp = d.creado;
+            txtRenameFile.value = d.titulo; comboModalidad.value = d.tipo || "nota";
             comboModalidad.onchange();
-            lblFileDates.textContent = `Creado: ${new Date(d.creado).toLocaleTimeString()}`;
-            actualizarContadoresEditor();
-            renderizarListaDocumentos();
+            lblFileDates.textContent = `Modificado: ${new Date(d.modificado).toLocaleTimeString()}`;
+            actualizarContadoresEditor(); renderizarListaDocumentos();
         };
 
-        itemBox.appendChild(titleSpan);
-        itemBox.appendChild(dateDiv);
-        lista.appendChild(itemBox);
+        if (esActivo) {
+            box.querySelector('#btn-share-inline').onclick = (e) => {
+                e.stopPropagation();
+                if (navigator.share) navigator.share({ title: d.titulo, text: editor.value });
+                else { navigator.clipboard.writeText(editor.value); mostrarNotificacion("Copiado al portapapeles"); }
+            };
+            box.querySelector('#btn-del-inline').onclick = async (e) => {
+                e.stopPropagation();
+                if (confirm(`¿Eliminar "${d.titulo}"?`)) {
+                    await eliminarDocumento(d.id); editor.value = ''; idDocumentoActual = null;
+                    txtRenameFile.value = ''; renderizarListaDocumentos();
+                }
+            };
+        }
+        lista.appendChild(box);
     });
 }
 
