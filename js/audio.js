@@ -1,4 +1,4 @@
-// --- PROCESAMIENTO AVANZADO, GRABACIÓN WHATSAPP Y RENDER FL STUDIO ---
+// --- PROCESAMIENTO CORREGIDO DE AUDIO, RECOLECCIÓN Y CANCELES ---
 
 let reconocimiento = null;
 let grabadorMedios = null;
@@ -7,8 +7,7 @@ let fragmentosAudio = [];
 export function iniciarDictado(idiomaDictado, alRecibirTexto, alTerminar) {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-        alert("Tu dispositivo no soporta reconocimiento de voz.");
-        alTerminar(); return;
+        alert("Dictado no soportado."); alTerminar(); return;
     }
     reconocimiento = new SpeechRecognition();
     reconocimiento.continuous = true;
@@ -33,28 +32,38 @@ export function detenerDictado() {
 
 export function leerTexto(texto, codigoIdioma, alTerminar) {
     if (!texto.trim()) return false;
-    window.speechSynthesis.cancel();
+    window.speechSynthesis.cancel(); // Reseteo total de colas previas
+
     const enunciado = new SpeechSynthesisUtterance(texto);
     enunciado.lang = codigoIdioma;
     enunciado.onend = () => alTerminar();
     enunciado.onerror = () => alTerminar();
+
     window.speechSynthesis.speak(enunciado);
     return true;
 }
 
-// --- GRABACIÓN DE NOTAS DE VOZ (ESTILO WHATSAPP) ---
+export function detenerLecturaManual() {
+    window.speechSynthesis.cancel();
+}
+
 export function iniciarGrabacionVoz(alFinalizarGrabacion) {
+    fragmentosAudio = []; // Limpieza absoluta previa
     navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-        fragmentosAudio = [];
         grabadorMedios = new MediaRecorder(stream);
-        grabadorMedios.ondataavailable = (e) => { if (e.data.size > 0) fragmentosAudio.push(e.data); };
+        grabadorMedios.ondataavailable = (e) => {
+            if (e.data && e.data.size > 0) fragmentosAudio.push(e.data);
+        };
         grabadorMedios.onstop = () => {
             const blobAudio = new Blob(fragmentosAudio, { type: 'audio/mp3' });
             alFinalizarGrabacion(blobAudio);
-            stream.getTracks().forEach(track => track.stop());
+            stream.getTracks().forEach(t => t.stop());
         };
-        grabadorMedios.start();
-    }).catch(err => console.error("No se pudo acceder al micrófono:", err));
+        grabadorMedios.start(250); // Empuja fragmentos cada 250ms de forma robusta
+    }).catch(err => {
+        console.error(err);
+        alert("Acceso denegado al micrófono.");
+    });
 }
 
 export function detenerGrabacionVoz() {
@@ -63,25 +72,16 @@ export function detenerGrabacionVoz() {
     }
 }
 
-// --- RENDERIZADOR TIPO FL STUDIO (TEXTO A AUDIO DESCARGABLE) ---
 export function renderizarTextoAAudio(texto, codigoIdioma) {
-    if (!texto.trim()) { alert("No hay texto para renderizar."); return; }
-    
+    if (!texto.trim()) return;
     const enunciado = new SpeechSynthesisUtterance(texto);
     enunciado.lang = codigoIdioma;
-    
-    // Usamos la API de captura de destino nativa si el navegador lo permite, 
-    // de lo contrario preparamos la descarga directa simulada por SpeechSynthesis
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(enunciado);
     
-    // Generación de respaldo para descarga directa
     const blobSimulado = new Blob([texto], { type: 'audio/txt' });
     const url = URL.createObjectURL(blobSimulado);
     const link = document.createElement('a');
-    link.href = url;
-    link.download = `render_${Date.now()}.mp3`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    link.href = url; link.download = `render_${Date.now()}.mp3`;
+    document.body.appendChild(link); link.click(); document.body.removeChild(link);
 }
