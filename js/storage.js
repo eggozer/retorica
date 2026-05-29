@@ -1,52 +1,67 @@
-// --- MÓDULO DE PERSISTENCIA Y BASE DE DATOS (IndexedDB) ---
-const DB_NAME = 'RetoricaDB';
-const DB_VERSION = 1;
-const STORE_NAME = 'documentos';
+// --- MÓDULO DE PERSISTENCIA INDEXEDDB EXPANDIDO ---
+
+let db = null;
 
 export function initDB() {
     return new Promise((resolve, reject) => {
-        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        const request = indexedDB.open("RetoricaDB", 3);
+
         request.onupgradeneeded = (e) => {
-            const db = e.target.result;
-            if (!db.objectStoreNames.contains(STORE_NAME)) {
-                db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+            db = e.target.result;
+            if (!db.objectStoreNames.contains("documentos")) {
+                db.createObjectStore("documentos", { keyPath: "id" });
+            }
+            if (!db.objectStoreNames.contains("usuarios")) {
+                db.createObjectStore("usuarios", { keyPath: "email" });
             }
         };
-        request.onsuccess = (e) => resolve(e.target.result);
+
+        request.onsuccess = (e) => {
+            db = e.target.result;
+            resolve(db);
+        };
+
         request.onerror = (e) => reject(e.target.error);
     });
 }
 
-export async function guardarDocumento(id, titulo, contenido) {
-    const db = await initDB();
-    return new Promise((resolve, reject) => {
-        const transaction = db.transaction([STORE_NAME], 'readwrite');
-        const store = transaction.objectStore(STORE_NAME); // Corregido
-        const registro = { id, titulo, contenido, fechaModificacion: Date.now() };
-        const request = store.put(registro);
-        request.onsuccess = () => resolve(true);
-        request.onerror = (e) => reject(e.target.error);
+export function guardarDocumento(id, titulo, contenido, audios = [], tipo = "nota", tamaño = "letter", creado = null) {
+    return new Promise((resolve) => {
+        const tx = db.transaction("documentos", "readwrite");
+        const store = tx.objectStore("documentos");
+        const ahora = Date.now();
+
+        const item = {
+            id: id,
+            titulo: titulo,
+            contenido: contenido,
+            audios: audios,
+            tipo: tipo,
+            tamaño: tamaño,
+            creado: creado || ahora,
+            modificado: ahora
+        };
+
+        store.put(item);
+        tx.oncomplete = () => resolve(true);
+        tx.onerror = () => resolve(false);
     });
 }
 
-export async function obtenerDocumentos() {
-    const db = await initDB();
-    return new Promise((resolve, reject) => {
-        const transaction = db.transaction([STORE_NAME], 'readonly');
-        const store = transaction.objectStore(STORE_NAME); // Corregido
+export function obtenerDocumentos() {
+    return new Promise((resolve) => {
+        const tx = db.transaction("documentos", "readonly");
+        const store = tx.objectStore("documentos");
         const request = store.getAll();
         request.onsuccess = () => resolve(request.result || []);
-        request.onerror = (e) => reject(e.target.error);
     });
 }
 
-export async function eliminarDocumento(id) {
-    const db = await initDB();
-    return new Promise((resolve, reject) => {
-        const transaction = db.transaction([STORE_NAME], 'readwrite');
-        const store = transaction.objectStore(STORE_NAME); // Corregido
-        const request = store.delete(id);
-        request.onsuccess = () => resolve(true);
-        request.onerror = (e) => reject(e.target.error);
+export function eliminarDocumento(id) {
+    return new Promise((resolve) => {
+        const tx = db.transaction("documentos", "readwrite");
+        const store = tx.objectStore("documentos");
+        store.delete(id);
+        tx.oncomplete = () => resolve(true);
     });
 }
