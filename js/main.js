@@ -68,14 +68,18 @@ function configurarEventosBasicos() {
             detenerDictado(); cambiarEstadoMic(false);
         } else {
             cambiarEstadoMic(true);
-            iniciarDictado(comboVoz.value, (textoFinal) => {
-                if (textoFinal) { editor.value += (editor.value ? ' ' : '') + textoFinal; actualizarContadoresEditor(); }
+            // CORRECCIÓN: El micrófono se inicializa usando el idioma unificado del texto/app
+            iniciarDictado(comboApp.value, (textoFinal) => {
+                if (textoFinal) { 
+                    editor.value += (editor.value ? ' ' : '') + textoFinal; 
+                    actualizarContadoresEditor(); 
+                }
             }, () => cambiarEstadoMic(false));
         }
     };
 
     btnLectura.onclick = () => {
-        const comenzo = leerTexto(editor.value, comboVoz.value.split('-')[0], () => {
+        const comenzo = leerTexto(editor.value, comboVoz.value, () => {
             lecturaActiva = false; btnLectura.textContent = "🔊";
         });
         if (comenzo) { lecturaActiva = true; btnLectura.textContent = "⏹️"; }
@@ -107,11 +111,9 @@ function configurarEventosBasicos() {
         }
     };
 
-    // CORRECCIÓN: Vinculación con los selectores de la barra superior actualizados
     comboApp.onchange = (e) => {
         const idiomaSeleccionado = e.target.value;
         
-        // Aplicar traducción completa a los contenedores
         const config = aplicarTraduccionInterfaz(idiomaSeleccionado, {
             lblSaveAs: document.getElementById('lbl-save-as'),
             btnNuevo: document.getElementById('btn-nuevo'),
@@ -119,7 +121,6 @@ function configurarEventosBasicos() {
             editor: editor
         });
 
-        // Hacer que el selector de voz se acople automáticamente al idioma nativo elegido
         if (config && config.voiceCode) {
             comboVoz.value = config.voiceCode;
         }
