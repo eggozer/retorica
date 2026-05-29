@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Retórica - Bloc de Notas</title>
-    <link rel="manifest" href="./manifest.json?v=7">
+    <title>Retórica - Entorno de Guiones</title>
+    <link rel="manifest" href="./manifest.json?v=8">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
     <style>
         :root {
             --bg-main: #0a0f1d; --bg-sidebar: #111827; --bg-card: #1f2937;
@@ -20,49 +19,36 @@
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--bg-main); color: var(--text-main); display: flex; height: 100vh; width: 100vw; overflow: hidden; position: relative; }
-        button, select { border-radius: 4px !important; height: 40px; padding: 0 10px; background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border); font-size: 0.85rem; }
+        button, select, input { border-radius: 4px; height: 40px; padding: 0 10px; background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border); font-size: 0.85rem; }
 
-        /* --- MENÚ LATERAL (BIBLIOTECA) --- */
         .sidebar { width: 280px; background-color: var(--bg-sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; height: 100%; position: absolute; left: 0; top: 0; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 200; }
         .sidebar.hidden { transform: translateX(-280px); }
         
-        /* Flecha flotante integrada al primer nivel */
-        .toggle-sidebar-pestaña { position: absolute; left: 12px; top: 10px; width: 40px; height: 40px; background-color: var(--bg-card); color: var(--accent); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; z-index: 250; font-size: 1.2rem; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 4px; }
+        /* FIJACIÓN DE LA FLECHA FLOTANTE - PREVIENE BLOQUEOS */
+        .toggle-sidebar-pestaña { position: fixed; left: 12px; top: 10px; width: 40px; height: 40px; background-color: var(--bg-card); color: var(--accent); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; z-index: 250; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 4px; }
+        
         .sidebar-header { padding: 0 16px 0 60px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; height: 60px; flex-shrink: 0; }
-        .btn-nuevo-doc { background: var(--accent); color: #0a0f1d; font-weight: bold; border: none; padding: 6px 12px; cursor: pointer; font-size: 0.85rem; height: auto; }
         .document-list { flex: 1; overflow-y: auto; padding: 12px; }
-        .sidebar-footer-menu { padding: 12px; border-top: 1px solid var(--border); background-color: rgba(0, 0, 0, 0.2); flex-shrink: 0; }
-        .footer-menu-title { font-size: 0.75rem; font-weight: bold; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; }
-        .footer-buttons-container { display: flex; flex-direction: column; gap: 6px; }
-        .btn-footer-action { width: 100%; text-align: left; cursor: pointer; }
+        
+        /* SECCIÓN DE REGISTRO / PERFIL LOCAL */
+        .user-section-box { padding: 10px; border-bottom: 1px solid var(--border); background-color: rgba(255,255,255,0.02); font-size: 0.8rem; }
+        .user-section-box input { width: 100%; height: 30px; margin-bottom: 5px; font-size: 0.75rem; }
 
-        /* --- CONTENEDOR CENTRAL DE DOS NIVELES --- */
         .main-container { flex: 1; display: flex; flex-direction: column; height: 100%; width: 100%; background-color: var(--bg-main); position: relative; }
+        .app-header-top { height: 60px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); flex-shrink: 0; z-index: 100; }
         
-        /* NIVEL 1: ENCABEZADO SUPERIOR FIJO */
-        .app-header-top { height: 60px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); position: relative; flex-shrink: 0; z-index: 100; }
-        .brand-title-center { display: flex; align-items: center; gap: 8px; font-weight: bold; font-size: 1.1rem; letter-spacing: 1.5px; color: var(--text-main); }
-        .brand-title-center span:first-child { font-size: 1.3rem; }
-
-        /* NIVEL 2: BARRA DE RACKS HERRAMIENTAS */
-        .top-toolbar-racks { height: 54px; border-bottom: 1px solid var(--border); padding: 0 12px; display: flex; align-items: center; gap: 10px; overflow-x: auto; white-space: nowrap; flex-shrink: 0; background-color: var(--bg-main); z-index: 90; scrollbar-width: none; }
-        .top-toolbar-racks::-webkit-scrollbar { display: none; }
+        .top-toolbar-racks { height: 54px; border-bottom: 1px solid var(--border); padding: 0 12px; display: flex; align-items: center; gap: 8px; overflow-x: auto; flex-shrink: 0; background-color: var(--bg-main); z-index: 90; }
+        .toolbar-rack { display: inline-flex; align-items: center; gap: 4px; background-color: rgba(255,255,255,0.02); border: 1px solid var(--border); padding: 4px; border-radius: 6px; }
         
-        .toolbar-rack { display: inline-flex; align-items: center; gap: 6px; background-color: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 4px 8px; border-radius: 6px; flex-shrink: 0; }
-        .btn-icon-pure { font-size: 1.1rem; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; width: 42px; }
-        .btn-text-action { font-weight: bold; cursor: pointer; padding: 0 14px; }
-        .btn-text-action.accent-btn { background-color: var(--accent); color: #0a0f1d; border: none; }
-
-        /* --- ÁREA DE EDICIÓN --- */
-        .editor-wrapper { flex: 1; display: flex; flex-direction: column; padding: 16px; overflow: hidden; background-color: transparent; position: relative; }
-        textarea { flex: 1; width: 100%; background: transparent; border: none; color: var(--text-main); font-size: 1.1rem; line-height: 1.6; resize: none; outline: none; overflow-y: auto; z-index: 10; }
-        .stats-bar { height: 24px; border-top: 1px solid var(--border); padding-top: 6px; font-size: 0.75rem; color: var(--text-muted); flex-shrink: 0; }
+        /* MODALIDAD DE TRABAJO (NOTA VS WORD) */
+        .editor-wrapper { flex: 1; display: flex; flex-direction: column; padding: 16px; overflow: hidden; position: relative; align-items: center; }
+        textarea { flex: 1; width: 100%; background: transparent; border: none; color: var(--text-main); font-size: 1.1rem; line-height: 1.6; resize: none; outline: none; overflow-y: auto; }
         
-        /* Interceptor para el cierre táctil por Swipe */
-        .swipe-capture-edge { position: absolute; top: 0; right: 0; bottom: 0; width: 60px; z-index: 110; background: transparent; display: none; }
-        .sidebar-open .swipe-capture-edge { display: block; }
-
-        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px); background-color: var(--accent); color: #0a0f1d; padding: 10px 20px; font-size: 0.85rem; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: transform 0.3s ease; z-index: 999; pointer-events: none; }
+        /* MODO HOJA DE TRABAJO ESTILO WORD */
+        textarea.modo-word { max-width: 800px; background-color: var(--bg-card); padding: 40px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 4px; }
+        
+        .stats-bar { width: 100%; height: auto; border-top: 1px solid var(--border); padding-top: 6px; font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between; }
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px); background-color: var(--accent); color: #0a0f1d; padding: 10px 20px; font-size: 0.85rem; font-weight: bold; transition: transform 0.3s; z-index: 999; }
         .toast.show { transform: translateX(-50%) translateY(0); }
     </style>
 </head>
@@ -72,54 +58,71 @@
 
     <div class="sidebar hidden" id="sidebar">
         <div class="sidebar-header">
-            <div style="display:flex; align-items:center; gap:6px;"><span style="font-size:1.1rem;">☀️</span><span style="font-weight:700; letter-spacing:0.5px; font-size:0.95rem;">RETÓRICA</span></div>
-            <button class="btn-nuevo-doc" id="btn-nuevo">➕</button>
+            <div style="font-weight:700; font-size:0.95rem;">RETÓRICA</div>
+            <button id="btn-nuevo">➕</button>
         </div>
+        
+        <div class="user-section-box" id="user-box">
+            <input type="email" id="txt-user-email" placeholder="Correo de sincronización...">
+            <div style="display:flex; gap:4px;">
+                <button id="btn-user-login" style="height:26px; flex:1; font-size:11px;">Entrar</button>
+                <button id="btn-user-logout" style="height:26px; flex:1; font-size:11px; background:var(--danger);">Salir</button>
+            </div>
+            <div id="lbl-user-status" style="margin-top:4px; font-size:10px; color:var(--text-muted);">Dispositivo: Autónomo</div>
+        </div>
+
+        <div style="padding:10px 12px 0 12px;">
+            <input type="text" id="txt-rename-file" placeholder="Renombrar nota seleccionada..." style="width:100%; height:34px;">
+        </div>
+
         <div class="document-list" id="document-list"></div>
-        <div class="sidebar-footer-menu">
-            <div class="footer-menu-title" id="lbl-save-as">Guardar como:</div>
-            <div class="footer-buttons-container">
-                <button class="btn-footer-action" id="export-pdf">1.- PDF</button>
-                <button class="btn-footer-action" id="export-pdf-edit">2.- PDF Editable</button>
-                <button class="btn-footer-action" id="export-doc">3.- DOC</button>
+        
+        <div style="padding:12px; border-top:1px solid var(--border);">
+            <button id="btn-compartir-nota" style="width:100%; margin-bottom:6px; background:#25d366; color:white; font-weight:bold;">🔗 COMPARTIR NOTA</button>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px;">
+                <button id="export-pdf" style="height:32px; font-size:11px;">PDF</button>
+                <button id="export-doc" style="height:32px; font-size:11px;">DOC</button>
             </div>
         </div>
     </div>
 
     <div class="main-container">
         <header class="app-header-top">
-            <div class="brand-title-center">
-                <span>☀️</span>
-                <span>RETÓRICA</span>
-            </div>
+            <div style="font-weight:bold; letter-spacing:1px;" id="lbl-meta-fechas">RETÓRICA ACTIVA</div>
         </header>
 
-        <div class="top-toolbar-racks" id="toolbar-container">
-            <div class="toolbar-rack" id="rack-audio">
-                <button class="btn-icon-pure" id="btn-mic" title="Dictado por voz">🎙️</button>
+        <div class="top-toolbar-racks">
+            <div class="toolbar-rack">
+                <button id="btn-mic" title="Dictado Continúo">🎙️</button>
+                <button id="btn-grab-audio-wa" title="Grabar Mensaje de Voz (WhatsApp)">🎙️💬</button>
+                <button id="btn-render-fl" title="Renderizar texto a Audio (FL Studio)">🎛️ Render</button>
             </div>
-            <div class="toolbar-rack" id="rack-idiomas">
-                <select id="app-lang" title="Idioma App y Dictado"><option value="es">Español</option></select>
-                <button class="btn-icon-pure" id="btn-lectura" title="Leer texto" style="border-radius: 4px 0 0 4px !important; border-right: none;">🔊</button>
-                <select id="voice-lang" title="Idioma de Lectura (Voz)" style="border-radius: 0 4px 4px 0 !important; margin-left: -7px;">
-                    <option value="es-MX">Español (MX)</option>
+            <div class="toolbar-rack">
+                <select id="app-lang"><option value="es">Español</option></select>
+                <button id="btn-lectura">🔊</button>
+                <select id="voice-lang"><option value="es-MX">Español (MX)</option></select>
+            </div>
+            <div class="toolbar-rack">
+                <select id="combo-modalidad" title="Modo de Trabajo">
+                    <option value="nota">Modo Nota</option>
+                    <option value="word-letter">Modo Carta (Word)</option>
+                    <option value="word-legal">Modo Oficio (Word)</option>
                 </select>
-            </div>
-            <div class="toolbar-rack" id="rack-sistema">
-                <button class="btn-icon-pure" id="btn-toggle-tema" title="Alternar Tema">🌙</button>
-                <button class="btn-text-action accent-btn" id="btn-main-guardar">GUARDAR HTML</button>
+                <button id="btn-toggle-tema">🌙</button>
+                <button id="btn-main-guardar" style="background:var(--accent); color:#0a0f1d; font-weight:bold;">GUARDAR</button>
             </div>
         </div>
 
         <div class="editor-wrapper">
-            <div class="swipe-capture-edge" id="swipe-capture-edge"></div>
             <textarea id="editor" placeholder="Escribe tu guion o nota aquí..."></textarea>
-            <div class="stats-bar" id="stats-bar">Caracteres: 0 | Palabras: 0 | Líneas: 0</div>
+            <div class="stats-bar">
+                <div id="stats-text">Caracteres: 0 | Palabras: 0 | Líneas: 0</div>
+                <div id="lbl-file-dates" style="color:var(--text-muted);">Sin guardar</div>
+            </div>
         </div>
     </div>
 
     <div class="toast" id="toast-notif">Operación exitosa</div>
-
     <script type="module" src="js/main.js"></script>
 </body>
 </html>
