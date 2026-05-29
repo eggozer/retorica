@@ -68,10 +68,8 @@
 </head>
 <body>
 
-    <!-- BOTÓN FLECHA FLOTANTE DINÁMICA -->
     <div class="toggle-sidebar-pestaña" id="btn-toggle-pestaña">▶</div>
 
-    <!-- MENÚ LATERAL (BIBLIOTECA) -->
     <div class="sidebar hidden" id="sidebar">
         <div class="sidebar-header">
             <div style="display:flex; align-items:center; gap:6px;"><span style="font-size:1.1rem;">☀️</span><span style="font-weight:700; letter-spacing:0.5px; font-size:0.95rem;">RETÓRICA</span></div>
@@ -88,9 +86,7 @@
         </div>
     </div>
 
-    <!-- ÁREA PRINCIPAL -->
     <div class="main-container">
-        <!-- NIVEL 1 -->
         <header class="app-header-top">
             <div class="brand-title-center">
                 <span>☀️</span>
@@ -98,15 +94,16 @@
             </div>
         </header>
 
-        <!-- NIVEL 2 -->
         <div class="top-toolbar-racks" id="toolbar-container">
             <div class="toolbar-rack" id="rack-audio">
                 <button class="btn-icon-pure" id="btn-mic" title="Dictado por voz">🎙️</button>
-                <button class="btn-icon-pure" id="btn-lectura" title="Leer texto">🔊</button>
             </div>
             <div class="toolbar-rack" id="rack-idiomas">
                 <select id="app-lang" title="Idioma App y Dictado"><option value="es">Español</option></select>
-                <select id="voice-lang" title="Idioma de Lectura (Voz)"><option value="es-MX">Español (MX)</option></select>
+                <button class="btn-icon-pure" id="btn-lectura" title="Leer texto" style="border-radius: 4px 0 0 4px !important; border-right: none;">🔊</button>
+                <select id="voice-lang" title="Idioma de Lectura (Voz)" style="border-radius: 0 4px 4px 0 !important; margin-left: -7px;">
+                    <option value="es-MX">Español (MX)</option>
+                </select>
             </div>
             <div class="toolbar-rack" id="rack-sistema">
                 <button class="btn-icon-pure" id="btn-toggle-tema" title="Alternar Tema">🌙</button>
@@ -114,7 +111,6 @@
             </div>
         </div>
 
-        <!-- EDITOR -->
         <div class="editor-wrapper">
             <div class="swipe-capture-edge" id="swipe-capture-edge"></div>
             <textarea id="editor" placeholder="Escribe tu guion o nota aquí..."></textarea>
