@@ -68,7 +68,6 @@ function configurarEventosBasicos() {
             detenerDictado(); cambiarEstadoMic(false);
         } else {
             cambiarEstadoMic(true);
-            // CORRECCIÓN: El micrófono se inicializa usando el idioma unificado del texto/app
             iniciarDictado(comboApp.value, (textoFinal) => {
                 if (textoFinal) { 
                     editor.value += (editor.value ? ' ' : '') + textoFinal; 
