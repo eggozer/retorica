@@ -1,4 +1,4 @@
-// --- ORQUESTADOR CENTRAL INTERACTIVO CON SWIPE DIRECCIONAL ---
+// --- ORQUESTADOR CENTRAL INTERACTIVO CON CONTROL DE ACTUALIZACIONES ---
 
 import { initDB, guardarDocumento, obtenerDocumentos, eliminarDocumento } from './storage.js';
 import { iniciarDictado, detenerDictado, leerTexto, detenerLecturaManual, iniciarGrabacionVoz, detenerGrabacionVoz, renderizarTextoAAudio } from './audio.js';
@@ -12,6 +12,7 @@ let notaAudiosLocales = [];
 let documentoCreadoTimestamp = null;
 
 let touchStartX = 0;
+let eventoInstalacionPWA = null;
 
 const editor = document.getElementById('editor');
 const statsText = document.getElementById('stats-text');
@@ -29,10 +30,14 @@ const btnGuardar = document.getElementById('btn-main-guardar');
 const sidebar = document.getElementById('sidebar');
 const btnTogglePestaña = document.getElementById('btn-toggle-pestaña');
 
+const btnInstalarPWA = document.getElementById('btn-instalar-pwa');
+const btnActualizarPWA = document.getElementById('btn-actualizar-pwa');
+
 function inicializarApp() {
     cargarSelectores(comboApp, comboVoz);
     configurarEventosBasicos();
     configurarGestosDeslizamiento();
+    configurarCicloVidaPWA();
     
     initDB().then(() => {
         actualizarContadoresEditor();
@@ -123,7 +128,6 @@ function configurarEventosBasicos() {
 }
 
 function configurarGestosDeslizamiento() {
-    // ABRE DESLIZANDO DESDE LA IZQUIERDA, CIERRA DESLIZANDO A LA IZQUIERDA
     window.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; }, { passive: true });
     window.addEventListener('touchend', (e) => {
         const diffX = e.changedTouches[0].clientX - touchStartX;
@@ -133,6 +137,54 @@ function configurarGestosDeslizamiento() {
             sidebar.classList.add('hidden'); btnTogglePestaña.textContent = "▶"; btnTogglePestaña.style.left = "12px";
         }
     }, { passive: true });
+}
+
+function configurarCicloVidaPWA() {
+    // 1.- MANEJO DE INSTALACIÓN DINÁMICA
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        eventoInstalacionPWA = e;
+        btnInstalarPWA.style.display = 'block'; // Muestra solo si no está instalada
+    });
+
+    btnInstalarPWA.onclick = () => {
+        if (!eventoInstalacionPWA) return;
+        eventoInstalacionPWA.prompt();
+        eventoInstalacionPWA.userChoice.then((choice) => {
+            if (choice.outcome === 'accepted') {
+                btnInstalarPWA.style.display = 'none';
+            }
+            eventoInstalacionPWA = null;
+        });
+    };
+
+    window.addEventListener('appinstalled', () => {
+        btnInstalarPWA.style.display = 'none';
+        mostrarNotificacion("¡Retórica instalada correctamente!");
+    });
+
+    // 2.- MANEJO DE ACTUALIZACIONES CALIENTES DE CÓDIGO
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js').then((reg) => {
+            reg.addEventListener('updatefound', () => {
+                const nuevoWorker = reg.installing;
+                nuevoWorker.addEventListener('statechange', () => {
+                    if (nuevoWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                        btnActualizarPWA.style.display = 'block'; // Muestra si hay cambios en GitHub
+                    }
+                });
+            });
+        });
+
+        btnActualizarPWA.onclick = () => {
+            navigator.serviceWorker.getRegistration().then((reg) => {
+                if (reg && reg.waiting) {
+                    reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+                }
+                window.location.reload();
+            });
+        };
+    }
 }
 
 async function ejecutarAutoGuardadoSilencioso() {
