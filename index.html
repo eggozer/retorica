@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Retórica - Entorno de Guiones</title>
-    <link rel="manifest" href="./manifest.json?v=8">
+    <title>Retórica - Bloc de Notas</title>
+    <link rel="manifest" href="./manifest.json?v=9">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root {
@@ -19,35 +19,33 @@
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--bg-main); color: var(--text-main); display: flex; height: 100vh; width: 100vw; overflow: hidden; position: relative; }
-        button, select, input { border-radius: 4px; height: 40px; padding: 0 10px; background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border); font-size: 0.85rem; }
+        button, select, input { border-radius: 4px !important; height: 40px; padding: 0 10px; background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border); font-size: 0.85rem; }
 
         .sidebar { width: 280px; background-color: var(--bg-sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; height: 100%; position: absolute; left: 0; top: 0; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 200; }
         .sidebar.hidden { transform: translateX(-280px); }
         
-        /* FIJACIÓN DE LA FLECHA FLOTANTE - PREVIENE BLOQUEOS */
         .toggle-sidebar-pestaña { position: fixed; left: 12px; top: 10px; width: 40px; height: 40px; background-color: var(--bg-card); color: var(--accent); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; z-index: 250; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 4px; }
-        
         .sidebar-header { padding: 0 16px 0 60px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; height: 60px; flex-shrink: 0; }
         .document-list { flex: 1; overflow-y: auto; padding: 12px; }
         
-        /* SECCIÓN DE REGISTRO / PERFIL LOCAL */
-        .user-section-box { padding: 10px; border-bottom: 1px solid var(--border); background-color: rgba(255,255,255,0.02); font-size: 0.8rem; }
-        .user-section-box input { width: 100%; height: 30px; margin-bottom: 5px; font-size: 0.75rem; }
+        .sidebar-footer-menu { padding: 12px; border-top: 1px solid var(--border); background-color: rgba(0, 0, 0, 0.2); flex-shrink: 0; }
+        .footer-menu-title { font-size: 0.75rem; font-weight: bold; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; }
+        .footer-buttons-container { display: flex; flex-direction: column; gap: 6px; }
 
         .main-container { flex: 1; display: flex; flex-direction: column; height: 100%; width: 100%; background-color: var(--bg-main); position: relative; }
         .app-header-top { height: 60px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); flex-shrink: 0; z-index: 100; }
+        .brand-title-center { display: flex; align-items: center; gap: 8px; font-weight: bold; font-size: 1.1rem; letter-spacing: 1.5px; }
+
+        .top-toolbar-racks { height: 54px; border-bottom: 1px solid var(--border); padding: 0 12px; display: flex; align-items: center; gap: 8px; overflow-x: auto; white-space: nowrap; flex-shrink: 0; background-color: var(--bg-main); z-index: 90; scrollbar-width: none; }
+        .top-toolbar-racks::-webkit-scrollbar { display: none; }
+        .toolbar-rack { display: inline-flex; align-items: center; gap: 6px; background-color: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 4px 8px; border-radius: 6px; }
         
-        .top-toolbar-racks { height: 54px; border-bottom: 1px solid var(--border); padding: 0 12px; display: flex; align-items: center; gap: 8px; overflow-x: auto; flex-shrink: 0; background-color: var(--bg-main); z-index: 90; }
-        .toolbar-rack { display: inline-flex; align-items: center; gap: 4px; background-color: rgba(255,255,255,0.02); border: 1px solid var(--border); padding: 4px; border-radius: 6px; }
-        
-        /* MODALIDAD DE TRABAJO (NOTA VS WORD) */
         .editor-wrapper { flex: 1; display: flex; flex-direction: column; padding: 16px; overflow: hidden; position: relative; align-items: center; }
         textarea { flex: 1; width: 100%; background: transparent; border: none; color: var(--text-main); font-size: 1.1rem; line-height: 1.6; resize: none; outline: none; overflow-y: auto; }
-        
-        /* MODO HOJA DE TRABAJO ESTILO WORD */
-        textarea.modo-word { max-width: 800px; background-color: var(--bg-card); padding: 40px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 4px; }
-        
-        .stats-bar { width: 100%; height: auto; border-top: 1px solid var(--border); padding-top: 6px; font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between; }
+        textarea.modo-carta { max-width: 800px; background-color: var(--bg-card); padding: 40px; border: 1px solid var(--border); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        textarea.modo-oficio { max-width: 850px; background-color: var(--bg-card); padding: 50px; border: 1px solid var(--border); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+
+        .stats-bar { width: 100%; height: 24px; border-top: 1px solid var(--border); padding-top: 6px; font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between; flex-shrink: 0; }
         .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px); background-color: var(--accent); color: #0a0f1d; padding: 10px 20px; font-size: 0.85rem; font-weight: bold; transition: transform 0.3s; z-index: 999; }
         .toast.show { transform: translateX(-50%) translateY(0); }
     </style>
@@ -58,66 +56,55 @@
 
     <div class="sidebar hidden" id="sidebar">
         <div class="sidebar-header">
-            <div style="font-weight:700; font-size:0.95rem;">RETÓRICA</div>
+            <div style="display:flex; align-items:center; gap:6px;"><span>☀️</span><span style="font-weight:700;">RETÓRICA</span></div>
             <button id="btn-nuevo">➕</button>
         </div>
-        
-        <div class="user-section-box" id="user-box">
-            <input type="email" id="txt-user-email" placeholder="Correo de sincronización...">
-            <div style="display:flex; gap:4px;">
-                <button id="btn-user-login" style="height:26px; flex:1; font-size:11px;">Entrar</button>
-                <button id="btn-user-logout" style="height:26px; flex:1; font-size:11px; background:var(--danger);">Salir</button>
-            </div>
-            <div id="lbl-user-status" style="margin-top:4px; font-size:10px; color:var(--text-muted);">Dispositivo: Autónomo</div>
-        </div>
-
         <div style="padding:10px 12px 0 12px;">
-            <input type="text" id="txt-rename-file" placeholder="Renombrar nota seleccionada..." style="width:100%; height:34px;">
+            <input type="text" id="txt-rename-file" placeholder="Renombrar nota..." style="width:100%; height:36px;">
         </div>
-
         <div class="document-list" id="document-list"></div>
-        
-        <div style="padding:12px; border-top:1px solid var(--border);">
-            <button id="btn-compartir-nota" style="width:100%; margin-bottom:6px; background:#25d366; color:white; font-weight:bold;">🔗 COMPARTIR NOTA</button>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px;">
-                <button id="export-pdf" style="height:32px; font-size:11px;">PDF</button>
-                <button id="export-doc" style="height:32px; font-size:11px;">DOC</button>
+        <div class="sidebar-footer-menu">
+            <div class="footer-menu-title">Guardar como:</div>
+            <div class="footer-buttons-container">
+                <button class="btn-footer-action" id="export-pdf">1.- PDF</button>
+                <button class="btn-footer-action" id="export-pdf-edit">2.- PDF Editable</button>
+                <button class="btn-footer-action" id="export-doc">3.- DOC</button>
             </div>
         </div>
     </div>
 
     <div class="main-container">
         <header class="app-header-top">
-            <div style="font-weight:bold; letter-spacing:1px;" id="lbl-meta-fechas">RETÓRICA ACTIVA</div>
+            <div class="brand-title-center"><span>☀️</span><span>RETÓRICA</span></div>
         </header>
 
         <div class="top-toolbar-racks">
             <div class="toolbar-rack">
-                <button id="btn-mic" title="Dictado Continúo">🎙️</button>
-                <button id="btn-grab-audio-wa" title="Grabar Mensaje de Voz (WhatsApp)">🎙️💬</button>
-                <button id="btn-render-fl" title="Renderizar texto a Audio (FL Studio)">🎛️ Render</button>
+                <button id="btn-mic" title="Dictado de Voz">🎙️</button>
+                <button id="btn-grab-audio-wa" title="Nota de Voz (WhatsApp)">🎙️💬</button>
+                <button id="btn-render-fl" title="Renderizar a Audio (FL Studio)">🎛️ Render</button>
             </div>
             <div class="toolbar-rack">
-                <select id="app-lang"><option value="es">Español</option></select>
-                <button id="btn-lectura">🔊</button>
-                <select id="voice-lang"><option value="es-MX">Español (MX)</option></select>
+                <select id="app-lang" title="Idioma App y Texto"><option value="es">Español</option></select>
+                <button id="btn-lectura" title="Leer texto">🔊</button>
+                <select id="voice-lang" title="Voz de Lectura"><option value="es-MX">Español (MX)</option></select>
             </div>
             <div class="toolbar-rack">
-                <select id="combo-modalidad" title="Modo de Trabajo">
-                    <option value="nota">Modo Nota</option>
-                    <option value="word-letter">Modo Carta (Word)</option>
-                    <option value="word-legal">Modo Oficio (Word)</option>
+                <select id="combo-modalidad">
+                    <option value="nota">Nota</option>
+                    <option value="carta">Carta</option>
+                    <option value="oficio">Oficio</option>
                 </select>
                 <button id="btn-toggle-tema">🌙</button>
-                <button id="btn-main-guardar" style="background:var(--accent); color:#0a0f1d; font-weight:bold;">GUARDAR</button>
+                <button id="btn-main-guardar" style="background:var(--accent); color:#0a0f1d; font-weight:bold;">GUARDAR HTML</button>
             </div>
         </div>
 
-        <div class="editor-wrapper">
+        <div class="editor-wrapper" id="editor-container">
             <textarea id="editor" placeholder="Escribe tu guion o nota aquí..."></textarea>
             <div class="stats-bar">
                 <div id="stats-text">Caracteres: 0 | Palabras: 0 | Líneas: 0</div>
-                <div id="lbl-file-dates" style="color:var(--text-muted);">Sin guardar</div>
+                <div id="lbl-file-dates">Sin guardar</div>
             </div>
         </div>
     </div>
