@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Retórica - Bloc de Notas</title>
-    <link rel="manifest" href="./manifest.json?v=10">
+    <link rel="manifest" href="./manifest.json?v=11">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root {
             --bg-main: #0a0f1d; --bg-sidebar: #111827; --bg-card: #1f2937;
             --bg-card-active: #374151; --accent: #ffca28; --text-main: #f3f4f6;
-            --text-muted: #9ca3af; --border: #2d3748; --danger: #ef4444; --success: #25d366;
+            --text-muted: #9ca3af; --border: #2d3748; --danger: #ef4444;
         }
         body.light-theme {
             --bg-main: #f9fafb; --bg-sidebar: #f3f4f6; --bg-card: #ffffff;
@@ -50,6 +50,7 @@
         .toast.show { transform: translateX(-50%) translateY(0); }
         
         .btn-pwa-dinamico { width: 100%; display: none; font-weight: bold; text-align: center; margin-top: 4px; cursor: pointer; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
