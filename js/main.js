@@ -9,6 +9,7 @@ let grabandoAudioWA = false;
 let notaAudiosLocales = [];
 let documentoCreadoTimestamp = null;
 let touchStartX = 0;
+let touchStartY = 0;
 let eventoInstalacionPWA = null;
 
 const editor = document.getElementById('editor');
@@ -104,7 +105,7 @@ function configurarEventosBasicos() {
     btnTogglePestaña.onclick = async () => {
         const seOculta = sidebar.classList.toggle('hidden');
         btnTogglePestaña.textContent = seOculta ? "▶" : "◀";
-        btnTogglePestaña.style.left = seOculta ? "12px" : "calc(100vw - 54px)";
+        btnTogglePestaña.style.left = seOculta ? "12px" : "calc(100vw - 58px)";
         if (!seOculta) await renderizarListaDocumentos();
     };
 
@@ -153,18 +154,23 @@ function configurarEventosBasicos() {
         if (!editor.innerText.trim()) return;
         await ejecutarAutoGuardadoSilencioso();
         lblFileDates.textContent = `Guardado: ${new Date().toLocaleTimeString()}`;
-        mostrarNotificacion("Guardado en base de datos de forma segura");
+        mostrarNotificacion("Guardado con éxito");
         await renderizarListaDocumentos();
     };
 }
 
 function configurarGestosDeslizamiento() {
-    window.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; }, { passive: true });
+    window.addEventListener('touchstart', (e) => { 
+        touchStartX = e.touches[0].clientX; 
+        touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+
     window.addEventListener('touchend', (e) => {
+        if (touchStartY < 120) return; 
         const diffX = e.changedTouches[0].clientX - touchStartX;
-        if (diffX > 80 && sidebar.classList.contains('hidden')) { 
-            sidebar.classList.remove('hidden'); btnTogglePestaña.textContent = "◀"; btnTogglePestaña.style.left = "calc(100vw - 54px)";
-        } else if (diffX < -80 && !sidebar.classList.contains('hidden')) {
+        if (diffX > 90 && sidebar.classList.contains('hidden')) { 
+            sidebar.classList.remove('hidden'); btnTogglePestaña.textContent = "◀"; btnTogglePestaña.style.left = "calc(100vw - 58px)";
+        } else if (diffX < -90 && !sidebar.classList.contains('hidden')) {
             sidebar.classList.add('hidden'); btnTogglePestaña.textContent = "▶"; btnTogglePestaña.style.left = "12px";
         }
     }, { passive: true });
