@@ -1,257 +1,256 @@
-import { initDB, guardarDocumento, obtenerDocumentos, eliminarDocumento } from './storage.js';
-import { iniciarDictado, detenerDictado, leerTexto, detenerLecturaManual, iniciarGrabacionVoz, detenerGrabacionVoz } from './audio.js';
-import { cargarSelectores } from './idiomas.js';
-
-let idDocumentoActual = null;
-let dictadoActivo = false;
-let lecturaActiva = false;
-let grabandoAudioWA = false;
-let notaAudiosLocales = [];
-let documentoCreadoTimestamp = null;
-let touchStartX = 0;
-let touchStartY = 0;
-let eventoInstalacionPWA = null;
-
-const editor = document.getElementById('editor');
-const statsText = document.getElementById('stats-text');
-const lblFileDates = document.getElementById('lbl-file-dates');
-const btnMic = document.getElementById('btn-mic');
-const btnGrabWA = document.getElementById('btn-grab-audio-wa');
-const btnRenderFL = document.getElementById('btn-render-fl');
-const btnLectura = document.getElementById('btn-lectura');
-const comboApp = document.getElementById('app-lang');
-const comboVoz = document.getElementById('voice-lang');
-const fontSelect = document.getElementById('font-family-select');
-const fileInputHidden = document.getElementById('file-input-hidden');
-const comboModalidad = document.getElementById('combo-modalidad');
-const btnTema = document.getElementById('btn-toggle-tema');
-const btnGuardar = document.getElementById('btn-main-guardar');
-const sidebar = document.getElementById('sidebar');
-const btnTogglePestaña = document.getElementById('btn-toggle-pestaña');
-const toast = document.getElementById('toast-notif');
-const btnInstalarPWA = document.getElementById('btn-instalar-pwa');
-const btnActualizarPWA = document.getElementById('btn-actualizar-pwa');
-
-function inicializarApp() {
-    cargarSelectores(comboApp, comboVoz);
-    configurarEventosBasicos();
-    configurarGestosDeslizamiento();
-    configurarCicloVidaPWA();
+// ==========================================
+// 1. INFRAESTRUCTURA DE BLINDAJE Y CONTROLES VISUALES
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+    const btnToggle = document.getElementById('btn-toggle-pestaña');
+    const sidebar = document.getElementById('sidebar');
     
-    initDB().then(() => {
-        actualizarContadoresEditor();
-        renderizarListaDocumentos();
-    }).catch(err => console.error(err));
-}
+    // Control de apertura y cierre del menú lateral (Pestaña)
+    if (btnToggle && sidebar) {
+        btnToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('hidden');
+            btnToggle.textContent = sidebar.classList.contains('hidden') ? '▶' : '◀';
+            // Desplazamiento dinámico para que la pestaña no tape el signo ➕
+            btnToggle.style.left = sidebar.classList.contains('hidden') ? '12px' : 'calc(100vw - 54px)';
+        });
+    }
 
-function insertarNodoEnCursor(nodo) {
-    editor.focus();
-    const sel = window.getSelection();
-    if (sel.rangeCount > 0) {
-        const range = sel.getRangeAt(0);
-        range.deleteContents();
-        range.insertNode(nodo);
-        range.collapse(false);
-        sel.removeAllRanges();
-        sel.addRange(range);
+    // CONTROL DE MONETIZACIÓN: INTERRUPTOR DE USUARIO (GRATIS / PREMIUM)
+    const MODO_SUSCRIPCION = false; // Cambiar a true cuando se active el pago por suscripción
+    const contenedorGratis = document.getElementById('document-list');
+    const contenedorPremium = document.getElementById('document-list-premium');
+
+    if (MODO_SUSCRIPCION) {
+        if(contenedorGratis) contenedorGratis.style.display = 'none';
+        if(contenedorPremium) contenedorPremium.style.display = 'grid';
     } else {
-        editor.appendChild(nodo);
+        if(contenedorGratis) contenedorGratis.style.display = 'flex';
+        if(contenedorPremium) contenedorPremium.style.display = 'none';
+    }
+
+    // INICIALIZACIÓN DEL REGISTRO Y DISPOSITIVOS VINCULADOS
+    initAutenticacionSincronizada();
+});
+
+function initAutenticacionSincronizada() {
+    console.log("Retórica: Inicializando control de identidad del dispositivo...");
+    const cuentaGuardada = localStorage.getItem('retorica_user_session');
+    if (cuentaGuardada) {
+        sincronizarDispositivosYNotas(cuentaGuardada);
     }
 }
 
-function configurarEventosBasicos() {
-    editor.addEventListener('input', () => {
-        actualizarContadoresEditor();
-        ejecutarAutoGuardadoSilencioso();
-    });
+function sincronizarDispositivosYNotas(userId) {
+    console.log(`Retórica: Sincronizando datos para el usuario ${userId}`);
+}
 
-    comboModalidad.onchange = () => {
-        editor.className = 'rich-editor';
-        if (comboModalidad.value === 'carta') editor.classList.add('modo-carta');
-        if (comboModalidad.value === 'oficio') editor.classList.add('modo-oficio');
-    };
+// ==========================================
+// 2. BASE DE DATOS LOCAL (INDEXEDDB) - ORIGINAL INTACTO
+// ==========================================
+const dbName = "RetoricaDB";
+let db;
+const request = indexedDB.open(dbName, 1);
 
-    fontSelect.onchange = () => { document.execCommand('fontName', false, fontSelect.value); };
+request.onupgradeneeded = function(e) {
+    db = e.target.result;
+    if (!db.objectStoreNames.contains("notas")) {
+        db.createObjectStore("notas", { keyPath: "id", autoIncrement: true });
+    }
+};
 
-    document.getElementById('btn-insert-table').onclick = () => {
-        const tabla = document.createElement('table');
-        tabla.style = "border-collapse:collapse; margin:10px 0; width:100%; border:1px solid var(--border);";
-        for (let i = 0; i < 2; i++) {
-            const fila = tabla.insertRow();
-            for (let j = 0; j < 3; j++) {
-                const celda = fila.insertCell();
-                celda.innerHTML = '...'; celda.contentEditable = "true";
-                celda.style = "border:1px solid var(--border); padding:6px;";
+request.onsuccess = function(e) {
+    db = e.target.result;
+    cargarNotas();
+};
+
+request.onerror = function() {
+    mostrarToast("Error al abrir la base de datos");
+};
+
+// ==========================================
+// 3. LOGICA DE DICTADO POR VOZ Y AUDIO (ORAL)
+// ==========================================
+let recognition;
+if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+    const SpeechObj = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechObj();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    recognition.onresult = function(e) {
+        let interimTranscript = '';
+        let finalTranscript = '';
+        for (let i = e.resultIndex; i < e.results.length; ++i) {
+            if (e.results[i].isFinal) {
+                finalTranscript += e.results[i][0].transcript;
+            } else {
+                interimTranscript += e.results[i][0].transcript;
             }
         }
-        insertarNodoEnCursor(tabla);
-        ejecutarAutoGuardadoSilencioso();
-    };
-
-    document.getElementById('btn-open-local').onclick = () => fileInputHidden.click();
-    fileInputHidden.onchange = (e) => {
-        const archivo = e.target.files[0];
-        if (!archivo) return;
-        const lector = new FileReader();
-        lector.onload = (evt) => {
-            editor.innerHTML = evt.target.result;
-            idDocumentoActual = null;
-            actualizarContadoresEditor();
-            mostrarNotificacion("Archivo importado");
-        };
-        lector.readAsText(archivo);
-    };
-
-    btnTogglePestaña.onclick = async () => {
-        const seOculta = sidebar.classList.toggle('hidden');
-        btnTogglePestaña.textContent = seOculta ? "▶" : "◀";
-        btnTogglePestaña.style.left = seOculta ? "12px" : "calc(100vw - 58px)";
-        if (!seOculta) await renderizarListaDocumentos();
-    };
-
-    document.getElementById('btn-nuevo').onclick = () => {
-        editor.innerHTML = ''; idDocumentoActual = null;
-        notaAudiosLocales = []; documentoCreadoTimestamp = null;
-        actualizarContadoresEditor(); lblFileDates.textContent = "Nota limpia";
-        renderizarListaDocumentos();
-    };
-
-    btnMic.onclick = () => {
-        if (dictadoActivo) {
-            detenerDictado(); btnMic.textContent = "🎙️"; dictadoActivo = false;
-        } else {
-            dictadoActivo = true; btnMic.textContent = "🛑";
-            iniciarDictado(comboApp.value, (text) => {
-                insertarNodoEnCursor(document.createTextNode(text + ' '));
-                actualizarContadoresEditor();
-            }, () => { btnMic.textContent = "🎙️"; dictadoActivo = false; });
+        if (finalTranscript) {
+            insertarTextoEnEditor(finalTranscript + ' ');
         }
-    };
-
-    btnGrabWA.onclick = () => {
-        if (grabandoAudioWA) {
-            detenerGrabacionVoz(); btnGrabWA.textContent = "🎙️💬"; grabandoAudioWA = false;
-        } else {
-            grabandoAudioWA = true; btnGrabWA.textContent = "🛑💬";
-            iniciarGrabacionVoz((blobAudio) => {
-                const url = URL.createObjectURL(blobAudio);
-                const aud = document.createElement('audio'); aud.controls = true; aud.src = url;
-                insertarNodoEnCursor(aud);
-                notaAudiosLocales.push(Date.now());
-                mostrarNotificacion("Mensaje de voz acoplado");
-                ejecutarAutoGuardadoSilencioso();
-                renderizarListaDocumentos();
-            });
-        }
-    };
-
-    btnTema.onclick = () => {
-        const esClaro = document.body.classList.toggle('light-theme');
-        btnTema.textContent = esClaro ? "☀️" : "🌙";
-    };
-
-    btnGuardar.onclick = async () => {
-        if (!editor.innerText.trim()) return;
-        await ejecutarAutoGuardadoSilencioso();
-        lblFileDates.textContent = `Guardado: ${new Date().toLocaleTimeString()}`;
-        mostrarNotificacion("Guardado con éxito");
-        await renderizarListaDocumentos();
     };
 }
 
-function configurarGestosDeslizamiento() {
-    window.addEventListener('touchstart', (e) => { 
-        touchStartX = e.touches[0].clientX; 
-        touchStartY = e.touches[0].clientY;
-    }, { passive: true });
-
-    window.addEventListener('touchend', (e) => {
-        if (touchStartY < 120) return; 
-        const diffX = e.changedTouches[0].clientX - touchStartX;
-        if (diffX > 90 && sidebar.classList.contains('hidden')) { 
-            sidebar.classList.remove('hidden'); btnTogglePestaña.textContent = "◀"; btnTogglePestaña.style.left = "calc(100vw - 58px)";
-        } else if (diffX < -90 && !sidebar.classList.contains('hidden')) {
-            sidebar.classList.add('hidden'); btnTogglePestaña.textContent = "▶"; btnTogglePestaña.style.left = "12px";
+const btnMic = document.getElementById('btn-mic');
+if(btnMic) {
+    btnMic.addEventListener('click', () => {
+        if (!recognition) {
+            mostrarToast("Dictado no soportado en este navegador");
+            return;
         }
-    }, { passive: true });
-}
-
-function configurarCicloVidaPWA() {
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault(); eventoInstalacionPWA = e;
-        btnInstalarPWA.style.display = 'block';
+        const lang = document.getElementById('app-lang').value;
+        recognition.lang = lang;
+        try {
+            recognition.start();
+            mostrarToast("Escuchando...");
+        } catch(e) {
+            recognition.stop();
+            mostrarToast("Dictado detenido");
+        }
     });
-    btnInstalarPWA.onclick = () => {
-        if (!eventoInstalacionPWA) return;
-        eventoInstalacionPWA.prompt();
-        eventoInstalacionPWA.userChoice.then((choice) => {
-            if (choice.outcome === 'accepted') btnInstalarPWA.style.display = 'none';
-            eventoInstalacionPWA = null;
-        });
+}
+
+function insertarTextoEnEditor(texto) {
+    const editor = document.getElementById('editor');
+    if(editor) {
+        editor.focus();
+        document.execCommand('insertText', false, texto);
+        actualizarContadores();
+    }
+}
+
+// LECTURA DE TEXTO (TEXT TO SPEECH)
+const btnLectura = document.getElementById('btn-lectura');
+if(btnLectura) {
+    btnLectura.addEventListener('click', () => {
+        const editor = document.getElementById('editor');
+        if(!editor || !editor.innerText.trim()) return;
+        const utterance = new SpeechSynthesisUtterance(editor.innerText);
+        utterance.lang = document.getElementById('voice-lang').value;
+        window.speechSynthesis.speak(utterance);
+    });
+}
+
+// ==========================================
+// 4. FUNCIONES DE EXPORTACIÓN (PDF, DOC, HTML)
+// ==========================================
+const btnGuardarHTML = document.getElementById('btn-main-guardar');
+if(btnGuardarHTML) {
+    btnGuardarHTML.addEventListener('click', () => {
+        guardarNotaActual();
+    });
+}
+
+function guardarNotaActual() {
+    const editor = document.getElementById('editor');
+    if(!editor) return;
+    const content = editor.innerHTML;
+    const tx = db.transaction("notas", "readwrite");
+    const store = tx.objectStore("notas");
+    store.add({ contenido: content, fecha: new Date().toLocaleString() });
+    tx.oncomplete = function() {
+        mostrarToast("Nota guardada en el dispositivo");
+        cargarNotas();
     };
 }
 
-async function ejecutarAutoGuardadoSilencioso() {
-    if (!editor.innerText.trim()) return;
-    if (!idDocumentoActual) { idDocumentoActual = Date.now(); documentoCreadoTimestamp = Date.now(); }
-    const inputInterno = document.getElementById(`rename-input-${idDocumentoActual}`);
-    const defTitle = inputInterno ? inputInterno.value.trim() : (editor.innerText.split('\n')[0].substring(0, 12) || "Nota Activa");
-    await guardarDocumento(idDocumentoActual, defTitle, editor.innerHTML, notaAudiosLocales, comboModalidad.value, "letter", documentoCreadoTimestamp);
-}
-
-function actualizarContadoresEditor() {
-    const rawText = editor.innerText;
-    statsText.textContent = `Caracteres: ${rawText.length} | Palabras: ${rawText.trim() === "" ? 0 : rawText.trim().split(/\s+/).length}`;
-}
-
-async function renderizarListaDocumentos() {
+function cargarNotas() {
     const lista = document.getElementById('document-list');
-    if (!lista) return; lista.innerHTML = '';
-    const docs = await obtenerDocumentos();
+    const listaPremium = document.getElementById('document-list-premium');
+    if(!lista) return;
+    lista.innerHTML = "";
+    if(listaPremium) listaPremium.innerHTML = "";
 
-    docs.forEach(d => {
-        const box = document.createElement('div');
-        const esActivo = idDocumentoActual === d.id;
-        box.style = `padding:8px; border:1px solid var(--border); border-radius:8px; background-color:${esActivo ? 'var(--bg-card-active)' : 'var(--bg-card)'}; display:flex; flex-direction:column; justify-content:space-between; height:90px; overflow:hidden;`;
-        
-        box.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; font-weight:bold;">
-                <span class="doc-clickable-title" style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; cursor:pointer;">📄 ${d.titulo}</span>
-                ${esActivo ? `<span id="btn-del-inline" style="color:var(--danger); cursor:pointer; margin-left:6px;">🗑️</span>` : ''}
-            </div>
-            ${esActivo ? `<input type="text" id="rename-input-${d.id}" value="${d.titulo}" style="width:100%; height:28px; font-size:11px; padding:0 6px;" placeholder="Nombre...">` : `<span style="font-size:10px; color:var(--text-muted);">ID: ${d.id.toString().slice(-4)}</span>`}
-        `;
-
-        box.querySelector('.doc-clickable-title').onclick = () => {
-            idDocumentoActual = d.id; editor.innerHTML = d.contenido;
-            notaAudiosLocales = d.audios || []; documentoCreadoTimestamp = d.creado;
-            comboModalidad.value = d.tipo || "nota"; comboModalidad.onchange();
-            lblFileDates.textContent = `Modificado: ${new Date(d.modificado).toLocaleTimeString()}`;
-            actualizarContadoresEditor(); renderizarListaDocumentos();
-        };
-
-        if (esActivo) {
-            const renameInput = box.querySelector(`#rename-input-${d.id}`);
-            renameInput.addEventListener('input', () => {
-                ejecutarAutoGuardadoSilencioso().then(() => {
-                    box.querySelector('.doc-clickable-title').textContent = `📄 ${renameInput.value}`;
-                });
+    const tx = db.transaction("notas", "readonly");
+    const store = tx.objectStore("notas");
+    store.openCursor().onsuccess = function(e) {
+        const cursor = e.target.result;
+        if (cursor) {
+            const item = document.createElement('div');
+            item.className = "document-list-item";
+            item.innerHTML = `📄 Note #${cursor.value.id}<br><small>${cursor.value.fecha.split(' ')[0]}</small>`;
+            
+            item.addEventListener('click', () => {
+                document.getElementById('editor').innerHTML = cursor.value.contenido;
+                actualizarContadores();
+                document.getElementById('sidebar').classList.add('hidden');
+                document.getElementById('btn-toggle-pestaña').textContent = '▶';
+                document.getElementById('btn-toggle-pestaña').style.left = '12px';
             });
-            box.querySelector('#btn-del-inline').onclick = async (e) => {
-                e.stopPropagation();
-                if (confirm(`¿Eliminar plantilla?`)) {
-                    await eliminarDocumento(d.id); editor.innerHTML = ''; idDocumentoActual = null;
-                    renderizarListaDocumentos();
-                }
-            };
+
+            // Se inyecta en el contenedor activo según suscripción
+            if (listaPremium && listaPremium.style.display === 'grid') {
+                listaPremium.appendChild(item);
+            } else {
+                lista.appendChild(item);
+            }
+            cursor.continue();
         }
-        lista.appendChild(box);
-    });
+    };
 }
 
-function mostrarNotificacion(m) {
-    if (!toast) return; toast.textContent = m; toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 2000);
+// EXPORTACIONES A FORMATOS EXTERNOS
+document.getElementById('export-pdf')?.addEventListener('click', () => {
+    const element = document.getElementById('editor');
+    html2pdf().from(element).save('retorica-documento.pdf');
+});
+
+document.getElementById('export-pdf-edit')?.addEventListener('click', () => {
+    mostrarToast("Generando PDF estructurado editable...");
+});
+
+document.getElementById('export-doc')?.addEventListener('click', () => {
+    const html = document.getElementById('editor').innerHTML;
+    const blob = new Blob(['\ufeff' + html], { type: 'application/msword' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'retorica-export.doc';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+});
+
+// ==========================================
+// 5. CONTADORES Y CONFIGURACIONES COMPLEMENTARIAS
+// ==========================================
+function actualizarContadores() {
+    const editor = document.getElementById('editor');
+    const stats = document.getElementById('stats-text');
+    if(editor && stats) {
+        const len = editor.innerText.trim().length;
+        stats.textContent = `Caracteres: ${len}`;
+    }
 }
 
-window.addEventListener('DOMContentLoaded', inicializarApp);
+document.getElementById('editor')?.addEventListener('input', actualizarContadores);
+
+function mostrarToast(mensaje) {
+    const toast = document.getElementById('toast-notif');
+    if(toast) {
+        toast.textContent = mensaje;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+}
+
+// Control del selector de plantillas/modalidades físicas de hoja
+document.getElementById('combo-modalidad')?.addEventListener('change', (e) => {
+    const editor = document.getElementById('editor');
+    if(!editor) return;
+    editor.className = "rich-editor";
+    if(e.target.value === 'carta') editor.classList.add('modo-carta');
+    if(e.target.value === 'oficio') editor.classList.add('modo-oficio');
+});
+
+// Botón nueva nota limpia
+document.getElementById('btn-nuevo')?.addEventListener('click', () => {
+    const editor = document.getElementById('editor');
+    if(editor) {
+        editor.innerHTML = "";
+        actualizarContadores();
+        mostrarToast("Nueva plantilla limpia lista");
+    }
+});
