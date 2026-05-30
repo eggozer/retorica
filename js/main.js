@@ -9,6 +9,7 @@ let grabandoAudioWA = false;
 let notaAudiosLocales = [];
 let documentoCreadoTimestamp = null;
 let touchStartX = 0;
+let eventoInstalacionPWA = null;
 
 const editor = document.getElementById('editor');
 const statsText = document.getElementById('stats-text');
@@ -20,8 +21,6 @@ const btnLectura = document.getElementById('btn-lectura');
 const comboApp = document.getElementById('app-lang');
 const comboVoz = document.getElementById('voice-lang');
 const fontSelect = document.getElementById('font-family-select');
-const btnTable = document.getElementById('btn-insert-table');
-const btnOpenLocal = document.getElementById('btn-open-local');
 const fileInputHidden = document.getElementById('file-input-hidden');
 const comboModalidad = document.getElementById('combo-modalidad');
 const btnTema = document.getElementById('btn-toggle-tema');
@@ -29,11 +28,14 @@ const btnGuardar = document.getElementById('btn-main-guardar');
 const sidebar = document.getElementById('sidebar');
 const btnTogglePestaña = document.getElementById('btn-toggle-pestaña');
 const toast = document.getElementById('toast-notif');
+const btnInstalarPWA = document.getElementById('btn-instalar-pwa');
+const btnActualizarPWA = document.getElementById('btn-actualizar-pwa');
 
 function inicializarApp() {
     cargarSelectores(comboApp, comboVoz);
     configurarEventosBasicos();
     configurarGestosDeslizamiento();
+    configurarCicloVidaPWA();
     
     initDB().then(() => {
         actualizarContadoresEditor();
@@ -56,43 +58,6 @@ function insertarNodoEnCursor(nodo) {
     }
 }
 
-function crearContenedorReproductorPersonalizado(audioUrl, blobData) {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'audio-player-wrapper';
-    wrapper.contentEditable = "false";
-
-    const aud = document.createElement('audio');
-    aud.controls = true;
-    aud.src = audioUrl;
-
-    const rateSel = document.createElement('select');
-    rateSel.title = "Velocidad";
-    ['0.5', '1.0', '1.5', '2.0'].forEach(v => {
-        const op = document.createElement('option');
-        op.value = v; op.textContent = `${v}x`;
-        if (v === '1.0') op.selected = true;
-        rateSel.appendChild(op);
-    });
-    rateSel.onchange = () => { aud.playbackRate = parseFloat(rateSel.value); };
-
-    const shareBtn = document.createElement('button');
-    shareBtn.textContent = "🔗 Compartir";
-    shareBtn.onclick = async () => {
-        if (!blobData) return;
-        const file = new File([blobData], `audio-${Date.now()}.mp3`, { type: 'audio/mp3' });
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            navigator.share({ files: [file], title: 'Audio Retórica' }).catch(() => {});
-        } else {
-            mostrarNotificacion("Tu dispositivo no soporta compartir este archivo.");
-        }
-    };
-
-    wrapper.appendChild(aud);
-    wrapper.appendChild(rateSel);
-    wrapper.appendChild(shareBtn);
-    return wrapper;
-}
-
 function configurarEventosBasicos() {
     editor.addEventListener('input', () => {
         actualizarContadoresEditor();
@@ -107,21 +72,22 @@ function configurarEventosBasicos() {
 
     fontSelect.onchange = () => { document.execCommand('fontName', false, fontSelect.value); };
 
-    btnTable.onclick = () => {
+    document.getElementById('btn-insert-table').onclick = () => {
         const tabla = document.createElement('table');
-        tabla.className = 'editor-table';
+        tabla.style = "border-collapse:collapse; margin:10px 0; width:100%; border:1px solid var(--border);";
         for (let i = 0; i < 2; i++) {
             const fila = tabla.insertRow();
             for (let j = 0; j < 3; j++) {
                 const celda = fila.insertCell();
                 celda.innerHTML = '...'; celda.contentEditable = "true";
+                celda.style = "border:1px solid var(--border); padding:6px;";
             }
         }
         insertarNodoEnCursor(tabla);
         ejecutarAutoGuardadoSilencioso();
     };
 
-    btnOpenLocal.onclick = () => fileInputHidden.click();
+    document.getElementById('btn-open-local').onclick = () => fileInputHidden.click();
     fileInputHidden.onchange = (e) => {
         const archivo = e.target.files[0];
         if (!archivo) return;
@@ -130,7 +96,7 @@ function configurarEventosBasicos() {
             editor.innerHTML = evt.target.result;
             idDocumentoActual = null;
             actualizarContadoresEditor();
-            mostrarNotificacion("Archivo cargado con éxito");
+            mostrarNotificacion("Archivo importado");
         };
         lector.readAsText(archivo);
     };
@@ -138,7 +104,7 @@ function configurarEventosBasicos() {
     btnTogglePestaña.onclick = async () => {
         const seOculta = sidebar.classList.toggle('hidden');
         btnTogglePestaña.textContent = seOculta ? "▶" : "◀";
-        btnTogglePestaña.style.left = seOculta ? "12px" : "292px";
+        btnTogglePestaña.style.left = seOculta ? "12px" : "calc(100vw - 54px)";
         if (!seOculta) await renderizarListaDocumentos();
     };
 
@@ -155,8 +121,7 @@ function configurarEventosBasicos() {
         } else {
             dictadoActivo = true; btnMic.textContent = "🛑";
             iniciarDictado(comboApp.value, (text) => {
-                const textNode = document.createTextNode(text + ' ');
-                insertarNodoEnCursor(textNode);
+                insertarNodoEnCursor(document.createTextNode(text + ' '));
                 actualizarContadoresEditor();
             }, () => { btnMic.textContent = "🎙️"; dictadoActivo = false; });
         }
@@ -169,39 +134,13 @@ function configurarEventosBasicos() {
             grabandoAudioWA = true; btnGrabWA.textContent = "🛑💬";
             iniciarGrabacionVoz((blobAudio) => {
                 const url = URL.createObjectURL(blobAudio);
-                const playerBlock = crearContenedorReproductorPersonalizado(url, blobAudio);
-                insertarNodoEnCursor(playerBlock);
+                const aud = document.createElement('audio'); aud.controls = true; aud.src = url;
+                insertarNodoEnCursor(aud);
                 notaAudiosLocales.push(Date.now());
-                mostrarNotificacion("Mensaje acoplado al renglón");
+                mostrarNotificacion("Mensaje de voz acoplado");
                 ejecutarAutoGuardadoSilencioso();
                 renderizarListaDocumentos();
             });
-        }
-    };
-
-    btnRenderFL.onclick = () => {
-        const selObj = window.getSelection();
-        const textoFiltrado = selObj.toString().trim() ? selObj.toString() : editor.innerText;
-        if (!textoFiltrado.trim()) return;
-
-        mostrarNotificacion("Generando síntesis de audio local...");
-        const u = new SpeechSynthesisUtterance(textoFiltrado);
-        u.lang = comboVoz.value;
-
-        const mockBlob = new Blob([textoFiltrado], { type: 'audio/mp3' });
-        const url = URL.createObjectURL(mockBlob);
-        const playerBlock = crearContenedorReproductorPersonalizado(url, mockBlob);
-        insertarNodoEnCursor(playerBlock);
-
-        window.speechSynthesis.speak(u);
-    };
-
-    btnLectura.onclick = () => {
-        if (lecturaActiva) {
-            detenerLecturaManual(); btnLectura.textContent = "🔊"; lecturaActiva = false;
-        } else {
-            const act = leerTexto(editor.innerText, comboVoz.value, () => { btnLectura.textContent = "🔊"; lecturaActiva = false; });
-            if (act) { btnLectura.textContent = "⏹️"; lecturaActiva = true; }
         }
     };
 
@@ -214,7 +153,7 @@ function configurarEventosBasicos() {
         if (!editor.innerText.trim()) return;
         await ejecutarAutoGuardadoSilencioso();
         lblFileDates.textContent = `Guardado: ${new Date().toLocaleTimeString()}`;
-        mostrarNotificacion("Guardado local exitoso");
+        mostrarNotificacion("Guardado en base de datos de forma segura");
         await renderizarListaDocumentos();
     };
 }
@@ -224,24 +163,39 @@ function configurarGestosDeslizamiento() {
     window.addEventListener('touchend', (e) => {
         const diffX = e.changedTouches[0].clientX - touchStartX;
         if (diffX > 80 && sidebar.classList.contains('hidden')) { 
-            sidebar.classList.remove('hidden'); btnTogglePestaña.textContent = "◀"; btnTogglePestaña.style.left = "292px";
+            sidebar.classList.remove('hidden'); btnTogglePestaña.textContent = "◀"; btnTogglePestaña.style.left = "calc(100vw - 54px)";
         } else if (diffX < -80 && !sidebar.classList.contains('hidden')) {
             sidebar.classList.add('hidden'); btnTogglePestaña.textContent = "▶"; btnTogglePestaña.style.left = "12px";
         }
     }, { passive: true });
 }
 
+function configurarCicloVidaPWA() {
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault(); eventoInstalacionPWA = e;
+        btnInstalarPWA.style.display = 'block';
+    });
+    btnInstalarPWA.onclick = () => {
+        if (!eventoInstalacionPWA) return;
+        eventoInstalacionPWA.prompt();
+        eventoInstalacionPWA.userChoice.then((choice) => {
+            if (choice.outcome === 'accepted') btnInstalarPWA.style.display = 'none';
+            eventoInstalacionPWA = null;
+        });
+    };
+}
+
 async function ejecutarAutoGuardadoSilencioso() {
     if (!editor.innerText.trim()) return;
     if (!idDocumentoActual) { idDocumentoActual = Date.now(); documentoCreadoTimestamp = Date.now(); }
     const inputInterno = document.getElementById(`rename-input-${idDocumentoActual}`);
-    const defTitle = inputInterno ? inputInterno.value.trim() : (editor.innerText.split('\n')[0].substring(0, 16) || "Nota Activa");
+    const defTitle = inputInterno ? inputInterno.value.trim() : (editor.innerText.split('\n')[0].substring(0, 12) || "Nota Activa");
     await guardarDocumento(idDocumentoActual, defTitle, editor.innerHTML, notaAudiosLocales, comboModalidad.value, "letter", documentoCreadoTimestamp);
 }
 
 function actualizarContadoresEditor() {
     const rawText = editor.innerText;
-    statsText.textContent = `Caracteres: ${rawText.length} | Palabras: ${rawText.trim() === "" ? 0 : rawText.trim().split(/\s+/).length} | Líneas: ${rawText === "" ? 0 : rawText.split('\n').length}`;
+    statsText.textContent = `Caracteres: ${rawText.length} | Palabras: ${rawText.trim() === "" ? 0 : rawText.trim().split(/\s+/).length}`;
 }
 
 async function renderizarListaDocumentos() {
@@ -252,16 +206,14 @@ async function renderizarListaDocumentos() {
     docs.forEach(d => {
         const box = document.createElement('div');
         const esActivo = idDocumentoActual === d.id;
-        box.style = `padding:10px; border-bottom:1px solid var(--border); margin-bottom:4px; border-radius:4px; background-color:${esActivo ? 'var(--bg-card-active)' : 'transparent'};`;
+        box.style = `padding:8px; border:1px solid var(--border); border-radius:8px; background-color:${esActivo ? 'var(--bg-card-active)' : 'var(--bg-card)'}; display:flex; flex-direction:column; justify-content:space-between; height:90px; overflow:hidden;`;
         
         box.innerHTML = `
-            <div style="display:flex; flex-direction:column; gap:6px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; font-weight:bold;">
-                    <span class="doc-clickable-title" style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">📄 ${d.titulo}</span>
-                    ${esActivo ? `<span id="btn-share-inline" style="margin-right:12px; font-size:16px; cursor:pointer;">🔗</span><span id="btn-del-inline" style="font-size:16px; color:var(--danger); cursor:pointer;">🗑️</span>` : ''}
-                </div>
-                ${esActivo ? `<input type="text" id="rename-input-${d.id}" value="${d.titulo}" style="width:100%; height:30px; background:rgba(0,0,0,0.2); font-size:12px;" placeholder="Renombrar plantilla...">` : ''}
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; font-weight:bold;">
+                <span class="doc-clickable-title" style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; cursor:pointer;">📄 ${d.titulo}</span>
+                ${esActivo ? `<span id="btn-del-inline" style="color:var(--danger); cursor:pointer; margin-left:6px;">🗑️</span>` : ''}
             </div>
+            ${esActivo ? `<input type="text" id="rename-input-${d.id}" value="${d.titulo}" style="width:100%; height:28px; font-size:11px; padding:0 6px;" placeholder="Nombre...">` : `<span style="font-size:10px; color:var(--text-muted);">ID: ${d.id.toString().slice(-4)}</span>`}
         `;
 
         box.querySelector('.doc-clickable-title').onclick = () => {
@@ -279,16 +231,11 @@ async function renderizarListaDocumentos() {
                     box.querySelector('.doc-clickable-title').textContent = `📄 ${renameInput.value}`;
                 });
             });
-
-            box.querySelector('#btn-share-inline').onclick = (e) => {
-                e.stopPropagation();
-                if (navigator.share) navigator.share({ title: d.titulo, text: editor.innerText });
-            };
             box.querySelector('#btn-del-inline').onclick = async (e) => {
                 e.stopPropagation();
-                if (confirm(`¿Eliminar "${d.titulo}"?`)) {
+                if (confirm(`¿Eliminar plantilla?`)) {
                     await eliminarDocumento(d.id); editor.innerHTML = ''; idDocumentoActual = null;
-                    lblFileDates.textContent = "Sin guardar"; actualizarContadoresEditor(); renderizarListaDocumentos();
+                    renderizarListaDocumentos();
                 }
             };
         }
