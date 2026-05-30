@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Retórica - Procesador de Notas</title>
-    <link rel="manifest" href="./manifest.json?v=16">
+    <link rel="manifest" href="./manifest.json?v=18">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root {
@@ -29,6 +29,8 @@
         
         .toggle-sidebar-pestaña { position: fixed; left: 12px; top: 10px; width: 42px; height: 42px; background-color: var(--bg-card); color: var(--accent); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; z-index: 300; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 50% !important; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
         .sidebar-header { padding: 0 16px 0 65px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; height: 60px; flex-shrink: 0; }
+        .sidebar-brand { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 1.3rem; letter-spacing: 2px; }
+        .sidebar-brand span:first-child { font-size: 1.4rem; }
         
         .document-list { flex: 1; overflow-y: auto; padding: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-content: start; }
         
@@ -66,7 +68,7 @@
 
     <div class="sidebar hidden" id="sidebar">
         <div class="sidebar-header">
-            <div style="display:flex; align-items:center; gap:6px;"><span>☀️</span><span style="font-weight:700;">RETÓRICA</span></div>
+            <div class="sidebar-brand"><span>☀️</span><span>RETÓRICA</span></div>
             <button id="btn-nuevo" style="border-radius:50% !important; width:40px; height:40px; padding:0;">➕</button>
         </div>
         <div style="padding:10px 12px 0 12px; display:flex; flex-direction:column; gap:4px;">
