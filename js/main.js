@@ -1,5 +1,5 @@
 // ==========================================
-// 1. CONTROL VISUAL DE DESPLIEGUE CON TRANSPARENCIA
+// 1. MANEJO DE DESPLIEGUE Y GESTOS TÁCTILES (SWIPE)
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
     const btnToggle = document.getElementById('btn-toggle-pestaña');
@@ -9,15 +9,31 @@ document.addEventListener('DOMContentLoaded', () => {
         btnToggle.addEventListener('click', () => {
             sidebar.classList.toggle('hidden');
             btnToggle.textContent = sidebar.classList.contains('hidden') ? '▼' : '▲';
-            // Ajustar la posición de la pestaña flotante de arriba a abajo
-            btnToggle.style.top = sidebar.classList.contains('hidden') ? '10px' : 'calc(45vh - 20px)';
         });
+
+        // DETECTOR DE ARRASTRE TÁCTIL PARA DISPOSITIVOS MÓVILES
+        letstartY = 0;
+        let currentY = 0;
+
+        sidebar.addEventListener('touchstart', (e) => {
+            startY = e.touches[0].clientY;
+        }, { passive: true });
+
+        sidebar.addEventListener('touchmove', (e) => {
+            currentY = e.touches[0].clientY;
+            let diffY = currentY - startY;
+            // Si arrastra fuerte hacia arriba, cierra el menú de cristal
+            if (diffY < -60 && !sidebar.classList.contains('hidden')) {
+                sidebar.classList.add('hidden');
+                btnToggle.textContent = '▼';
+            }
+        }, { passive: true });
     }
     cargarNotas();
 });
 
 // ==========================================
-// 2. BASE DE DATOS LOCAL (INDEXEDDB) BLINDADA
+// 2. BASE DE DATOS LOCAL (INDEXEDDB)
 // ==========================================
 const dbName = "RetoricaDB";
 let db;
@@ -35,11 +51,11 @@ request.onsuccess = function(e) {
 };
 
 request.onerror = function() {
-    mostrarToast("Error al inicializar almacenamiento");
+    mostrarToast("Error en almacenamiento local");
 };
 
 // ==========================================
-// 3. CONTROL DE DICTADO POR VOZ SIN DUPLICACIÓN DE PALABRAS
+// 3. DICTADO POR VOZ CORREGIDO (SIN PALABRAS REPETIDAS)
 // ==========================================
 let recognition;
 let estaEscuchando = false;
@@ -47,11 +63,10 @@ let estaEscuchando = false;
 if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
     const SpeechObj = window.SpeechRecognition || window.webkitSpeechRecognition;
     recognition = new SpeechObj();
-    recognition.continuous = false; // Cambiado a falso para obligar limpieza de búfer por frase
-    recognition.interimResults = false; // Desactivar resultados previos inestables que duplican texto
+    recognition.continuous = false; // Resetear buffer frase por frase
+    recognition.interimResults = false; // Desactivar texto tentativo inestable
 
     recognition.onresult = function(e) {
-        // Tomar estrictamente la frase final procesada sin acumular buffers basura
         const resultadoFinal = e.results[0][0].transcript;
         if (resultadoFinal && resultadoFinal.trim() !== "") {
             insertarTextoEnEditor(resultadoFinal.trim() + ' ');
@@ -59,9 +74,8 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
     };
 
     recognition.onend = function() {
-        // Si el usuario no lo apagó manualmente, reiniciamos el ciclo de escucha limpio
         if (estaEscuchando) {
-            recognition.start();
+            recognition.start(); // Reinicia el ciclo en limpio
         }
     };
 }
@@ -101,7 +115,7 @@ function insertarTextoEnEditor(texto) {
 document.getElementById('btn-lectura')?.addEventListener('click', () => {
     const editor = document.getElementById('editor');
     if(!editor || !editor.innerText.trim()) return;
-    window.speechSynthesis.cancel(); // Limpiar lecturas anteriores
+    window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(editor.innerText);
     utterance.lang = document.getElementById('voice-lang').value;
     window.speechSynthesis.speak(utterance);
@@ -118,7 +132,7 @@ document.getElementById('btn-main-guardar')?.addEventListener('click', () => {
     const store = tx.objectStore("notas");
     store.add({ contenido: content, fecha: new Date().toLocaleString() });
     tx.oncomplete = function() {
-        mostrarToast("Nota guardada");
+        mostrarToast("Nota guardada localmente");
         cargarNotas();
     };
 });
@@ -128,7 +142,6 @@ function cargarNotas() {
     if(!lista) return;
     lista.innerHTML = "";
 
-    // Evitar fallas si DB aún está cargando en milisegundos iniciales
     if (!db) { setTimeout(cargarNotas, 200); return; }
 
     const tx = db.transaction("notas", "readonly");
@@ -145,7 +158,6 @@ function cargarNotas() {
                 actualizarContadores();
                 document.getElementById('sidebar').classList.add('hidden');
                 document.getElementById('btn-toggle-pestaña').textContent = '▼';
-                document.getElementById('btn-toggle-pestaña').style.top = '10px';
             });
             lista.appendChild(item);
             cursor.continue();
@@ -205,6 +217,6 @@ document.getElementById('btn-nuevo')?.addEventListener('click', () => {
     if(editor) {
         editor.innerHTML = "";
         actualizarContadores();
-        mostrarToast("Nueva nota limpia");
+        mostrarToast("Nueva plantilla limpia");
     }
 });
