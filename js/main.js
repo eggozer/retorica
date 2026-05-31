@@ -1,31 +1,49 @@
 // ==========================================
-// 1. MANEJO DE DESPLIEGUE Y GESTOS TÁCTILES (SWIPE)
+// 1. MANEJO DEL DESPLIEGUE, GESTOS (SWIPE) Y SELECTOR DE TEMA
 // ==========================================
-document.addEventListener('DOMContentLoaded', () => {
-    const btnToggle = document.getElementById('btn-toggle-pestaña');
-    const sidebar = document.getElementById('sidebar');
+document.addEventListener('DOMContentLoaded', function() {
+    var btnToggle = document.getElementById('btn-toggle-pestaña');
+    var sidebar = document.getElementById('sidebar');
+    var touchZone = document.getElementById('sidebar-touch-zone');
+    var btnTema = document.getElementById('btn-toggle-tema');
     
+    // Control de despliegue por botón
     if (btnToggle && sidebar) {
-        btnToggle.addEventListener('click', () => {
+        btnToggle.addEventListener('click', function() {
             sidebar.classList.toggle('hidden');
             btnToggle.textContent = sidebar.classList.contains('hidden') ? '▼' : '▲';
         });
+    }
 
-        // DETECTOR DE ARRASTRE TÁCTIL PARA DISPOSITIVOS MÓVILES
-        letstartY = 0;
-        let currentY = 0;
+    // INTERRUPTOR DE TEMA (DESTRABADO COMPLETAMENTE)
+    var temaGuardado = localStorage.getItem('retorica_theme');
+    if (temaGuardado === 'light') {
+        document.body.classList.add('light-theme');
+    } else {
+        document.body.classList.remove('light-theme');
+    }
 
-        sidebar.addEventListener('touchstart', (e) => {
+    if (btnTema) {
+        btnTema.addEventListener('click', function() {
+            document.body.classList.toggle('light-theme');
+            var modoActual = document.body.classList.contains('light-theme') ? 'light' : 'dark';
+            localStorage.setItem('retorica_theme', modoActual);
+            mostrarToast("Tema " + (modoActual === 'light' ? 'Claro' : 'Oscuro') + " activado");
+        });
+    }
+
+    // CONTROL DE DESLIZAMIENTO CON LOS DEDOS HACIA ARRIBA EN LA ZONA GRANDE
+    if (touchZone && sidebar) {
+        var startY = 0;
+        touchZone.addEventListener('touchstart', function(e) {
             startY = e.touches[0].clientY;
         }, { passive: true });
 
-        sidebar.addEventListener('touchmove', (e) => {
-            currentY = e.touches[0].clientY;
-            let diffY = currentY - startY;
-            // Si arrastra fuerte hacia arriba, cierra el menú de cristal
-            if (diffY < -60 && !sidebar.classList.contains('hidden')) {
+        touchZone.addEventListener('touchmove', function(e) {
+            var diffY = e.touches[0].clientY - startY;
+            if (diffY < -40 && !sidebar.classList.contains('hidden')) {
                 sidebar.classList.add('hidden');
-                btnToggle.textContent = '▼';
+                if (btnToggle) btnToggle.textContent = '▼';
             }
         }, { passive: true });
     }
@@ -33,11 +51,11 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================
-// 2. BASE DE DATOS LOCAL (INDEXEDDB)
+// 2. ALMACENAMIENTO INDEXEDDB LOCAL
 // ==========================================
-const dbName = "RetoricaDB";
-let db;
-const request = indexedDB.open(dbName, 1);
+var dbName = "RetoricaDB";
+var db;
+var request = indexedDB.open(dbName, 1);
 
 request.onupgradeneeded = function(e) {
     db = e.target.result;
@@ -45,65 +63,52 @@ request.onupgradeneeded = function(e) {
         db.createObjectStore("notas", { keyPath: "id", autoIncrement: true });
     }
 };
-
-request.onsuccess = function(e) {
-    db = e.target.result;
-};
-
-request.onerror = function() {
-    mostrarToast("Error en almacenamiento local");
-};
+request.onsuccess = function(e) { db = e.target.result; };
+request.onerror = function() { console.log("Error de almacenamiento local"); };
 
 // ==========================================
-// 3. DICTADO POR VOZ CORREGIDO (SIN PALABRAS REPETIDAS)
+// 3. DICTADO POR VOZ (FRASERIZADO SIN REPETICIÓN)
 // ==========================================
-let recognition;
-let estaEscuchando = false;
+var recognition;
+var estaEscuchando = false;
 
 if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-    const SpeechObj = window.SpeechRecognition || window.webkitSpeechRecognition;
+    var SpeechObj = window.SpeechRecognition || window.webkitSpeechRecognition;
     recognition = new SpeechObj();
-    recognition.continuous = false; // Resetear buffer frase por frase
-    recognition.interimResults = false; // Desactivar texto tentativo inestable
+    recognition.continuous = false; 
+    recognition.interimResults = false; 
 
     recognition.onresult = function(e) {
-        const resultadoFinal = e.results[0][0].transcript;
-        if (resultadoFinal && resultadoFinal.trim() !== "") {
-            insertarTextoEnEditor(resultadoFinal.trim() + ' ');
+        var frase = e.results[0][0].transcript;
+        if (frase && frase.trim() !== "") {
+            insertarTexto(frase.trim() + ' ');
         }
     };
-
     recognition.onend = function() {
-        if (estaEscuchando) {
-            recognition.start(); // Reinicia el ciclo en limpio
-        }
+        if (estaEscuchando) recognition.start();
     };
 }
 
-const btnMic = document.getElementById('btn-mic');
+var btnMic = document.getElementById('btn-mic');
 if(btnMic) {
-    btnMic.addEventListener('click', () => {
-        if (!recognition) {
-            mostrarToast("Dictado no soportado");
-            return;
-        }
+    btnMic.addEventListener('click', function() {
+        if (!recognition) return;
         if (!estaEscuchando) {
-            recognition.lang = document.getElementById('app-lang').value;
             estaEscuchando = true;
             recognition.start();
             btnMic.style.background = "#ef4444";
-            mostrarToast("Micrófono activo");
+            mostrarToast("Grabando voz...");
         } else {
             estaEscuchando = false;
             recognition.stop();
-            btnMic.style.background = "var(--bg-card)";
-            mostrarToast("Micrófono apagado");
+            btnMic.style.background = "";
+            mostrarToast("Micrófono en pausa");
         }
     });
 }
 
-function insertarTextoEnEditor(texto) {
-    const editor = document.getElementById('editor');
+function insertarTexto(texto) {
+    var editor = document.getElementById('editor');
     if(editor) {
         editor.focus();
         document.execCommand('insertText', false, texto);
@@ -111,49 +116,34 @@ function insertarTextoEnEditor(texto) {
     }
 }
 
-// LECTURA DE TEXTO
-document.getElementById('btn-lectura')?.addEventListener('click', () => {
-    const editor = document.getElementById('editor');
-    if(!editor || !editor.innerText.trim()) return;
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(editor.innerText);
-    utterance.lang = document.getElementById('voice-lang').value;
-    window.speechSynthesis.speak(utterance);
-});
-
 // ==========================================
-// 4. FUNCIONES DE ALMACENAMIENTO Y EXPORTACIÓN
+// 4. PERSISTENCIA DE PLANTILLAS Y EXPORTACIÓN
 // ==========================================
-document.getElementById('btn-main-guardar')?.addEventListener('click', () => {
-    const editor = document.getElementById('editor');
+document.getElementById('btn-main-guardar')?.addEventListener('click', function() {
+    var editor = document.getElementById('editor');
     if(!editor) return;
-    const content = editor.innerHTML;
-    const tx = db.transaction("notas", "readwrite");
-    const store = tx.objectStore("notas");
-    store.add({ contenido: content, fecha: new Date().toLocaleString() });
+    var content = editor.innerHTML;
+    var tx = db.transaction("notas", "readwrite");
+    tx.objectStore("notas").add({ contenido: content, fecha: new Date().toLocaleString() });
     tx.oncomplete = function() {
-        mostrarToast("Nota guardada localmente");
+        mostrarToast("Nota respaldada");
         cargarNotas();
     };
 });
 
 function cargarNotas() {
-    const lista = document.getElementById('document-list');
+    var lista = document.getElementById('document-list');
     if(!lista) return;
     lista.innerHTML = "";
+    if (!db) { setTimeout(cargarNotas, 250); return; }
 
-    if (!db) { setTimeout(cargarNotas, 200); return; }
-
-    const tx = db.transaction("notas", "readonly");
-    const store = tx.objectStore("notas");
-    store.openCursor().onsuccess = function(e) {
-        const cursor = e.target.result;
+    db.transaction("notas", "readonly").objectStore("notas").openCursor().onsuccess = function(e) {
+        var cursor = e.target.result;
         if (cursor) {
-            const item = document.createElement('div');
+            var item = document.createElement('div');
             item.className = "document-list-item";
-            item.innerHTML = `📄 Nota #${cursor.value.id}<br><small>${cursor.value.fecha.split(' ')[0]}</small>`;
-            
-            item.addEventListener('click', () => {
+            item.innerHTML = "📄 Nota #" + cursor.value.id + "<br><small>" + cursor.value.fecha.split(' ')[0] + "</small>";
+            item.addEventListener('click', function() {
                 document.getElementById('editor').innerHTML = cursor.value.contenido;
                 actualizarContadores();
                 document.getElementById('sidebar').classList.add('hidden');
@@ -165,58 +155,25 @@ function cargarNotas() {
     };
 }
 
-document.getElementById('export-pdf')?.addEventListener('click', () => {
-    const element = document.getElementById('editor');
-    html2pdf().from(element).save('retorica-documento.pdf');
-});
-
-document.getElementById('export-doc')?.addEventListener('click', () => {
-    const html = document.getElementById('editor').innerHTML;
-    const blob = new Blob(['\ufeff' + html], { type: 'application/msword' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'retorica-export.doc';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+document.getElementById('export-pdf')?.addEventListener('click', function() {
+    html2pdf().from(document.getElementById('editor')).save('nota.pdf');
 });
 
 // ==========================================
-// 5. CONTADORES Y EVENTOS AUXILIARES
+// 5. AUXILIARES
 // ==========================================
 function actualizarContadores() {
-    const editor = document.getElementById('editor');
-    const stats = document.getElementById('stats-text');
-    if(editor && stats) {
-        stats.textContent = `Caracteres: ${editor.innerText.trim().length}`;
-    }
+    var editor = document.getElementById('editor');
+    var stats = document.getElementById('stats-text');
+    if(editor && stats) stats.textContent = "Caracteres: " + editor.innerText.trim().length;
 }
-
 document.getElementById('editor')?.addEventListener('input', actualizarContadores);
 
 function mostrarToast(mensaje) {
-    const toast = document.getElementById('toast-notif');
+    var toast = document.getElementById('toast-notif');
     if(toast) {
         toast.textContent = mensaje;
         toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 2500);
+        setTimeout(function() { toast.classList.remove('show'); }, 2000);
     }
 }
-
-document.getElementById('combo-modalidad')?.addEventListener('change', (e) => {
-    const editor = document.getElementById('editor');
-    if(!editor) return;
-    editor.className = "rich-editor";
-    if(e.target.value === 'carta') editor.classList.add('modo-carta');
-    if(e.target.value === 'oficio') editor.classList.add('modo-oficio');
-});
-
-document.getElementById('btn-nuevo')?.addEventListener('click', () => {
-    const editor = document.getElementById('editor');
-    if(editor) {
-        editor.innerHTML = "";
-        actualizarContadores();
-        mostrarToast("Nueva plantilla limpia");
-    }
-});
