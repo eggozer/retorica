@@ -2,120 +2,95 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Retórica - Procesador de Notas</title>
-    <link rel="manifest" href="./manifest.json?v=21">
+    <link rel="manifest" href="./manifest.json?v=24">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        :root {
-            --bg-main: #0a0f1d; --bg-sidebar-glass: rgba(10, 15, 29, 0.4); --bg-card: rgba(31, 41, 55, 0.8);
-            --accent: #ffca28; --text-main: #f3f4f6; --text-muted: #9ca3af; --border: rgba(255, 255, 255, 0.15); --danger: #ef4444;
-        }
-        body.light-theme {
-            --bg-main: #f9fafb; --bg-sidebar-glass: rgba(249, 250, 251, 0.4); --bg-card: rgba(255, 255, 255, 0.8);
-            --text-main: #111827; --text-muted: #6b7280; --border: rgba(0, 0, 0, 0.15);
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background-color: var(--bg-main); color: var(--text-main); display: flex; flex-direction: column; height: 100vh; width: 100vw; overflow: hidden; position: relative; }
-        
-        button, select, input { border-radius: 20px !important; height: 38px; padding: 0 12px; background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border); font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; backdrop-filter: blur(5px); }
-        
-        /* CABECERA FIJA PRINCIPAL - EL LOGO NUNCA SE MUEVE */
-        .app-header-top { height: 60px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: center; background-color: var(--bg-main); position: relative; z-index: 290; width: 100%; flex-shrink: 0; }
-        .brand-logo-fixed { display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 1.15rem; letter-spacing: 1px; }
-        .brand-logo-fixed span:first-child { font-size: 1.25rem; }
+        /* CONTROL DE COLORES MEDIANTE CLASES FIJAS - COMPATIBILIDAD CON ANDROID 5 */
+        body { background-color: #0a0f1d; color: #f3f4f6; margin: 0; padding: 0; font-family: sans-serif; overflow: hidden; position: relative; width: 100vw; height: 100vh; }
+        body.light-theme { background-color: #f9fafb; color: #111827; }
 
-        /* PESTAÑA FLOTANTE DE CONTROL */
-        .toggle-sidebar-pestaña { position: absolute; left: 12px; top: 11px; width: 38px; height: 38px; background-color: var(--bg-card); color: var(--accent); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; z-index: 310; border-radius: 50% !important; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
-        
-        /* EL MEGA TRUCO: MENÚ DESPLEGABLE TRANSPARENTE TOTAL (CRISTAL) */
-        .sidebar { width: 100vw; background-color: var(--bg-sidebar-glass); backdrop-filter: blur(25px) saturate(180%); -webkit-backdrop-filter: blur(25px) saturate(180%); border-bottom: 1px solid var(--border); display: flex; flex-direction: column; height: 50vh; position: absolute; left: 0; top: 60px; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.3s; z-index: 280; visibility: visible; touch-action: none; }
-        .sidebar.hidden { transform: translateY(-100%); visibility: hidden; }
-        
-        /* FILA ÚNICA HORIZONTAL DESLIZABLE PARA HERRAMIENTAS */
-        .menu-tira-horizontal { width: 100%; display: flex; align-items: center; gap: 10px; overflow-x: auto; white-space: nowrap; height: 54px; padding: 0 14px; border-bottom: 1px solid var(--border); scrollbar-width: none; -webkit-overflow-scrolling: touch; }
-        .menu-tira-horizontal::-webkit-scrollbar { display: none; }
-        .separador-vertical { width: 1px; height: 20px; background-color: var(--border); flex-shrink: 0; }
+        /* CABECERA FIJA SUPERIOR (EL LOGO SIEMPRE SE QUEDA EN EL ÁREA DE TRABAJO) */
+        .app-header-fixed { position: absolute; top: 0; left: 0; width: 100%; height: 56px; border-bottom: 1px solid rgba(255,255,255,0.15); background-color: #0a0f1d; text-align: center; line-height: 56px; z-index: 400; }
+        body.light-theme .app-header-fixed { background-color: #f9fafb; border-bottom: 1px solid rgba(0,0,0,0.15); }
+        .brand-logo-fixed { font-weight: bold; font-size: 1.15rem; letter-spacing: 0.5px; display: inline-block; }
 
-        /* ESPACIO GRANDE PARA PLANTILLAS Y PUBLICIDAD */
-        .sidebar-body-content { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 12px; background: transparent; }
-        .section-subtitle { font-size: 0.75rem; font-weight: bold; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-        
-        .slider-plantillas { display: flex; align-items: center; gap: 10px; overflow-x: auto; padding: 4px 0; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
-        .slider-plantillas::-webkit-scrollbar { display: none; }
-        .document-list-item { background: var(--bg-card); border: 1px solid var(--border); padding: 10px 14px; border-radius: 12px; font-size: 0.8rem; text-align: center; min-width: 110px; cursor: pointer; color: var(--text-main); }
-        
-        .adsense-strip-container { height: 60px; background: rgba(255, 255, 255, 0.05); border: 1px dashed var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: var(--text-muted); font-weight: bold; width: 100%; margin-top: auto; }
+        /* PESTAÑA FLOTANTE DE CONTROL REPOSICIONADA */
+        .toggle-sidebar-pestaña { position: absolute; left: 12px; top: 10px; width: 36px; height: 36px; background: #1f2937; color: #ffca28; border: 1px solid rgba(255,255,255,0.15); text-align: center; line-height: 34px; font-weight: bold; cursor: pointer; z-index: 450; border-radius: 50%; }
+        body.light-theme .toggle-sidebar-pestaña { background: #ffffff; border: 1px solid rgba(0,0,0,0.15); }
 
-        /* ÁREA DE TRABAJO INDEPENDIENTE Y VISIBLE DEBAJO */
-        .main-container { flex: 1; display: flex; flex-direction: column; height: calc(100vh - 60px); width: 100vw; background-color: var(--bg-main); overflow: hidden; position: relative; z-index: 100; }
-        .editor-wrapper { flex: 1; display: flex; flex-direction: column; padding: 16px; overflow-y: auto; align-items: center; width: 100%; }
-        .rich-editor { width: 100%; min-height: 100%; background: transparent; border: none; color: var(--text-main); font-size: 1.1rem; line-height: 1.6; outline: none; padding: 4px; overflow-wrap: break-word; }
+        /* MENÚ FLOTANTE BASE COMPATIBLE CON TRANSPARENCIA REAL REQUERIDA */
+        .sidebar { position: absolute; top: 56px; left: 0; width: 100%; height: 42vh; background-color: rgba(10, 15, 29, 0.75); border-bottom: 1px solid rgba(255,255,255,0.2); z-index: 300; transition: transform 0.25s ease-out; }
+        body.light-theme .sidebar { background-color: rgba(249, 250, 251, 0.75); border-bottom: 1px solid rgba(0,0,0,0.2); }
+        .sidebar.hidden { transform: translateY(-130%); }
         
-        .rich-editor.modo-carta { max-width: 800px; background-color: var(--bg-card); padding: 40px; border: 1px solid var(--border); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .rich-editor.modo-oficio { max-width: 850px; background-color: var(--bg-card); padding: 50px; border: 1px solid var(--border); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        /* TIRA HORIZONTAL DE BOTONES EN UNA SOLA LÍNEA */
+        .menu-tira-horizontal { width: 100%; height: 50px; overflow-x: auto; overflow-y: hidden; white-space: nowrap; padding: 6px 12px; border-bottom: 1px solid rgba(255,255,255,0.1); box-sizing: border-box; -webkit-overflow-scrolling: touch; }
+        body.light-theme .menu-tira-horizontal { border-bottom: 1px solid rgba(0,0,0,0.1); }
+        
+        button, select { display: inline-block; height: 36px; padding: 0 12px; margin-right: 6px; background: #1f2937; color: #f3f4f6; border: 1px solid rgba(255,255,255,0.15); border-radius: 18px; font-size: 0.85rem; vertical-align: top; cursor: pointer; }
+        body.light-theme button, body.light-theme select { background: #ffffff; color: #111827; border: 1px solid rgba(0,0,0,0.15); }
+        .separador-vertical { display: inline-block; width: 1px; height: 20px; background: rgba(255,255,255,0.2); margin: 8px 6px 0 0; vertical-align: top; }
+        body.light-theme .separador-vertical { background: rgba(0,0,0,0.15); }
 
-        .stats-bar { width: 100%; height: 32px; border-top: 1px solid var(--border); padding: 6px 16px 0 16px; font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between; background-color: var(--bg-main); z-index: 110; }
-        .toast { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%) translateY(100px); background-color: var(--accent); color: #0a0f1d; padding: 10px 20px; font-size: 0.85rem; font-weight: bold; transition: transform 0.3s; z-index: 999; border-radius: 20px; }
-        .toast.show { transform: translateX(-50%) translateY(0); }
+        /* CONTENEDOR GRANDE PARA PLANTILLAS Y PUBLICIDAD MONETIZADA */
+        .sidebar-body-content { position: absolute; top: 50px; bottom: 0; left: 0; right: 0; padding: 12px; overflow-y: auto; box-sizing: border-box; }
+        .slider-plantillas { width: 100%; overflow-x: auto; white-space: nowrap; padding: 4px 0; -webkit-overflow-scrolling: touch; }
+        .document-list-item { display: inline-block; background: #1f2937; border: 1px solid rgba(255,255,255,0.15); padding: 8px 12px; border-radius: 10px; font-size: 0.8rem; text-align: center; min-width: 100px; margin-right: 8px; color: #f3f4f6; }
+        body.light-theme .document-list-item { background: #ffffff; color: #111827; border: 1px solid rgba(0,0,0,0.15); }
+        .adsense-strip-container { width: 100%; height: 50px; margin-top: 12px; border: 1px dashed #ffca28; background: rgba(255,255,255,0.02); border-radius: 6px; text-align: center; line-height: 48px; font-size: 0.7rem; color: #9ca3af; font-weight: bold; }
+
+        /* AREA DE ESCRITURA TOTALMENTE INDEPENDIENTE ABAJO (EVITA ERRORES DE ENCOGIMIENTO/ZOOM) */
+        .main-container { width: 100%; height: 100%; padding-top: 56px; box-sizing: border-box; overflow: hidden; position: relative; }
+        .editor-wrapper { width: 100%; height: calc(100% - 32px); padding: 16px; overflow-y: auto; box-sizing: border-box; }
+        .rich-editor { width: 100%; min-height: 100%; background: transparent; border: none; color: #f3f4f6; font-size: 1.05rem; line-height: 1.5; outline: none; box-sizing: border-box; }
+        body.light-theme .rich-editor { color: #111827; }
+
+        .stats-bar { width: 100%; height: 32px; border-top: 1px solid rgba(255,255,255,0.15); padding: 6px 14px 0 14px; font-size: 0.75rem; color: #9ca3af; position: absolute; bottom: 0; left: 0; background: #0a0f1d; box-sizing: border-box; }
+        body.light-theme .stats-bar { background: #f9fafb; border-top: 1px solid rgba(0,0,0,0.15); color: #6b7280; }
+        .toast { position: fixed; bottom: 45px; left: 50%; transform: translate(-50%, 100px); background-color: #ffca28; color: #0a0f1d; padding: 8px 16px; font-size: 0.8rem; font-weight: bold; transition: transform 0.2s ease; z-index: 999; border-radius: 20px; }
+        .toast.show { transform: translate(-50%, 0); }
     </style>
 </head>
 <body>
 
-    <header class="app-header-top">
+    <header class="app-header-fixed">
         <div class="toggle-sidebar-pestaña" id="btn-toggle-pestaña">▼</div>
-        <div class="brand-logo-fixed"><span>☀️</span><span>RETÓRICA</span></div>
+        <div class="brand-logo-fixed">☀️ RETÓRICA</div>
     </header>
 
     <div class="sidebar hidden" id="sidebar">
         <div class="menu-tira-horizontal">
-            <button id="btn-nuevo" title="Nueva nota">➕</button>
+            <button id="btn-nuevo">➕</button>
             <div class="separador-vertical"></div>
-            <button id="btn-main-guardar" style="background: var(--accent); color: #0a0f1d; font-weight: bold;">GUARDAR HTML</button>
-            <button id="export-pdf">1.- PDF</button>
-            <button id="export-pdf-edit">2.- PDF Editable</button>
-            <button id="export-doc">3.- DOC</button>
+            <button id="btn-main-guardar" style="background:#ffca28; color:#0a0f1d; font-weight:bold;">GUARDAR</button>
+            <button id="export-pdf">PDF</button>
+            <button id="export-doc">DOC</button>
             <div class="separador-vertical"></div>
-            <button id="btn-mic" title="Dictado de Voz">🎙️</button>
-            <button id="btn-grab-audio-wa" title="Grabar audio">🎙️💬</button>
-            <button id="btn-render-fl" title="Renderizar Audio">🎛️ Render</button>
+            <button id="btn-mic">🎙️</button>
             <button id="btn-lectura">🔊</button>
-            <button id="btn-insert-table">📊</button>
-            <button id="btn-open-local">📁</button>
-            <button id="btn-toggle-tema">🌙</button>
-            <select id="app-lang"><option value="es-MX">Español (MX)</option><option value="en-US">English (US)</option></select>
-            <select id="voice-lang"><option value="es-MX">Español (MX)</option></select>
-            <select id="font-family-select" style="width:110px;">
-                <option value="sans-serif">Sans-Serif</option>
-                <option value="serif">Serif</option>
-                <option value="monospace">Monospace</option>
-                <option value="cursive">Cursive</option>
-            </select>
-            <select id="combo-modalidad">
-                <option value="nota">📄 Nota</option>
-                <option value="carta">📄 Carta</option>
-                <option value="oficio">📄 Oficio</option>
-            </select>
+            <button id="btn-toggle-tema">☀️/🌙</button>
+            <select id="app-lang"><option value="es-MX">Español (MX)</option></select>
+            <select id="combo-modalidad"><option value="nota">📄 Nota</option></select>
         </div>
 
-        <div class="sidebar-body-content">
-            <div class="section-subtitle">Tus Documentos / Plantillas Disponibles:</div>
+        <div class="sidebar-body-content" id="sidebar-touch-zone">
             <div class="slider-plantillas" id="document-list"></div>
-            <div class="adsense-strip-container">ZONA DE PUBLICIDAD FLOTANTE (RESERVADO ADSENSE)</div>
+            <div class="adsense-strip-container">ESPACIO DE PUBLICIDAD RESERVADO (MONETIZACIÓN)</div>
         </div>
     </div>
 
     <div class="main-container">
-        <div class="editor-wrapper" id="editor-container">
+        <div class="editor-wrapper">
             <div id="editor" class="rich-editor" contenteditable="true" placeholder="Escribe aquí..."></div>
         </div>
         <div class="stats-bar">
-            <div id="stats-text">Caracteres: 0</div>
-            <div id="lbl-file-dates">Sin guardar</div>
+            <span id="stats-text">Caracteres: 0</span>
+            <span id="lbl-file-dates" style="float: right;">Sin guardar</span>
         </div>
     </div>
 
-    <input type="file" id="file-input-hidden" accept=".html,.txt,.doc" style="display:none;">
     <div class="toast" id="toast-notif">Operación exitosa</div>
     <script type="module" src="js/main.js"></script>
 </body>
