@@ -1,5 +1,5 @@
 // ==========================================
-// 1. MANEJO DEL DESPLIEGUE, GESTOS (SWIPE) Y SELECTOR DE TEMA
+// 1. MANEJO DEL DESPLIEGUE LATERAL, GESTOS (SWIPE) Y SELECTOR DE TEMA
 // ==========================================
 document.addEventListener('DOMContentLoaded', function() {
     var btnToggle = document.getElementById('btn-toggle-pestaña');
@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var touchZone = document.getElementById('sidebar-touch-zone');
     var btnTema = document.getElementById('btn-toggle-tema');
     
-    // Control de despliegue por botón
+    // Control de apertura y cierre lateral
     if (btnToggle && sidebar) {
         btnToggle.addEventListener('click', function() {
             sidebar.classList.toggle('hidden');
@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // INTERRUPTOR DE TEMA (DESTRABADO COMPLETAMENTE)
+    // INTERRUPTOR DE TEMA (BLINDADO Y PERSISTENTE)
     var temaGuardado = localStorage.getItem('retorica_theme');
     if (temaGuardado === 'light') {
         document.body.classList.add('light-theme');
@@ -32,16 +32,17 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // CONTROL DE DESLIZAMIENTO CON LOS DEDOS HACIA ARRIBA EN LA ZONA GRANDE
+    // CONTROL POR GESTO TÁCTIL: DESLIZAR HACIA LA IZQUIERDA PARA OCULTAR
     if (touchZone && sidebar) {
-        var startY = 0;
+        var startX = 0;
         touchZone.addEventListener('touchstart', function(e) {
-            startY = e.touches[0].clientY;
+            startX = e.touches[0].clientX;
         }, { passive: true });
 
         touchZone.addEventListener('touchmove', function(e) {
-            var diffY = e.touches[0].clientY - startY;
-            if (diffY < -40 && !sidebar.classList.contains('hidden')) {
+            var diffX = e.touches[0].clientX - startX;
+            // Si arrastras el dedo hacia la izquierda, el menú lateral de pantalla completa se cierra
+            if (diffX < -50 && !sidebar.classList.contains('hidden')) {
                 sidebar.classList.add('hidden');
                 if (btnToggle) btnToggle.textContent = '▼';
             }
@@ -160,7 +161,7 @@ document.getElementById('export-pdf')?.addEventListener('click', function() {
 });
 
 // ==========================================
-// 5. AUXILIARES
+// 5. AUXILIARES DE CONTEO Y NOTIFICACIÓN
 // ==========================================
 function actualizarContadores() {
     var editor = document.getElementById('editor');
