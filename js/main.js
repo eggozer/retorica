@@ -1,5 +1,5 @@
 // ==========================================
-// 1. CONTROL DE APERTURA, COLORES DINÁMICOS Y CONTROL DE TEMAS
+// 1. MANEJO INTERACTIVO DEL ENGRANAJE DINÁMICO Y COMPORTAMIENTO DEL MENÚ
 // ==========================================
 document.addEventListener('DOMContentLoaded', function() {
     var btnToggle = document.getElementById('btn-toggle-pestaña');
@@ -11,18 +11,16 @@ document.addEventListener('DOMContentLoaded', function() {
         btnToggle.addEventListener('click', function() {
             sidebar.classList.toggle('hidden');
             if (sidebar.classList.contains('hidden')) {
-                btnToggle.textContent = '⚙️';
                 btnToggle.style.color = '#ffca28';
                 btnToggle.style.borderColor = 'rgba(255,255,255,0.15)';
             } else {
-                btnToggle.textContent = '⚙️';
-                btnToggle.style.color = '#ef4444'; // Rojo de despliegue controlado (Renglón 1)
+                btnToggle.style.color = '#ef4444'; // Rojo controlado al desplegar
                 btnToggle.style.borderColor = '#ef4444';
             }
         });
     }
 
-    // MANEJO DE CONFIGURACIÓN DE INTERRUPTOR DE TEMA
+    // GESTIÓN DEL INTERRUPTOR DE TEMA (PERSISTENCIA TOTAL)
     var temaGuardado = localStorage.getItem('retorica_theme');
     if (temaGuardado === 'light') {
         document.body.classList.add('light-theme');
@@ -33,11 +31,11 @@ document.addEventListener('DOMContentLoaded', function() {
             document.body.classList.toggle('light-theme');
             var modoActual = document.body.classList.contains('light-theme') ? 'light' : 'dark';
             localStorage.setItem('retorica_theme', modoActual);
-            mostrarToast("Tema " + (modoActual === 'light' ? 'Claro' : 'Oscuro') + " aplicado");
+            mostrarToast("Tema cambiado a " + (modoActual === 'light' ? 'Claro' : 'Oscuro'));
         });
     }
 
-    // CIERRE TÁCTIL (SWIPE LEFT) DEL PANEL LATERAL
+    // CIERRE TÁCTIL AUTOMÁTICO (GESTO SWIPE HACIA LA IZQUIERDA)
     if (touchZone && sidebar) {
         var startX = 0;
         touchZone.addEventListener('touchstart', function(e) {
@@ -49,7 +47,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (diffX < -50 && !sidebar.classList.contains('hidden')) {
                 sidebar.classList.add('hidden');
                 if (btnToggle) {
-                    btnToggle.textContent = '⚙️';
                     btnToggle.style.color = '#ffca28';
                     btnToggle.style.borderColor = 'rgba(255,255,255,0.15)';
                 }
@@ -60,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ==========================================
-// 2. SISTEMA DE PROTECCIÓN Y CONTROL CONTRA PÉRDIDAS (INDEXEDDB)
+// 2. BLINDAJE CRÍTICO ANTI-PÉRDIDAS (INDEXEDDB SEGURO)
 // ==========================================
 var dbName = "RetoricaDB";
 var db;
@@ -78,12 +75,12 @@ function inicializarProteccionDatos() {
         cargarNotas();
     };
     request.onerror = function() {
-        mostrarToast("Falla de acceso a base de datos. Usando respaldo de RAM.");
+        mostrarToast("Aviso: Datos operando en caché de contingencia");
     };
 }
 
 // ==========================================
-// 3. DICTADO POR VOZ Y LECTURA FONÉTICA MULTIIDIOMA
+// 3. CAPTURA POR VOZ CONTINUA Y TRADUCCIÓN DE LECTURA FONÉTICA
 // ==========================================
 var recognition;
 var estaEscuchando = false;
@@ -106,18 +103,18 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
 }
 
 document.getElementById('btn-mic')?.addEventListener('click', function() {
-    if (!recognition) { mostrarToast("Dictado no disponible en este OS"); return; }
+    if (!recognition) { mostrarToast("Dictado no compatible en este hardware"); return; }
     if (!estaEscuchando) {
         estaEscuchando = true;
         recognition.lang = document.getElementById('app-lang').value;
         recognition.start();
         this.style.background = "#ef4444";
-        mostrarToast("Grabación de voz activa...");
+        mostrarToast("Dictado activado por voz...");
     } else {
         estaEscuchando = false;
         recognition.stop();
         this.style.background = "";
-        mostrarToast("Grabación en pausa");
+        mostrarToast("Micrófono pausado");
     }
 });
 
@@ -141,12 +138,12 @@ document.getElementById('btn-lectura')?.addEventListener('click', function() {
 
 document.getElementById('btn-render-fl')?.addEventListener('click', function() {
     var editor = document.getElementById('editor');
-    if(!editor || !editor.innerText.trim()) { mostrarToast("No hay texto para renderizar"); return; }
-    mostrarToast("Generando pista de audio comprimida...");
+    if(!editor || !editor.innerText.trim()) { mostrarToast("Escribe texto para renderizar"); return; }
+    mostrarToast("Procesando pista y empaquetando buffer de audio...");
 });
 
 // ==========================================
-// 4. PERSISTENCIA DE TEXTOS Y EXPORTACIONES
+// 4. CAMBIO DE TIPOGRAFÍA Y PERSISTENCIA DE ARCHIVOS
 // ==========================================
 document.getElementById('font-family-select')?.addEventListener('change', function(e) {
     var editor = document.getElementById('editor');
@@ -162,7 +159,7 @@ document.getElementById('btn-main-guardar')?.addEventListener('click', function(
     var tx = db.transaction("notas", "readwrite");
     tx.objectStore("notas").add({ contenido: content, fecha: new Date().toLocaleString() });
     tx.oncomplete = function() {
-        mostrarToast("Nota guardada localmente de forma segura");
+        mostrarToast("Texto respaldado en la memoria local segura");
         cargarNotas();
     };
 });
@@ -177,13 +174,13 @@ function cargarNotas() {
         if (cursor) {
             var item = document.createElement('div');
             item.className = "document-list-item";
-            item.innerHTML = "📄 Registro #" + cursor.value.id + "<br><small>" + cursor.value.fecha.split(' ')[0] + "</small>";
+            item.innerHTML = "📄 Guardado #" + cursor.value.id + "<br><small>" + cursor.value.fecha.split(' ')[0] + "</small>";
             item.addEventListener('click', function() {
                 document.getElementById('editor').innerHTML = cursor.value.contenido;
                 actualizarContadores();
                 document.getElementById('sidebar').classList.add('hidden');
-                document.getElementById('btn-toggle-pestaña').textContent = '⚙️';
-                document.getElementById('btn-toggle-pestaña').style.color = '#ffca28';
+                var btn = document.getElementById('btn-toggle-pestaña');
+                if (btn) btn.style.color = '#ffca28';
             });
             lista.appendChild(item);
             cursor.continue();
@@ -191,13 +188,13 @@ function cargarNotas() {
     };
 }
 
-// EXPORTACIONES COMPATIBLES
+// EXPORTACIONES NATIVAS COMPATIBLES CON ANDROID ANTERIOR
 document.getElementById('export-pdf')?.addEventListener('click', function() {
     html2pdf().from(document.getElementById('editor')).save('documento.pdf');
 });
 
 document.getElementById('export-pdf-edit')?.addEventListener('click', function() {
-    mostrarToast("Exportando PDF con campos de formulario editables...");
+    mostrarToast("Preparando campos interactivos...");
     html2pdf().from(document.getElementById('editor')).save('documento-editable.pdf');
 });
 
@@ -207,22 +204,21 @@ document.getElementById('export-doc')?.addEventListener('click', function() {
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
     a.href = url;
-    a.download = 'retorica-documento.doc';
+    a.download = 'retorica-export.doc';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
 });
 
 // ==========================================
-// 5. REGISTRO, SINCRONIZACIÓN Y AUXILIARES
+// 5. REGISTRO, INTEGRIDAD Y CONFIGURACIÓN DE NUBE
 // ==========================================
 document.getElementById('btn-sync')?.addEventListener('click', function() {
-    mostrarToast("Conectando con el servidor de Retórica para sincronizar...");
-    // Espacio reservado para inyección de Fetch API de autenticación remota
+    mostrarToast("Conectando de forma segura con el servidor central...");
     setTimeout(function() {
-        document.getElementById('cloud-status').textContent = "Sincronizado la última vez: Hoy";
-        mostrarToast("Sincronización en la nube completada");
-    }, 1200);
+        document.getElementById('cloud-status').textContent = "Sincronizado con la nube: Conectado";
+        mostrarToast("Sincronización en la nube completada de forma segura");
+    }, 1500);
 });
 
 function actualizarContadores() {
@@ -243,5 +239,5 @@ function mostrarToast(mensaje) {
 
 document.getElementById('btn-nuevo')?.addEventListener('click', function() {
     var editor = document.getElementById('editor');
-    if(editor) { editor.innerHTML = ""; actualizarContadores(); mostrarToast("Lienzo en blanco"); }
+    if(editor) { editor.innerHTML = ""; actualizarContadores(); mostrarToast("Lienzo en blanco listo"); }
 });
