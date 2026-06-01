@@ -2,26 +2,26 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=3.0, user-scalable=yes">
     <title>Retórica - Procesador de Notas</title>
-    <link rel="manifest" href="./manifest.json?v=27">
+    <link rel="manifest" href="./manifest.json?v=28">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        /* CSS BLINDADO - COMPATIBILIDAD TOTAL RETROACTIVA */
-        body { background-color: #0a0f1d; color: #f3f4f6; margin: 0; padding: 0; font-family: sans-serif; overflow: hidden; width: 100vw; height: 100vh; position: relative; }
+        /* CSS BLINDADO DE COMPATIBILIDAD RETROACTIVA TOTAL (ANDROID 5+ Y ESCRITORIO) */
+        body { background-color: #0a0f1d; color: #f3f4f6; margin: 0; padding: 0; font-family: sans-serif; overflow-x: hidden; position: relative; width: 100%; min-height: 100vh; }
         body.light-theme { background-color: #f9fafb; color: #111827; }
 
-        /* CABECERA PRINCIPAL FIJA (LOGO ESTÁTICO) */
-        .app-header-fixed { position: absolute; top: 0; left: 0; width: 100%; height: 50px; border-bottom: 1px solid rgba(255,255,255,0.15); background-color: #0a0f1d; text-align: center; line-height: 50px; z-index: 400; }
+        /* CABECERA PRINCIPAL SUPERIOR FIJA */
+        .app-header-fixed { position: fixed; top: 0; left: 0; width: 100%; height: 50px; border-bottom: 1px solid rgba(255,255,255,0.15); background-color: #0a0f1d; text-align: center; line-height: 50px; z-index: 2000; }
         body.light-theme .app-header-fixed { background-color: #f9fafb; border-bottom: 1px solid rgba(0,0,0,0.15); }
         .brand-logo-fixed { font-weight: bold; font-size: 1.15rem; letter-spacing: 0.5px; display: inline-block; }
 
-        /* BOTÓN ENGRANAJE CAMBIA-COLOR (REGLÓN 1) */
-        .toggle-sidebar-pestaña { position: absolute; left: 12px; top: 7px; width: 36px; height: 36px; background: #1f2937; color: #ffca28; border: 1px solid rgba(255,255,255,0.15); text-align: center; line-height: 34px; font-weight: bold; cursor: pointer; z-index: 450; border-radius: 50%; transition: color 0.2s, border 0.2s; }
+        /* BOTÓN ENGRANAJE DE CONTROL DINÁMICO (CAMBIA DE COLOR SEGÚN ESTADO) */
+        .toggle-sidebar-pestaña { position: absolute; left: 12px; top: 7px; width: 36px; height: 36px; background: #1f2937; color: #ffca28; border: 1px solid rgba(255,255,255,0.15); text-align: center; line-height: 34px; font-weight: bold; cursor: pointer; z-index: 10000; border-radius: 50%; }
         body.light-theme .toggle-sidebar-pestaña { background: #ffffff; border: 1px solid rgba(0,0,0,0.15); }
 
-        /* BARRA DE HERRAMIENTAS SUPERIOR (NUNCA SE OCULTA POR EL TECLADO - REGLÓN 2) */
-        .menu-tira-horizontal { position: absolute; top: 50px; left: 0; width: 100%; height: 48px; overflow-x: auto; overflow-y: hidden; white-space: nowrap; padding: 6px 12px; background: #0c1326; border-bottom: 1px solid rgba(255,255,255,0.15); box-sizing: border-box; z-index: 250; -webkit-overflow-scrolling: touch; }
+        /* BARRA DE HERRAMIENTAS HORIZONTAL SUPERIOR (INMUNE AL DESPLIEGUE DEL TECLADO) */
+        .menu-tira-horizontal { position: fixed; top: 50px; left: 0; width: 100%; height: 48px; overflow-x: auto; overflow-y: hidden; white-space: nowrap; padding: 6px 12px; background: #0c1326; border-bottom: 1px solid rgba(255,255,255,0.15); box-sizing: border-box; z-index: 1500; -webkit-overflow-scrolling: touch; }
         body.light-theme .menu-tira-horizontal { background: #f3f4f6; border-bottom: 1px solid rgba(0,0,0,0.15); }
         
         button, select { display: inline-block; height: 34px; padding: 0 12px; background: #1f2937; color: #f3f4f6; border: 1px solid rgba(255,255,255,0.15); border-radius: 17px; font-size: 0.8rem; cursor: pointer; box-sizing: border-box; vertical-align: top; margin-right: 6px; }
@@ -29,43 +29,46 @@
         .separador-vertical { display: inline-block; width: 1px; height: 18px; background: rgba(255,255,255,0.2); margin: 8px 6px 0 0; vertical-align: top; }
         body.light-theme .separador-vertical { background: rgba(0,0,0,0.15); }
 
-        /* REGLÓN 4: MENÚ LATERAL COMPLETO SÓLIDO (SIN TRANSPARENCIAS) */
-        .sidebar { position: absolute; top: 50px; left: 0; width: 100vw; height: calc(100vh - 50px); background-color: #0a0f1d; z-index: 300; transition: transform 0.25s ease-out; }
+        /* MENÚ LATERAL: CAPA INDEPENDIENTE FLOTANTE ABSOLUTA SÓLIDA */
+        .sidebar { position: fixed; top: 50px; left: 0; width: 100%; height: calc(100vh - 50px); background-color: #0a0f1d; z-index: 9999; transition: transform 0.25s ease-out; box-sizing: border-box; overflow: hidden; }
         body.light-theme .sidebar { background-color: #f9fafb; }
-        .sidebar.hidden { transform: translateX(-100vw); }
+        .sidebar.hidden { transform: translateX(-100%); }
 
-        /* REGLÓN 3: EXPORTACIONES SUPERIORES EN MINI-BOTONES REDONDOS */
-        .export-mini-bar { width: 100%; height: 46px; overflow-x: auto; white-space: nowrap; padding: 6px 12px; background: rgba(255,255,255,0.02); border-bottom: 1px solid rgba(255,255,255,0.1); box-sizing: border-box; -webkit-overflow-scrolling: touch; }
+        /* SUBBARRA SUPERIOR DE EXPORTACIÓN CON BOTONES PEQUEÑOS Y REDONDOS */
+        .export-mini-bar { width: 100%; height: 46px; overflow-x: auto; white-space: nowrap; padding: 8px 12px; background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.1); box-sizing: border-box; -webkit-overflow-scrolling: touch; }
         .btn-round-mini { height: 30px; padding: 0 14px; border-radius: 15px !important; font-size: 0.75rem; background: #2d3748; }
 
-        /* CONTENIDO INTERNO DEL SIDEBAR */
+        /* CONTENIDO DE CONFIGURACIÓN INTERNA */
         .sidebar-body-content { position: absolute; top: 46px; bottom: 0; left: 0; right: 0; padding: 16px; overflow-y: auto; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px; }
         .config-group { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); padding: 12px; border-radius: 12px; }
         body.light-theme .config-group { background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.06); }
         .config-title { font-size: 0.8rem; font-weight: bold; margin-bottom: 6px; color: #ffca28; }
 
-        /* REGLÓN 7: CONTORNOS MONOCROMÁTICOS LUMINOSOS PARA PLANTILLAS */
+        /* CONTORNO MONOCROMÁTICO LUMINOSO PARA LAS PLANTILLAS */
         .slider-plantillas { width: 100%; overflow-x: auto; white-space: nowrap; padding: 6px 2px; -webkit-overflow-scrolling: touch; }
         .document-list-item { display: inline-block; background: #1f2937; border: 1px solid #ffca28; box-shadow: 0 0 6px rgba(255,202,40,0.3); padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; text-align: center; min-width: 110px; margin-right: 8px; color: #f3f4f6; }
         body.light-theme .document-list-item { background: #ffffff; color: #111827; }
         
-        /* MONETIZACIÓN INTEGRAL */
-        .adsense-strip-container { width: 100%; min-height: 60px; border: 1px dashed #ffca28; background: rgba(255,255,255,0.01); border-radius: 6px; text-align: center; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: #9ca3af; font-weight: bold; margin-top: auto; }
+        /* CONTENEDOR PUBLICITARIO COMPATIBLE CON FORMATOS MULTIMEDIA */
+        .adsense-strip-container { width: 100%; min-height: 65px; border: 1px dashed #ffca28; background: rgba(255,255,255,0.01); border-radius: 6px; text-align: center; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: #9ca3af; font-weight: bold; margin-top: auto; }
 
-        /* DISEÑO ESTRUCTURAL DE ÁREA DE ESCRITURA TOTALMENTE INDEPENDIENTE */
-        .main-container { width: 100%; height: 100%; padding-top: 98px; padding-bottom: 30px; box-sizing: border-box; overflow: hidden; position: relative; z-index: 100; }
-        .editor-wrapper { width: 100%; height: 100%; padding: 16px; overflow-y: auto; box-sizing: border-box; background: transparent; }
-        .rich-editor { width: 100%; min-height: 100%; background: transparent; border: none; color: #f3f4f6; font-size: 1.05rem; line-height: 1.5; outline: none; box-sizing: border-box; overflow-wrap: break-word; }
+        /* CONTENEDOR DEL CANVAS DE ESCRITURA */
+        .main-container { width: 100%; padding-top: 98px; padding-bottom: 32px; box-sizing: border-box; }
+        .editor-wrapper { width: 100%; padding: 16px; box-sizing: border-box; background: transparent; }
+        
+        /* BLINDAJE DE PALABRAS PARA PREVENIR ERRORES AL HACER ZOOM AGRESIVO */
+        .rich-editor { width: 100%; min-height: calc(100vh - 146px); background: transparent; border: none; color: #f3f4f6; font-size: 1.05rem; line-height: 1.5; outline: none; box-sizing: border-box; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; }
         body.light-theme .rich-editor { color: #111827; }
 
-        /* DINÁMICAS TIPOGRÁFICAS BLINDADAS */
+        /* CLASES TIPOGRÁFICAS ASOCIADAS */
         .rich-editor.font-sans { font-family: sans-serif; }
         .rich-editor.font-serif { font-family: serif; }
         .rich-editor.font-mono { font-family: monospace; }
 
-        .stats-bar { width: 100%; height: 30px; border-top: 1px solid rgba(255,255,255,0.15); padding: 6px 14px 0 14px; font-size: 0.7rem; color: #9ca3af; position: absolute; bottom: 0; left: 0; background: #0a0f1d; box-sizing: border-box; z-index: 260; }
+        /* PIE DE PÁGINA FIJO CON CONTEO */
+        .stats-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: 30px; border-top: 1px solid rgba(255,255,255,0.15); padding: 6px 14px 0 14px; font-size: 0.7rem; color: #9ca3af; background: #0a0f1d; box-sizing: border-box; z-index: 1500; }
         body.light-theme .stats-bar { background: #f9fafb; border-top: 1px solid rgba(0,0,0,0.15); }
-        .toast { position: fixed; bottom: 45px; left: 50%; transform: translate(-50%, 100px); background-color: #ffca28; color: #0a0f1d; padding: 8px 16px; font-size: 0.8rem; font-weight: bold; transition: transform 0.2s ease; z-index: 999; border-radius: 20px; }
+        .toast { position: fixed; bottom: 45px; left: 50%; transform: translate(-50%, 100px); background-color: #ffca28; color: #0a0f1d; padding: 8px 16px; font-size: 0.8rem; font-weight: bold; transition: transform 0.2s ease; z-index: 15000; border-radius: 20px; }
         .toast.show { transform: translate(-50%, 0); }
     </style>
 </head>
@@ -85,13 +88,13 @@
 
         <div class="sidebar-body-content" id="sidebar-touch-zone">
             <div class="config-group">
-                <div class="config-title">👤 Cuenta y Nube (Protección Local Activa)</div>
-                <div style="font-size:0.75rem; color:#9ca3af; margin-bottom:8px;" id="cloud-status">Modo Local Protegido (Sin Registro)</div>
-                <button id="btn-sync" style="width:100%; background:#2563eb;">Sincronizar Datos</button>
+                <div class="config-title">👤 Registro y Nube (Protección Local Activa)</div>
+                <div style="font-size:0.75rem; color:#9ca3af; margin-bottom:8px;" id="cloud-status">Modo Local Protegido (Sin Cuenta)</div>
+                <button id="btn-sync" style="width:100%; background:#2563eb; color:#ffffff; border:none;">Sincronizar y Respaldar Nube</button>
             </div>
 
             <div class="config-group">
-                <div class="config-title">🌐 Idioma Global de Sistema (20 Idiomas)</div>
+                <div class="config-title">🌐 Idioma de Entrada, Salida y Aplicación</div>
                 <select id="app-lang" style="width: 100%;">
                     <option value="es-MX">Español (México)</option><option value="es-ES">Español (España)</option>
                     <option value="en-US">English (USA)</option><option value="en-GB">English (UK)</option>
@@ -107,16 +110,16 @@
             </div>
 
             <div class="config-group">
-                <div class="config-title">📄 Historial y Plantillas Disponibles</div>
+                <div class="config-title">📄 Historial de Notas y Plantillas Gratis</div>
                 <div class="slider-plantillas" id="document-list"></div>
             </div>
 
-            <div class="adsense-strip-container" id="ads-zone">ESPACIO PUBLICITARIO DE MONETIZACIÓN (ADSENSE/VIDEO)</div>
+            <div class="adsense-strip-container" id="ads-zone">ZONA AD-MONETIZACIÓN (IMPRESIONES Y VIDEO)</div>
         </div>
     </div>
 
     <div class="menu-tira-horizontal">
-        <button id="btn-main-guardar" style="background:#ffca28; color:#0a0f1d; font-weight:bold;">💾 GUARDAR</button>
+        <button id="btn-main-guardar" style="background:#ffca28; color:#0a0f1d; font-weight:bold;">💾 GUARDAR HTML</button>
         <button id="btn-nuevo">➕ Nueva</button>
         <div class="separador-vertical"></div>
         <select id="font-family-select">
@@ -127,22 +130,22 @@
         <div class="separador-vertical"></div>
         <button id="btn-mic">🎙️ Dictado</button>
         <button id="btn-lectura">🔊 Escuchar</button>
-        <button id="btn-render-fl">🎛️ Render</button>
+        <button id="btn-render-fl">🎛️ Render Audio</button>
         <button id="btn-toggle-tema">🌓 Tema</button>
     </div>
 
-    <div class="main-container">
+    <main class="main-container">
         <div class="editor-wrapper">
-            <div id="editor" class="rich-editor font-sans" contenteditable="true" placeholder="Escribe tu texto aquí..."></div>
+            <div id="editor" class="rich-editor font-sans" contenteditable="true" placeholder="Escribe aquí tu obra o guion..."></div>
         </div>
-    </div>
+    </main>
 
     <div class="stats-bar">
         <span id="stats-text">Caracteres: 0</span>
-        <span id="lbl-file-dates" style="float: right;">Sin sincronizar</span>
+        <span id="lbl-file-dates" style="float: right;">Almacenamiento Local Intacto</span>
     </div>
 
-    <div class="toast" id="toast-notif">Guardado local listo</div>
+    <div class="toast" id="toast-notif">Base de datos protegida</div>
     <script type="module" src="js/main.js"></script>
 </body>
 </html>
