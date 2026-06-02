@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=3.0, user-scalable=yes">
     <title>Retórica - Procesador de Notas</title>
-    <link rel="manifest" href="./manifest.json?v=36">
+    <link rel="manifest" href="./manifest.json?v=37">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         /* BLINDAJE ANTI-REFRESCADO ACCIDENTAL EN MÓVILES (PULL-TO-REFRESH) */
@@ -88,6 +88,7 @@
         <div class="brand-logo-fixed">☀️ RETÓRICA</div>
     </header>
 
+    <!-- MENÚ LATERAL -->
     <div class="sidebar hidden" id="sidebar">
         <div class="export-mini-bar">
             <button class="btn-round-mini" id="export-pdf">PDF</button>
@@ -100,6 +101,7 @@
                 <button id="btn-nuevo" style="width:100%; background:#ffca28; color:#0a0f1d; font-weight:bold; height:38px; border-radius:8px;">➕ Crear Nueva Nota</button>
             </div>
 
+            <!-- INSTALADOR PWA CONTROLADO -->
             <div class="config-group" id="pwa-container">
                 <div class="config-title">📱 Aplicación Retórica Nativa</div>
                 <button id="btn-pwa-action" class="btn-pwa-status">Instalar en Dispositivo</button>
@@ -120,9 +122,11 @@
         </div>
     </div>
 
+    <!-- TIRA HORIZONTAL DE CONTROL CON NUEVO ORDEN SEGURO -->
     <div class="menu-tira-horizontal">
         <button id="btn-main-guardar" style="background:#ffca28; color:#0a0f1d; font-weight:bold;">💾 GUARDAR</button>
         
+        <!-- SELECTORES DE IDIOMA UBICADOS CORRECTAMENTE A LA DER. DEL BOTÓN GUARDAR -->
         <select id="app-lang" style="max-width: 135px;"></select>
         <select id="voice-lang" style="max-width: 135px;"></select>
         
@@ -144,6 +148,7 @@
         <button id="btn-toggle-tema">🌓 Tema</button>
     </div>
 
+    <!-- ÁREA DE ESCRITURA DOBLE CAMPO -->
     <main class="main-container">
         <div class="editor-wrapper">
             <div id="editor-title" class="title-input-field font-sans" contenteditable="true"></div>
