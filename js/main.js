@@ -1,12 +1,22 @@
+// ==========================================
+// 1. LISTADO UNIFICADO DE LOS 30 IDIOMAS SOLICITADOS
+// ==========================================
 var listaIdiomas = [
-    { code: "es-MX", name: "Español (Méx)" }, { code: "es-ES", name: "Español (Esp)" },
+    { code: "es-MX", name: "Español (Mex)" }, { code: "es-ES", name: "Español (Esp)" },
     { code: "en-US", name: "English (USA)" }, { code: "en-GB", name: "English (UK)" },
     { code: "de-DE", name: "Deutsch" }, { code: "fr-FR", name: "Français" },
     { code: "ru-RU", name: "Русский" }, { code: "zh-CN", name: "中文 (Chino)" },
     { code: "zh-HK", name: "廣東話 (Cant)" }, { code: "ja-JP", name: "日本語" },
     { code: "ko-KR", name: "한국어" }, { code: "ar-SA", name: "العربية" },
     { code: "hi-IN", name: "हिन्दी" }, { code: "it-IT", name: "Italiano" },
-    { code: "pt-BR", name: "Português" }
+    { code: "pt-BR", name: "Português" }, { code: "pt-PT", name: "Português (Por)" },
+    { code: "nl-NL", name: "Nederlands" }, { code: "pl-PL", name: "Polski" },
+    { code: "tr-TR", name: "Türkçe" }, { code: "sv-SE", name: "Svenska" },
+    { code: "vi-VN", name: "Tiếng Việt" }, { code: "th-TH", name: "ไทย" },
+    { code: "id-ID", name: "Bahasa Indo" }, { code: "he-IL", name: "עברית" },
+    { code: "el-GR", name: "Ελληνικά" }, { code: "ro-RO", name: "Română" },
+    { code: "hu-HU", name: "Magyar" }, { code: "cs-CZ", name: "Čeština" },
+    { code: "fi-FI", name: "Suomi" }, { code: "uk-UA", name: "Українська" }
 ];
 
 var idNotaActual = null; 
@@ -16,12 +26,12 @@ var db;
 document.addEventListener('DOMContentLoaded', function() {
     var btnToggle = document.getElementById('btn-toggle-pestaña');
     var sidebar = document.getElementById('sidebar');
-    var touchZone = document.getElementById('sidebar-touch-zone');
     
-    // Inyección de idiomas en selectores de barra de tareas
+    // Inyección de elementos controlada para evitar bloqueos del DOM
     var selectApp = document.getElementById('app-lang');
     var selectVoice = document.getElementById('voice-lang');
     if (selectApp && selectVoice) {
+        selectApp.innerHTML = ""; selectVoice.innerHTML = "";
         listaIdiomas.forEach(function(idioma) {
             var opt1 = document.createElement('option'); opt1.value = idioma.code; opt1.textContent = "📝 " + idioma.name; selectApp.appendChild(opt1);
             var opt2 = document.createElement('option'); opt2.value = idioma.code; opt2.textContent = "🔊 " + idioma.name; selectVoice.appendChild(opt2);
@@ -36,47 +46,38 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // MANEJO DEL DESLIZAMIENTO DEL MENÚ LATERAL MEDIANTE GESTOS CON EL DEDO (SWIPE)
+    // CONTROL DE GESTOS SWIPE AJUSTADO SÓLO AL BORDE DE PANTALLA PARA EVITAR FALSOS ARRASTRES
     var startMenuX = 0;
-    var startMenuY = 0;
-    
-    // Abrir menú arrastrando desde el borde izquierdo de la pantalla
     document.addEventListener('touchstart', function(e) {
-        if (sidebar.classList.contains('hidden') && e.touches[0].clientX < 40) {
+        if (sidebar.classList.contains('hidden') && e.touches[0].clientX < 35) {
             startMenuX = e.touches[0].clientX;
-            startMenuY = e.touches[0].clientY;
         }
     }, { passive: true });
 
     document.addEventListener('touchmove', function(e) {
         if (startMenuX > 0) {
             var diffX = e.touches[0].clientX - startMenuX;
-            var diffY = e.touches[0].clientY - startMenuY;
-            if (diffX > 60 && Math.abs(diffY) < 30) {
+            if (diffX > 70) {
                 sidebar.classList.remove('hidden');
-                btnToggle.style.color = '#ef4444';
+                if (btnToggle) { btnToggle.style.color = '#ef4444'; btnToggle.style.borderColor = '#ef4444'; }
                 startMenuX = 0;
             }
         }
     }, { passive: true });
 
-    // Cerrar menú arrastrando hacia la izquierda dentro del menú
-    sidebar.addEventListener('touchstart', function(e) {
-        startMenuX = e.touches[0].clientX;
-    }, { passive: true });
-
+    sidebar.addEventListener('touchstart', function(e) { startMenuX = e.touches[0].clientX; }, { passive: true });
     sidebar.addEventListener('touchmove', function(e) {
         if (startMenuX > 0) {
             var diffX = e.touches[0].clientX - startMenuX;
-            if (diffX < -60) {
+            if (diffX < -70) {
                 sidebar.classList.add('hidden');
-                btnToggle.style.color = '#ffca28';
+                if (btnToggle) { btnToggle.style.color = '#ffca28'; btnToggle.style.borderColor = 'rgba(255,255,255,0.15)'; }
                 startMenuX = 0;
             }
         }
     }, { passive: true });
 
-    // ACCIONES NATIVAS DE EDICIÓN: DESHACER, REHACER, NEGRITA Y CURSIVA
+    // FORMATOS DIRECTOS DE HOJA
     document.getElementById('btn-undo')?.addEventListener('click', function() { document.execCommand('undo', false, null); guardarCopiaSeguridadTemporal(); });
     document.getElementById('btn-redo')?.addEventListener('click', function() { document.execCommand('redo', false, null); guardarCopiaSeguridadTemporal(); });
     document.getElementById('btn-bold')?.addEventListener('click', function() { document.execCommand('bold', false, null); });
@@ -90,13 +91,20 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    var btnTema = document.getElementById('btn-toggle-tema');
+    if (localStorage.getItem('retorica_theme') === 'light') { document.body.classList.add('light-theme'); }
+    btnTema?.addEventListener('click', function() {
+        document.body.classList.toggle('light-theme');
+        localStorage.setItem('retorica_theme', document.body.classList.contains('light-theme') ? 'light' : 'dark');
+    });
+
     inicializarProteccionDatos();
     inicializarPWA();
     restaurarCopiaSeguridadTemporal();
 });
 
 // ==========================================
-// AUTO-GUARDADO TEMPORAL ANTI-ACCIDENTES DE MEMORIA (RAM)
+// 2. CAPA CAPTURA EN RAM EN CALIENTE (ANTI-ACCIDENTES)
 // ==========================================
 function guardarCopiaSeguridadTemporal() {
     var titleHtml = document.getElementById('editor-title').innerHTML;
@@ -123,16 +131,15 @@ document.getElementById('editor-title')?.addEventListener('input', function() { 
 document.getElementById('editor')?.addEventListener('input', function() { guardarCopiaSeguridadTemporal(); actualizarContadores(); });
 
 // ==========================================
-// GESTOR DE INSTALACIÓN PWA MEJORADO Y BLINDADO
+// 3. GESTOR DE INSTALACIÓN INTERACTIVO PWA
 // ==========================================
 var defferredPrompt;
 function inicializarPWA() {
     var btnPwa = document.getElementById('btn-pwa-action');
     
-    // Forzar visibilidad si el navegador soporta instalación diferida
     window.addEventListener('beforeinstallprompt', function(e) {
         e.preventDefault(); defferredPrompt = e;
-        if(btnPwa) { btnPwa.style.display = 'block'; btnPwa.textContent = 'Instalar en Dispositivo'; btnPwa.style.background = '#10b981'; }
+        if(btnPwa) { btnPwa.textContent = 'Instalar en Dispositivo'; btnPwa.style.background = '#10b981'; }
     });
 
     btnPwa?.addEventListener('click', function() {
@@ -141,21 +148,21 @@ function inicializarPWA() {
             defferredPrompt.prompt();
             defferredPrompt.userChoice.then(function(choice) { if (choice.outcome === 'accepted') { btnPwa.style.display = 'none'; } defferredPrompt = null; });
         } else {
-            mostrarToast("La aplicación ya está instalada o ejecutándose en modo nativo.");
+            mostrarToast("Ejecutando en modo Nativo PWA Activo");
         }
     });
 
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.ready.then(function(reg) {
             reg.addEventListener('updatefound', function() {
-                if(btnPwa) { btnPwa.style.display = 'block'; btnPwa.textContent = 'Actualizar Aplicación'; btnPwa.style.background = '#2563eb'; }
+                if(btnPwa) { btnPwa.textContent = 'Actualizar Aplicación'; btnPwa.style.background = '#2563eb'; }
             });
         });
     }
 }
 
 // ==========================================
-// BASE DE DATOS LOCAL CORREGIDA CON EXTRACCIÓN MULTILÍNEA
+// 4. BASE DE DATOS LOCAL Y EXTRACCIÓN DE EXTRACTOS
 // ==========================================
 function inicializarProteccionDatos() {
     var request = indexedDB.open(dbName, 1);
@@ -177,11 +184,11 @@ document.getElementById('btn-main-guardar')?.addEventListener('click', function(
 
     if (idNotaActual !== null) {
         store.put({ id: idNotaActual, titulo: titleField.innerHTML, contenido: editorField.innerHTML, fecha: fechaStr });
-        tx.oncomplete = function() { mostrarToast("Cambios guardados correctamente"); cargarNotas(); localStorage.removeItem('retorica_cache_title'); localStorage.removeItem('retorica_cache_body'); };
+        tx.oncomplete = function() { mostrarToast("Cambios guardados"); cargarNotas(); localStorage.removeItem('retorica_cache_title'); localStorage.removeItem('retorica_cache_body'); };
     } else {
         var addReq = store.add({ titulo: titleField.innerHTML, contenido: editorField.innerHTML, fecha: fechaStr });
         addReq.onsuccess = function(e) { idNotaActual = e.target.result; };
-        tx.oncomplete = function() { mostrarToast("Nota nueva guardada"); cargarNotas(); localStorage.removeItem('retorica_cache_title'); localStorage.removeItem('retorica_cache_body'); };
+        tx.oncomplete = function() { mostrarToast("Nota creada y guardada"); cargarNotas(); localStorage.removeItem('retorica_cache_title'); localStorage.removeItem('retorica_cache_body'); };
     }
 });
 
@@ -194,36 +201,31 @@ function cargarNotas() {
         if (cursor) {
             var item = document.createElement('div'); item.className = "document-list-item";
             
-            // Limpieza de etiquetas HTML para renderizar texto plano en el extracto de la plantilla
             var tempDiv = document.createElement('div'); tempDiv.innerHTML = cursor.value.contenido;
             var plainText = tempDiv.innerText.trim();
             var tempTit = document.createElement('div'); tempTit.innerHTML = cursor.value.titulo || "";
             var plainTitle = tempTit.innerText.trim();
 
-            var visibleTitle = plainTitle ? plainTitle : (plainText ? plainText.substring(0, 20) + "..." : "Sin Título");
-            var visibleBody = plainText ? plainText : "Documento vacío sin líneas de texto adicionales.";
+            var titlePrint = plainTitle ? plainTitle : (plainText ? plainText.substring(0, 18) + "..." : "Sin Título");
+            var bodyPrint = plainText ? plainText : "Nota vacía sin líneas de texto adicionales guardadas.";
 
-            item.innerHTML = "<div class='doc-item-title'>📄 " + visibleTitle + "</div><div class='doc-item-body'>" + visibleBody + "</div>";
+            item.innerHTML = "<div class='doc-item-title'>📄 " + titlePrint + "</div><div class='doc-item-body'>" + bodyPrint + "</div>";
             
-            (function(id, titHtml, contHtml) {
+            (function(id, tHtml, cHtml) {
                 item.addEventListener('click', function() {
-                    idNotaActual = id;
-                    document.getElementById('editor-title').innerHTML = titHtml;
-                    document.getElementById('editor').innerHTML = contHtml;
-                    actualizarContadores(); guardarCopiaSeguridadTemporal();
-                    document.getElementById('sidebar').classList.add('hidden');
-                    var btn = document.getElementById('btn-toggle-pestaña'); if(btn) btn.style.color = '#ffca28';
+                    idNotaActual = id; document.getElementById('editor-title').innerHTML = tHtml; document.getElementById('editor').innerHTML = cHtml;
+                    actualizarContadores(); guardarCopiaSeguridadTemporal(); document.getElementById('sidebar').classList.add('hidden');
+                    var btn = document.getElementById('btn-toggle-pestaña'); if(btn) { btn.style.color = '#ffca28'; btn.style.borderColor = 'rgba(255,255,255,0.15)'; }
                 });
             })(cursor.value.id, cursor.value.titulo, cursor.value.contenido);
 
-            lista.appendChild(item);
-            cursor.continue();
+            lista.appendChild(item); cursor.continue();
         }
     };
 }
 
 // ==========================================
-// DICTADO Y LECTURA FONÉTICA POR BOTONES EXCLUSIVOS
+// 5. HERRAMIENTAS MULTIMEDIA COMPLETA
 // ==========================================
 var recognition; var estaEscuchando = false;
 if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
@@ -252,14 +254,14 @@ document.getElementById('btn-lectura')?.addEventListener('click', function() {
 });
 
 document.getElementById('btn-render-fl')?.addEventListener('click', function() { mostrarToast("Procesando búfer de audio..."); });
+
 document.getElementById('btn-nuevo')?.addEventListener('click', function() {
     idNotaActual = null; document.getElementById('editor-title').innerHTML = ""; document.getElementById('editor').innerHTML = "";
     localStorage.removeItem('retorica_cache_title'); localStorage.removeItem('retorica_cache_body');
     actualizarContadores(); document.getElementById('sidebar').classList.add('hidden');
-    var btn = document.getElementById('btn-toggle-pestaña'); if(btn) btn.style.color = '#ffca28';
+    var btn = document.getElementById('btn-toggle-pestaña'); if(btn) { btn.style.color = '#ffca28'; btn.style.borderColor = 'rgba(255,255,255,0.15)'; }
 });
 
-// EXPORTACIONES NATIVAS COMPLETAS
 document.getElementById('export-pdf')?.addEventListener('click', function() { html2pdf().from(document.getElementById('editor')).save('documento.pdf'); });
 document.getElementById('export-pdf-edit')?.addEventListener('click', function() { html2pdf().from(document.getElementById('editor')).save('documento-editable.pdf'); });
 document.getElementById('export-doc')?.addEventListener('click', function() {
