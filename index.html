@@ -7,7 +7,7 @@
     <link rel="manifest" href="./manifest.json?v=37">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        /* BLINDAJE ANTI-REFRESCADO ACCIDENTAL EN MÓVILES */
+        /* BLINDAJE ANTI-REFRESCADO ACCIDENTAL EN MÓVILES (PULL-TO-REFRESH) */
         html, body { overscroll-behavior-y: contain !important; background-color: #0a0f1d; color: #f3f4f6; margin: 0; padding: 0; font-family: sans-serif; overflow-x: hidden; width: 100%; min-height: 100vh; }
         body.light-theme { background-color: #f9fafb; color: #111827; }
 
@@ -16,29 +16,30 @@
         body.light-theme .app-header-fixed { background-color: #f9fafb; border-bottom: 1px solid rgba(0,0,0,0.15); }
         .brand-logo-fixed { font-weight: bold; font-size: 1.15rem; letter-spacing: 0.5px; display: inline-block; }
 
-        /* BOTÓN FLOTANTE / PESTAÑA LATERAL */
+        /* BOTÓN FLOTANTE / PESTAÑA LATERAL DE LA TUERCA */
         .toggle-sidebar-pestaña { position: absolute; left: 12px; top: 7px; width: 36px; height: 36px; background: #1f2937; color: #ffca28; border: 1px solid rgba(255,255,255,0.15); text-align: center; line-height: 34px; font-weight: bold; cursor: pointer; z-index: 10000; border-radius: 50%; transition: all 0.2s; }
         body.light-theme .toggle-sidebar-pestaña { background: #ffffff; border: 1px solid rgba(0,0,0,0.15); }
 
-        /* BARRA DE HERRAMIENTAS HORIZONTAL */
+        /* BARRA DE HERRAMIENTAS HORIZONTAL DESLIZABLE (LÍNEA REORGANIZADA) */
         .menu-tira-horizontal { position: fixed; top: 50px; left: 0; width: 100%; height: 48px; overflow-x: auto; overflow-y: hidden; white-space: nowrap; padding: 6px 12px; background: #0c1326; border-bottom: 1px solid rgba(255,255,255,0.15); box-sizing: border-box; z-index: 1500; -webkit-overflow-scrolling: touch; }
         body.light-theme .menu-tira-horizontal { background: #f3f4f6; border-bottom: 1px solid rgba(0,0,0,0.15); }
 
         button, select { display: inline-block; height: 34px; padding: 0 12px; background: #1f2937; color: #f3f4f6; border: 1px solid rgba(255,255,255,0.15); border-radius: 17px; font-size: 0.8rem; cursor: pointer; box-sizing: border-box; vertical-align: top; margin-right: 6px; }
         body.light-theme button, body.light-theme select { background: #ffffff; color: #111827; border: 1px solid rgba(0,0,0,0.15); }
-        .separador-vertical { display: inline-block; width: 1px; height: 18px; background: rgba(255,255,255,0.2); margin: 8px 6px 0 0; vertical-align: top; }
-        body.light-theme .separador-vertical { background: rgba(0,0,0,0.15); }
         .btn-format { width: 34px; height: 34px; padding: 0; border-radius: 50%; font-weight: bold; font-size: 0.9rem; }
 
-        /* MENÚ LATERAL INTERFACES DE CONTROL */
+        /* SUB-MENÚ DESPLEGABLE HORIZONTAL DE FORMATOS (GUARDAR TODO) */
+        .dropdown-formatos-tira { display: none; position: fixed; top: 98px; left: 0; width: 100%; height: 44px; background: #111827; border-bottom: 1px solid #ffca28; padding: 5px 12px; box-sizing: border-box; overflow-x: auto; white-space: nowrap; z-index: 1400; -webkit-overflow-scrolling: touch; }
+        body.light-theme .dropdown-formatos-tira { background: #e5e7eb; border-bottom: 1px solid #b45309; }
+        .dropdown-formatos-tira.show { display: block; }
+        .btn-mini-save { height: 32px; padding: 0 14px; border-radius: 16px; background: #1f2937; color: #ffca28; border: 1px solid #ffca28; font-size: 0.75rem; font-weight: bold; }
+
+        /* MENÚ LATERAL DE CONFIGURACIÓN (TUERCA) */
         .sidebar { position: fixed; top: 50px; left: 0; width: 100%; height: calc(100vh - 50px); background-color: #0a0f1d; z-index: 9999; transition: transform 0.25s ease-out; box-sizing: border-box; overflow: hidden; }
         body.light-theme .sidebar { background-color: #f9fafb; }
         .sidebar.hidden { transform: translateX(-100%); }
 
-        .export-mini-bar { width: 100%; height: 46px; overflow-x: auto; white-space: nowrap; padding: 8px 12px; background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.1); box-sizing: border-box; }
-        .btn-round-mini { height: 30px; padding: 0 14px; border-radius: 15px !important; font-size: 0.75rem; background: #2d3748; }
-
-        .sidebar-body-content { position: absolute; top: 46px; bottom: 0; left: 0; right: 0; padding: 16px; overflow-y: auto; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px; overscroll-behavior-y: contain; }
+        .sidebar-body-content { position: absolute; top: 0; bottom: 0; left: 0; right: 0; padding: 16px; overflow-y: auto; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px; overscroll-behavior-y: contain; }
         .config-group { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); padding: 12px; border-radius: 12px; }
         body.light-theme .config-group { background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.06); }
         .config-title { font-size: 0.8rem; font-weight: bold; margin-bottom: 6px; color: #ffca28; }
@@ -54,16 +55,16 @@
 
         .adsense-strip-container { width: 100%; min-height: 65px; border: 1px dashed #ffca28; background: rgba(255,255,255,0.01); border-radius: 6px; text-align: center; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: #9ca3af; font-weight: bold; margin-top: auto; }
 
-        /* ÁREA DE ESCRITURA */
-        .main-container { width: 100%; padding-top: 98px; padding-bottom: 32px; box-sizing: border-box; }
+        /* ÁREA DE TRABAJO CORREGIDA CON SUS SEPARACIONES ORIGINALES */
+        .main-container { width: 100%; padding-top: 110px; padding-bottom: 32px; box-sizing: border-box; transition: padding-top 0.2s ease; }
         .editor-wrapper { width: 100%; padding: 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px; }
 
         .title-input-field { width: 100%; background: transparent; border: none; color: #ffca28; font-size: 1.5rem; font-weight: bold; outline: none; box-sizing: border-box; padding: 0; }
         body.light-theme .title-input-field { color: #b45309; }
-        .title-input-field:empty:before { content: "Título de la Nota"; color: rgba(255,252,40,0.3); font-style: italic; }
+        .title-input-field:empty:before { content: "Título de la Nota"; color: rgba(255,202,40,0.3); font-style: italic; }
         body.light-theme .title-input-field:empty:before { color: rgba(0,0,0,0.3); }
 
-        .rich-editor { width: 100%; min-height: calc(100vh - 200px); background: transparent; border: none; color: #f3f4f6; font-size: 1.05rem; line-height: 1.5; outline: none; box-sizing: border-box; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; }
+        .rich-editor { width: 100%; min-height: calc(100vh - 210px); background: transparent; border: none; color: #f3f4f6; font-size: 1.05rem; line-height: 1.5; outline: none; box-sizing: border-box; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; }
         body.light-theme .rich-editor { color: #111827; }
         .rich-editor:empty:before { content: "Comienza a dictar o escribir aquí tu obra..."; color: rgba(255,255,255,0.25); }
         body.light-theme .rich-editor:empty:before { color: rgba(0,0,0,0.3); }
@@ -89,15 +90,15 @@
     </header>
 
     <div class="sidebar hidden" id="sidebar">
-        <div class="export-mini-bar">
-            <button class="btn-round-mini" id="export-pdf">PDF</button>
-            <button class="btn-round-mini" id="export-pdf-edit">PDF Editable</button>
-            <button class="btn-round-mini" id="export-doc">DOC (Word)</button>
-        </div>
-
         <div class="sidebar-body-content">
             <div class="config-group">
-                <button id="btn-nuevo" style="width:100%; background:#ffca28; color:#0a0f1d; font-weight:bold; height:38px; border-radius:8px;">➕ Crear Nueva Nota</button>
+                <div class="config-title">📂 Abrir Archivo de Almacenamiento</div>
+                <input type="file" id="input-abrir-archivo" accept=".html" style="display: none;">
+                <button id="btn-trigger-abrir" style="width:100%; background:#2563eb; color:#ffffff; font-weight:bold; height:36px; border-radius:8px; border:none;">Buscar Nota HTML Vieja</button>
+            </div>
+
+            <div class="config-group">
+                <button id="btn-nuevo" style="width:100%; background:#ffca28; color:#0a0f1d; font-weight:bold; height:38px; border-radius:8px; border:none;">➕ Crear Nueva Nota</button>
             </div>
 
             <div class="config-group" id="pwa-container">
@@ -108,7 +109,7 @@
             <div class="config-group">
                 <div class="config-title">👤 Sincronización Protegida</div>
                 <div style="font-size:0.75rem; color:#9ca3af; margin-bottom:8px;" id="cloud-status">Modo Local Activo (Base de Datos Encriptada)</div>
-                <button id="btn-sync" style="width:100%; background:#2563eb; color:#ffffff; border:none; height:34px; border-radius:17px;">Sincronizar Nube</button>
+                <button id="btn-sync" style="width:100%; background:#1f2937; color:#ffffff; border:1px solid rgba(255,255,255,0.15); height:34px; border-radius:17px;">Sincronizar Nube</button>
             </div>
 
             <div class="config-group">
@@ -120,31 +121,42 @@
         </div>
     </div>
 
-    <div class="menu-tira-horizontal">
-        <button id="btn-main-guardar" style="background:#ffca28; color:#0a0f1d; font-weight:bold;">💾 GUARDAR</button>
-        
-        <select id="app-lang" style="max-width: 135px;"></select>
-        <select id="voice-lang" style="max-width: 135px;"></select>
-        
-        <button id="btn-mic">🎙️ Dictado</button>
-        <button id="btn-lectura">🔊 Escuchar</button>
-        <button id="btn-render-fl">🎛️ Render Audio</button>
+    <div class="menu-tira-horizontal" id="tira-herramientas">
+        <button id="btn-main-guardar" style="background:#ffca28; color:#0a0f1d; font-weight:bold; border:1px solid #ffca28;">💾 Guardar Todo</button>
         
         <button id="btn-undo" class="btn-format">↶</button>
+        
         <button id="btn-redo" class="btn-format">↷</button>
         
-        <div class="separador-vertical"></div>
+        <button id="btn-mic">🎙️ Dictar</button>
+        
+        <button id="btn-lectura">🔊 Escuchar</button>
+        
+        <button id="btn-msg-voz">💬 Mensaje de Voz</button>
+        
+        <button id="btn-render-fl">🎛️ Render de Texto a Audio</button>
+        
+        <select id="voice-lang" style="max-width: 145px;"></select>
+        
+        <select id="app-lang" style="max-width: 145px;"></select>
+        
         <select id="font-family-select">
             <option value="font-sans">Sans-Serif</option>
             <option value="font-serif">Serif</option>
             <option value="font-mono">Monospace</option>
         </select>
-        <button id="btn-bold" class="btn-format">B</button>
-        <button id="btn-italic" class="btn-format" style="font-style: italic;">I</button>
+        
         <button id="btn-toggle-tema">🌓 Tema</button>
     </div>
 
-    <main class="main-container">
+    <div class="dropdown-formatos-tira" id="dropdown-formatos">
+        <button class="btn-mini-save" id="save-native-html">💾 Base de Datos e HTML</button>
+        <button class="btn-mini-save" id="export-pdf">📄 Exportar PDF</button>
+        <button class="btn-mini-save" id="export-pdf-edit">📝 PDF Editable</button>
+        <button class="btn-mini-save" id="export-doc">💙 DOC (Word)</button>
+    </div>
+
+    <main class="main-container" id="contenedor-principal">
         <div class="editor-wrapper">
             <div id="editor-title" class="title-input-field font-sans" contenteditable="true"></div>
             <div id="editor" class="rich-editor font-sans" contenteditable="true"></div>
