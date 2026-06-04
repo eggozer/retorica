@@ -1,30 +1,55 @@
-// CONTROL DE IDENTIDAD, REGISTRO Y MONETIZACIÓN DE RETÓRICA
-export const ControlUsuarios = {
-    detectarEmailDispositivo: async () => {
-        // En PWAs avanzadas, permite validar si hay una sesión previa del navegador
-        if (navigator.credentials) {
-            try {
-                const cred = await navigator.credentials.get({password: true, publicKey: false});
-                if (cred) return cred.id;
-            } catch (e) { console.log("Identificación automática omitida"); }
-        }
-        return null;
-    },
-
-    registrarNuevoUsuario: (datosUsuario) => {
-        // Guarda la sesión localmente e identifica el dispositivo único
-        const dispositivoId = crypto.randomUUID();
-        const perfil = { ...datosUsuario, dispositivoId, creadoEn: new Date().toISOString() };
-        localStorage.setItem('retorica_user_session', JSON.stringify(perfil));
-        return perfil;
-    },
-
-    cerrarSesionDispositivos: (todo) => {
-        if (todo) {
-            // Lógica para enviar orden al servidor de cerrar sesión en la tablet, el Pixel, etc.
-            console.log("Sesión cerrada en todos los dispositivos vinculados.");
-        }
-        localStorage.removeItem('retorica_user_session');
-        window.location.reload();
+/**
+ * Retórica - Módulo de Gestión de Sesiones y Registros de Usuarios
+ */
+class AuthManager {
+    constructor() {
+        this.usuariosKey = 'retorica_usuarios_db';
+        this.sesionKey = 'retorica_usuario_activo';
+        this.initStorage();
     }
-};
+
+    initStorage() {
+        if (!localStorage.getItem(this.usuariosKey)) {
+            localStorage.setItem(this.usuariosKey, JSON.stringify([]));
+        }
+    }
+
+    // Registro de un usuario nuevo
+    registrarUsuario(username) {
+        const nameClean = username.trim();
+        if (!nameClean) throw new Error("El nombre de usuario no puede estar vacío.");
+
+        const usuarios = JSON.parse(localStorage.getItem(this.usuariosKey));
+        
+        // Validar si ya existe
+        if (usuarios.includes(nameClean)) {
+            // Si ya existe, asumimos el login directo por facilidad de uso local
+            this.setSession(nameClean);
+            return nameClean;
+        }
+
+        usuarios.push(nameClean);
+        localStorage.setItem(this.usuariosKey, JSON.stringify(usuarios));
+        this.setSession(nameClean);
+        return nameClean;
+    }
+
+    setSession(username) {
+        localStorage.setItem(this.sesionKey, username);
+    }
+
+    getUsuarioActivo() {
+        return localStorage.getItem(this.sesionKey) || null;
+    }
+
+    cerrarSesion() {
+        localStorage.removeItem(this.sesionKey);
+    }
+
+    obtenerTodosLosUsuarios() {
+        return JSON.parse(localStorage.getItem(this.usuariosKey)) || [];
+    }
+}
+
+// Instancia global accesible desde main.js
+window.authSystem = new AuthManager();
