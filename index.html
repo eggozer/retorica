@@ -4,174 +4,149 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=3.0, user-scalable=yes">
     <title>Retórica - Procesador de Notas</title>
-    <link rel="manifest" href="./manifest.json?v=39">
+    <link rel="icon" type="image/png" href="./icono-512.png">
+    <link rel="apple-touch-icon" href="./icono-512.png">
+    <link rel="manifest" href="./manifest.json?v=40">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        /* BLINDAJE BASE Y COLORES ESTILO MATRÍZ / ELECTRICIDAD */
-        html, body { overscroll-behavior-y: contain !important; background-color: #050a12; color: #00ffcc; margin: 0; padding: 0; font-family: sans-serif; width: 100%; height: 100%; }
-        body.light-theme { background-color: #f4f7f6; color: #006655; }
-
-        /* CABECERA SUPERIOR FIJA REESTRUCTURADA (PUNTO 4) */
-        .app-header-fixed { position: fixed; top: 0; left: 0; width: 100%; height: 50px; border-bottom: 2px solid #00ffcc; background-color: #071424; z-index: 10000; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; box-sizing: border-box; box-shadow: 0 0 10px rgba(0, 255, 204, 0.4); }
-        body.light-theme .app-header-fixed { background-color: #e0ebe8; border-bottom: 2px solid #00aa88; box-shadow: 0 0 10px rgba(0, 170, 136, 0.2); }
+        /* BASE GENERAL Y COLORES DE MATRIZ/ELECTRICIDAD */
+        html, body { overscroll-behavior-y: contain !important; background-color: #03070d; color: #00ffcc; margin: 0; padding: 0; font-family: sans-serif; width: 100%; height: 100%; overflow: hidden; }
         
-        .brand-logo-fixed { font-weight: bold; font-size: 1.2rem; letter-spacing: 1px; color: #00ffcc; text-shadow: 0 0 5px #00ffcc; position: absolute; left: 50%; transform: translateX(-50%); }
-        body.light-theme .brand-logo-fixed { color: #00aa88; text-shadow: none; }
+        /* TEMA OSCURO MEJORADO COMPLETO 3D (PUNTO 2) */
+        body { --bg-primary: #050d1a; --bg-header: #0a1626; --color-neon: #00ffcc; --shadow-neon: #009977; --shadow-dark: #003328; --border-color: #00ffcc; --text-color: #e0f7f4; --bg-tira: #030812; }
+        
+        /* TEMA CLARO MEJORADO COMPLETO 3D (PUNTO 1) */
+        body.light-theme { --bg-primary: #f4f7f6; --bg-header: #dbeae6; --color-neon: #00aa88; --shadow-neon: #006655; --shadow-dark: #003322; --border-color: #00aa88; --text-color: #11221f; --bg-tira: #e4eee9; }
 
-        /* BOTONES INTERNOS DE LA CABECERA (EXTREMOS) */
-        .header-btn-side { width: 38px; height: 38px; background: linear-gradient(135deg, #0d2b45, #071424); color: #00ffcc; border: 2px solid #00ffcc; text-align: center; line-height: 34px; font-size: 1.2rem; cursor: pointer; border-radius: 8px; box-shadow: 0 0 8px rgba(0,255,204,0.3); z-index: 10001; }
-        body.light-theme .header-btn-side { background: linear-gradient(135deg, #ffffff, #cce5df); color: #00aa88; border: 2px solid #00aa88; box-shadow: none; }
+        /* CABECERA SUPERIOR FIJA REESTRUCTURADA CON RECOVOS 3D */
+        .app-header-fixed { position: fixed; top: 0; left: 0; width: 100%; height: 56px; border-bottom: 3px solid var(--border-color); background-color: var(--bg-header); z-index: 10000; display: flex; align-items: center; justify-content: space-between; padding: 0 14px; box-sizing: border-box; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4); }
+        
+        /* BRAND LOGO CON EL ICONO OFICIAL EMBEBIDO EN EL CENTRO (PUNTO 3) */
+        .brand-logo-fixed { display: flex; align-items: center; gap: 8px; font-weight: bold; font-size: 1.25rem; letter-spacing: 1.5px; color: var(--color-neon); text-shadow: 0 0 6px var(--color-neon); position: absolute; left: 50%; transform: translateX(-50%); }
+        .brand-logo-fixed img { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--color-neon); box-shadow: 0 0 5px var(--color-neon); object-fit: cover; }
+        body.light-theme .brand-logo-fixed { text-shadow: none; }
 
-        /* BARRA DE HERRAMIENTAS EN 3D MONOCROMÁTICO NEÓN (PUNTO 3) */
-        .menu-tira-horizontal { position: fixed; top: 50px; left: 0; width: 100%; height: 54px; overflow-x: auto; overflow-y: hidden; white-space: nowrap; padding: 8px 12px; background: #040910; border-bottom: 1px solid rgba(0, 255, 204, 0.2); box-sizing: border-box; z-index: 1500; -webkit-overflow-scrolling: touch; }
-        body.light-theme .menu-tira-horizontal { background: #eef5f3; border-bottom: 1px solid rgba(0, 170, 136, 0.2); }
+        /* REPARACIÓN BOTÓN ENGRANE Y BOTÓN MÁS REDONDO FIJO EN 3D MONOCROMÁTICO (PUNTO 1 Y 2) */
+        .header-btn-side-3d { width: 40px; height: 40px; background: linear-gradient(135deg, var(--bg-header), var(--bg-primary)); color: var(--color-neon); border: 2px solid var(--border-color); text-align: center; font-size: 1.2rem; cursor: pointer; box-shadow: 0 4px 0 var(--shadow-neon), inset 0 1px 1px rgba(255,255,255,0.1); text-shadow: 0 0 3px var(--color-neon); transition: all 0.1s ease; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
+        #btn-toggle-pestaña { border-radius: 8px; }
+        #btn-cabecera-nuevo-fijo { border-radius: 50% !important; font-size: 1.1rem; } /* Totalmente redondo y proporcionado */
+        
+        .header-btn-side-3d:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--shadow-neon); }
 
-        button, select { display: inline-block; height: 36px; padding: 0 12px; background: linear-gradient(135deg, #0f253d, #050d1a); color: #00ffcc; border: 2px solid #00ffcc; border-radius: 6px; font-size: 0.85rem; font-weight: bold; cursor: pointer; box-sizing: border-box; vertical-align: top; margin-right: 8px; box-shadow: 0 3px 0 #009977, inset 0 1px 1px rgba(255,255,255,0.1); text-shadow: 0 0 3px #00ffcc; transition: all 0.1s ease; }
-        body.light-theme button, body.light-theme select { background: linear-gradient(135deg, #ffffff, #d5eae4); color: #006655; border: 2px solid #00aa88; box-shadow: 0 3px 0 #005544; text-shadow: none; }
-        button:active, select:active { transform: translateY(2px); box-shadow: 0 1px 0 #009977; }
-        body.light-theme button:active, body.light-theme select:active { box-shadow: 0 1px 0 #005544; }
+        /* BARRA DE HERRAMIENTAS REFORZADA EN 3D MONOCROMÁTICO (PUNTO 1, 2 Y CONTROL DE PÉRDIDA) */
+        .menu-tira-horizontal { position: fixed; top: 56px; left: 0; width: 100%; height: 56px; overflow-x: auto; overflow-y: hidden; white-space: nowrap; padding: 8px 12px; background: var(--bg-tira); border-bottom: 2px solid var(--border-color); box-sizing: border-box; z-index: 9500; -webkit-overflow-scrolling: touch; display: flex; align-items: center; gap: 8px; }
 
-        /* ESTILIZACIÓN DE LOS BOTONES 3D DE ICONOS PUROS */
-        .btn-3d-mono { width: 36px; height: 36px; padding: 0; font-size: 1.1rem; line-height: 32px; border-radius: 50%; }
+        button, select { display: inline-block; height: 38px; padding: 0 14px; background: linear-gradient(135deg, var(--bg-header), var(--bg-primary)); color: var(--color-neon); border: 2px solid var(--border-color); border-radius: 6px; font-size: 0.85rem; font-weight: bold; cursor: pointer; box-sizing: border-box; box-shadow: 0 3.5px 0 var(--shadow-neon), inset 0 1px 1px rgba(255,255,255,0.1); text-shadow: 0 0 3px var(--color-neon); transition: all 0.05s ease; }
+        body.light-theme button, body.light-theme select { text-shadow: none; }
+        button:active, select:active { transform: translateY(2.5px); box-shadow: 0 1px 0 var(--shadow-neon); }
+        
+        /* BOTONES 3D PEQUEÑOS DE ICONO */
+        .btn-3d-mono { width: 38px; height: 38px; padding: 0; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; border-radius: 6px; }
 
-        /* MENÚ LATERAL AJUSTADO Y DESLIZABLE HORIZONTALMENTE (PUNTO 1, 2, 5, 7) */
-        .sidebar { position: fixed; top: 50px; left: 0; width: 100%; height: calc(100vh - 50px); background-color: rgba(5, 13, 23, 0.98); z-index: 9999; transition: transform 0.25s ease-out; box-sizing: border-box; overflow: hidden; }
-        body.light-theme .sidebar { background-color: rgba(244, 247, 246, 0.98); }
+        /* MENÚ LATERAL DESLIZABLE HORIZONTALMENTE */
+        .sidebar { position: fixed; top: 56px; left: 0; width: 100%; height: calc(100vh - 56px); background-color: rgba(5, 13, 26, 0.99); z-index: 9999; transition: transform 0.25s ease-out; box-sizing: border-box; overflow: hidden; border-right: 2px solid var(--border-color); }
+        body.light-theme .sidebar { background-color: rgba(244, 247, 246, 0.99); }
         .sidebar.hidden { transform: translateX(-100%); }
-        
         .sidebar-body-content { position: absolute; top: 0; bottom: 0; left: 0; right: 0; padding: 14px; overflow-y: auto; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px; }
 
-        /* TIRA DESLIZABLE INTERNA MEJORADA */
-        .engrane-tira-horizontal { width: 100%; height: 64px; overflow-x: auto; overflow-y: hidden; white-space: nowrap; padding: 6px 4px; background: rgba(0, 255, 204, 0.05); border: 1px solid #00ffcc; border-radius: 10px; box-sizing: border-box; -webkit-overflow-scrolling: touch; }
-        body.light-theme .engrane-tira-horizontal { background: rgba(0, 170, 136, 0.05); border: 1px solid #00aa88; }
-        
-        /* BOTONES INTERNOS CON TEXTOS EXPLICATIVOS CORTOS (PUNTO 2 y 5) */
-        .btn-engrane-inline { display: inline-block; height: 44px; padding: 0 14px; font-size: 0.85rem; margin-right: 10px; line-height: 40px; border-radius: 8px; vertical-align: top; }
+        .engrane-tira-horizontal { width: 100%; height: 64px; overflow-x: auto; overflow-y: hidden; white-space: nowrap; padding: 6px 4px; background: rgba(0, 255, 204, 0.03); border: 2px solid var(--border-color); border-radius: 10px; box-sizing: border-box; -webkit-overflow-scrolling: touch; }
+        .btn-engrane-inline { display: inline-block; height: 44px; padding: 0 14px; font-size: 0.85rem; border-radius: 6px; line-height: 40px; }
 
-        /* LEYENDA DE VINCULACIÓN CORREGIDA (PUNTO 7 - AISLADO EN SU PROPIO DIV) */
-        .status-vinculacion-wrapper { width: 100%; background: #09192e; border: 1px dashed #00ffcc; border-radius: 8px; padding: 8px; font-size: 0.8rem; text-align: center; box-sizing: border-box; color: #00ffcc; }
-        body.light-theme .status-vinculacion-wrapper { background: #e2f0ed; border: 1px dashed #00aa88; color: #006655; }
+        .status-vinculacion-wrapper { width: 100%; background: rgba(0,0,0,0.3); border: 1px dashed var(--border-color); border-radius: 8px; padding: 8px; font-size: 0.8rem; text-align: center; box-sizing: border-box; color: var(--color-neon); }
 
-        /* PANEL GUARDAR COMO */
-        .panel-guardar-como { display: none; background: #071526; border: 2px solid #00ffcc; padding: 10px; border-radius: 8px; flex-direction: column; gap: 8px; box-shadow: 0 0 10px rgba(0,255,204,0.2); }
-        body.light-theme .panel-guardar-como { background: #ffffff; border: 2px solid #00aa88; }
-        .panel-guardar-como.show { display: flex; }
-        .btn-export-code { width: 100%; height: 36px; text-align: left; padding-left: 12px; border-radius: 6px; }
-
-        /* BUSCADOR INTERNO */
+        /* BUSCADOR HISTORIAL */
         .search-box-container { width: 100%; position: relative; box-sizing: border-box; }
-        .search-input { width: 100%; height: 40px; background: #03080f; border: 2px solid #00ffcc; border-radius: 8px; padding: 0 12px 0 36px; color: #00ffcc; font-size: 0.9rem; box-sizing: border-box; outline: none; }
-        body.light-theme .search-input { background: #ffffff; border: 2px solid #00aa88; color: #006655; }
-        .search-icon-inside { position: absolute; left: 12px; top: 11px; font-size: 0.9rem; color: rgba(0,255,204,0.6); }
-        body.light-theme .search-icon-inside { color: #00aa88; }
+        .search-input { width: 100%; height: 40px; background: rgba(0,0,0,0.2); border: 2px solid var(--border-color); border-radius: 8px; padding: 0 12px 0 36px; color: var(--color-neon); font-size: 0.9rem; box-sizing: border-box; outline: none; }
+        .search-icon-inside { position: absolute; left: 12px; top: 11px; font-size: 0.9rem; color: var(--border-color); opacity: 0.7; }
 
-        /* HISTORIAL CON ACCIONES INDEPENDIENTES (PUNTO 6) */
+        /* HISTORIAL Y COPIAS DE SEGURIDAD */
         .slider-plantillas { width: 100%; display: flex; flex-direction: column; gap: 10px; }
-        .document-list-item { background: #091624; border: 1px solid rgba(0,255,204,0.3); padding: 12px; border-radius: 8px; display: flex; flex-direction: column; gap: 8px; box-sizing: border-box; }
-        body.light-theme .document-list-item { background: #ffffff; border: 1px solid rgba(0,170,136,0.3); }
+        .document-list-item { background: rgba(0,0,0,0.15); border: 1px solid rgba(0,255,204,0.2); padding: 12px; border-radius: 8px; display: flex; flex-direction: column; gap: 8px; box-sizing: border-box; }
+        body.light-theme .document-list-item { background: #ffffff; border: 1px solid rgba(0,170,136,0.2); }
         .doc-item-main-click { cursor: pointer; width: 100%; }
-        .doc-item-title { font-weight: bold; color: #00ffcc; font-size: 0.9rem; margin-bottom: 4px; }
-        body.light-theme .doc-item-title { color: #006655; }
+        .doc-item-title { font-weight: bold; color: var(--color-neon); font-size: 0.9rem; }
         .doc-item-body { font-size: 0.78rem; color: #88a0b5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        
-        /* BOTONERA ACCIONES DE NOTA (PUNTO 6) */
-        .doc-item-actions { display: flex; gap: 8px; margin-top: 4px; border-top: 1px dashed rgba(0,255,204,0.2); padding-top: 8px; }
-        body.light-theme .doc-item-actions { border-top: 1px dashed rgba(0,170,136,0.2); }
-        .btn-action-nota { height: 28px; padding: 0 10px; font-size: 0.75rem; border-radius: 4px; line-height: 24px; box-shadow: 0 2px 0 #009977; }
-        body.light-theme .btn-action-nota { box-shadow: 0 2px 0 #005544; }
+        .doc-item-actions { display: flex; gap: 8px; margin-top: 4px; border-top: 1px dashed rgba(0,255,204,0.15); padding-top: 8px; }
+        .btn-action-nota { height: 28px; padding: 0 10px; font-size: 0.75rem; border-radius: 4px; line-height: 24px; }
         .btn-action-delete { border-color: #ff3b30; color: #ff3b30; box-shadow: 0 2px 0 #b3241c; }
-        body.light-theme .btn-action-delete { border-color: #cc1100; color: #cc1100; box-shadow: 0 2px 0 #880000; }
 
-        /* UNIFICACIÓN TOTAL DEL ÁREA DE TRABAJO EN UN CONTENEDOR (PUNTO 8) */
-        .main-container { width: 100%; position: absolute; top: 104px; bottom: 30px; left: 0; right: 0; box-sizing: border-box; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-        
-        /* Bloque contenedor único para permitir "Seleccionar Todo" sin fragmentación */
-        .unified-editor-container { width: 100%; min-height: 100%; padding: 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px; background: transparent; -webkit-user-select: text; user-select: text; }
+        /* PANEL EXPORTAR */
+        .panel-guardar-como { display: none; background: var(--bg-header); border: 2px solid var(--border-color); padding: 10px; border-radius: 8px; flex-direction: column; gap: 8px; }
+        .panel-guardar-como.show { display: flex; }
 
-        .title-input-field { width: 100%; background: transparent; border: none; color: #00ffcc; font-size: 1.5rem; font-weight: bold; outline: none; box-sizing: border-box; padding: 0; border-bottom: 1px solid rgba(0,255,204,0.15); padding-bottom: 6px; }
-        body.light-theme .title-input-field { color: #006655; border-bottom: 1px solid rgba(0,170,136,0.15); }
-        .title-input-field:empty:before { content: "Título de la Nota"; color: rgba(0,255,204,0.3); font-style: italic; }
-        body.light-theme .title-input-field:empty:before { color: rgba(0,102,85,0.3); }
+        /* ÁREA DE TRABAJO UNIFICADA CONTRA DESPLAZAMIENTOS (BLINDAJE DE BARRA DE HERRAMIENTAS) */
+        .main-container { width: 100%; position: absolute; top: 112px; bottom: 32px; left: 0; right: 0; box-sizing: border-box; overflow-y: auto; -webkit-overflow-scrolling: touch; background: var(--bg-primary); }
+        .unified-editor-container { width: 100%; min-height: 100%; padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px; -webkit-user-select: text; user-select: text; }
 
-        .rich-editor { width: 100%; min-height: 300px; height: auto; background: transparent; border: none; color: #e0f7f4; font-size: 1.05rem; line-height: 1.6; outline: none; box-sizing: border-box; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; padding-bottom: 100px; }
-        body.light-theme .rich-editor { color: #11221f; }
-        .rich-editor:empty:before { content: "Comienza a dictar o escribir aquí tu obra..."; color: rgba(0,255,204,0.25); }
-        body.light-theme .rich-editor:empty:before { color: rgba(0,102,85,0.3); }
+        .title-input-field { width: 100%; background: transparent; border: none; color: var(--color-neon); font-size: 1.6rem; font-weight: bold; outline: none; box-sizing: border-box; padding-bottom: 8px; border-bottom: 2px solid rgba(0,255,204,0.15); }
+        .title-input-field:empty:before { content: "Título de la Nota"; opacity: 0.4; font-style: italic; }
+
+        .rich-editor { width: 100%; min-height: 350px; height: auto; background: transparent; border: none; color: var(--text-color); font-size: 1.1rem; line-height: 1.65; outline: none; box-sizing: border-box; overflow-wrap: break-word; word-wrap: break-word; padding-bottom: 120px; }
+        .rich-editor:empty:before { content: "Comienza a dictar o escribir aquí tu obra..."; opacity: 0.4; }
 
         .rich-editor.font-sans, .title-input-field.font-sans { font-family: sans-serif; }
         .rich-editor.font-serif, .title-input-field.font-serif { font-family: serif; }
         .rich-editor.font-mono, .title-input-field.font-mono { font-family: monospace; }
 
-        /* BARRA DE ESTADO INFERIOR */
-        .stats-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: 30px; border-top: 1px solid rgba(0,255,204,0.2); padding: 6px 14px 0 14px; font-size: 0.72rem; color: #88a0b5; background: #050a12; box-sizing: border-box; z-index: 1500; }
-        body.light-theme .stats-bar { background: #eef5f3; border-top: 1px solid rgba(0,170,136,0.2); color: #005544; }
+        /* BARRA DE ESTADO */
+        .stats-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: 32px; border-top: 2px solid var(--border-color); padding: 6px 14px 0 14px; font-size: 0.75rem; color: #88a0b5; background: var(--bg-header); box-sizing: border-box; z-index: 9500; }
 
         /* TOAST */
-        .toast { position: fixed; bottom: 45px; left: 50%; transform: translate(-50%, 100px); background-color: #00ffcc; color: #050a12; padding: 8px 18px; font-size: 0.85rem; font-weight: bold; transition: transform 0.2s ease; z-index: 15000; border-radius: 20px; box-shadow: 0 0 10px rgba(0,255,204,0.5); pointer-events: none; }
-        body.light-theme .toast { background-color: #00aa88; color: #ffffff; box-shadow: none; }
+        .toast { position: fixed; bottom: 50px; left: 50%; transform: translate(-50%, 120px); background-color: var(--color-neon); color: #03070d; padding: 10px 20px; font-size: 0.85rem; font-weight: bold; transition: transform 0.2s ease; z-index: 15000; border-radius: 20px; box-shadow: 0 0 12px var(--color-neon); pointer-events: none; }
         .toast.show { transform: translate(-50%, 0); }
     </style>
 </head>
 <body>
 
-    <!-- CABECERA SUPERIOR REESTRUCTURADA CON EL BOTÓN NUEVA NOTA FIJO A LA DERECHA (PUNTO 4) -->
     <header class="app-header-fixed">
-        <button class="header-btn-side" id="btn-toggle-pestaña" title="Menú lateral">⚙️</button>
-        <div class="brand-logo-fixed">RETÓRICA</div>
-        <button class="header-btn-side" id="btn-cabecera-nuevo-fijo" title="Nueva Nota">➕</button>
+        <button class="header-btn-side-3d" id="btn-toggle-pestaña" title="Menú lateral">⚙️</button>
+        <div class="brand-logo-fixed">
+            <img src="./icono-512.png" alt="R" onerror="this.style.display='none'">
+            RETÓRICA
+        </div>
+        <button class="header-btn-side-3d" id="btn-cabecera-nuevo-fijo" title="Nueva Nota">➕</button>
     </header>
 
-    <!-- MENÚ LATERAL DE LA TUERCA AJUSTADO Y DESLIZABLE (PUNTO 1, 2, 5, 7) -->
     <div class="sidebar hidden" id="sidebar">
         <div class="sidebar-body-content">
-            
-            <!-- CONTENEDOR AISLADO DE LA LEYENDA TRAS LOS BOTONES (PUNTO 7) -->
-            <div class="status-vinculacion-wrapper" id="wrapper-leyenda-vinculo">
-                Estado: Modo Local (Información Resguardada)
-            </div>
+            <div class="status-vinculacion-wrapper" id="wrapper-leyenda-vinculo">Estado: Modo Local (Información Resguardada)</div>
 
-            <!-- TIRA HORIZONTAL DESLIZABLE INTERNA CON PALABRAS CLAVE PRECISAS (PUNTO 1, 2, 5) -->
             <div class="engrane-tira-horizontal">
-                <button id="btn-abrir-inline" class="btn-engrane-inline" title="Abrir archivo">📂 Abrir</button>
-                <button id="btn-vincular-inline" class="btn-engrane-inline" title="Vincular Dispositivo">🔗 Vincular</button>
-                <button id="btn-saveas-inline" class="btn-engrane-inline" title="Guardar como">💾 Exportar</button>
-                <button id="btn-instalar-inline" class="btn-engrane-inline" title="Instalar app">📲 Instalar App</button>
+                <button id="btn-abrir-inline" class="btn-engrane-inline">📂 Abrir</button>
+                <button id="btn-vincular-inline" class="btn-engrane-inline">🔗 Vincular</button>
+                <button id="btn-saveas-inline" class="btn-engrane-inline">💾 Exportar</button>
+                <button id="btn-instalar-inline" class="btn-engrane-inline">📲 Instalar App</button>
             </div>
 
-            <!-- INPUT OCULTO ACCIÓN ABRIR -->
             <input type="file" id="input-file-abrir-nativo" accept=".html" style="display: none;">
 
-            <!-- DESPLEGABLE INTERNO EXPORTAR -->
             <div class="panel-guardar-como" id="panel-guardar-como-container">
-                <button class="btn-export-code" id="export-code-pdf">📄 Formato PDF</button>
-                <button class="btn-export-code" id="export-code-pdf-edit">📝 PDF Editable</button>
-                <button class="btn-export-code" id="export-code-doc">💙 Formato Word (DOC)</button>
+                <button id="export-code-pdf">📄 Formato PDF</button>
+                <button id="export-code-pdf-edit">📝 PDF Editable</button>
+                <button id="export-code-doc">💙 Formato Word (DOC)</button>
             </div>
 
-            <!-- BUSCADOR INTERNO -->
             <div class="search-box-container">
                 <span class="search-icon-inside">🔍</span>
                 <input type="text" id="input-buscador-interno" class="search-input" placeholder="Buscar en mis documentos...">
             </div>
 
-            <div style="font-size:0.8rem; font-weight:bold; color:#00ffcc; margin-top:2px;">Historial de Notas locales:</div>
+            <div style="font-size:0.8rem; font-weight:bold; color:var(--color-neon);" id="lbl-historial-tit">Historial de Notas locales:</div>
             <div class="slider-plantillas" id="document-list"></div>
         </div>
     </div>
 
-    <!-- BARRA DE HERRAMIENTAS SUPERIOR EN 3D (PUNTO 3) -->
     <div class="menu-tira-horizontal" id="tira-herramientas">
-        <button id="btn-html-save-directo" class="btn-3d-mono" title="Guardar en Base de Datos">✓</button>
+        <button id="btn-html-save-directo" class="btn-3d-mono" title="Guardar localmente">✓</button>
         <button id="btn-undo" class="btn-3d-mono" title="Deshacer">↶</button>
         <button id="btn-redo" class="btn-3d-mono" title="Rehacer">↷</button>
-        <button id="btn-mic" class="btn-3d-mono" title="Dictar voz">🎙️</button>
-        <button id="btn-lectura" class="btn-3d-mono" title="Escuchar notas">🔊</button>
+        <button id="btn-mic" class="btn-3d-mono" title="Dictado">🎙️</button>
+        <button id="btn-lectura" class="btn-3d-mono" title="Escuchar">🔊</button>
         <button id="btn-msg-voz">💬 Mensaje de Voz</button>
-        <button id="btn-render-fl">🎛️ Render de Texto a Audio</button>
+        <button id="btn-render-fl">🎛️ Render Audio</button>
         
-        <!-- CORRECCIÓN DE IDIOMAS (PUNTO IDIOMAS REPARADO) -->
-        <select id="voice-lang"></select>
-        <select id="app-lang"></select>
+        <select id="app-lang" style="max-width: 140px;"></select>
+        <select id="voice-lang" style="max-width: 140px;"></select>
         
         <select id="font-family-select">
             <option value="font-sans">Sans-Serif</option>
@@ -181,7 +156,6 @@
         <button id="btn-toggle-tema">🌓 Tema</button>
     </div>
 
-    <!-- CONTENEDOR UNIFICADO COMPLETO DEL ÁREA DE TRABAJO (PUNTO 8) -->
     <main class="main-container">
         <div class="unified-editor-container" id="contenedor-global-seleccion">
             <div id="editor-title" class="title-input-field font-sans" contenteditable="true"></div>
@@ -189,13 +163,12 @@
         </div>
     </main>
 
-    <!-- BARRA DE ESTADO -->
     <div class="stats-bar">
         <span id="stats-text">Caracteres: 0</span>
         <span id="lbl-file-dates" style="float: right;">Nota Nueva en RAM</span>
     </div>
 
-    <div class="toast" id="toast-notif">Guardado Exitoso</div>
+    <div class="toast" id="toast-notif">Guardado</div>
 
     <script type="module" src="js/main.js"></script>
 </body>
