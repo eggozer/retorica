@@ -4,174 +4,198 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=3.0, user-scalable=yes">
     <title>Retórica - Procesador de Notas</title>
-    <link rel="manifest" href="./manifest.json?v=38">
+    <link rel="manifest" href="./manifest.json?v=39">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        /* BLINDAJE ANTI-REFRESCADO ACCIDENTAL EN MÓVILES (PULL-TO-REFRESH) */
-        html, body { overscroll-behavior-y: contain !important; background-color: #0a0f1d; color: #f3f4f6; margin: 0; padding: 0; font-family: sans-serif; width: 100%; height: 100%; }
-        body.light-theme { background-color: #f9fafb; color: #111827; }
+        /* BLINDAJE BASE Y COLORES ESTILO MATRÍZ / ELECTRICIDAD */
+        html, body { overscroll-behavior-y: contain !important; background-color: #050a12; color: #00ffcc; margin: 0; padding: 0; font-family: sans-serif; width: 100%; height: 100%; }
+        body.light-theme { background-color: #f4f7f6; color: #006655; }
 
-        /* CABECERA SUPERIOR FIJA */
-        .app-header-fixed { position: fixed; top: 0; left: 0; width: 100%; height: 50px; border-bottom: 1px solid rgba(255,255,255,0.15); background-color: #0a0f1d; text-align: center; line-height: 50px; z-index: 2000; }
-        body.light-theme .app-header-fixed { background-color: #f9fafb; border-bottom: 1px solid rgba(0,0,0,0.15); }
-        .brand-logo-fixed { font-weight: bold; font-size: 1.15rem; letter-spacing: 0.5px; display: inline-block; }
-
-        /* PESTAÑA LATERAL DE LA TUERCA */
-        .toggle-sidebar-pestaña { position: absolute; left: 12px; top: 7px; width: 36px; height: 36px; background: #1f2937; color: #ffca28; border: 1px solid rgba(255,255,255,0.15); text-align: center; line-height: 34px; font-weight: bold; cursor: pointer; z-index: 10000; border-radius: 50%; }
-        body.light-theme .toggle-sidebar-pestaña { background: #ffffff; border: 1px solid rgba(0,0,0,0.15); }
-
-        /* BARRA DE HERRAMIENTAS SUPERIOR FIJA Y DESLIZABLE */
-        .menu-tira-horizontal { position: fixed; top: 50px; left: 0; width: 100%; height: 48px; overflow-x: auto; overflow-y: hidden; white-space: nowrap; padding: 6px 12px; background: #0c1326; border-bottom: 1px solid rgba(255,255,255,0.15); box-sizing: border-box; z-index: 1500; -webkit-overflow-scrolling: touch; }
-        body.light-theme .menu-tira-horizontal { background: #f3f4f6; border-bottom: 1px solid rgba(0,0,0,0.15); }
-
-        button, select { display: inline-block; height: 34px; padding: 0 12px; background: #1f2937; color: #f3f4f6; border: 1px solid rgba(255,255,255,0.15); border-radius: 17px; font-size: 0.85rem; cursor: pointer; box-sizing: border-box; vertical-align: top; margin-right: 6px; }
-        body.light-theme button, body.light-theme select { background: #ffffff; color: #111827; border: 1px solid rgba(0,0,0,0.15); }
+        /* CABECERA SUPERIOR FIJA REESTRUCTURADA (PUNTO 4) */
+        .app-header-fixed { position: fixed; top: 0; left: 0; width: 100%; height: 50px; border-bottom: 2px solid #00ffcc; background-color: #071424; z-index: 10000; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; box-sizing: border-box; box-shadow: 0 0 10px rgba(0, 255, 204, 0.4); }
+        body.light-theme .app-header-fixed { background-color: #e0ebe8; border-bottom: 2px solid #00aa88; box-shadow: 0 0 10px rgba(0, 170, 136, 0.2); }
         
-        /* DISEÑO DE BOTONES DE ICONO MONOCROMÁTICO TRIDIMENSIONAL EXCLUSIVO */
-        .btn-3d-mono { width: 34px; height: 34px; padding: 0; border-radius: 50%; font-weight: bold; font-size: 1.05rem; background: linear-gradient(135deg, #2a3547, #111622); color: #e5e7eb; border: 1px solid rgba(255,255,255,0.2); box-shadow: inset 0 1px 2px rgba(255,255,255,0.15), 0 2px 4px rgba(0,0,0,0.4); text-shadow: 0 -1px 1px rgba(0,0,0,0.5); }
-        body.light-theme .btn-3d-mono { background: linear-gradient(135deg, #ffffff, #d1d5db); color: #1f2937; border: 1px solid rgba(0,0,0,0.15); box-shadow: inset 0 1px 1px rgba(255,255,255,0.8), 0 2px 3px rgba(0,0,0,0.15); text-shadow: 0 1px 0 rgba(255,255,255,0.8); }
-        .btn-format { width: 34px; height: 34px; padding: 0; border-radius: 50%; font-weight: bold; }
+        .brand-logo-fixed { font-weight: bold; font-size: 1.2rem; letter-spacing: 1px; color: #00ffcc; text-shadow: 0 0 5px #00ffcc; position: absolute; left: 50%; transform: translateX(-50%); }
+        body.light-theme .brand-logo-fixed { color: #00aa88; text-shadow: none; }
 
-        /* MENÚ LATERAL DE LA TUERCA */
-        .sidebar { position: fixed; top: 50px; left: 0; width: 100%; height: calc(100vh - 50px); background-color: #0a0f1d; z-index: 9999; transition: transform 0.25s ease-out; box-sizing: border-box; overflow: hidden; }
-        body.light-theme .sidebar { background-color: #f9fafb; }
+        /* BOTONES INTERNOS DE LA CABECERA (EXTREMOS) */
+        .header-btn-side { width: 38px; height: 38px; background: linear-gradient(135deg, #0d2b45, #071424); color: #00ffcc; border: 2px solid #00ffcc; text-align: center; line-height: 34px; font-size: 1.2rem; cursor: pointer; border-radius: 8px; box-shadow: 0 0 8px rgba(0,255,204,0.3); z-index: 10001; }
+        body.light-theme .header-btn-side { background: linear-gradient(135deg, #ffffff, #cce5df); color: #00aa88; border: 2px solid #00aa88; box-shadow: none; }
+
+        /* BARRA DE HERRAMIENTAS EN 3D MONOCROMÁTICO NEÓN (PUNTO 3) */
+        .menu-tira-horizontal { position: fixed; top: 50px; left: 0; width: 100%; height: 54px; overflow-x: auto; overflow-y: hidden; white-space: nowrap; padding: 8px 12px; background: #040910; border-bottom: 1px solid rgba(0, 255, 204, 0.2); box-sizing: border-box; z-index: 1500; -webkit-overflow-scrolling: touch; }
+        body.light-theme .menu-tira-horizontal { background: #eef5f3; border-bottom: 1px solid rgba(0, 170, 136, 0.2); }
+
+        button, select { display: inline-block; height: 36px; padding: 0 12px; background: linear-gradient(135deg, #0f253d, #050d1a); color: #00ffcc; border: 2px solid #00ffcc; border-radius: 6px; font-size: 0.85rem; font-weight: bold; cursor: pointer; box-sizing: border-box; vertical-align: top; margin-right: 8px; box-shadow: 0 3px 0 #009977, inset 0 1px 1px rgba(255,255,255,0.1); text-shadow: 0 0 3px #00ffcc; transition: all 0.1s ease; }
+        body.light-theme button, body.light-theme select { background: linear-gradient(135deg, #ffffff, #d5eae4); color: #006655; border: 2px solid #00aa88; box-shadow: 0 3px 0 #005544; text-shadow: none; }
+        button:active, select:active { transform: translateY(2px); box-shadow: 0 1px 0 #009977; }
+        body.light-theme button:active, body.light-theme select:active { box-shadow: 0 1px 0 #005544; }
+
+        /* ESTILIZACIÓN DE LOS BOTONES 3D DE ICONOS PUROS */
+        .btn-3d-mono { width: 36px; height: 36px; padding: 0; font-size: 1.1rem; line-height: 32px; border-radius: 50%; }
+
+        /* MENÚ LATERAL AJUSTADO Y DESLIZABLE HORIZONTALMENTE (PUNTO 1, 2, 5, 7) */
+        .sidebar { position: fixed; top: 50px; left: 0; width: 100%; height: calc(100vh - 50px); background-color: rgba(5, 13, 23, 0.98); z-index: 9999; transition: transform 0.25s ease-out; box-sizing: border-box; overflow: hidden; }
+        body.light-theme .sidebar { background-color: rgba(244, 247, 246, 0.98); }
         .sidebar.hidden { transform: translateX(-100%); }
-        .sidebar-body-content { position: absolute; top: 0; bottom: 0; left: 0; right: 0; padding: 14px; overflow-y: auto; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; overscroll-behavior-y: contain; }
+        
+        .sidebar-body-content { position: absolute; top: 0; bottom: 0; left: 0; right: 0; padding: 14px; overflow-y: auto; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px; }
 
-        /* TIRA HORIZONTAL DESLIZABLE INTERNA EN EL ENGRANE (PUNTO 4 COMPACTADO) */
-        .engrane-tira-horizontal { width: 100%; height: 52px; overflow-x: auto; overflow-y: hidden; white-space: nowrap; padding: 6px 4px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; box-sizing: border-box; -webkit-overflow-scrolling: touch; margin-bottom: 4px; }
-        body.light-theme .engrane-tira-horizontal { background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.06); }
-        .btn-engrane-inline { display: inline-block; height: 36px; padding: 0 12px; border-radius: 18px; font-weight: bold; font-size: 0.8rem; margin-right: 8px; vertical-align: top; line-height: 34px; }
+        /* TIRA DESLIZABLE INTERNA MEJORADA */
+        .engrane-tira-horizontal { width: 100%; height: 64px; overflow-x: auto; overflow-y: hidden; white-space: nowrap; padding: 6px 4px; background: rgba(0, 255, 204, 0.05); border: 1px solid #00ffcc; border-radius: 10px; box-sizing: border-box; -webkit-overflow-scrolling: touch; }
+        body.light-theme .engrane-tira-horizontal { background: rgba(0, 170, 136, 0.05); border: 1px solid #00aa88; }
+        
+        /* BOTONES INTERNOS CON TEXTOS EXPLICATIVOS CORTOS (PUNTO 2 y 5) */
+        .btn-engrane-inline { display: inline-block; height: 44px; padding: 0 14px; font-size: 0.85rem; margin-right: 10px; line-height: 40px; border-radius: 8px; vertical-align: top; }
 
-        /* SECCIÓN ADICIONAL FLOTANTE DE GUARDAR COMO INTEGRADA (PRODUCIDA POR CÓDIGO) */
-        .panel-guardar-como { display: none; background: rgba(255,255,255,0.04); border: 1px solid #ffca28; padding: 10px; border-radius: 12px; flex-direction: column; gap: 8px; }
-        body.light-theme .panel-guardar-como { background: #ffffff; border: 1px solid #b45309; }
+        /* LEYENDA DE VINCULACIÓN CORREGIDA (PUNTO 7 - AISLADO EN SU PROPIO DIV) */
+        .status-vinculacion-wrapper { width: 100%; background: #09192e; border: 1px dashed #00ffcc; border-radius: 8px; padding: 8px; font-size: 0.8rem; text-align: center; box-sizing: border-box; color: #00ffcc; }
+        body.light-theme .status-vinculacion-wrapper { background: #e2f0ed; border: 1px dashed #00aa88; color: #006655; }
+
+        /* PANEL GUARDAR COMO */
+        .panel-guardar-como { display: none; background: #071526; border: 2px solid #00ffcc; padding: 10px; border-radius: 8px; flex-direction: column; gap: 8px; box-shadow: 0 0 10px rgba(0,255,204,0.2); }
+        body.light-theme .panel-guardar-como { background: #ffffff; border: 2px solid #00aa88; }
         .panel-guardar-como.show { display: flex; }
-        .btn-export-code { width: 100%; height: 34px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; background: #1f2937; color: #ffffff; border: 1px solid rgba(255,255,255,0.1); text-align: left; padding-left: 12px; }
-        body.light-theme .btn-export-code { background: #f3f4f6; color: #111827; border: 1px solid rgba(0,0,0,0.1); }
+        .btn-export-code { width: 100%; height: 36px; text-align: left; padding-left: 12px; border-radius: 6px; }
 
-        /* INPUT DEL BUSCADOR INTERNO */
+        /* BUSCADOR INTERNO */
         .search-box-container { width: 100%; position: relative; box-sizing: border-box; }
-        .search-input { width: 100%; height: 36px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 0 12px 0 34px; color: #f3f4f6; font-size: 0.85rem; box-sizing: border-box; outline: none; }
-        body.light-theme .search-input { background: #ffffff; border: 1px solid rgba(0,0,0,0.15); color: #111827; }
-        .search-icon-inside { position: absolute; left: 12px; top: 10px; font-size: 0.85rem; color: #9ca3af; }
+        .search-input { width: 100%; height: 40px; background: #03080f; border: 2px solid #00ffcc; border-radius: 8px; padding: 0 12px 0 36px; color: #00ffcc; font-size: 0.9rem; box-sizing: border-box; outline: none; }
+        body.light-theme .search-input { background: #ffffff; border: 2px solid #00aa88; color: #006655; }
+        .search-icon-inside { position: absolute; left: 12px; top: 11px; font-size: 0.9rem; color: rgba(0,255,204,0.6); }
+        body.light-theme .search-icon-inside { color: #00aa88; }
 
-        /* CONTENEDOR DE HISTORIAL */
-        .slider-plantillas { width: 100%; display: flex; flex-direction: column; gap: 8px; padding: 2px 0; }
-        .document-list-item { background: #1f2937; border: 1px solid rgba(255,255,255,0.1); padding: 10px 12px; border-radius: 8px; font-size: 0.8rem; color: #f3f4f6; text-align: left; cursor: pointer; }
-        body.light-theme .document-list-item { background: #ffffff; color: #111827; border: 1px solid rgba(0,0,0,0.1); }
-        .doc-item-title { font-weight: bold; color: #ffca28; margin-bottom: 3px; }
-        body.light-theme .doc-item-title { color: #b45309; }
-        .doc-item-body { font-size: 0.72rem; color: #9ca3af; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        /* HISTORIAL CON ACCIONES INDEPENDIENTES (PUNTO 6) */
+        .slider-plantillas { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+        .document-list-item { background: #091624; border: 1px solid rgba(0,255,204,0.3); padding: 12px; border-radius: 8px; display: flex; flex-direction: column; gap: 8px; box-sizing: border-box; }
+        body.light-theme .document-list-item { background: #ffffff; border: 1px solid rgba(0,170,136,0.3); }
+        .doc-item-main-click { cursor: pointer; width: 100%; }
+        .doc-item-title { font-weight: bold; color: #00ffcc; font-size: 0.9rem; margin-bottom: 4px; }
+        body.light-theme .doc-item-title { color: #006655; }
+        .doc-item-body { font-size: 0.78rem; color: #88a0b5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        /* BOTONERA ACCIONES DE NOTA (PUNTO 6) */
+        .doc-item-actions { display: flex; gap: 8px; margin-top: 4px; border-top: 1px dashed rgba(0,255,204,0.2); padding-top: 8px; }
+        body.light-theme .doc-item-actions { border-top: 1px dashed rgba(0,170,136,0.2); }
+        .btn-action-nota { height: 28px; padding: 0 10px; font-size: 0.75rem; border-radius: 4px; line-height: 24px; box-shadow: 0 2px 0 #009977; }
+        body.light-theme .btn-action-nota { box-shadow: 0 2px 0 #005544; }
+        .btn-action-delete { border-color: #ff3b30; color: #ff3b30; box-shadow: 0 2px 0 #b3241c; }
+        body.light-theme .btn-action-delete { border-color: #cc1100; color: #cc1100; box-shadow: 0 2px 0 #880000; }
 
-        /* ÁREA DE TRABAJO INDEPENDIENTE Y FLEXIBLE (PUNTO 6 DESBLOQUEADO) */
-        .main-container { width: 100%; position: absolute; top: 98px; bottom: 30px; left: 0; right: 0; box-sizing: border-box; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-        .editor-wrapper { width: 100%; min-height: 100%; padding: 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; }
+        /* UNIFICACIÓN TOTAL DEL ÁREA DE TRABAJO EN UN CONTENEDOR (PUNTO 8) */
+        .main-container { width: 100%; position: absolute; top: 104px; bottom: 30px; left: 0; right: 0; box-sizing: border-box; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        
+        /* Bloque contenedor único para permitir "Seleccionar Todo" sin fragmentación */
+        .unified-editor-container { width: 100%; min-height: 100%; padding: 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px; background: transparent; -webkit-user-select: text; user-select: text; }
 
-        .title-input-field { width: 100%; background: transparent; border: none; color: #ffca28; font-size: 1.5rem; font-weight: bold; outline: none; box-sizing: border-box; padding: 0; }
-        body.light-theme .title-input-field { color: #b45309; }
-        .title-input-field:empty:before { content: "Título de la Nota"; color: rgba(255,202,40,0.3); font-style: italic; }
-        body.light-theme .title-input-field:empty:before { color: rgba(0,0,0,0.3); }
+        .title-input-field { width: 100%; background: transparent; border: none; color: #00ffcc; font-size: 1.5rem; font-weight: bold; outline: none; box-sizing: border-box; padding: 0; border-bottom: 1px solid rgba(0,255,204,0.15); padding-bottom: 6px; }
+        body.light-theme .title-input-field { color: #006655; border-bottom: 1px solid rgba(0,170,136,0.15); }
+        .title-input-field:empty:before { content: "Título de la Nota"; color: rgba(0,255,204,0.3); font-style: italic; }
+        body.light-theme .title-input-field:empty:before { color: rgba(0,102,85,0.3); }
 
-        .rich-editor { width: 100%; min-height: 250px; height: auto; background: transparent; border: none; color: #f3f4f6; font-size: 1.05rem; line-height: 1.5; outline: none; box-sizing: border-box; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; padding-bottom: 80px; }
-        body.light-theme .rich-editor { color: #111827; }
-        .rich-editor:empty:before { content: "Comienza a dictar o escribir aquí tu obra..."; color: rgba(255,255,255,0.25); }
-        body.light-theme .rich-editor:empty:before { color: rgba(0,0,0,0.3); }
+        .rich-editor { width: 100%; min-height: 300px; height: auto; background: transparent; border: none; color: #e0f7f4; font-size: 1.05rem; line-height: 1.6; outline: none; box-sizing: border-box; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; padding-bottom: 100px; }
+        body.light-theme .rich-editor { color: #11221f; }
+        .rich-editor:empty:before { content: "Comienza a dictar o escribir aquí tu obra..."; color: rgba(0,255,204,0.25); }
+        body.light-theme .rich-editor:empty:before { color: rgba(0,102,85,0.3); }
 
         .rich-editor.font-sans, .title-input-field.font-sans { font-family: sans-serif; }
         .rich-editor.font-serif, .title-input-field.font-serif { font-family: serif; }
         .rich-editor.font-mono, .title-input-field.font-mono { font-family: monospace; }
 
-        /* BARRA DE ESTADO INFERIOR FIXED */
-        .stats-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: 30px; border-top: 1px solid rgba(255,255,255,0.15); padding: 6px 14px 0 14px; font-size: 0.7rem; color: #9ca3af; background: #0a0f1d; box-sizing: border-box; z-index: 1500; }
-        body.light-theme .stats-bar { background: #f9fafb; border-top: 1px solid rgba(0,0,0,0.15); }
+        /* BARRA DE ESTADO INFERIOR */
+        .stats-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: 30px; border-top: 1px solid rgba(0,255,204,0.2); padding: 6px 14px 0 14px; font-size: 0.72rem; color: #88a0b5; background: #050a12; box-sizing: border-box; z-index: 1500; }
+        body.light-theme .stats-bar { background: #eef5f3; border-top: 1px solid rgba(0,170,136,0.2); color: #005544; }
 
-        /* TOAST NOTIFICACIONES */
-        .toast { position: fixed; bottom: 45px; left: 50%; transform: translate(-50%, 100px); background-color: #ffca28; color: #0a0f1d; padding: 8px 16px; font-size: 0.8rem; font-weight: bold; transition: transform 0.2s ease; z-index: 15000; border-radius: 20px; pointer-events: none; }
+        /* TOAST */
+        .toast { position: fixed; bottom: 45px; left: 50%; transform: translate(-50%, 100px); background-color: #00ffcc; color: #050a12; padding: 8px 18px; font-size: 0.85rem; font-weight: bold; transition: transform 0.2s ease; z-index: 15000; border-radius: 20px; box-shadow: 0 0 10px rgba(0,255,204,0.5); pointer-events: none; }
+        body.light-theme .toast { background-color: #00aa88; color: #ffffff; box-shadow: none; }
         .toast.show { transform: translate(-50%, 0); }
-        .adsense-strip-container { width: 100%; min-height: 50px; border: 1px dashed rgba(255,255,255,0.15); text-align: center; line-height: 48px; font-size: 0.7rem; color: #9ca3af; margin-top: auto; }
     </style>
 </head>
 <body>
 
+    <!-- CABECERA SUPERIOR REESTRUCTURADA CON EL BOTÓN NUEVA NOTA FIJO A LA DERECHA (PUNTO 4) -->
     <header class="app-header-fixed">
-        <div class="toggle-sidebar-pestaña" id="btn-toggle-pestaña">⚙️</div>
-        <div class="brand-logo-fixed">☀️ RETÓRICA</div>
+        <button class="header-btn-side" id="btn-toggle-pestaña" title="Menú lateral">⚙️</button>
+        <div class="brand-logo-fixed">RETÓRICA</div>
+        <button class="header-btn-side" id="btn-cabecera-nuevo-fijo" title="Nueva Nota">➕</button>
     </header>
 
+    <!-- MENÚ LATERAL DE LA TUERCA AJUSTADO Y DESLIZABLE (PUNTO 1, 2, 5, 7) -->
     <div class="sidebar hidden" id="sidebar">
         <div class="sidebar-body-content">
             
-            <div class="engrane-tira-horizontal">
-                <button id="btn-nuevo-inline" class="btn-engrane-inline btn-3d-mono" title="Crear nota nueva">➕</button>
-                <button id="btn-abrir-inline" class="btn-engrane-inline btn-3d-mono" title="Abrir archivo">📂</button>
-                <button id="btn-vincular-inline" class="btn-engrane-inline btn-3d-mono" style="font-size:0.95rem;" title="Vincular Dispositivo">🔗</button>
-                <button id="btn-saveas-inline" class="btn-engrane-inline btn-3d-mono" title="Guardar como">💾</button>
-                <button id="btn-instalar-inline" class="btn-engrane-inline btn-3d-mono" title="Instalar app">📲</button>
+            <!-- CONTENEDOR AISLADO DE LA LEYENDA TRAS LOS BOTONES (PUNTO 7) -->
+            <div class="status-vinculacion-wrapper" id="wrapper-leyenda-vinculo">
+                Estado: Modo Local (Información Resguardada)
             </div>
 
+            <!-- TIRA HORIZONTAL DESLIZABLE INTERNA CON PALABRAS CLAVE PRECISAS (PUNTO 1, 2, 5) -->
+            <div class="engrane-tira-horizontal">
+                <button id="btn-abrir-inline" class="btn-engrane-inline" title="Abrir archivo">📂 Abrir</button>
+                <button id="btn-vincular-inline" class="btn-engrane-inline" title="Vincular Dispositivo">🔗 Vincular</button>
+                <button id="btn-saveas-inline" class="btn-engrane-inline" title="Guardar como">💾 Exportar</button>
+                <button id="btn-instalar-inline" class="btn-engrane-inline" title="Instalar app">📲 Instalar App</button>
+            </div>
+
+            <!-- INPUT OCULTO ACCIÓN ABRIR -->
             <input type="file" id="input-file-abrir-nativo" accept=".html" style="display: none;">
 
+            <!-- DESPLEGABLE INTERNO EXPORTAR -->
             <div class="panel-guardar-como" id="panel-guardar-como-container">
-                <div style="font-size:0.75rem; font-weight:bold; color:#ffca28; margin-bottom:2px;">Guardar como:</div>
-                <button class="btn-export-code" id="export-code-pdf">📄 Generar Formato PDF</button>
-                <button class="btn-export-code" id="export-code-pdf-edit">📝 Generar PDF Editable</button>
-                <button class="btn-export-code" id="export-code-doc">💙 Generar Formato DOC (Word)</button>
+                <button class="btn-export-code" id="export-code-pdf">📄 Formato PDF</button>
+                <button class="btn-export-code" id="export-code-pdf-edit">📝 PDF Editable</button>
+                <button class="btn-export-code" id="export-code-doc">💙 Formato Word (DOC)</button>
             </div>
 
+            <!-- BUSCADOR INTERNO -->
             <div class="search-box-container">
                 <span class="search-icon-inside">🔍</span>
                 <input type="text" id="input-buscador-interno" class="search-input" placeholder="Buscar en mis documentos...">
             </div>
 
-            <div style="font-size:0.75rem; font-weight:bold; color:#9ca3af; margin-top:4px;">Historial de Notas locales:</div>
+            <div style="font-size:0.8rem; font-weight:bold; color:#00ffcc; margin-top:2px;">Historial de Notas locales:</div>
             <div class="slider-plantillas" id="document-list"></div>
-
-            <div class="adsense-strip-container">ZONA AD-MONETIZACIÓN</div>
         </div>
     </div>
 
+    <!-- BARRA DE HERRAMIENTAS SUPERIOR EN 3D (PUNTO 3) -->
     <div class="menu-tira-horizontal" id="tira-herramientas">
-        <button id="btn-html-save-directo" class="btn-3d-mono">✓</button>
-        
-        <button id="btn-undo" class="btn-format">↶</button>
-        
-        <button id="btn-redo" class="btn-format">↷</button>
-        
-        <button id="btn-mic" class="btn-format">🎙️</button>
-        
-        <button id="btn-lectura" class="btn-format">🔊</button>
-        
+        <button id="btn-html-save-directo" class="btn-3d-mono" title="Guardar en Base de Datos">✓</button>
+        <button id="btn-undo" class="btn-3d-mono" title="Deshacer">↶</button>
+        <button id="btn-redo" class="btn-3d-mono" title="Rehacer">↷</button>
+        <button id="btn-mic" class="btn-3d-mono" title="Dictar voz">🎙️</button>
+        <button id="btn-lectura" class="btn-3d-mono" title="Escuchar notas">🔊</button>
         <button id="btn-msg-voz">💬 Mensaje de Voz</button>
-        
         <button id="btn-render-fl">🎛️ Render de Texto a Audio</button>
         
-        <select id="voice-lang" style="max-width: 140px;"></select>
-        
-        <select id="app-lang" style="max-width: 140px;"></select>
+        <!-- CORRECCIÓN DE IDIOMAS (PUNTO IDIOMAS REPARADO) -->
+        <select id="voice-lang"></select>
+        <select id="app-lang"></select>
         
         <select id="font-family-select">
             <option value="font-sans">Sans-Serif</option>
             <option value="font-serif">Serif</option>
             <option value="font-mono">Monospace</option>
         </select>
-        
         <button id="btn-toggle-tema">🌓 Tema</button>
     </div>
 
+    <!-- CONTENEDOR UNIFICADO COMPLETO DEL ÁREA DE TRABAJO (PUNTO 8) -->
     <main class="main-container">
-        <div class="editor-wrapper">
+        <div class="unified-editor-container" id="contenedor-global-seleccion">
             <div id="editor-title" class="title-input-field font-sans" contenteditable="true"></div>
             <div id="editor" class="rich-editor font-sans" contenteditable="true"></div>
         </div>
     </main>
 
+    <!-- BARRA DE ESTADO -->
     <div class="stats-bar">
         <span id="stats-text">Caracteres: 0</span>
         <span id="lbl-file-dates" style="float: right;">Nota Nueva en RAM</span>
     </div>
 
-    <div class="toast" id="toast-notif">Guardado en Base de Datos</div>
+    <div class="toast" id="toast-notif">Guardado Exitoso</div>
 
     <script type="module" src="js/main.js"></script>
 </body>
