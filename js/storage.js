@@ -1,67 +1,44 @@
-// --- MÓDULO DE PERSISTENCIA INDEXEDDB EXPANDIDO ---
+/**
+ * Retórica - Módulo de Persistencia de Datos (Notas e Historial)
+ */
+class StorageManager {
+    constructor() {
+        this.notasKey = 'retorica_notas_db';
+        this.initStorage();
+    }
 
-let db = null;
+    initStorage() {
+        if (!localStorage.getItem(this.notasKey)) {
+            localStorage.setItem(this.notasKey, JSON.stringify([]));
+        }
+    }
 
-export function initDB() {
-    return new Promise((resolve, reject) => {
-        const request = indexedDB.open("RetoricaDB", 3);
+    guardarNota(titulo, contenido, usuario) {
+        const notas = this.obtenerTodasLasNotas();
+        const notaId = Date.now().toString();
 
-        request.onupgradeneeded = (e) => {
-            db = e.target.result;
-            if (!db.objectStoreNames.contains("documentos")) {
-                db.createObjectStore("documentos", { keyPath: "id" });
-            }
-            if (!db.objectStoreNames.contains("usuarios")) {
-                db.createObjectStore("usuarios", { keyPath: "email" });
-            }
-        };
-
-        request.onsuccess = (e) => {
-            db = e.target.result;
-            resolve(db);
-        };
-
-        request.onerror = (e) => reject(e.target.error);
-    });
-}
-
-export function guardarDocumento(id, titulo, contenido, audios = [], tipo = "nota", tamaño = "letter", creado = null) {
-    return new Promise((resolve) => {
-        const tx = db.transaction("documentos", "readwrite");
-        const store = tx.objectStore("documentos");
-        const ahora = Date.now();
-
-        const item = {
-            id: id,
-            titulo: titulo,
+        const nuevaNota = {
+            id: notaId,
+            titulo: titulo.trim() || "Nota sin título",
             contenido: contenido,
-            audios: audios,
-            tipo: tipo,
-            tamaño: tamaño,
-            creado: creado || ahora,
-            modificado: ahora
+            autor: usuario || "Anónimo",
+            fecha: new Date().toLocaleString()
         };
 
-        store.put(item);
-        tx.oncomplete = () => resolve(true);
-        tx.onerror = () => resolve(false);
-    });
+        notas.push(nuevaNota);
+        localStorage.setItem(this.notasKey, JSON.stringify(notas));
+        return nuevaNota;
+    }
+
+    obtenerTodasLasNotas() {
+        return JSON.parse(localStorage.getItem(this.notasKey)) || [];
+    }
+
+    obtenerNotasPorUsuario(usuario) {
+        const notas = this.obtenerTodasLasNotas();
+        if (!usuario) return notas.filter(n => n.autor === "Anónimo");
+        return notas.filter(n => n.autor === usuario);
+    }
 }
 
-export function obtenerDocumentos() {
-    return new Promise((resolve) => {
-        const tx = db.transaction("documentos", "readonly");
-        const store = tx.objectStore("documentos");
-        const request = store.getAll();
-        request.onsuccess = () => resolve(request.result || []);
-    });
-}
-
-export function eliminarDocumento(id) {
-    return new Promise((resolve) => {
-        const tx = db.transaction("documentos", "readwrite");
-        const store = tx.objectStore("documentos");
-        store.delete(id);
-        tx.oncomplete = () => resolve(true);
-    });
-}
+window.storageSystem = new StorageManager();
