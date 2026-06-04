@@ -2,196 +2,347 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=3.0, user-scalable=yes">
-    <title>Retórica - Procesador de Notas</title>
-    <link rel="icon" type="image/png" href="./icono-512.png">
-    <link rel="apple-touch-icon" href="./icono-512.png">
-    <link rel="manifest" href="./manifest.json?v=40">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Retórica</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#061113">
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.8.2/docx.js"></script>
+
     <style>
-        /* BASE GENERAL Y COLORES DE MATRIZ/ELECTRICIDAD */
-        html, body { overscroll-behavior-y: contain !important; background-color: #03070d; color: #00ffcc; margin: 0; padding: 0; font-family: sans-serif; width: 100%; height: 100%; overflow: hidden; }
-        
-        /* TEMA OSCURO MEJORADO COMPLETO 3D (PUNTO 2) */
-        body { 
-            --bg-primary: #050d1a; 
-            --bg-header: #0a1626; 
-            --color-neon: #00ffcc; 
-            --shadow-neon: #009977; 
-            --shadow-dark: #003328; 
-            --border-color: #00ffcc; 
-            --text-color: #e0f7f4; 
-            --bg-tira: #030812; 
-        }
-        
-        /* TEMA CLARO MEJORADO COMPLETO 3D (PUNTO 1) */
-        body.light-theme { 
-            --bg-primary: #f4f7f6; 
-            --bg-header: #dbeae6; 
-            --color-neon: #00aa88; 
-            --shadow-neon: #006655; 
-            --shadow-dark: #003322; 
-            --border-color: #00aa88; 
-            --text-color: #11221f; 
-            --bg-tira: #e4eee9; 
+        /* ==========================================================================
+           VARIABLES Y CONFIGURACIÓN RETRO-CYBER
+           ========================================================================== */
+        :root {
+            --bg-principal: #061113;
+            --bg-superficie: #091c1f;
+            --bg-botones: #0b2528;
+            --neon-cian: #00ffcc;
+            --neon-verde: #33ff66;
+            --texto-principal: #e6f0f2;
+            --texto-mutado: #64888c;
+            --borde-radio: 8px;
+            --shadow-neon: 0 0 10px rgba(0, 255, 204, 0.4);
         }
 
-        /* CABECERA SUPERIOR FIJA REESTRUCTURADA CON RECOVOS 3D */
-        .app-header-fixed { position: fixed; top: 0; left: 0; width: 100%; height: 56px; border-bottom: 3px solid var(--border-color); background-color: var(--bg-header); z-index: 10000; display: flex; align-items: center; justify-content: space-between; padding: 0 14px; box-sizing: border-box; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4); }
-        
-        /* BRAND LOGO CON EL ICONO OFICIAL EMBEBIDO EN EL CENTRO (PUNTO 3) */
-        .brand-logo-fixed { display: flex; align-items: center; gap: 8px; font-weight: bold; font-size: 1.25rem; letter-spacing: 1.5px; color: var(--color-neon); text-shadow: 0 0 6px var(--color-neon); position: absolute; left: 50%; transform: translateX(-50%); }
-        .brand-logo-fixed img { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--color-neon); box-shadow: 0 0 5px var(--color-neon); object-fit: cover; }
-        body.light-theme .brand-logo-fixed { text-shadow: none; }
+        body.light-theme {
+            --bg-principal: #f4f7f6;
+            --bg-superficie: #e2edea;
+            --bg-botones: #cce0db;
+            --neon-cian: #1a4d46;
+            --neon-verde: #2e7d32;
+            --texto-principal: #0d2623;
+            --texto-mutado: #52736e;
+            --shadow-neon: none;
+        }
 
-        /* REPARACIÓN BOTÓN ENGRANE Y BOTÓN MÁS REDONDO FIJO EN 3D MONOCROMÁTICO (PUNTO 1 Y 2) */
-        .header-btn-side-3d { width: 40px; height: 40px; background: linear-gradient(135deg, var(--bg-header), var(--bg-primary)); color: var(--color-neon); border: 2px solid var(--border-color); text-align: center; font-size: 1.2rem; cursor: pointer; box-shadow: 0 4px 0 var(--shadow-neon), inset 0 1px 1px rgba(255,255,255,0.1); text-shadow: 0 0 3px var(--color-neon); transition: all 0.1s ease; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
-        #btn-toggle-pestaña { border-radius: 8px; }
-        #btn-cabecera-nuevo-fijo { border-radius: 50% !important; font-size: 1.1rem; } /* Totalmente redondo y proporcionado */
-        
-        .header-btn-side-3d:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--shadow-neon); }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-        /* BARRA DE HERRAMIENTAS REFORZADA EN 3D MONOCROMÁTICO (PUNTO 1, 2 Y CONTROL DE PÉRDIDA) */
-        .menu-tira-horizontal { position: fixed; top: 56px; left: 0; width: 100%; height: 56px; overflow-x: auto; overflow-y: hidden; white-space: nowrap; padding: 8px 12px; background: var(--bg-tira); border-bottom: 2px solid var(--border-color); box-sizing: border-box; z-index: 9500; -webkit-overflow-scrolling: touch; display: flex; align-items: center; gap: 8px; }
+        body {
+            background-color: var(--bg-principal);
+            color: var(--texto-principal);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            transition: background-color 0.3s, color 0.3s;
+        }
 
-        button, select { display: inline-block; height: 38px; padding: 0 14px; background: linear-gradient(135deg, var(--bg-header), var(--bg-primary)); color: var(--color-neon); border: 2px solid var(--border-color); border-radius: 6px; font-size: 0.85rem; font-weight: bold; cursor: pointer; box-sizing: border-box; box-shadow: 0 3.5px 0 var(--shadow-neon), inset 0 1px 1px rgba(255,255,255,0.1); text-shadow: 0 0 3px var(--color-neon); transition: all 0.05s ease; }
-        body.light-theme button, body.light-theme select { text-shadow: none; }
-        button:active, select:active { transform: translateY(2.5px); box-shadow: 0 1px 0 var(--shadow-neon); }
-        
-        /* BOTONES 3D PEQUEÑOS DE ICONO */
-        .btn-3d-mono { width: 38px; height: 38px; padding: 0; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; border-radius: 6px; }
+        /* ==========================================================================
+           HEADER Y CORRECCIÓN DE BOTONES (ENGRANE Y +)
+           ========================================================================== */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background-color: var(--bg-principal);
+            border-bottom: 2px solid var(--neon-cian);
+            box-shadow: var(--shadow-neon);
+            z-index: 10;
+        }
 
-        /* MENÚ LATERAL DESLIZABLE HORIZONTALMENTE */
-        .sidebar { position: fixed; top: 56px; left: 0; width: 100%; height: calc(100vh - 56px); background-color: rgba(5, 13, 26, 0.99); z-index: 9999; transition: transform 0.25s ease-out; box-sizing: border-box; overflow: hidden; border-right: 2px solid var(--border-color); }
-        body.light-theme .sidebar { background-color: rgba(244, 247, 246, 0.99); }
-        .sidebar.hidden { transform: translateX(-100%); }
-        .sidebar-body-content { position: absolute; top: 0; bottom: 0; left: 0; right: 0; padding: 14px; overflow-y: auto; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px; }
+        .header-title {
+            font-size: 24px;
+            font-weight: bold;
+            letter-spacing: 3px;
+            color: var(--neon-cian);
+            text-shadow: var(--shadow-neon);
+        }
 
-        .engrane-tira-horizontal { width: 100%; height: 64px; overflow-x: auto; overflow-y: hidden; white-space: nowrap; padding: 6px 4px; background: rgba(0, 255, 204, 0.03); border: 2px solid var(--border-color); border-radius: 10px; box-sizing: border-box; -webkit-overflow-scrolling: touch; }
-        .btn-engrane-inline { display: inline-block; height: 44px; padding: 0 14px; font-size: 0.85rem; border-radius: 6px; line-height: 40px; }
+        .btn-solido {
+            background-color: var(--bg-botones) !important;
+            border: 2px solid var(--neon-cian) !important;
+            border-radius: var(--borde-radio);
+            color: var(--neon-cian);
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--shadow-neon);
+            transition: all 0.2s ease;
+        }
 
-        .status-vinculacion-wrapper { width: 100%; background: rgba(0,0,0,0.3); border: 1px dashed var(--border-color); border-radius: 8px; padding: 8px; font-size: 0.8rem; text-align: center; box-sizing: border-box; color: var(--color-neon); }
+        /* Fuerza la eliminación del borde rojo residual en modo oscuro */
+        body:not(.light-theme) #btn-config,
+        body:not(.light-theme) #btn-config:focus {
+            border: 2px solid var(--neon-cian) !important;
+            outline: none !important;
+        }
 
-        /* BUSCADOR HISTORIAL */
-        .search-box-container { width: 100%; position: relative; box-sizing: border-box; }
-        .search-input { width: 100%; height: 40px; background: rgba(0,0,0,0.2); border: 2px solid var(--border-color); border-radius: 8px; padding: 0 12px 0 36px; color: var(--color-neon); font-size: 0.9rem; box-sizing: border-box; outline: none; }
-        .search-icon-inside { position: absolute; left: 12px; top: 11px; font-size: 0.9rem; color: var(--border-color); opacity: 0.7; }
+        /* ==========================================================================
+           CORRECCIÓN DEL DESBORDAMIENTO DE LA BARRA DE HERRAMIENTAS
+           ========================================================================== */
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background-color: var(--bg-superficie);
+            border-bottom: 2px solid var(--neon-cian);
+            
+            /* Solución al desbordamiento en Pixel 2 / móviles */
+            overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+        }
 
-        /* HISTORIAL Y COPIAS DE SEGURIDAD */
-        .slider-plantillas { width: 100%; display: flex; flex-direction: column; gap: 10px; }
-        .document-list-item { background: rgba(0,0,0,0.15); border: 1px solid rgba(0,255,204,0.2); padding: 12px; border-radius: 8px; display: flex; flex-direction: column; gap: 8px; box-sizing: border-box; }
-        body.light-theme .document-list-item { background: #ffffff; border: 1px solid rgba(0,170,136,0.2); }
-        .doc-item-main-click { cursor: pointer; width: 100%; }
-        .doc-item-title { font-weight: bold; color: var(--color-neon); font-size: 0.9rem; }
-        .doc-item-body { font-size: 0.78rem; color: #88a0b5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .doc-item-actions { display: flex; gap: 8px; margin-top: 4px; border-top: 1px dashed rgba(0,255,204,0.15); padding-top: 8px; }
-        .btn-action-nota { height: 28px; padding: 0 10px; font-size: 0.75rem; border-radius: 4px; line-height: 24px; }
-        .btn-action-delete { border-color: #ff3b30; color: #ff3b30; box-shadow: 0 2px 0 #b3241c; }
+        /* Ocultar barra de scroll para mantener la UI limpia */
+        .toolbar::-webkit-scrollbar {
+            display: none;
+        }
 
-        /* PANEL EXPORTAR */
-        .panel-guardar-como { display: none; background: var(--bg-header); border: 2px solid var(--border-color); padding: 10px; border-radius: 8px; flex-direction: column; gap: 8px; }
-        .panel-guardar-como.show { display: flex; }
+        .toolbar button {
+            flex-shrink: 0; /* Evita que los botones se aplasten */
+            background: transparent;
+            border: 2px solid var(--neon-cian);
+            color: var(--neon-cian);
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
 
-        /* ÁREA DE TRABAJO UNIFICADA CONTRA DESPLAZAMIENTOS (BLINDAJE DE BARRA DE HERRAMIENTAS) */
-        .main-container { width: 100%; position: absolute; top: 112px; bottom: 32px; left: 0; right: 0; box-sizing: border-box; overflow-y: auto; -webkit-overflow-scrolling: touch; background: var(--bg-primary); }
-        .unified-editor-container { width: 100%; min-height: 100%; padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px; -webkit-user-select: text; user-select: text; }
+        .toolbar button.active {
+            background-color: rgba(255, 0, 0, 0.2);
+            border-color: #ff3333;
+            color: #ff3333;
+        }
 
-        .title-input-field { width: 100%; background: transparent; border: none; color: var(--color-neon); font-size: 1.6rem; font-weight: bold; outline: none; box-sizing: border-box; padding-bottom: 8px; border-bottom: 2px solid rgba(0,255,204,0.15); }
-        
-        /* Placeholder dinámico controlado por el módulo de idiomas */
-        .title-input-field:empty:before { content: "Título de la Nota"; opacity: 0.4; font-style: italic; }
+        /* ==========================================================================
+           ÁREA DE TRABAJO (EDITOR)
+           ========================================================================== */
+        .workspace {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow-y: auto;
+        }
 
-        .rich-editor { width: 100%; min-height: 350px; height: auto; background: transparent; border: none; color: var(--text-color); font-size: 1.1rem; line-height: 1.65; outline: none; box-sizing: border-box; overflow-wrap: break-word; word-wrap: break-word; padding-bottom: 120px; }
-        
-        /* Manejo del placeholder dinámico usando el atributo data-placeholder */
-        .rich-editor:empty:before { content: attr(data-placeholder); opacity: 0.4; }
+        .note-title-input {
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid var(--texto-mutado);
+            color: var(--neon-cian);
+            font-size: 22px;
+            font-weight: bold;
+            padding: 8px 0;
+            margin-bottom: 15px;
+            outline: none;
+        }
 
-        .rich-editor.font-sans, .title-input-field.font-sans { font-family: sans-serif; }
-        .rich-editor.font-serif, .title-input-field.font-serif { font-family: serif; }
-        .rich-editor.font-mono, .title-input-field.font-mono { font-family: monospace; }
+        .note-editor {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--texto-principal);
+            font-size: 16px;
+            line-height: 1.6;
+            resize: none;
+        }
 
-        /* BARRA DE ESTADO */
-        .stats-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: 32px; border-top: 2px solid var(--border-color); padding: 6px 14px 0 14px; font-size: 0.75rem; color: #88a0b5; background: var(--bg-header); box-sizing: border-box; z-index: 9500; }
+        /* ==========================================================================
+           MENÚ LATERAL (SIDEBAR / CONFIGURACIÓN) Y REGISTRO
+           ========================================================================== */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 100%;
+            background-color: var(--bg-superficie);
+            border-left: 2px solid var(--neon-cian);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.5);
+            z-index: 20;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
 
-        /* TOAST */
-        .toast { position: fixed; bottom: 50px; left: 50%; transform: translate(-50%, 120px); background-color: var(--color-neon); color: #03070d; padding: 10px 20px; font-size: 0.85rem; font-weight: bold; transition: transform 0.2s ease; z-index: 15000; border-radius: 20px; box-shadow: 0 0 12px var(--color-neon); pointer-events: none; }
-        .toast.show { transform: translate(-50%, 0); }
+        .sidebar.active {
+            transform: translateX(0);
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--texto-mutado);
+            padding-bottom: 10px;
+        }
+
+        /* Formulario de Registro e Historial de Usuarios */
+        .auth-container {
+            background-color: var(--bg-principal);
+            border: 1px solid var(--texto-mutado);
+            padding: 12px;
+            border-radius: var(--borde-radio);
+            margin-bottom: 15px;
+        }
+
+        .auth-container h4 {
+            color: var(--neon-cian);
+            margin-bottom: 10px;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        .auth-input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 8px;
+            background-color: var(--bg-superficie);
+            border: 1px solid var(--texto-mutado);
+            color: var(--texto-principal);
+            border-radius: 4px;
+            outline: none;
+        }
+
+        .auth-input:focus {
+            border-color: var(--neon-cian);
+        }
+
+        .btn-accion {
+            width: 100%;
+            padding: 8px;
+            background-color: var(--bg-botones);
+            border: 1px solid var(--neon-verde);
+            color: var(--neon-verde);
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-bottom: 5px;
+        }
+
+        .user-badge {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 255, 204, 0.1);
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        /* ==========================================================================
+           FOOTER / BARRA DE ESTADO
+           ========================================================================== */
+        footer {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 16px;
+            background-color: var(--bg-superficie);
+            border-top: 1px solid var(--texto-mutado);
+            font-size: 12px;
+            color: var(--texto-mutado);
+        }
     </style>
 </head>
 <body>
 
-    <header class="app-header-fixed">
-        <button class="header-btn-side-3d" id="btn-toggle-pestaña" title="Menú lateral">⚙️</button>
-        <div class="brand-logo-fixed">
-            <img src="./icono-512.png" alt="R" onerror="this.style.display='none'">
-            RETÓRICA
-        </div>
-        <button class="header-btn-side-3d" id="btn-cabecera-nuevo-fijo" title="Nueva Nota">➕</button>
+    <header>
+        <button id="btn-config" class="btn-solido" title="Configuración y Usuarios">⚙️</button>
+        <div class="header-title">RETÓRICA</div>
+        <button id="btn-nueva-nota" class="btn-solido" title="Nueva Nota">＋</button>
     </header>
 
-    <div class="sidebar hidden" id="sidebar">
-        <div class="sidebar-body-content">
-            <div class="status-vinculacion-wrapper" id="wrapper-leyenda-vinculo">Estado: Modo Local (Información Resguardada)</div>
-
-            <div class="engrane-tira-horizontal">
-                <button id="btn-abrir-inline" class="btn-engrane-inline">📂 Abrir</button>
-                <button id="btn-vincular-inline" class="btn-engrane-inline">🔗 Vincular</button>
-                <button id="btn-saveas-inline" class="btn-engrane-inline">💾 Exportar</button>
-                <button id="btn-instalar-inline" class="btn-engrane-inline">📲 Instalar App</button>
-            </div>
-
-            <input type="file" id="input-file-abrir-nativo" accept=".html" style="display: none;">
-
-            <div class="panel-guardar-como" id="panel-guardar-como-container">
-                <button id="export-code-pdf">📄 Formato PDF</button>
-                <button id="export-code-pdf-edit">📝 PDF Editable</button>
-                <button id="export-code-doc">💙 Formato Word (DOC)</button>
-            </div>
-
-            <div class="search-box-container">
-                <span class="search-icon-inside">🔍</span>
-                <input type="text" id="input-buscador-interno" class="search-input" placeholder="Buscar en mis documentos...">
-            </div>
-
-            <div style="font-size:0.8rem; font-weight:bold; color:var(--color-neon);" id="lbl-historial-tit">Historial de Notas locales:</div>
-            <div class="slider-plantillas" id="document-list"></div>
-        </div>
+    <div class="toolbar" id="toolbar-herramientas">
+        <button id="btn-guardar">GUARDAR</button>
+        <button id="btn-deshacer">↩</button>
+        <button id="btn-rehacer">↪</button>
+        <button id="btn-mic">🎙️ Dictar</button>
+        <button id="btn-tts">🔊 Leer</button>
+        <button id="btn-exportar-pdf">📄 PDF</button>
+        <button id="btn-exportar-word">💙 Word (DOC)</button>
     </div>
 
-    <div class="menu-tira-horizontal" id="tira-herramientas">
-        <button id="btn-html-save-directo" class="btn-3d-mono" title="Guardar localmente">✓</button>
-        <button id="btn-undo" class="btn-3d-mono" title="Deshacer">↶</button>
-        <button id="btn-redo" class="btn-3d-mono" title="Rehacer">↷</button>
-        <button id="btn-mic" class="btn-3d-mono" title="Dictado">🎙️</button>
-        <button id="btn-lectura" class="btn-3d-mono" title="Escuchar">🔊</button>
-        <button id="btn-msg-voz">💬 Mensaje de Voz</button>
-        <button id="btn-render-fl">🎛️ Render Audio</button>
-        
-        <select id="app-lang" style="max-width: 140px;"></select>
-        <select id="voice-lang" style="max-width: 140px;"></select>
-        
-        <select id="font-family-select">
-            <option value="font-sans">Sans-Serif</option>
-            <option value="font-serif">Serif</option>
-            <option value="font-mono">Monospace</option>
-        </select>
-        <button id="btn-toggle-tema">🌓 Tema</button>
-    </div>
-
-    <main class="main-container">
-        <div class="unified-editor-container" id="contenedor-global-seleccion">
-            <div id="editor-title" class="title-input-field font-sans" contenteditable="true"></div>
-            <div id="editor" class="rich-editor font-sans" contenteditable="true" data-placeholder="Escribe tu guion o nota aquí..."></div>
-        </div>
+    <main class="workspace">
+        <input type="text" id="input-titulo" class="note-title-input" placeholder="Título de la Nota" value="Nota Nueva en RAM">
+        <textarea id="txt-editor" class="note-editor" placeholder="Comienza a dictar o escribir aquí tu obra..."></textarea>
     </main>
 
-    <div class="stats-bar">
-        <span id="stats-text">Caracteres: 0</span>
-        <span id="lbl-file-dates" style="float: right;">Nota Nueva en RAM</span>
+    <div class="sidebar" id="panel-configuracion">
+        <div class="sidebar-header">
+            <h3>Configuración</h3>
+            <button id="btn-cerrar-config" style="background:transparent; border:none; color:var(--neon-cian); font-size:20px; cursor:pointer;">✕</button>
+        </div>
+
+        <div class="auth-container">
+            <h4>Gestión de Usuario</h4>
+            <div id="auth-anonimo">
+                <input type="text" id="reg-username" class="auth-input" placeholder="Nombre de usuario o alias">
+                <button id="btn-registrar" class="btn-accion">CREAR REGISTRO LOCAL</button>
+            </div>
+            <div id="auth-activo" style="display: none;">
+                <div class="user-badge">
+                    <span>Usuario: <strong id="lbl-usuario-actual"></strong></span>
+                    <button id="btn-logout" style="background:transparent; border:none; color:red; cursor:pointer;">Salir</button>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 15px;">
+            <h4>Preferencias</h4>
+            <button id="btn-cambiar-tema" class="btn-accion" style="border-color: var(--neon-cian); color: var(--neon-cian); margin-top: 10px;">Alternar Tema Claro/Oscuro</button>
+        </div>
+
+        <div style="margin-top: 20px; flex: 1; overflow-y: auto;">
+            <h4>Historial de Notas locales:</h4>
+            <div id="lista-notas-historial" style="font-size: 13px; color: var(--texto-mutado); margin-top: 10px;">
+                No hay registros coincidentes
+            </div>
+        </div>
     </div>
 
-    <div class="toast" id="toast-notif">Guardado</div>
+    <footer>
+        <span id="txt-contador-caracteres">Caracteres: 0</span>
+        <span id="lbl-estado-sistema">Estado: Modo Local (Información Resguardada)</span>
+    </footer>
 
-    <script type="module" src="js/main.js"></script>
+    <script src="storage.js"></script>
+    <script src="auth.js"></script>
+    <script src="audio.js"></script>
+    <script src="main.js"></script>
+    <script>
+        // Inicialización del Service Worker para PWA
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(() => console.log("Service Worker Activo."))
+                .catch(err => console.error("Error en SW:", err));
+        }
+    </script>
 </body>
 </html>
