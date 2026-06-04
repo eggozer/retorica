@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=3.0, user-scalable=yes">
     <title>Retórica - Procesador de Notas</title>
-    <link rel="manifest" href="./manifest.json?v=37">
+    <link rel="manifest" href="./manifest.json?v=38">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         /* BLINDAJE ANTI-REFRESCADO ACCIDENTAL EN MÓVILES (PULL-TO-REFRESH) */
-        html, body { overscroll-behavior-y: contain !important; background-color: #0a0f1d; color: #f3f4f6; margin: 0; padding: 0; font-family: sans-serif; overflow-x: hidden; width: 100%; min-height: 100vh; }
+        html, body { overscroll-behavior-y: contain !important; background-color: #0a0f1d; color: #f3f4f6; margin: 0; padding: 0; font-family: sans-serif; width: 100%; height: 100%; }
         body.light-theme { background-color: #f9fafb; color: #111827; }
 
         /* CABECERA SUPERIOR FIJA */
@@ -16,55 +16,64 @@
         body.light-theme .app-header-fixed { background-color: #f9fafb; border-bottom: 1px solid rgba(0,0,0,0.15); }
         .brand-logo-fixed { font-weight: bold; font-size: 1.15rem; letter-spacing: 0.5px; display: inline-block; }
 
-        /* BOTÓN FLOTANTE / PESTAÑA LATERAL DE LA TUERCA */
-        .toggle-sidebar-pestaña { position: absolute; left: 12px; top: 7px; width: 36px; height: 36px; background: #1f2937; color: #ffca28; border: 1px solid rgba(255,255,255,0.15); text-align: center; line-height: 34px; font-weight: bold; cursor: pointer; z-index: 10000; border-radius: 50%; transition: all 0.2s; }
+        /* PESTAÑA LATERAL DE LA TUERCA */
+        .toggle-sidebar-pestaña { position: absolute; left: 12px; top: 7px; width: 36px; height: 36px; background: #1f2937; color: #ffca28; border: 1px solid rgba(255,255,255,0.15); text-align: center; line-height: 34px; font-weight: bold; cursor: pointer; z-index: 10000; border-radius: 50%; }
         body.light-theme .toggle-sidebar-pestaña { background: #ffffff; border: 1px solid rgba(0,0,0,0.15); }
 
-        /* BARRA DE HERRAMIENTAS HORIZONTAL DESLIZABLE (LÍNEA REORGANIZADA) */
+        /* BARRA DE HERRAMIENTAS SUPERIOR FIJA Y DESLIZABLE */
         .menu-tira-horizontal { position: fixed; top: 50px; left: 0; width: 100%; height: 48px; overflow-x: auto; overflow-y: hidden; white-space: nowrap; padding: 6px 12px; background: #0c1326; border-bottom: 1px solid rgba(255,255,255,0.15); box-sizing: border-box; z-index: 1500; -webkit-overflow-scrolling: touch; }
         body.light-theme .menu-tira-horizontal { background: #f3f4f6; border-bottom: 1px solid rgba(0,0,0,0.15); }
 
-        button, select { display: inline-block; height: 34px; padding: 0 12px; background: #1f2937; color: #f3f4f6; border: 1px solid rgba(255,255,255,0.15); border-radius: 17px; font-size: 0.8rem; cursor: pointer; box-sizing: border-box; vertical-align: top; margin-right: 6px; }
+        button, select { display: inline-block; height: 34px; padding: 0 12px; background: #1f2937; color: #f3f4f6; border: 1px solid rgba(255,255,255,0.15); border-radius: 17px; font-size: 0.85rem; cursor: pointer; box-sizing: border-box; vertical-align: top; margin-right: 6px; }
         body.light-theme button, body.light-theme select { background: #ffffff; color: #111827; border: 1px solid rgba(0,0,0,0.15); }
-        .btn-format { width: 34px; height: 34px; padding: 0; border-radius: 50%; font-weight: bold; font-size: 0.9rem; }
+        
+        /* DISEÑO DE BOTONES DE ICONO MONOCROMÁTICO TRIDIMENSIONAL EXCLUSIVO */
+        .btn-3d-mono { width: 34px; height: 34px; padding: 0; border-radius: 50%; font-weight: bold; font-size: 1.05rem; background: linear-gradient(135deg, #2a3547, #111622); color: #e5e7eb; border: 1px solid rgba(255,255,255,0.2); box-shadow: inset 0 1px 2px rgba(255,255,255,0.15), 0 2px 4px rgba(0,0,0,0.4); text-shadow: 0 -1px 1px rgba(0,0,0,0.5); }
+        body.light-theme .btn-3d-mono { background: linear-gradient(135deg, #ffffff, #d1d5db); color: #1f2937; border: 1px solid rgba(0,0,0,0.15); box-shadow: inset 0 1px 1px rgba(255,255,255,0.8), 0 2px 3px rgba(0,0,0,0.15); text-shadow: 0 1px 0 rgba(255,255,255,0.8); }
+        .btn-format { width: 34px; height: 34px; padding: 0; border-radius: 50%; font-weight: bold; }
 
-        /* SUB-MENÚ DESPLEGABLE HORIZONTAL DE FORMATOS (GUARDAR TODO) */
-        .dropdown-formatos-tira { display: none; position: fixed; top: 98px; left: 0; width: 100%; height: 44px; background: #111827; border-bottom: 1px solid #ffca28; padding: 5px 12px; box-sizing: border-box; overflow-x: auto; white-space: nowrap; z-index: 1400; -webkit-overflow-scrolling: touch; }
-        body.light-theme .dropdown-formatos-tira { background: #e5e7eb; border-bottom: 1px solid #b45309; }
-        .dropdown-formatos-tira.show { display: block; }
-        .btn-mini-save { height: 32px; padding: 0 14px; border-radius: 16px; background: #1f2937; color: #ffca28; border: 1px solid #ffca28; font-size: 0.75rem; font-weight: bold; }
-
-        /* MENÚ LATERAL DE CONFIGURACIÓN (TUERCA) */
+        /* MENÚ LATERAL DE LA TUERCA */
         .sidebar { position: fixed; top: 50px; left: 0; width: 100%; height: calc(100vh - 50px); background-color: #0a0f1d; z-index: 9999; transition: transform 0.25s ease-out; box-sizing: border-box; overflow: hidden; }
         body.light-theme .sidebar { background-color: #f9fafb; }
         .sidebar.hidden { transform: translateX(-100%); }
+        .sidebar-body-content { position: absolute; top: 0; bottom: 0; left: 0; right: 0; padding: 14px; overflow-y: auto; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; overscroll-behavior-y: contain; }
 
-        .sidebar-body-content { position: absolute; top: 0; bottom: 0; left: 0; right: 0; padding: 16px; overflow-y: auto; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px; overscroll-behavior-y: contain; }
-        .config-group { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); padding: 12px; border-radius: 12px; }
-        body.light-theme .config-group { background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.06); }
-        .config-title { font-size: 0.8rem; font-weight: bold; margin-bottom: 6px; color: #ffca28; }
+        /* TIRA HORIZONTAL DESLIZABLE INTERNA EN EL ENGRANE (PUNTO 4 COMPACTADO) */
+        .engrane-tira-horizontal { width: 100%; height: 52px; overflow-x: auto; overflow-y: hidden; white-space: nowrap; padding: 6px 4px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; box-sizing: border-box; -webkit-overflow-scrolling: touch; margin-bottom: 4px; }
+        body.light-theme .engrane-tira-horizontal { background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.06); }
+        .btn-engrane-inline { display: inline-block; height: 36px; padding: 0 12px; border-radius: 18px; font-weight: bold; font-size: 0.8rem; margin-right: 8px; vertical-align: top; line-height: 34px; }
 
-        .btn-pwa-status { width: 100%; background: #10b981; color: #ffffff; border: none; font-weight: bold; padding: 10px 0; border-radius: 8px; display: block; text-align: center; font-size: 0.85rem; cursor: pointer; }
-        .slider-plantillas { width: 100%; overflow-x: auto; white-space: nowrap; padding: 6px 2px; -webkit-overflow-scrolling: touch; }
+        /* SECCIÓN ADICIONAL FLOTANTE DE GUARDAR COMO INTEGRADA (PRODUCIDA POR CÓDIGO) */
+        .panel-guardar-como { display: none; background: rgba(255,255,255,0.04); border: 1px solid #ffca28; padding: 10px; border-radius: 12px; flex-direction: column; gap: 8px; }
+        body.light-theme .panel-guardar-como { background: #ffffff; border: 1px solid #b45309; }
+        .panel-guardar-como.show { display: flex; }
+        .btn-export-code { width: 100%; height: 34px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; background: #1f2937; color: #ffffff; border: 1px solid rgba(255,255,255,0.1); text-align: left; padding-left: 12px; }
+        body.light-theme .btn-export-code { background: #f3f4f6; color: #111827; border: 1px solid rgba(0,0,0,0.1); }
 
-        .document-list-item { display: inline-block; background: #1f2937; border: 1px solid #ffca28; box-shadow: 0 0 6px rgba(255,202,40,0.3); padding: 10px 12px; border-radius: 8px; font-size: 0.8rem; min-width: 170px; max-width: 230px; margin-right: 8px; color: #f3f4f6; vertical-align: top; white-space: normal; text-align: left; }
-        body.light-theme .document-list-item { background: #ffffff; color: #111827; }
-        .doc-item-title { font-weight: bold; color: #ffca28; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 3px; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; }
+        /* INPUT DEL BUSCADOR INTERNO */
+        .search-box-container { width: 100%; position: relative; box-sizing: border-box; }
+        .search-input { width: 100%; height: 36px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 0 12px 0 34px; color: #f3f4f6; font-size: 0.85rem; box-sizing: border-box; outline: none; }
+        body.light-theme .search-input { background: #ffffff; border: 1px solid rgba(0,0,0,0.15); color: #111827; }
+        .search-icon-inside { position: absolute; left: 12px; top: 10px; font-size: 0.85rem; color: #9ca3af; }
+
+        /* CONTENEDOR DE HISTORIAL */
+        .slider-plantillas { width: 100%; display: flex; flex-direction: column; gap: 8px; padding: 2px 0; }
+        .document-list-item { background: #1f2937; border: 1px solid rgba(255,255,255,0.1); padding: 10px 12px; border-radius: 8px; font-size: 0.8rem; color: #f3f4f6; text-align: left; cursor: pointer; }
+        body.light-theme .document-list-item { background: #ffffff; color: #111827; border: 1px solid rgba(0,0,0,0.1); }
+        .doc-item-title { font-weight: bold; color: #ffca28; margin-bottom: 3px; }
         body.light-theme .doc-item-title { color: #b45309; }
-        .doc-item-body { font-size: 0.72rem; color: #9ca3af; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; line-height: 1.2; }
+        .doc-item-body { font-size: 0.72rem; color: #9ca3af; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        .adsense-strip-container { width: 100%; min-height: 65px; border: 1px dashed #ffca28; background: rgba(255,255,255,0.01); border-radius: 6px; text-align: center; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: #9ca3af; font-weight: bold; margin-top: auto; }
-
-        /* ÁREA DE TRABAJO CORREGIDA CON SUS SEPARACIONES ORIGINALES */
-        .main-container { width: 100%; padding-top: 110px; padding-bottom: 32px; box-sizing: border-box; transition: padding-top 0.2s ease; }
-        .editor-wrapper { width: 100%; padding: 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px; }
+        /* ÁREA DE TRABAJO INDEPENDIENTE Y FLEXIBLE (PUNTO 6 DESBLOQUEADO) */
+        .main-container { width: 100%; position: absolute; top: 98px; bottom: 30px; left: 0; right: 0; box-sizing: border-box; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        .editor-wrapper { width: 100%; min-height: 100%; padding: 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; }
 
         .title-input-field { width: 100%; background: transparent; border: none; color: #ffca28; font-size: 1.5rem; font-weight: bold; outline: none; box-sizing: border-box; padding: 0; }
         body.light-theme .title-input-field { color: #b45309; }
         .title-input-field:empty:before { content: "Título de la Nota"; color: rgba(255,202,40,0.3); font-style: italic; }
         body.light-theme .title-input-field:empty:before { color: rgba(0,0,0,0.3); }
 
-        .rich-editor { width: 100%; min-height: calc(100vh - 210px); background: transparent; border: none; color: #f3f4f6; font-size: 1.05rem; line-height: 1.5; outline: none; box-sizing: border-box; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; }
+        .rich-editor { width: 100%; min-height: 250px; height: auto; background: transparent; border: none; color: #f3f4f6; font-size: 1.05rem; line-height: 1.5; outline: none; box-sizing: border-box; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; padding-bottom: 80px; }
         body.light-theme .rich-editor { color: #111827; }
         .rich-editor:empty:before { content: "Comienza a dictar o escribir aquí tu obra..."; color: rgba(255,255,255,0.25); }
         body.light-theme .rich-editor:empty:before { color: rgba(0,0,0,0.3); }
@@ -73,13 +82,14 @@
         .rich-editor.font-serif, .title-input-field.font-serif { font-family: serif; }
         .rich-editor.font-mono, .title-input-field.font-mono { font-family: monospace; }
 
-        /* BARRA DE ESTADO INFERIOR */
+        /* BARRA DE ESTADO INFERIOR FIXED */
         .stats-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: 30px; border-top: 1px solid rgba(255,255,255,0.15); padding: 6px 14px 0 14px; font-size: 0.7rem; color: #9ca3af; background: #0a0f1d; box-sizing: border-box; z-index: 1500; }
         body.light-theme .stats-bar { background: #f9fafb; border-top: 1px solid rgba(0,0,0,0.15); }
 
-        /* NOTIFICACIONES TOAST */
-        .toast { position: fixed; bottom: 45px; left: 50%; transform: translate(-50%, 100px); background-color: #ffca28; color: #0a0f1d; padding: 8px 16px; font-size: 0.8rem; font-weight: bold; transition: transform 0.2s ease; z-index: 15000; border-radius: 20px; text-align: center; pointer-events: none; }
+        /* TOAST NOTIFICACIONES */
+        .toast { position: fixed; bottom: 45px; left: 50%; transform: translate(-50%, 100px); background-color: #ffca28; color: #0a0f1d; padding: 8px 16px; font-size: 0.8rem; font-weight: bold; transition: transform 0.2s ease; z-index: 15000; border-radius: 20px; pointer-events: none; }
         .toast.show { transform: translate(-50%, 0); }
+        .adsense-strip-container { width: 100%; min-height: 50px; border: 1px dashed rgba(255,255,255,0.15); text-align: center; line-height: 48px; font-size: 0.7rem; color: #9ca3af; margin-top: auto; }
     </style>
 </head>
 <body>
@@ -91,54 +101,54 @@
 
     <div class="sidebar hidden" id="sidebar">
         <div class="sidebar-body-content">
-            <div class="config-group">
-                <div class="config-title">📂 Abrir Archivo de Almacenamiento</div>
-                <input type="file" id="input-abrir-archivo" accept=".html" style="display: none;">
-                <button id="btn-trigger-abrir" style="width:100%; background:#2563eb; color:#ffffff; font-weight:bold; height:36px; border-radius:8px; border:none;">Buscar Nota HTML Vieja</button>
+            
+            <div class="engrane-tira-horizontal">
+                <button id="btn-nuevo-inline" class="btn-engrane-inline btn-3d-mono" title="Crear nota nueva">➕</button>
+                <button id="btn-abrir-inline" class="btn-engrane-inline btn-3d-mono" title="Abrir archivo">📂</button>
+                <button id="btn-vincular-inline" class="btn-engrane-inline btn-3d-mono" style="font-size:0.95rem;" title="Vincular Dispositivo">🔗</button>
+                <button id="btn-saveas-inline" class="btn-engrane-inline btn-3d-mono" title="Guardar como">💾</button>
+                <button id="btn-instalar-inline" class="btn-engrane-inline btn-3d-mono" title="Instalar app">📲</button>
             </div>
 
-            <div class="config-group">
-                <button id="btn-nuevo" style="width:100%; background:#ffca28; color:#0a0f1d; font-weight:bold; height:38px; border-radius:8px; border:none;">➕ Crear Nueva Nota</button>
+            <input type="file" id="input-file-abrir-nativo" accept=".html" style="display: none;">
+
+            <div class="panel-guardar-como" id="panel-guardar-como-container">
+                <div style="font-size:0.75rem; font-weight:bold; color:#ffca28; margin-bottom:2px;">Guardar como:</div>
+                <button class="btn-export-code" id="export-code-pdf">📄 Generar Formato PDF</button>
+                <button class="btn-export-code" id="export-code-pdf-edit">📝 Generar PDF Editable</button>
+                <button class="btn-export-code" id="export-code-doc">💙 Generar Formato DOC (Word)</button>
             </div>
 
-            <div class="config-group" id="pwa-container">
-                <div class="config-title">📱 Aplicación Retórica Nativa</div>
-                <button id="btn-pwa-action" class="btn-pwa-status">Instalar en Dispositivo</button>
+            <div class="search-box-container">
+                <span class="search-icon-inside">🔍</span>
+                <input type="text" id="input-buscador-interno" class="search-input" placeholder="Buscar en mis documentos...">
             </div>
 
-            <div class="config-group">
-                <div class="config-title">👤 Sincronización Protegida</div>
-                <div style="font-size:0.75rem; color:#9ca3af; margin-bottom:8px;" id="cloud-status">Modo Local Activo (Base de Datos Encriptada)</div>
-                <button id="btn-sync" style="width:100%; background:#1f2937; color:#ffffff; border:1px solid rgba(255,255,255,0.15); height:34px; border-radius:17px;">Sincronizar Nube</button>
-            </div>
+            <div style="font-size:0.75rem; font-weight:bold; color:#9ca3af; margin-top:4px;">Historial de Notas locales:</div>
+            <div class="slider-plantillas" id="document-list"></div>
 
-            <div class="config-group">
-                <div class="config-title">📄 Historial de Notas (Locales)</div>
-                <div class="slider-plantillas" id="document-list"></div>
-            </div>
-
-            <div class="adsense-strip-container" id="ads-zone">ZONA AD-MONETIZACIÓN</div>
+            <div class="adsense-strip-container">ZONA AD-MONETIZACIÓN</div>
         </div>
     </div>
 
     <div class="menu-tira-horizontal" id="tira-herramientas">
-        <button id="btn-main-guardar" style="background:#ffca28; color:#0a0f1d; font-weight:bold; border:1px solid #ffca28;">💾 Guardar Todo</button>
+        <button id="btn-html-save-directo" class="btn-3d-mono">✓</button>
         
         <button id="btn-undo" class="btn-format">↶</button>
         
         <button id="btn-redo" class="btn-format">↷</button>
         
-        <button id="btn-mic">🎙️ Dictar</button>
+        <button id="btn-mic" class="btn-format">🎙️</button>
         
-        <button id="btn-lectura">🔊 Escuchar</button>
+        <button id="btn-lectura" class="btn-format">🔊</button>
         
         <button id="btn-msg-voz">💬 Mensaje de Voz</button>
         
         <button id="btn-render-fl">🎛️ Render de Texto a Audio</button>
         
-        <select id="voice-lang" style="max-width: 145px;"></select>
+        <select id="voice-lang" style="max-width: 140px;"></select>
         
-        <select id="app-lang" style="max-width: 145px;"></select>
+        <select id="app-lang" style="max-width: 140px;"></select>
         
         <select id="font-family-select">
             <option value="font-sans">Sans-Serif</option>
@@ -149,14 +159,7 @@
         <button id="btn-toggle-tema">🌓 Tema</button>
     </div>
 
-    <div class="dropdown-formatos-tira" id="dropdown-formatos">
-        <button class="btn-mini-save" id="save-native-html">💾 Base de Datos e HTML</button>
-        <button class="btn-mini-save" id="export-pdf">📄 Exportar PDF</button>
-        <button class="btn-mini-save" id="export-pdf-edit">📝 PDF Editable</button>
-        <button class="btn-mini-save" id="export-doc">💙 DOC (Word)</button>
-    </div>
-
-    <main class="main-container" id="contenedor-principal">
+    <main class="main-container">
         <div class="editor-wrapper">
             <div id="editor-title" class="title-input-field font-sans" contenteditable="true"></div>
             <div id="editor" class="rich-editor font-sans" contenteditable="true"></div>
@@ -168,7 +171,7 @@
         <span id="lbl-file-dates" style="float: right;">Nota Nueva en RAM</span>
     </div>
 
-    <div class="toast" id="toast-notif">Base de datos protegida</div>
+    <div class="toast" id="toast-notif">Guardado en Base de Datos</div>
 
     <script type="module" src="js/main.js"></script>
 </body>
