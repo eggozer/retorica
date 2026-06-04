@@ -1,14 +1,14 @@
 // js/main.js
 
-// Importaciones unificadas de tu arquitectura modular original
 import { initDB, guardarDocumento, obtenerDocumentos } from './storage.js';
 import { iniciarDictado, detenerDictado, leerTexto, iniciarGrabacionVoz, detenerGrabacionVoz } from './audio.js';
 
 var idNotaActual = null;
 var escuchandoDictado = false;
 var grabandoNotaVoz = false;
+var dispositivosVinculadosStatus = false; // Estado local de vinculación dispositivo puente
+var todasLasNotasLocales = []; // Cache en memoria para buscador
 
-// Los 30 idiomas solicitados para alimentar dinámicamente tus combos
 const listaIdiomas = [
     { code: "es-MX", name: "Español (Mex)" }, { code: "es-ES", name: "Español (Esp)" },
     { code: "en-US", name: "English (USA)" }, { code: "en-GB", name: "English (UK)" },
@@ -32,202 +32,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sidebar = document.getElementById('sidebar');
     const selectApp = document.getElementById('app-lang');
     const selectVoice = document.getElementById('voice-lang');
-    const btnMainGuardar = document.getElementById('btn-main-guardar');
-    const dropdownFormatos = document.getElementById('dropdown-formatos');
-    const contenedorPrincipal = document.getElementById('contenedor-principal');
 
-    // 1. POBLADO EXCLUSIVO DE LOS COMBOS DE IDIOMAS EN LA TIRA HORIZONTAL
+    // Cargar estado previo de vinculación del dispositivo
+    if(localStorage.getItem('ret_dispositivo_vinculado') === 'si') {
+        dispositivosVinculadosStatus = true;
+        const btnV = document.getElementById('btn-vincular-inline');
+        if(btnV) btnV.textContent = "🔗 Desvincular";
+    }
+
+    // Poblado de combos de idioma
     if (selectApp && selectVoice) {
-        selectApp.innerHTML = "";
-        selectVoice.innerHTML = "";
+        selectApp.innerHTML = ""; selectVoice.innerHTML = "";
         listaIdiomas.forEach(idioma => {
-            const opt1 = document.createElement('option');
-            opt1.value = idioma.code;
-            opt1.textContent = "📝 " + idioma.name;
-            selectApp.appendChild(opt1);
-
-            const opt2 = document.createElement('option');
-            opt2.value = idioma.code;
-            opt2.textContent = "🔊 " + idioma.name;
-            selectVoice.appendChild(opt2);
+            const opt1 = document.createElement('option'); opt1.value = idioma.code; opt1.textContent = "📝 " + idioma.name; selectApp.appendChild(opt1);
+            const opt2 = document.createElement('option'); opt2.value = idioma.code; opt2.textContent = "🔊 " + idioma.name; selectVoice.appendChild(opt2);
         });
     }
 
-    // 2. LOGICA DEL BOTÓN DESPLEGABLE "GUARDAR TODO"
-    btnMainGuardar?.addEventListener('click', (e) => {
-        e.stopPropagation();
-        dropdownFormatos.classList.toggle('show');
-        if (dropdownFormatos.classList.contains('show')) {
-            contenedorPrincipal.style.paddingTop = "146px"; // Baja el área de trabajo dinámicamente
-        } else {
-            contenedorPrincipal.style.paddingTop = "110px"; // Recupera margen original
-        }
-    });
-
-    document.addEventListener('click', () => {
-        if (dropdownFormatos && dropdownFormatos.classList.contains('show')) {
-            dropdownFormatos.classList.remove('show');
-            contenedorPrincipal.style.paddingTop = "110px";
-        }
-    });
-
-    dropdownFormatos?.addEventListener('click', (e) => e.stopPropagation());
-
-    // 3. FUNCIÓN APERTURA DE ARCHIVOS HTML LOCALES (INDICACIÓN NUEVA)
-    const btnTriggerAbrir = document.getElementById('btn-trigger-abrir');
-    const inputAbrirArchivo = document.getElementById('input-abrir-archivo');
-
-    btnTriggerAbrir?.addEventListener('click', () => inputAbrirArchivo?.click());
-
-    inputAbrirArchivo?.addEventListener('change', function(e) {
-        const archivo = e.target.files[0];
-        if (!archivo) return;
-
-        const lector = new FileReader();
-        lector.onload = function(evt) {
-            const contenidoBruto = evt.target.result;
-            
-            // Creamos un elemento temporal en memoria para limpiar estructuras raras
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = contenidoBruto;
-            
-            // Buscamos si tiene el formato interno de Retórica o si extraemos el texto plano limpio
-            const tituloRescatado = tempDiv.querySelector('#editor-title')?.innerHTML || archivo.name.replace('.html', '');
-            const cuerpoRescatado = tempDiv.querySelector('#editor')?.innerHTML || tempDiv.innerHTML;
-
-            document.getElementById('editor-title').innerHTML = tituloRescatado;
-            document.getElementById('editor').innerHTML = cuerpoRescatado;
-
-            idNotaActual = Date.now(); // Le asignamos un ID local para re-incorporarla
-            actualizarContadores();
-            cacheTemporal();
-
-            sidebar?.classList.add('hidden');
-            if (btnToggle) { btnToggle.style.color = '#ffca28'; btnToggle.style.borderColor = 'rgba(255,255,255,0.15)'; }
-            mostrarToast("Archivo cargado con éxito en el editor");
-        };
-        lector.readAsText(archivo);
-    });
-
-    // 4. CONTROL DEL MENÚ DE LA TUERCA (SIDEBAR INTERRUPTOR)
-    if (btnToggle && sidebar) {
-        btnToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('hidden');
-            btnToggle.style.color = sidebar.classList.contains('hidden') ? '#ffca28' : '#ef4444';
-            btnToggle.style.borderColor = sidebar.classList.contains('hidden') ? 'rgba(255,255,255,0.15)' : '#ef4444';
-        });
-    }
-
-    // GESTOS TÁCTILES CONTROLADOS: LIMITADOS AL MARGEN DE 35 PIXÉLES ANTI-TRABAS
-    let startMenuX = 0;
-    document.addEventListener('touchstart', (e) => {
-        if (sidebar && sidebar.classList.contains('hidden') && e.touches[0].clientX < 35) {
-            startMenuX = e.touches[0].clientX;
-        }
-    }, { passive: true });
-
-    document.addEventListener('touchmove', (e) => {
-        if (startMenuX > 0) {
-            let diffX = e.touches[0].clientX - startMenuX;
-            if (diffX > 70) {
-                sidebar.classList.remove('hidden');
-                if (btnToggle) { btnToggle.style.color = '#ef4444'; btnToggle.style.borderColor = '#ef4444'; }
-                startMenuX = 0;
-            }
-        }
-    }, { passive: true });
-
-    sidebar?.addEventListener('touchstart', (e) => { startMenuX = e.touches[0].clientX; }, { passive: true });
-    sidebar?.addEventListener('touchmove', (e) => {
-        if (startMenuX > 0) {
-            let diffX = e.touches[0].clientX - startMenuX;
-            if (diffX < -70) {
-                sidebar.classList.add('hidden');
-                if (btnToggle) { btnToggle.style.color = '#ffca28'; btnToggle.style.borderColor = 'rgba(255,255,255,0.15)'; }
-                startMenuX = 0;
-            }
-        }
-    }, { passive: true });
-
-    // 5. BOTONES DESHACER / REHACER Y CONTROL TIPOGRÁFICO
-    document.getElementById('btn-undo')?.addEventListener('click', () => { document.execCommand('undo', false, null); cacheTemporal(); });
-    document.getElementById('btn-redo')?.addEventListener('click', () => { document.execCommand('redo', false, null); cacheTemporal(); });
-
-    document.getElementById('font-family-select')?.addEventListener('change', (e) => {
-        const ed = document.getElementById('editor');
-        const tit = document.getElementById('editor-title');
-        if (ed && tit) {
-            ed.classList.remove('font-sans', 'font-serif', 'font-mono'); ed.classList.add(e.target.value);
-            tit.classList.remove('font-sans', 'font-serif', 'font-mono'); tit.classList.add(e.target.value);
-        }
-    });
-
-    // ALTERNADOR DE TEMAS (CLARO Y OSCURO)
-    const btnTema = document.getElementById('btn-toggle-tema');
-    if (localStorage.getItem('retorica_theme') === 'light') { document.body.classList.add('light-theme'); }
-    btnTema?.addEventListener('click', () => {
-        document.body.classList.toggle('light-theme');
-        localStorage.setItem('retorica_theme', document.body.classList.contains('light-theme') ? 'light' : 'dark');
-    });
-
-    // 6. ENLACE DE HERRAMIENTAS AUDIO MÓDULO (DICTADO Y LECTURA)
-    document.getElementById('btn-mic')?.addEventListener('click', function() {
-        const idioma = selectApp ? selectApp.value : 'es-MX';
-        if (!escuchandoDictado) {
-            escuchandoDictado = true;
-            this.style.background = "#ef4444"; this.style.color = "#ffffff";
-            mostrarToast("Dictado por voz iniciado...");
-            iniciarDictado(idioma, (texto) => {
-                const ed = document.getElementById('editor');
-                if (ed) { ed.focus(); document.execCommand('insertText', false, texto + ' '); cacheTemporal(); actualizarContadores(); }
-            }, () => {
-                escuchandoDictado = false; this.style.background = ""; this.style.color = "";
-            });
-        } else {
-            escuchandoDictado = false; detenerDictado(); this.style.background = ""; this.style.color = "";
-            mostrarToast("Dictado detenido");
-        }
-    });
-
-    document.getElementById('btn-lectura')?.addEventListener('click', () => {
-        const ed = document.getElementById('editor');
-        const voz = selectVoice ? selectVoice.value : 'es-MX';
-        if (ed && ed.innerText.trim()) {
-            mostrarToast("Leyendo texto en voz alta...");
-            leerTexto(ed.innerText, voz, () => mostrarToast("Lectura concluida"));
-        }
-    });
-
-    // 7. FUNCIÓN MENSAJE DE VOZ (INDICACIÓN NUEVA)
-    document.getElementById('btn-msg-voz')?.addEventListener('click', function() {
-        if (!grabandoNotaVoz) {
-            grabandoNotaVoz = true;
-            this.style.background = "#b91c1c"; this.style.color = "#ffffff";
-            mostrarToast("Grabando archivo de audio directo...");
-            iniciarGrabacionVoz((blobAudio) => {
-                mostrarToast("Audio capturado con éxito");
-                console.log("Blob listo para persistencia local: ", blobAudio);
-            });
-        } else {
-            grabandoNotaVoz = false;
-            detenerGrabacionVoz();
-            this.style.background = ""; this.style.color = "";
-            mostrarToast("Grabación finalizada");
-        }
-    });
-
-    document.getElementById('btn-render-fl')?.addEventListener('click', () => mostrarToast("Procesando mezcla de audio..."));
-
-    // 8. INICIALIZADOR DE LA BASE DE DATOS LOCAL
-    try {
-        await initDB();
-        listarNotas();
-    } catch (err) {
-        console.error("Fallo IndexedDB:", err);
-    }
-
-    // CONTROLADORES DE GUARDADO DESDE EL DESPLEGABLE HORIZONTAL
-    document.getElementById('save-native-html')?.addEventListener('click', async () => {
+    // 1. BOTÓN PALOMITA ✓ GUARDADO LOCAL EXCLUSIVO EN INDEXEDDB (SIN DESCARGAS FANTASMA - PUNTO 1 Y 5)
+    document.getElementById('btn-html-save-directo')?.addEventListener('click', async () => {
         const t = document.getElementById('editor-title');
         const e = document.getElementById('editor');
         if (!t || !e) return;
@@ -236,38 +59,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const completado = await guardarDocumento(idNotaActual, t.innerHTML, e.innerHTML, [], "nota", "letter");
         if (completado) {
-            mostrarToast("Nota indexada en la Base de Datos");
+            mostrarToast("✓ Nota guardada localmente en Base de Datos");
             listarNotas();
-            // Disparamos la descarga del HTML físico de respaldo automáticamente hacia tu teléfono
-            const estructuraHTML = `<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body><div id="editor-title">${t.innerHTML}</div><div id="editor">${e.innerHTML}</div></body></html>`;
-            const blob = new Blob([estructuraHTML], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = `${t.innerText.trim() || 'nota-retorica'}.html`;
-            document.body.appendChild(a); a.click(); document.body.removeChild(a);
-            
-            localStorage.removeItem('ret_c_title'); localStorage.removeItem('ret_c_body');
-            dropdownFormatos.classList.remove('show'); contenedorPrincipal.style.paddingTop = "110px";
+            cacheTemporal();
         }
     });
 
-    // EXPORTADORES ORIGINALES COMPATIBILIZADOS
-    document.getElementById('export-pdf')?.addEventListener('click', () => {
-        html2pdf().from(document.getElementById('editor')).save('documento.pdf');
-        dropdownFormatos.classList.remove('show'); contenedorPrincipal.style.paddingTop = "110px";
-    });
-    document.getElementById('export-pdf-edit')?.addEventListener('click', () => {
-        html2pdf().from(document.getElementById('editor')).save('documento-editable.pdf');
-        dropdownFormatos.classList.remove('show'); contenedorPrincipal.style.paddingTop = "110px";
-    });
-    document.getElementById('export-doc')?.addEventListener('click', () => {
-        const html = document.getElementById('editor').innerHTML;
-        const blob = new Blob(['\ufeff' + html], { type: 'application/msword' });
-        const url = URL.createObjectURL(blob); const a = document.createElement('a');
-        a.href = url; a.download = 'retorica-export.doc'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
-        dropdownFormatos.classList.remove('show'); contenedorPrincipal.style.paddingTop = "110px";
-    });
-
-    document.getElementById('btn-nuevo')?.addEventListener('click', () => {
+    // 2. FUNCIÓN DE LA TIRA INTERNA DEL ENGRANE: CREAR NOTA NUEVA (➕)
+    document.getElementById('btn-nuevo-inline')?.addEventListener('click', () => {
         idNotaActual = null;
         document.getElementById('editor-title').innerHTML = "";
         document.getElementById('editor').innerHTML = "";
@@ -275,9 +74,155 @@ document.addEventListener('DOMContentLoaded', async () => {
         actualizarContadores();
         sidebar?.classList.add('hidden');
         if (btnToggle) { btnToggle.style.color = '#ffca28'; btnToggle.style.borderColor = 'rgba(255,255,255,0.15)'; }
+        mostrarToast("Lienzo limpio para nueva nota");
     });
 
-    // 9. COPIA DE SEGURIDAD PREVENTIVA EN CALIENTE CONTRA APAGONES
+    // 3. FUNCIÓN DE LA TIRA INTERNA DEL ENGRANE: ABRIR ARCHIVO (📂 - SELECCIÓN DIRECTA)
+    const btnAbrirInline = document.getElementById('btn-abrir-inline');
+    const inputFileNativo = document.getElementById('input-file-abrir-nativo');
+
+    btnAbrirInline?.addEventListener('click', () => inputFileNativo?.click());
+
+    inputFileNativo?.addEventListener('change', function(e) {
+        const archivo = e.target.files[0];
+        if (!archivo) return;
+
+        const lector = new FileReader();
+        lector.onload = function(evt) {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = evt.target.result;
+            
+            const tituloRescatado = tempDiv.querySelector('#editor-title')?.innerHTML || archivo.name.replace('.html', '');
+            const cuerpoRescatado = tempDiv.querySelector('#editor')?.innerHTML || tempDiv.innerHTML;
+
+            document.getElementById('editor-title').innerHTML = tituloRescatado;
+            document.getElementById('editor').innerHTML = cuerpoRescatado;
+
+            idNotaActual = Date.now();
+            actualizarContadores(); cacheTemporal();
+            sidebar?.classList.add('hidden');
+            if (btnToggle) { btnToggle.style.color = '#ffca28'; btnToggle.style.borderColor = 'rgba(255,255,255,0.15)'; }
+            mostrarToast("Nota abierta e importada con éxito");
+        };
+        lector.readAsText(archivo);
+    });
+
+    // 4. FUNCIÓN DE LA TIRA INTERNA DEL ENGRANE: VINCULAR / DESVINCULAR DISPOSITIVO (🔗)
+    document.getElementById('btn-vincular-inline')?.addEventListener('click', function() {
+        if(!dispositivosVinculadosStatus) {
+            dispositivosVinculadosStatus = true;
+            localStorage.setItem('ret_dispositivo_vinculado', 'si');
+            this.textContent = "🔗 Desvincular";
+            mostrarToast("Dispositivo vinculado. Resguardo en la nube activo.");
+        } else {
+            dispositivosVinculadosStatus = false;
+            localStorage.removeItem('ret_dispositivo_vinculado');
+            this.textContent = "🔗 Vincular";
+            mostrarToast("Dispositivo desvinculado. Datos solo locales.");
+        }
+    });
+
+    // 5. FUNCIÓN DE LA TIRA INTERNA DEL ENGRANE: GUARDAR COMO ALTERNADOR PANEL (💾)
+    const btnSaveAsInline = document.getElementById('btn-saveas-inline');
+    const panelGuardarComo = document.getElementById('panel-guardar-como-container');
+
+    btnSaveAsInline?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        panelGuardarComo?.classList.toggle('show');
+    });
+
+    // EXPORTADORES INTERNOS (PRODUCIDOS POR CÓDIGO)
+    document.getElementById('export-code-pdf')?.addEventListener('click', () => {
+        html2pdf().from(document.getElementById('editor')).save('documento.pdf');
+        panelGuardarComo?.classList.remove('show');
+    });
+    document.getElementById('export-code-pdf-edit')?.addEventListener('click', () => {
+        html2pdf().from(document.getElementById('editor')).save('documento-editable.pdf');
+        panelGuardarComo?.classList.remove('show');
+    });
+    document.getElementById('export-code-doc')?.addEventListener('click', () => {
+        const html = document.getElementById('editor').innerHTML;
+        const blob = new Blob(['\ufeff' + html], { type: 'application/msword' });
+        const url = URL.createObjectURL(blob); const a = document.createElement('a');
+        a.href = url; a.download = 'retorica-export.doc'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        panelGuardarComo?.classList.remove('show');
+    });
+
+    // 6. FUNCIÓN DE LA TIRA INTERNA DEL ENGRANE: INSTALAR APP (📲)
+    document.getElementById('btn-instalar-inline')?.addEventListener('click', () => {
+        mostrarToast("Ejecutando instalación nativa PWA...");
+    });
+
+    // 7. BUSCADOR INTERNO DE NOTAS EN TIEMPO REAL (🔍)
+    document.getElementById('input-buscador-interno')?.addEventListener('input', function(e) {
+        const termino = e.target.value.toLowerCase().trim();
+        renderizarListaFiltrada(termino);
+    });
+
+    // Interrupción del Menú lateral
+    if (btnToggle && sidebar) {
+        btnToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('hidden');
+            btnToggle.style.color = sidebar.classList.contains('hidden') ? '#ffca28' : '#ef4444';
+            btnToggle.style.borderColor = sidebar.classList.contains('hidden') ? 'rgba(255,255,255,0.15)' : '#ef4444';
+        });
+    }
+
+    // Controles básicos adicionales
+    document.getElementById('btn-undo')?.addEventListener('click', () => { document.execCommand('undo', false, null); cacheTemporal(); });
+    document.getElementById('btn-redo')?.addEventListener('click', () => { document.execCommand('redo', false, null); cacheTemporal(); });
+
+    document.getElementById('font-family-select')?.addEventListener('change', (e) => {
+        const ed = document.getElementById('editor'); const tit = document.getElementById('editor-title');
+        if (ed && tit) {
+            ed.classList.remove('font-sans', 'font-serif', 'font-mono'); ed.classList.add(e.target.value);
+            tit.classList.remove('font-sans', 'font-serif', 'font-mono'); tit.classList.add(e.target.value);
+        }
+    });
+
+    const btnTema = document.getElementById('btn-toggle-tema');
+    if (localStorage.getItem('retorica_theme') === 'light') { document.body.classList.add('light-theme'); }
+    btnTema?.addEventListener('click', () => {
+        document.body.classList.toggle('light-theme');
+        localStorage.setItem('retorica_theme', document.body.classList.contains('light-theme') ? 'light' : 'dark');
+    });
+
+    // Control de Voz y Audio modular
+    document.getElementById('btn-mic')?.addEventListener('click', function() {
+        const idioma = selectApp ? selectApp.value : 'es-MX';
+        if (!escuchandoDictado) {
+            escuchandoDictado = true; this.style.background = "#ef4444";
+            iniciarDictado(idioma, (texto) => {
+                const ed = document.getElementById('editor');
+                if (ed) { ed.focus(); document.execCommand('insertText', false, texto + ' '); cacheTemporal(); actualizarContadores(); }
+            }, () => { escuchandoDictado = false; this.style.background = ""; });
+        } else {
+            escuchandoDictado = false; maxDetenerDictado(); this.style.background = "";
+        }
+    });
+
+    function maxDetenerDictado() { detenerDictado(); }
+
+    document.getElementById('btn-lectura')?.addEventListener('click', () => {
+        const ed = document.getElementById('editor'); const voz = selectVoice ? selectVoice.value : 'es-MX';
+        if (ed && ed.innerText.trim()) { leerTexto(ed.innerText, voz, () => {}); }
+    });
+
+    document.getElementById('btn-msg-voz')?.addEventListener('click', function() {
+        if (!grabandoNotaVoz) {
+            grabandoNotaVoz = true; this.style.background = "#b91c1c";
+            iniciarGrabacionVoz((blobAudio) => { console.log("Grabación guardada localmente.", blobAudio); });
+        } else {
+            grabandoNotaVoz = false; detenerGrabacionVoz(); this.style.background = "";
+            mostrarToast("Grabación de voz guardada");
+        }
+    });
+
+    document.getElementById('btn-render-fl')?.addEventListener('click', () => mostrarToast("Renderizando audio sin descargas..."));
+
+    // Inicializar Persistencia
+    try { await initDB(); listarNotas(); } catch (err) { console.error("Fallo IndexedDB:", err); }
+
     document.getElementById('editor-title')?.addEventListener('input', () => { cacheTemporal(); actualizarContadores(); });
     document.getElementById('editor')?.addEventListener('input', () => { cacheTemporal(); actualizarContadores(); });
 
@@ -285,19 +230,33 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function listarNotas() {
+    todasLasNotasLocales = await obtenerDocumentos();
+    renderizarListaFiltrada("");
+}
+
+function renderizarListaFiltrada(filtro) {
     const lista = document.getElementById('document-list');
     if (!lista) return; lista.innerHTML = "";
-    
-    const notas = await obtenerDocumentos();
-    notas.forEach(nota => {
-        const div = document.createElement('div');
-        div.className = "document-list-item";
+
+    const notasFiltradas = todasLasNotasLocales.filter(nota => {
+        const t = (nota.titulo || "").toLowerCase();
+        const c = (nota.contenido || "").toLowerCase();
+        return t.includes(filtro) || c.includes(filtro);
+    });
+
+    if(notasFiltradas.length === 0) {
+        lista.innerHTML = "<div style='font-size:0.75rem; color:#6b7280; font-style:italic; padding:6px;'>No se encontraron notas...</div>";
+        return;
+    }
+
+    notasFiltradas.forEach(nota => {
+        const div = document.createElement('div'); div.className = "document-list-item";
 
         const tmpB = document.createElement('div'); tmpB.innerHTML = nota.contenido; const plainB = tmpB.innerText.trim();
         const tmpT = document.createElement('div'); tmpT.innerHTML = nota.titulo || ""; const plainT = tmpT.innerText.trim();
 
-        const pTitle = plainT ? plainT : (plainB ? plainB.substring(0, 18) + "..." : "Sin Título");
-        const pBody = plainB ? plainB : "Sin contenido adicional.";
+        const pTitle = plainT ? plainT : (plainB ? plainB.substring(0, 22) + "..." : "Sin Título");
+        const pBody = plainB ? plainB : "Sin contenido.";
 
         div.innerHTML = `<div class='doc-item-title'>📄 ${pTitle}</div><div class='doc-item-body'>${pBody}</div>`;
         
