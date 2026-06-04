@@ -1,7 +1,6 @@
 // js/main.js
 import { initDB, guardarDocumento, obtenerDocumentos, eliminarDocumento } from './storage.js';
 import { iniciarDictado, detenerDictado, leerTexto, iniciarGrabacionVoz, detenerGrabacionVoz } from './audio.js';
-// Importamos exactamente las dos funciones que veo en tus capturas de pantalla
 import { cargarSelectores, aplicarTraduccionInterfaz } from './idiomas.js';
 
 var idNotaActual = null;
@@ -17,12 +16,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const selectVoice = document.getElementById('voice-lang');
     const txtLeyenda = document.getElementById('wrapper-leyenda-vinculo');
 
-    // 1. CARGA DE SELECTORES REPARADA NATIVAMENTE
-    // Usamos tu función propia de idiomas.js para rellenar los combos correctamente
+    // 1. CARGA NATIVA DE LOS SELECTORES USANDO TU PROPIO MÓDULO (REPARADO)
     if (selectApp && selectVoice) {
         cargarSelectores(selectApp, selectVoice);
         
-        // Recuperar configuraciones previas del almacenamiento local
+        // Recuperar configuraciones previas guardadas del usuario
         if (localStorage.getItem('ret_lang_app')) {
             selectApp.value = localStorage.getItem('ret_lang_app');
         }
@@ -31,7 +29,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Inicializar estado de vinculación remota persistente
+    // Inicializar estado de vinculación persistente
     if (localStorage.getItem('ret_dispositivo_vinculado') === 'si') {
         dispositivosVinculadosStatus = true;
         const btnV = document.getElementById('btn-vincular-inline');
@@ -39,8 +37,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (txtLeyenda) txtLeyenda.innerHTML = "🔗 Linked: Servidor Sincronizado Activo";
     }
 
-    // 2. DISPARADORES DE TRADUCCIÓN EN TIEMPO REAL (REPARADO)
-    // Escucha el cambio de idioma e invoca tu función nativa mapeando los elementos reales de tu UI
+    // 2. ESCUCHADORES DE CAMBIO DE IDIOMA E INTERFAZ DINÁMICA (REPARADO EL BOTÓN DE IDIOMAS)
     selectApp?.addEventListener('change', (e) => {
         localStorage.setItem('ret_lang_app', e.target.value);
         ejecutarTraduccionGlobal(e.target.value);
@@ -52,7 +49,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         mostrarToast("Idioma Voz: " + e.target.value);
     });
 
-    // 3. OPERACIONES DE BASE DE DATOS LOCALES (INDEXEDDB)
+    // 3. EVENTO GUARDAR LOCAL EN INDEXEDDB
     document.getElementById('btn-html-save-directo')?.addEventListener('click', async () => {
         const t = document.getElementById('editor-title');
         const e = document.getElementById('editor');
@@ -70,7 +67,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // 4. CREACIÓN DE NUEVA NOTA LIMPIA
+    // 4. NUEVA NOTA LIMPIA DESDE BOTÓN SUPERIOR REDONDO
     document.getElementById('btn-cabecera-nuevo-fijo')?.addEventListener('click', () => {
         idNotaActual = null;
         document.getElementById('editor-title').innerHTML = "";
@@ -87,7 +84,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         mostrarToast("Nueva Nota Limpia");
     });
 
-    // 5. IMPORTADOR DE ARCHIVOS LOCALES EXTERNOS
+    // 5. CONTROLADOR PARA ABRIR ARCHIVOS LOCALES
     const btnAbrirInline = document.getElementById('btn-abrir-inline');
     const inputFileNativo = document.getElementById('input-file-abrir-nativo');
     
@@ -119,7 +116,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         lector.readAsText(archivo);
     });
 
-    // 6. GESTIÓN DE VINCULACIÓN ENTRE DISPOSITIVOS
+    // 6. OPERACIONES DE VINCULACIÓN DE EQUIPOS
     document.getElementById('btn-vincular-inline')?.addEventListener('click', function () {
         if (!dispositivosVinculadosStatus) {
             dispositivosVinculadosStatus = true;
@@ -136,7 +133,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // 7. PANEL EXPORTAR MULTIFORMATO
+    // 7. EXPORTADOR MULTIFORMATO (PDF / WORD)
     const btnSaveAsInline = document.getElementById('btn-saveas-inline');
     const panelGuardarComo = document.getElementById('panel-guardar-como-container');
     
@@ -168,17 +165,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         panelGuardarComo?.classList.remove('show');
     });
 
-    // 8. SOPORTE DE INSTALACIÓN PWA
+    // 8. SOPORTE DE INSTALACIÓN PWA AUTOMÁTICA
     document.getElementById('btn-instalar-inline')?.addEventListener('click', () => {
         mostrarToast("Instalando en entorno de escritorio...");
     });
 
-    // 9. FILTRADO DINÁMICO EN EL BUSCADOR INTERNO
+    // 9. FILTRO EN TIEMPO REAL DEL HISTORIAL
     document.getElementById('input-buscador-interno')?.addEventListener('input', function (e) {
         renderizarListaFiltrada(e.target.value.toLowerCase().trim());
     });
 
-    // 10. INTERRUPTOR VISUAL DEL MENÚ LATERAL (SIDEBAR)
+    // 10. CONTROL DE APERTURA DEL SIDEBAR LATERAL
     if (btnToggle && sidebar) {
         btnToggle.addEventListener('click', () => {
             sidebar.classList.toggle('hidden');
@@ -188,7 +185,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // 11. COMANDOS NATIVOS EDITABLES (DESHACER / REHACER)
+    // 11. MANEJO DE COMANDOS DE DESHACER Y REHACER NATIVOS
     document.getElementById('btn-undo')?.addEventListener('click', () => {
         document.execCommand('undo', false, null);
         cacheTemporal();
@@ -209,7 +206,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // 13. CONMUTADOR DE TEMA DINÁMICO (CLARO / OSCURO)
+    // 13. INTERRUPTOR DE CAMBIO DE TEMAS (CLARO Y OSCURO)
     const btnTema = document.getElementById('btn-toggle-tema');
     if (localStorage.getItem('retorica_theme') === 'light') {
         document.body.classList.add('light-theme');
@@ -220,7 +217,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         localStorage.setItem('retorica_theme', document.body.classList.contains('light-theme') ? 'light' : 'dark');
     });
 
-    // 14. MÓDULOS PERIFÉRICOS DE AUDIO (DICTADO POR VOZ INTEGRADO)
+    // 14. CONTROLADORES DE AUDIO ENLAZADOS (DICTADO POR VOZ)
     document.getElementById('btn-mic')?.addEventListener('click', function () {
         const idioma = selectVoice ? selectVoice.value : 'es-MX';
         if (!escuchandoDictado) {
@@ -245,7 +242,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // LECTURA DE TEXTO EN VOZ ALTA (SÍNTESIS DE VOZ TTS)
+    // SÍNTESIS DE AUDIO (TEXT-TO-SPEECH)
     document.getElementById('btn-lectura')?.addEventListener('click', () => {
         const ed = document.getElementById('editor');
         const voz = selectVoice ? selectVoice.value : 'es-MX';
@@ -254,7 +251,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // GRABACIÓN DE NOTAS DE AUDIO CRUDAS
+    // GRABACIÓN DIRECTA DE MENSAJES DE VOZ
     document.getElementById('btn-msg-voz')?.addEventListener('click', function () {
         if (!grabandoNotaVoz) {
             grabandoNotaVoz = true;
@@ -272,7 +269,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         mostrarToast("Compilando muestras de audio neón...");
     });
 
-    // 15. ARRANQUE AUTOMÁTICO E INICIALIZACIÓN DE LA BASE DE DATOS
+    // 15. INICIALIZACIÓN DE LA BASE DE DATOS LOCAL INDEXEDDB
     try {
         await initDB();
         listarNotas();
@@ -280,7 +277,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error("Fallo crítico en IndexedDB:", err);
     }
 
-    // Listeners para vigilar la escritura en caliente del usuario
+    // Monitoreo en caliente de escritura para evitar pérdidas de información
     document.getElementById('editor-title')?.addEventListener('input', () => {
         cacheTemporal();
         actualizarContadores();
@@ -293,12 +290,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     restaurarCache();
     
-    // Ejecutar la traducción inicial cargando la preferencia guardada
+    // Forzar la traducción inicial guardada por defecto al abrir la aplicación
     const idiomaInicial = localStorage.getItem('ret_lang_app') || "es";
     ejecutarTraduccionGlobal(idiomaInicial);
 });
 
-// 16. MANIPULACIÓN, CONSTRUCCIÓN Y FILTRADO DEL HISTORIAL LOCAL
+// 16. EXTRACCIÓN Y RENDERIZACIÓN DEL HISTORIAL DE NOTAS
 async function listarNotas() {
     todasLasNotasLocales = await obtenerDocumentos();
     renderizarListaFiltrada("");
@@ -345,7 +342,7 @@ function renderizarListaFiltrada(filtro) {
         `;
         lista.appendChild(div);
 
-        // Eventos para cargar la nota seleccionada del historial en el editor principal
+        // Cargar nota local en el espacio editable
         document.getElementById(`click-load-${nota.id}`).addEventListener('click', () => {
             idNotaActual = nota.id;
             document.getElementById('editor-title').innerHTML = nota.titulo;
@@ -356,7 +353,7 @@ function renderizarListaFiltrada(filtro) {
             mostrarToast("Nota Cargada");
         });
 
-        // Compartición nativa o copia al portapapeles
+        // Compartir texto plano de la obra
         document.getElementById(`share-${nota.id}`).addEventListener('click', (e) => {
             e.stopPropagation();
             if (navigator.share) {
@@ -367,7 +364,7 @@ function renderizarListaFiltrada(filtro) {
             }
         });
 
-        // Borrado definitivo del registro
+        // Borrado definitivo del registro IndexedDB
         document.getElementById(`del-${nota.id}`).addEventListener('click', async (e) => {
             e.stopPropagation();
             if (confirm("¿Estás seguro de eliminar este documento permanentemente?")) {
@@ -388,9 +385,9 @@ function renderizarListaFiltrada(filtro) {
     });
 }
 
-// 17. CONECTOR FIJO CON TU DICCIONARIO REAL DE APLICARTRADUCCIONINTERFAZ
+// 17. CONECTOR INTERNO PERFECTO CON TU MÓDULO DE TRADUCCIÓN REAL (REPARADO)
 function ejecutarTraduccionGlobal(codigoIdioma) {
-    // Vinculamos de manera precisa los IDs de tu DOM con los nombres de variables que busca tu script nativo
+    // Mapeamos los elementos con los nombres exactos de variables que espera tu idiomas.js
     const elementosUI = {
         lblSaveAs: document.getElementById('btn-saveas-inline'),
         btnNuevo: document.getElementById('btn-cabecera-nuevo-fijo'),
@@ -398,11 +395,11 @@ function ejecutarTraduccionGlobal(codigoIdioma) {
         editor: document.getElementById('editor')
     };
     
-    // Llamamos a tu función original pasándole el código de idioma y el mapa de elementos
+    // Llamada nativa a tu script original sin alterar nada
     aplicarTraduccionInterfaz(codigoIdioma, elementosUI);
 }
 
-// 18. CACHÉ DE RESPALDO Y CONTADORES DE CARACTERES
+// 18. GESTIÓN DE CACHÉ DE SEGURIDAD EN TIEMPO REAL
 function cacheTemporal() {
     const t = document.getElementById('editor-title')?.innerHTML || "";
     const b = document.getElementById('editor')?.innerHTML || "";
