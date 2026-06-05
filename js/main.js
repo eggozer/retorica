@@ -1,101 +1,135 @@
-// js/main.js
+// --- CONMUTADOR CENTRAL Y CONTROLADOR DE INTERFAZ (MAIN) ---
+
 import { initDB, guardarDocumento, obtenerDocumentos, eliminarDocumento } from './storage.js';
-import { iniciarDictado, detenerDictado, leerTexto } from './audio.js';
+import { iniciarDictado, detenerDictado, leerTexto, toggleGrabacionMensajeVoz, renderizarTextoAAudioArchivo } from './audio.js';
 import { cargarSelectores, aplicarTraduccionInterfaz } from './idiomas.js';
 
-let idNotaActual = null;
-let todasLasNotasLocales = [];
+// Estado global de la aplicación
+let idDocumentoActual = null;
+let dictadoActivo = false;
+let lecturaActiva = false;
 
-document.addEventListener('DOMContentLoaded', async () => {
-    // Referencias a la UI
-    const editorTitle = document.getElementById('editor-title');
-    const editorBody = document.getElementById('editor');
-    const selectApp = document.getElementById('app-lang');
-    const selectVoice = document.getElementById('voice-lang');
-    const statsText = document.getElementById('stats-text');
+// Elementos de la Interfaz de Usuario (DOM)
+const editor = document.getElementById('editor');
+const statsBar = document.getElementById('stats-bar');
+const btnMic = document.getElementById('btn-mic');
+const btnLectura = document.getElementById('btn-lectura');
+const comboApp = document.getElementById('app-lang');
+const comboVoz = document.getElementById('voice-lang');
+const btnTema = document.getElementById('btn-toggle-tema');
+const btnGuardar = document.getElementById('btn-main-guardar');
+const toast = document.getElementById('toast-notif');
 
-    // 1. Inicializar Idiomas
-    if (selectApp && selectVoice) {
-        cargarSelectores(selectApp, selectVoice);
-        selectApp.value = localStorage.getItem('ret_lang_app') || 'es';
-        selectVoice.value = localStorage.getItem('ret_lang_voice') || 'es-MX';
-    }
-
-    // 2. Función de Traducción (Usa tu lógica de idiomas.js)
-    const traducir = (codigo) => {
-        const elementos = {
-            lblSaveAs: document.getElementById('btn-saveas-inline'),
-            btnNuevo: document.getElementById('btn-cabecera-nuevo-fijo'),
-            btnGuardar: document.getElementById('btn-html-save-directo'),
-            editor: editorBody
-        };
-        aplicarTraduccionInterfaz(codigo, elementos);
-    };
-
-    // 3. Inicializar Base de Datos y cargar notas
+// 1. INICIALIZACIÓN DE COMPONENTES
+async function inicializarApp() {
+    // Configurar menús de lenguajes e interfaz
+    cargarSelectores(comboApp, comboVoz);
+    
+    // Conectar base de datos persistente y cargar biblioteca de notas
     try {
         await initDB();
-        await refrescarLista();
-        restaurarCache();
-        traducir(selectApp.value);
-    } catch (e) { console.error("Error DB:", e); }
+        configurarEventosBasicos();
+        actualizarContadoresEditor();
+        mostrarNotificacion("Retórica Modular Inicializada");
+    } catch (err) {
+        console.error("Error al levantar la persistencia IndexedDB:", err);
+    }
+}
 
-    // 4. Evento Guardar (Respeta tus 7 parámetros de storage.js)
-    document.getElementById('btn-html-save-directo')?.addEventListener('click', async () => {
-        if (!idNotaActual) idNotaActual = Date.now();
-        
-        // id, titulo, contenido, audios, tipo, tamaño, creado
-        const exito = await guardarDocumento(
-            idNotaActual, 
-            editorTitle.innerHTML, 
-            editorBody.innerHTML, 
-            [], "nota", "letter", null
-        );
+// 2. CONTROLADORES DE EVENTOS (ACCIONES DE BOTONES)
+function configurarEventosBasicos() {
+    // Evento de escucha para contadores de texto en tiempo real
+    editor.addEventListener('input', actualizarContadoresEditor);
 
-        if (exito) {
-            window.mostrarToast("✓ Guardado");
-            refrescarLista();
+    // Botón Dictado por Voz (Microfóno)
+    btnMic.onclick = () => {
+        if (dictadoActivo) {
+            detenerDictado();
+            cambiarEstadoMic(false);
+        } else {
+            cambiarEstadoMic(true);
+            iniciarDictado(comboVoz.value, 
+                (textoFinal, textoIntermedio) => {
+                    if (textoFinal) {
+                        editor.value += (editor.value ? ' ' : '') + textoFinal;
+                        actualizarContadoresEditor();
+                    }
+                }, 
+                () => cambiarEstadoMic(false)
+            );
         }
-    });
-
-    // 5. Dictado por Voz
-    document.getElementById('btn-mic')?.addEventListener('click', function() {
-        const micBtn = this;
-        iniciarDictado(selectVoice.value, (texto) => {
-            editorBody.focus();
-            document.execCommand('insertText', false, texto + ' ');
-            actualizarContadores();
-        }, () => micBtn.style.background = "");
-        micBtn.style.background = "#ff3b30";
-    });
-
-    // 6. Contadores y Caché
-    const actualizarContadores = () => {
-        if (statsText) statsText.textContent = `Caracteres: ${editorBody.innerText.trim().length}`;
-        localStorage.setItem('ret_c_title', editorTitle.innerHTML);
-        localStorage.setItem('ret_c_body', editorBody.innerHTML);
-        localStorage.setItem('ret_c_id', idNotaActual);
     };
 
-    editorTitle.addEventListener('input', actualizarContadores);
-    editorBody.addEventListener('input', actualizarContadores);
-});
+    // Botón Lectura en Voz Alta
+    btnLectura.onclick = () => {
+        const comenzoLectura = leerTexto(editor.value, comboVoz.value.split('-')[0], () => {
+            lecturaActiva = false;
+            btnLectura.textContent = "🔊";
+        });
 
-async function refrescarLista() {
-    todasLasNotasLocales = await obtenerDocumentos();
-    const lista = document.getElementById('document-list');
-    if (!lista) return;
-    lista.innerHTML = todasLasNotasLocales.map(n => `
-        <div class="document-list-item">
-            <span onclick="window.cargarNota(${n.id})">📄 ${n.titulo || 'Sin título'}</span>
-            <button onclick="window.borrarNota(${n.id})">🗑️</button>
-        </div>
-    `).join('');
+        if (comenzoLectura) {
+            lecturaActiva = true;
+            btnLectura.textContent = "⏹️";
+        } else if (lecturaActiva === false) {
+            btnLectura.textContent = "🔊";
+        }
+    };
+
+    // Botón Alternar Tema Visual (Luz / Oscuridad)
+    btnTema.onclick = () => {
+        const esClaro = document.body.classList.toggle('light-theme');
+        btnTema.textContent = esClaro ? "☀️" : "🌙";
+    };
+
+    // Botón Guardar Directo (HTML y Persistencia)
+    btnGuardar.onclick = async () => {
+        const contenido = editor.value;
+        if (!contenido.trim()) {
+            mostrarNotificacion("El editor está vacío");
+            return;
+        }
+
+        if (!idDocumentoActual) idDocumentoActual = Date.now();
+        const lineas = contenido.split('\n');
+        const titulo = lineas[0].substring(0, 25) || "Nota Nueva";
+
+        const exito = await guardarDocumento(idDocumentoActual, titulo, contenido);
+        if (exito) {
+            mostrarNotificacion("Nota guardada con éxito");
+            // Aquí puedes enlazar la descarga física si se requiere
+        }
+    };
+
+    // Manejo de cambio de idioma en la App
+    comboApp.onchange = (e) => {
+        aplicarTraduccionInterfaz(e.target.value, {
+            lblSaveAs: document.getElementById('lbl-save-as'),
+            btnNuevo: document.getElementById('btn-nuevo')
+        });
+    };
 }
 
-function restaurarCache() {
-    const t = localStorage.getItem('ret_c_title');
-    const b = localStorage.getItem('ret_c_body');
-    if (t) document.getElementById('editor-title').innerHTML = t;
-    if (b) document.getElementById('editor').innerHTML = b;
+// 3. AUXILIARES VINCULADOS
+function actualizarContadoresEditor() {
+    const texto = editor.value;
+    const caracteres = texto.length;
+    const palabras = texto.trim() === "" ? 0 : texto.trim().split(/\s+/).length;
+    const lineas = texto === "" ? 0 : texto.split('\n').length;
+    
+    statsBar.textContent = `Caracteres: ${caracteres} | Palabras: ${palabras} | Líneas: ${lineas}`;
 }
+
+function cambiarEstadoMic(estaActivo) {
+    dictadoActivo = estaActivo;
+    btnMic.textContent = estaActivo ? "🛑" : "🎙️";
+    btnMic.style.borderColor = estaActivo ? "var(--danger)" : "var(--border)";
+}
+
+function mostrarNotificacion(mensaje) {
+    toast.textContent = mensaje;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+// Ejecutar al cargar el documento por completo
+window.addEventListener('DOMContentLoaded', inicializarApp);
