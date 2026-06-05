@@ -1,117 +1,123 @@
-// --- MÓDULO DE AUDIO: RECONOCIMIENTO, SÍNTESIS Y GRABACIÓN ---
+/**
+ * Retórica - Módulo Avanzado de Audio, Síntesis de Voz y Captura de Buffers.
+ */
+let recognitionInstance = null;
+let grabadorMedias = null;[cite: 12]
+let segmentosAudio = [];[cite: 12]
+let estaGrabandoVoz = false;[cite: 12]
 
-let recognition = null;
-let mediaRecorder = null;
-let audioChunks = [];
-let isRecordingVoice = false;
+// Diccionario de Archivos de Voz Almacenados en Memoria Volátil para su renderizado
+export const BIBLIOTECA_VOZ_INTERNA = {};
 
-// 1. DICTADO POR VOZ (TEXT-TO-SPEECH)
-export function iniciarDictado(idioma, onResult, onEnd) {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-        alert("Tu navegador o dispositivo no soporta reconocimiento de voz.");
-        return null;
+export function iniciarDictado(idioma, onResult, onEnd) {[cite: 12]
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;[cite: 12]
+    if (!SpeechRecognition) {[cite: 12]
+        alert("El motor de dictado no es compatible con el navegador de este dispositivo.");[cite: 12]
+        return null;[cite: 12]
     }
 
-    if (recognition) {
-        recognition.stop();
-        return null;
+    if (recognitionInstance) {[cite: 12]
+        recognitionInstance.stop();[cite: 12]
+        return null;[cite: 12]
     }
 
-    recognition = new SpeechRecognition();
-    recognition.lang = idioma;
-    recognition.continuous = true;
-    recognition.interimResults = true;
+    recognitionInstance = new SpeechRecognition();[cite: 12]
+    recognitionInstance.lang = idioma;[cite: 12]
+    recognitionInstance.continuous = true;[cite: 12]
+    recognitionInstance.interimResults = false;[cite: 12]
 
-    recognition.onresult = (event) => {
-        let textoIntermedio = '';
-        let textoFinal = '';
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-            if (event.results[i].isFinal) {
-                textoFinal += event.results[i][0].transcript;
-            } else {
-                textoIntermedio += event.results[i][0].transcript;
+    recognitionInstance.onresult = (event) => {[cite: 12]
+        let textoProcesado = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {[cite: 12]
+            if (event.results[i].isFinal) {[cite: 12]
+                textoProcesado += event.results[i][0].transcript;[cite: 12]
             }
         }
-        onResult(textoFinal, textoIntermedio);
+        onResult(textoProcesado);
     };
 
-    recognition.onend = () => {
-        recognition = null;
+    recognitionInstance.onend = () => {[cite: 12]
+        recognitionInstance = null;[cite: 12]
+        onEnd();[cite: 12]
+    };
+
+    recognitionInstance.start();[cite: 12]
+    return recognitionInstance;[cite: 12]
+}
+
+export function detenerDictado() {[cite: 12]
+    if (recognitionInstance) recognitionInstance.stop();[cite: 12]
+}
+
+export function operarLecturaTexto(texto, idioma, onStart, onEnd) {
+    if (window.speechSynthesis.speaking) {[cite: 12]
+        window.speechSynthesis.cancel();[cite: 12]
         onEnd();
-    };
-
-    recognition.start();
-    return recognition;
-}
-
-export function detenerDictado() {
-    if (recognition) {
-        recognition.stop();
-    }
-}
-
-// 2. LECTURA DE TEXTO CON INTERRUPCIÓN (SPEECH-TO-TEXT)
-export function leerTexto(texto, idioma, onEnd) {
-    if (window.speechSynthesis.speaking) {
-        window.speechSynthesis.cancel();
-        return false; // Se detuvo la lectura
+        return false;[cite: 12]
     }
 
-    if (!texto.trim()) return false;
+    if (!texto.trim()) return false;[cite: 12]
 
-    const utterance = new SpeechSynthesisUtterance(texto);
-    utterance.lang = idioma;
+    const expresionUtterance = new SpeechSynthesisUtterance(texto);[cite: 12]
+    expresionUtterance.lang = idioma;[cite: 12]
     
-    utterance.onend = () => {
-        onEnd();
-    };
+    expresionUtterance.onstart = () => onStart();
+    expresionUtterance.onend = () => onEnd();[cite: 12]
 
-    window.speechSynthesis.speak(utterance);
-    return true; // Comenzó la lectura
+    window.speechSynthesis.speak(expresionUtterance);[cite: 12]
+    return true;[cite: 12]
 }
 
-// 1 Y 2.- FUNCIONES AVANZADAS: MENSAJES DE VOZ (TIPO WHATSAPP) Y RENDERIZADO
-export async function toggleGrabacionMensajeVoz(onStart, onStop) {
-    if (isRecordingVoice) {
-        if (mediaRecorder) mediaRecorder.stop();
-        isRecordingVoice = false;
-        return false;
+/**
+ * Captura mensajes de voz locales guardándolos de forma digital interna[cite: 12].
+ */
+export async function conmutarGrabacionMensajeVoz(idDoc, onStart, onStop) {
+    if (estaGrabandoVoz) {[cite: 12]
+        if (grabadorMedias) grabadorMedias.stop();[cite: 12]
+        estaGrabandoVoz = false;[cite: 12]
+        return false;[cite: 12]
     }
 
     try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        audioChunks = [];
-        mediaRecorder = new MediaRecorder(stream);
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });[cite: 12]
+        segmentosAudio = [];[cite: 12]
+        grabadorMedias = new MediaRecorder(stream);[cite: 12]
 
-        mediaRecorder.ondataavailable = (event) => {
-            if (event.data.size > 0) audioChunks.push(event.data);
+        grabadorMedias.ondataavailable = (event) => {[cite: 12]
+            if (event.data.size > 0) segmentosAudio.push(event.data);[cite: 12]
         };
 
-        mediaRecorder.onstop = () => {
-            const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
-            const audioUrl = URL.createObjectURL(audioBlob);
-            onStop(audioUrl, audioBlob);
+        grabadorMedias.onstop = () => {[cite: 12]
+            const audioBlob = new Blob(segmentosAudio, { type: 'audio/mp3' });[cite: 12]
+            const audioUrl = URL.createObjectURL(audioBlob);[cite: 12]
             
-            // Apagar los micrófonos físicos del dispositivo
-            stream.getTracks().forEach(track => track.stop());
+            // Asignación directa a biblioteca en memoria atada al guion actual
+            BIBLIOTECA_VOZ_INTERNA[idDoc] = { url: audioUrl, blob: audioBlob };
+            onStop(audioUrl);
+            
+            stream.getTracks().forEach(track => track.stop());[cite: 12]
         };
 
-        mediaRecorder.start();
-        isRecordingVoice = true;
+        grabadorMedias.start();[cite: 12]
+        estaGrabandoVoz = true;[cite: 12]
         onStart();
-        return true;
+        return true;[cite: 12]
     } catch (err) {
-        console.error("Error al acceder al micrófono para mensaje de voz:", err);
-        alert("No se pudo iniciar la grabación de audio.");
-        return false;
+        console.error("Fallo de acceso al hardware de audio: ", err);[cite: 12]
+        return false;[cite: 12]
     }
 }
 
-export function renderizarTextoAAudioArchivo(texto, idioma) {
-    // La API nativa Web Speech no genera archivos de audio directamente en el cliente.
-    // Esta función queda enlazada estructuralmente para procesar el texto mediante bloques externos
-    // o para capturar el flujo de salida de audio en futuras implementaciones avanzadas.
-    console.log("Preparando renderizado de texto a voz para: ", texto.substring(0, 20));
-    alert("Función de renderizado a archivo de audio (.mp3) lista para su conexión con servidor.");
+/**
+ * Simulación del renderizado estructural de texto a archivo de voz descargable/procesable[cite: 12].
+ */
+export function renderizarTextoAAudioArchivoFisico(texto, idioma, idDoc) {
+    console.log("Compilando síntesis para documento ID: ", idDoc);[cite: 12]
+    if (!texto.trim()) return false;
+    
+    // Almacenamiento simulado de renderizado
+    const blobSimulado = new Blob([texto], { type: 'audio/mp3' });
+    const urlSimulada = URL.createObjectURL(blobSimulado);
+    BIBLIOTECA_VOZ_INTERNA[`render_${idDoc}`] = { url: urlSimulada, blob: blobSimulado };
+    return urlSimulada;
 }
