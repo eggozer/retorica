@@ -1,87 +1,117 @@
-// --- PROCESAMIENTO CORREGIDO DE AUDIO, RECOLECCIÓN Y CANCELES ---
+// --- MÓDULO DE AUDIO: RECONOCIMIENTO, SÍNTESIS Y GRABACIÓN ---
 
-let reconocimiento = null;
-let grabadorMedios = null;
-let fragmentosAudio = [];
+let recognition = null;
+let mediaRecorder = null;
+let audioChunks = [];
+let isRecordingVoice = false;
 
-export function iniciarDictado(idiomaDictado, alRecibirTexto, alTerminar) {
+// 1. DICTADO POR VOZ (TEXT-TO-SPEECH)
+export function iniciarDictado(idioma, onResult, onEnd) {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-        alert("Dictado no soportado."); alTerminar(); return;
+        alert("Tu navegador o dispositivo no soporta reconocimiento de voz.");
+        return null;
     }
-    reconocimiento = new SpeechRecognition();
-    reconocimiento.continuous = true;
-    reconocimiento.interimResults = false;
-    reconocimiento.lang = idiomaDictado;
 
-    reconocimiento.onresult = (e) => {
-        let texto = "";
-        for (let i = e.resultIndex; i < e.results.length; ++i) {
-            if (e.results[i].isFinal) texto += e.results[i][0].transcript;
+    if (recognition) {
+        recognition.stop();
+        return null;
+    }
+
+    recognition = new SpeechRecognition();
+    recognition.lang = idioma;
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    recognition.onresult = (event) => {
+        let textoIntermedio = '';
+        let textoFinal = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) {
+                textoFinal += event.results[i][0].transcript;
+            } else {
+                textoIntermedio += event.results[i][0].transcript;
+            }
         }
-        if (texto) alRecibirTexto(texto.trim());
+        onResult(textoFinal, textoIntermedio);
     };
-    reconocimiento.onerror = () => alTerminar();
-    reconocimiento.onend = () => alTerminar();
-    reconocimiento.start();
+
+    recognition.onend = () => {
+        recognition = null;
+        onEnd();
+    };
+
+    recognition.start();
+    return recognition;
 }
 
 export function detenerDictado() {
-    if (reconocimiento) { reconocimiento.stop(); reconocimiento = null; }
-}
-
-export function leerTexto(texto, codigoIdioma, alTerminar) {
-    if (!texto.trim()) return false;
-    window.speechSynthesis.cancel(); // Reseteo total de colas previas
-
-    const enunciado = new SpeechSynthesisUtterance(texto);
-    enunciado.lang = codigoIdioma;
-    enunciado.onend = () => alTerminar();
-    enunciado.onerror = () => alTerminar();
-
-    window.speechSynthesis.speak(enunciado);
-    return true;
-}
-
-export function detenerLecturaManual() {
-    window.speechSynthesis.cancel();
-}
-
-export function iniciarGrabacionVoz(alFinalizarGrabacion) {
-    fragmentosAudio = []; // Limpieza absoluta previa
-    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-        grabadorMedios = new MediaRecorder(stream);
-        grabadorMedios.ondataavailable = (e) => {
-            if (e.data && e.data.size > 0) fragmentosAudio.push(e.data);
-        };
-        grabadorMedios.onstop = () => {
-            const blobAudio = new Blob(fragmentosAudio, { type: 'audio/mp3' });
-            alFinalizarGrabacion(blobAudio);
-            stream.getTracks().forEach(t => t.stop());
-        };
-        grabadorMedios.start(250); // Empuja fragmentos cada 250ms de forma robusta
-    }).catch(err => {
-        console.error(err);
-        alert("Acceso denegado al micrófono.");
-    });
-}
-
-export function detenerGrabacionVoz() {
-    if (grabadorMedios && grabadorMedios.state !== "inactive") {
-        grabadorMedios.stop();
+    if (recognition) {
+        recognition.stop();
     }
 }
 
-export function renderizarTextoAAudio(texto, codigoIdioma) {
-    if (!texto.trim()) return;
-    const enunciado = new SpeechSynthesisUtterance(texto);
-    enunciado.lang = codigoIdioma;
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(enunciado);
+// 2. LECTURA DE TEXTO CON INTERRUPCIÓN (SPEECH-TO-TEXT)
+export function leerTexto(texto, idioma, onEnd) {
+    if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel();
+        return false; // Se detuvo la lectura
+    }
+
+    if (!texto.trim()) return false;
+
+    const utterance = new SpeechSynthesisUtterance(texto);
+    utterance.lang = idioma;
     
-    const blobSimulado = new Blob([texto], { type: 'audio/txt' });
-    const url = URL.createObjectURL(blobSimulado);
-    const link = document.createElement('a');
-    link.href = url; link.download = `render_${Date.now()}.mp3`;
-    document.body.appendChild(link); link.click(); document.body.removeChild(link);
+    utterance.onend = () => {
+        onEnd();
+    };
+
+    window.speechSynthesis.speak(utterance);
+    return true; // Comenzó la lectura
+}
+
+// 1 Y 2.- FUNCIONES AVANZADAS: MENSAJES DE VOZ (TIPO WHATSAPP) Y RENDERIZADO
+export async function toggleGrabacionMensajeVoz(onStart, onStop) {
+    if (isRecordingVoice) {
+        if (mediaRecorder) mediaRecorder.stop();
+        isRecordingVoice = false;
+        return false;
+    }
+
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioChunks = [];
+        mediaRecorder = new MediaRecorder(stream);
+
+        mediaRecorder.ondataavailable = (event) => {
+            if (event.data.size > 0) audioChunks.push(event.data);
+        };
+
+        mediaRecorder.onstop = () => {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+            const audioUrl = URL.createObjectURL(audioBlob);
+            onStop(audioUrl, audioBlob);
+            
+            // Apagar los micrófonos físicos del dispositivo
+            stream.getTracks().forEach(track => track.stop());
+        };
+
+        mediaRecorder.start();
+        isRecordingVoice = true;
+        onStart();
+        return true;
+    } catch (err) {
+        console.error("Error al acceder al micrófono para mensaje de voz:", err);
+        alert("No se pudo iniciar la grabación de audio.");
+        return false;
+    }
+}
+
+export function renderizarTextoAAudioArchivo(texto, idioma) {
+    // La API nativa Web Speech no genera archivos de audio directamente en el cliente.
+    // Esta función queda enlazada estructuralmente para procesar el texto mediante bloques externos
+    // o para capturar el flujo de salida de audio en futuras implementaciones avanzadas.
+    console.log("Preparando renderizado de texto a voz para: ", texto.substring(0, 20));
+    alert("Función de renderizado a archivo de audio (.mp3) lista para su conexión con servidor.");
 }
