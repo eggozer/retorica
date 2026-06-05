@@ -14,19 +14,19 @@
             --border: #2d3748; --danger: #ff3b30; --btn-3d-bg: #2d3244;
             --btn-3d-shadow-dark: #090b11; --btn-3d-shadow-light: #414963;
         }
-        body.light-theme {
+        html.light-theme, body.light-theme {
             --bg-main: #f0f2f5; --bg-sidebar: #e4e7eb; --bg-card: #ffffff;
             --accent: #00a884; --text-main: #1a202c; --text-muted: #718096;
             --border: #cbd5e0; --btn-3d-bg: #e0e5ec;
             --btn-3d-shadow-dark: #b8bec7; --btn-3d-shadow-light: #ffffff;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; transition: background-color 0.2s ease, border-color 0.2s ease; }
         body { background-color: var(--bg-main); color: var(--text-main); display: flex; height: 100vh; width: 100vw; overflow: hidden; position: relative; }
 
         /* --- CONTENEDOR 3D Y COMPONENTES BLINDADOS --- */
         .sidebar { width: 290px; background-color: var(--bg-sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; height: 100%; position: absolute; left: 0; top: 0; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 120; }
         .sidebar.hidden { transform: translateX(-290px); }
-        .toggle-sidebar-pestaña { position: absolute; right: -36px; top: 15px; width: 36px; height: 45px; background-color: var(--bg-sidebar); color: var(--accent); border: 1px solid var(--border); border-left: none; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; z-index: 121; border-radius: 0 8px 8px 0; box-shadow: 3px 0 6px rgba(0,0,0,0.2); }
+        .toggle-sidebar-pestaña { position: absolute; right: -42px; top: 15px; width: 42px; height: 45px; background-color: var(--bg-sidebar); color: var(--accent); border: 1px solid var(--border); border-left: none; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; font-weight: bold; z-index: 125; border-radius: 0 8px 8px 0; box-shadow: 3px 0 6px rgba(0,0,0,0.3); pointer-events: auto; }
         .sidebar-header { padding: 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; height: 70px; flex-shrink: 0; }
         
         .document-list { flex: 1; overflow-y: auto; padding: 12px; scrollbar-width: thin; }
@@ -53,10 +53,19 @@
         
         .select-3d-styled { background: var(--btn-3d-bg); color: var(--text-main); border: none; padding: 6px 10px; font-size: 0.78rem; font-weight: bold; outline: none; height: 36px; border-radius: 8px !important; box-shadow: 2px 2px 5px var(--btn-3d-shadow-dark), -2px -2px 5px var(--btn-3d-shadow-light); }
 
-        /* --- ENTORNO DE TRABAJO DEL EDITOR --- */
+        /* --- ENTORNO DE TRABAJO DEL EDITOR Y COMPONENTE PLAYGROUND --- */
         .editor-wrapper { flex: 1; display: flex; flex-direction: column; padding: 20px; overflow: hidden; position: relative; }
         .input-titulo-html { background: transparent; border: none; border-bottom: 1px dashed var(--border); color: var(--accent); font-size: 1.4rem; font-weight: bold; padding-bottom: 8px; margin-bottom: 12px; outline: none; width: 100%; }
-        .textarea-encapsulado { flex: 1; width: 100%; background: transparent; border: none; color: var(--text-main); font-size: 1.1rem; line-height: 1.6; resize: none; outline: none; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        
+        .workspaces-container { flex: 1; display: flex; width: 100%; height: 100%; overflow: hidden; gap: 15px; position: relative; }
+        .textarea-encapsulado { flex: 1; height: 100%; background: transparent; border: none; color: var(--text-main); font-size: 1.1rem; line-height: 1.6; resize: none; outline: none; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        
+        /* Contenedor del Visor e Frame de Ejecución Segura */
+        .playground-preview-pane { flex: 1; height: 100%; background: #ffffff; border: 2px solid var(--border); border-radius: 8px; overflow: hidden; display: none; flex-direction: column; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .playground-preview-pane.active { display: flex; }
+        .playground-header-bar { background: #e2e8f0; color: #1a202c; padding: 6px 12px; font-size: 0.75rem; font-weight: bold; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #cbd5e0; }
+        .playground-iframe-sandbox { flex: 1; width: 100%; border: none; background: #ffffff; }
+
         .stats-bar-fija { height: 30px; border-top: 1px solid var(--border); padding-top: 10px; font-size: 0.78rem; color: var(--text-muted); display: flex; justify-content: space-between; flex-shrink: 0; font-family: monospace; }
         
         /* --- SISTEMA DE AUTENTICACIÓN INTEGRADO --- */
@@ -96,8 +105,6 @@
     <!-- CAPA INTEGRAL DE REGISTRO E INICIO DE SESIÓN CORREGIDO -->
     <div class="auth-overlay" id="modulo-auth-screen" data-retorica-anchor="auth-gate" style="display: flex;">
         <div class="auth-card">
-            
-            <!-- LOGO Y ENCABEZADO DE MARCA -->
             <div class="login-header-brand">
                 <svg class="login-brand-logo" viewBox="0 0 24 24" width="38" height="38">
                     <path fill="#00ffcc" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.53c-.26-.81-1-1.4-1.9-1.4h-1v-3c0-.55-.45-1-1-1h-6v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
@@ -106,7 +113,6 @@
             </div>
             <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 20px;">Resguardo Local y Sincronización en la Nube</p>
             
-            <!-- FORMULARIO DE ACCESO PROPIO -->
             <form id="retorica-form-autenticacion" onsubmit="ejecutarAccesoDirectoRetorica(event)">
                 <input type="email" id="auth-username-field" class="auth-input" placeholder="Correo electrónico" required>
                 <input type="password" id="auth-password-field" class="auth-input" placeholder="Contraseña (Crear o ingresar)" required>
@@ -121,7 +127,6 @@
 
             <div class="auth-divider-line"><span>ó continuar con</span></div>
 
-            <!-- PASARELAS DE TERCEROS RÁPIDAS -->
             <div class="social-auth-box">
                 <button class="btn-social-gate" onclick="procesarAccesoTerceros('Google')">
                     <img src="https://cdn-icons-png.flaticon.com/512/300/300221.png" alt="Google"> Google
@@ -133,11 +138,10 @@
                     <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="WhatsApp"> WhatsApp
                 </button>
             </div>
-
         </div>
     </div>
 
-    <!-- MENÚ LATERAL: BIBLIOTECA DE DOCUMENTOS -->
+    <!-- MENÚ LATERAL: BIBLIOTECA DE DOCUMENTOS (Flecha reparada) -->
     <div class="sidebar hidden" id="sidebar-container" data-retorica-anchor="sidebar-root">
         <div class="toggle-sidebar-pestaña" id="btn-toggle-pestaña" title="Desplegar Biblioteca">▶</div>
         <div class="sidebar-header">
@@ -169,8 +173,6 @@
 
     <!-- ÁREA DE TRABAJO PRINCIPAL -->
     <div class="main-container" id="area-principal-retorica">
-        
-        <!-- MATRIZ DE PASARELAS HORIZONTALES DESLIZABLES -->
         <div class="scollable-toolbar-wrapper">
             <div class="top-toolbar-pasarela" id="pasarela-herramientas-globales" data-retorica-anchor="toolbar-scroller">
                 
@@ -194,18 +196,28 @@
                     </div>
                 </div>
 
-                <!-- RACK 2: IDIOMAS CONFIGURABLES (30 IDIOMAS INTEGRADOS) -->
+                <!-- NUEVO RACK PLAYGROUND: EJECUTOR DE CÓDIGO DINÁMICO -->
+                <div class="toolbar-rack-modular" id="rack-playground-html" style="display: none;">
+                    <div class="control-unit-3d">
+                        <div class="leyenda-superior-externa">Código</div>
+                        <button class="btn-3d-round" id="btn-ejecutar-playground" title="Ejecutar Código HTML en Tiempo Real">⚡</button>
+                    </div>
+                </div>
+
+                <!-- RACK 2: IDIOMAS CONFIGURABLES -->
                 <div class="toolbar-rack-modular" id="rack-configuracion-idiomas">
                     <div class="control-unit-3d">
                         <div class="leyenda-superior-externa">App</div>
                         <select id="selector-idioma-app" class="select-3d-styled" title="Idioma del Entorno">
-                            <!-- Inyectados por script -->
+                            <option value="es">Español</option>
+                            <option value="en">English</option>
                         </select>
                     </div>
                     <div class="control-unit-3d">
                         <div class="leyenda-superior-externa">Voz</div>
                         <select id="selector-idioma-voz" class="select-3d-styled" title="Idioma de Reconocimiento">
-                            <!-- Inyectados por script -->
+                            <option value="es-MX">Español (MX)</option>
+                            <option value="en-US">English (US)</option>
                         </select>
                     </div>
                 </div>
@@ -241,14 +253,25 @@
                         <button class="btn-3d-round" id="btn-confirmar-guardado-nativo" style="color: var(--accent); font-weight: bold;" title="Guardar cambios localmente">✓</button>
                     </div>
                 </div>
-
             </div>
         </div>
 
-        <!-- ENTORNO DE EDICIÓN TOTALMENTE SEPARADO Y PROTEGIDO -->
+        <!-- ENTORNO DE EDICIÓN CON PLAYGROUND INTEGRADO -->
         <div class="editor-wrapper" id="bloque-editor-retorica">
             <input type="text" id="editor-document-title" class="input-titulo-html" placeholder="Título del Documento..." data-retorica-anchor="doc-title">
-            <textarea id="editor-core-textarea" class="textarea-encapsulado" placeholder="Escribe tu guion o nota aquí..." data-retorica-anchor="doc-body"></textarea>
+            
+            <div class="workspaces-container">
+                <textarea id="editor-core-textarea" class="textarea-encapsulado" placeholder="Escribe tu guion, nota o código HTML aquí..." data-retorica-anchor="doc-body"></textarea>
+                
+                <!-- Panel de vista previa aislado e inmune al CSS de Retórica -->
+                <div class="playground-preview-pane" id="contenedor-vista-previa">
+                    <div class="playground-header-bar">
+                        <span>ENTORNO DE PRUEBAS INTERACTIVO (SANDBOX)</span>
+                        <button id="btn-cerrar-preview" style="background:none; border:none; font-weight:bold; cursor:pointer; color:var(--danger);">✕ Cerrar</button>
+                    </div>
+                    <iframe class="playground-iframe-sandbox" id="sandbox-ejecutor"></iframe>
+                </div>
+            </div>
             
             <div class="stats-bar-fija" id="stats-bar-fija-indicador">
                 <span id="txt-contador-caracteres">Caracteres: 0</span>
@@ -258,76 +281,321 @@
         </div>
     </div>
 
-    <!-- COMPONENTE FLOTANTE DE AVISOS -->
     <div class="toast-notificador" id="toast-notificador-global">Sistema Listo</div>
 
-    <!-- ENLAZADOR CENTRAL DEL MOTOR DE MÓDULOS -->
-    <script type="module" src="./js/main.js?v=2026_Módulos"></script>
-
-    <!-- SISTEMA DE COMPROBACIÓN INTELIGENTE Y ACCESOS NATIVOS -->
+    <!-- SCRIPT CENTRALIZADO: PERSISTENCIA INDEXEDDB ATÓMICA -->
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            verificarConectividadCredencialesDispositivo();
-        });
+        const DB_NAME = 'RetoricaDB_V2026';
+        const DB_VERSION = 2;
+        const STORE_NAME = 'documentos_guiones';
 
-        // 1. Detectar si el teléfono tiene cuentas activadas o sesión local para saltar el paso
-        function verificarConectividadCredencialesDispositivo() {
-            const sesionActiva = localStorage.getItem("retorica_user_session");
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                request.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                    }
+                };
+                request.onsuccess = (e) => resolve(e.target.result);
+                request.onerror = (e) => reject(e.target.error);
+            });
+        }
+
+        async function guardarDocumento(id, titulo, contenido, usuarioPropietario) {
+            const db = await initDB();
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAME], 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                const registro = { id: Number(id), titulo: titulo.trim() || "Sin Título", contenido: contenido, usuario: usuarioPropietario, fechaModificacion: Date.now() };
+                const request = store.put(registro);
+                request.onsuccess = () => resolve(true);
+                request.onerror = (e) => reject(e.target.error);
+            });
+        }
+
+        async function obtenerDocumentosPorUsuario(usuarioPropietario) {
+            const db = await initDB();
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAME], 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.getAll();
+                request.onsuccess = () => {
+                    const todos = request.result || [];
+                    resolve(todos.filter(doc => doc.usuario === usuarioPropietario));
+                };
+                request.onerror = (e) => reject(e.target.error);
+            });
+        }
+
+        async function eliminarDocumento(id) {
+            const db = await initDB();
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAME], 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.delete(Number(id));
+                request.onsuccess = () => resolve(true);
+                request.onerror = (e) => reject(e.target.error);
+            });
+        }
+    </script>
+
+    <!-- SCRIPT CENTRALIZADO: LÓGICA DE NEGOCIO Y CONTROLADORES DE INTERFAZ -->
+    <script>
+        let idDocumentoActual = null;
+        let usuarioSesionActiva = null;
+        let diferidoPromptPWA = null;
+
+        const editorTextArea = document.getElementById('editor-core-textarea');
+        const editorTitleInput = document.getElementById('editor-document-title');
+        const txtContadorCaracteres = document.getElementById('txt-contador-caracteres');
+        const txtContadorPalabras = document.getElementById('txt-contador-palabras');
+        const txtContadorLineas = document.getElementById('txt-contador-lineas');
+        const btnGuardarNativo = document.getElementById('btn-confirmar-guardado-nativo');
+        const btnNuevoDoc = document.getElementById('btn-nuevo-documento-limpio');
+        const contenedorLista = document.getElementById('contenedor-lista-documentos');
+        const btnPwaInstalar = document.getElementById('btn-pwa-instalar-nativo');
+        const rackPlayground = document.getElementById('rack-playground-html');
+        const previewPane = document.getElementById('contenedor-vista-previa');
+        const sandboxIframe = document.getElementById('sandbox-ejecutor');
+
+        async function inicializarEcosistema() {
+            // Restaurar Tema inmediato
+            if (localStorage.getItem('ret_theme_claro') === 'si') {
+                document.documentElement.classList.add('light-theme');
+                document.body.classList.add('light-theme');
+            }
+
+            // Configurar Listeners de Interfaz
+            configurarEventosCore();
+            verificarConectividadCredencialesDispositivo();
+            procesarContadoresInternos();
+            detectarTipoContenidoPlayground();
+        }
+
+        function configurarEventosCore() {
+            // Escucha del título y cuerpo para guardar caché rápido e identificar HTML
+            editorTextArea.addEventListener('input', () => {
+                procesarContadoresInternos();
+                salvaguardarCacheTemporalInmediato();
+                detectarTipoContenidoPlayground();
+            });
+            editorTitleInput.addEventListener('input', () => {
+                salvaguardarCacheTemporalInmediato();
+                detectarTipoContenidoPlayground();
+            });
+
+            // GESTIÓN DEL MENÚ LATERAL (Corregida con detención de propagación en móviles)
+            const sidebarBtn = document.getElementById('btn-toggle-pestaña');
+            sidebarBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const sidebar = document.getElementById('sidebar-container');
+                const estaOculto = sidebar.classList.toggle('hidden');
+                sidebarBtn.textContent = estaOculto ? "▶" : "◀";
+            });
+
+            // Cierre automático del menú lateral al hacer clic en el contenedor principal
+            document.getElementById('area-principal-retorica').addEventListener('click', () => {
+                const sidebar = document.getElementById('sidebar-container');
+                if (!sidebar.classList.contains('hidden')) {
+                    sidebar.classList.add('hidden');
+                    sidebarBtn.textContent = "▶";
+                }
+            });
+
+            // CONMUTACIÓN DE TEMA (Corregido para forzar al nodo raíz html)
+            document.getElementById('btn-conmutar-tema-visual').onclick = () => {
+                const esClaro = document.documentElement.classList.toggle('light-theme');
+                document.body.classList.toggle('light-theme', esClaro);
+                localStorage.setItem('ret_theme_claro', esClaro ? 'si' : 'no');
+            };
+
+            // BOTÓN GUARDAR (Resguardo atómico IndexedDB)
+            btnGuardarNativo.onclick = async () => {
+                const contenido = editorTextArea.value;
+                const titulo = editorTitleInput.value;
+                if (!contenido.trim() && !titulo.trim()) {
+                    mostrarNotificacionToast("Editor Vacío");
+                    return;
+                }
+                if (!idDocumentoActual) idDocumentoActual = Date.now();
+                const exito = await guardarDocumento(idDocumentoActual, titulo || "Nota Sin Título", contenido, usuarioSesionActiva);
+                if (exito) {
+                    mostrarNotificacionToast("✓ Guardado en Memoria Interna");
+                    refrescarBibliotecaVisual();
+                }
+            };
+
+            btnNuevoDoc.onclick = () => {
+                idDocumentoActual = null;
+                editorTitleInput.value = '';
+                editorTextArea.value = '';
+                previewPane.classList.remove('active');
+                procesarContadoresInternos();
+                detectarTipoContenidoPlayground();
+                mostrarNotificacionToast("Lienzo Limpio");
+            };
+
+            // MOTOR INTEGRADO PLAYGROUND: COMPILADOR Y EJECUTOR INTERNO
+            document.getElementById('btn-ejecutar-playground').onclick = () => {
+                previewPane.classList.add('active');
+                const codigoACompilar = editorTextArea.value;
+                
+                // Forzar aislamiento completo inyectando el código crudo en tiempo de ejecución
+                const blob = new Blob([codigoACompilar], { type: 'text/html;charset=utf-8' });
+                sandboxIframe.src = URL.createObjectURL(blob);
+                mostrarNotificacionToast("Ejecutando Scripts...");
+            };
+
+            document.getElementById('btn-cerrar-preview').onclick = () => {
+                previewPane.classList.remove('active');
+                sandboxIframe.src = "about:blank";
+            };
+
+            // APERTURA DE ARCHIVOS LOCALES (Fiel a la carga cruda para conservar scripts)
+            const cargadorArchivosEntrada = document.getElementById('fallback-file-loader');
+            document.getElementById('btn-abrir-archivo-local').onclick = () => cargadorArchivosEntrada.click();
+            cargadorArchivosEntrada.onchange = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const lectorInstancia = new FileReader();
+                lectorInstancia.onload = (evt) => {
+                    // Eliminada la limpieza Regex para no destruir scripts de tus archivos HTML
+                    editorTextArea.value = evt.target.result;
+                    editorTitleInput.value = file.name;
+                    idDocumentoActual = Date.now();
+                    procesarContadoresInternos();
+                    salvaguardarCacheTemporalInmediato();
+                    detectarTipoContenidoPlayground();
+                    mostrarNotificacionToast("Documento Cargado Completo");
+                };
+                lectorInstancia.readAsText(file);
+            };
+
+            // EXPORTACIONES COMPLEMENTARIAS
+            document.getElementById('btn-exportar-word-doc').onclick = () => {
+                const esqueletoDoc = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><title>Export</title></head><body><h2>${editorTitleInput.value || 'Sin Título'}</h2><p>${editorTextArea.value.replace(/\n/g, '<br/>')}</p></body></html>`;
+                const blob = new Blob(['\ufeff' + esqueletoDoc], { type: 'application/msword' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a'); a.href = url; a.download = `${editorTitleInput.value || 'Nota'}.doc`; a.click();
+            };
+        }
+
+        function detectarTipoContenidoPlayground() {
+            const cuerpo = editorTextArea.value.toLowerCase();
+            const titulo = editorTitleInput.value.toLowerCase();
             
-            if (sesionActiva) {
-                console.log("Sesión existente detectada localmente.");
-                removerPantallaCapaAutenticacion();
+            // Si detecta etiquetas o extensión de desarrollo, despliega el Rack ejecutor
+            if (cuerpo.includes('<!doctype') || cuerpo.includes('<html') || cuerpo.includes('<script') || titulo.endsWith('.html')) {
+                rackPlayground.style.display = 'inline-flex';
+            } else {
+                rackPlayground.style.display = 'none';
+            }
+        }
+
+        async function refrescarBibliotecaVisual() {
+            if (!usuarioSesionActiva) return;
+            const lista = await obtenerDocumentosPorUsuario(usuarioSesionActiva);
+            contenedorLista.innerHTML = '';
+
+            if (lista.length === 0) {
+                contenedorLista.innerHTML = `<div style="color:var(--text-muted); font-size:0.75rem; text-align:center; padding:20px;">No hay documentos</div>`;
                 return;
             }
 
-            // Detección silenciosa mediante credenciales del ecosistema del smartphone
-            if (navigator.credentials && navigator.credentials.get) {
-                navigator.credentials.get({ password: true, mediation: "silent" })
-                    .then((credencial) => {
-                        if (credencial && credencial.id) {
-                            console.log("Cuenta detectada en dispositivo:", credencial.id);
-                            localStorage.setItem("retorica_user_session", JSON.stringify({ email: credencial.id, provider: "device-auto" }));
-                            
-                            const displayUser = document.getElementById("display-user-activo");
-                            if (displayUser) displayUser.textContent = credencial.id.split('@')[0];
-                            
-                            removerPantallaCapaAutenticacion();
+            lista.forEach(doc => {
+                const item = document.createElement('div');
+                item.className = 'document-list-item';
+                item.innerHTML = `
+                    <div style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:0.8rem; font-weight:bold;">
+                        📄 ${doc.titulo}
+                    </div>
+                    <button class="btn-3d-round" id="btn-eliminar-nota-${doc.id}" style="width:28px; height:28px; font-size:0.8rem; box-shadow: 2px 2px 4px rgba(0,0,0,0.3);">🗑️</button>
+                `;
+                
+                item.onclick = (e) => {
+                    if (e.target.id === `btn-eliminar-nota-${doc.id}`) return;
+                    idDocumentoActual = doc.id;
+                    editorTitleInput.value = doc.titulo;
+                    editorTextArea.value = doc.contenido; // Inyección fiel sin parseo destructivo
+                    procesarContadoresInternos();
+                    detectarTipoContenidoPlayground();
+                    document.getElementById('sidebar-container').classList.add('hidden');
+                    document.getElementById('btn-toggle-pestaña').textContent = "▶";
+                    mostrarNotificacionToast("Documento Abierto");
+                };
+                contenedorLista.appendChild(item);
+
+                document.getElementById(`btn-eliminar-nota-${doc.id}`).onclick = async (e) => {
+                    e.stopPropagation();
+                    if (confirm("¿Eliminar nota permanentemente?")) {
+                        await eliminarDocumento(doc.id);
+                        if (idDocumentoActual === doc.id) {
+                            idDocumentoActual = null;
+                            editorTitleInput.value = '';
+                            editorTextArea.value = '';
+                            previewPane.classList.remove('active');
                         }
-                    })
-                    .catch((err) => console.log("Comprobación silenciosa nativa saltada u omitida.", err));
+                        refrescarBibliotecaVisual();
+                        detectarTipoContenidoPlayground();
+                    }
+                };
+            });
+        }
+
+        function procesarContadoresInternos() {
+            const rawTexto = editorTextArea.value;
+            txtContadorCaracteres.textContent = `Caracteres: ${rawTexto.length}`;
+            txtContadorPalabras.textContent = `Palabras: ${rawTexto.trim() === "" ? 0 : rawTexto.trim().split(/\s+/).length}`;
+            txtContadorLineas.textContent = `Líneas: ${rawTexto === "" ? 0 : rawTexto.split('\n').length}`;
+        }
+
+        function salvaguardarCacheTemporalInmediato() {
+            localStorage.setItem('ret_cache_fast_title', editorTitleInput.value);
+            localStorage.setItem('ret_cache_fast_body', editorTextArea.value);
+            if (idDocumentoActual) localStorage.setItem('ret_cache_fast_id', idDocumentoActual);
+        }
+
+        function restaurarCacheTemporal() {
+            const t = localStorage.getItem('ret_cache_fast_title');
+            const b = localStorage.getItem('ret_cache_fast_body');
+            const i = localStorage.getItem('ret_cache_fast_id');
+            if (t || b) {
+                editorTitleInput.value = t || '';
+                editorTextArea.value = b || '';
+                if (i) idDocumentoActual = Number(i);
+                procesarContadoresInternos();
+                detectarTipoContenidoPlayground();
             }
         }
 
-        // 2. Registro y creación de contraseña interna desde el propio código de Retórica
+        function verificarConectividadCredencialesDispositivo() {
+            const sesionActiva = localStorage.getItem("retorica_user_session");
+            if (sesionActiva) {
+                try {
+                    const datos = JSON.parse(sesionActiva);
+                    usuarioSesionActiva = datos.email;
+                    document.getElementById("display-user-activo").textContent = `👤 ${usuarioSesionActiva.split('@')[0].toUpperCase()}`;
+                    removerPantallaCapaAutenticacion();
+                    refrescarBibliotecaVisual();
+                    restaurarCacheTemporal();
+                } catch(e) { window.location.reload(); }
+            }
+        }
+
         function ejecutarAccesoDirectoRetorica(event) {
             event.preventDefault();
             const emailValue = document.getElementById("auth-username-field").value;
-            const passwordValue = document.getElementById("auth-password-field").value;
-
-            if (emailValue && passwordValue) {
-                // Se resguarda la estructura de sesión local
-                const metadataUsuario = { email: emailValue, provider: "retorica_secure" };
-                localStorage.setItem("retorica_user_session", JSON.stringify(metadataUsuario));
-                
-                const displayUser = document.getElementById("display-user-activo");
-                if (displayUser) displayUser.textContent = emailValue.split('@')[0];
-                
-                removerPantallaCapaAutenticacion();
-                mostrarNotificacionToast("Acceso correcto con cuenta Retórica");
-            }
+            localStorage.setItem("retorica_user_session", JSON.stringify({ email: emailValue, provider: "retorica_secure" }));
+            verificarConectividadCredencialesDispositivo();
+            mostrarNotificacionToast("Acceso Concedido");
         }
 
-        // 3. Pasarelas de federación simulada para Google, Facebook y WhatsApp
         function procesarAccesoTerceros(proveedorPlataforma) {
-            console.log(`Invocando pasarela externa: ${proveedorPlataforma}`);
-            
-            const cuentaSimulada = { email: `usuario.${proveedorPlataforma.toLowerCase()}@retorica.app`, provider: proveedorPlataforma };
-            localStorage.setItem("retorica_user_session", JSON.stringify(cuentaSimulada));
-            
-            const displayUser = document.getElementById("display-user-activo");
-            if (displayUser) displayUser.textContent = proveedorPlataforma;
-
-            removerPantallaCapaAutenticacion();
+            const emailSimulado = `usuario.${proveedorPlataforma.toLowerCase()}@retorica.app`;
+            localStorage.setItem("retorica_user_session", JSON.stringify({ email: emailSimulado, provider: proveedorPlataforma }));
+            verificarConectividadCredencialesDispositivo();
             mostrarNotificacionToast(`Conectado vía ${proveedorPlataforma}`);
         }
 
@@ -344,44 +612,16 @@
             if (toast) {
                 toast.textContent = mensaje;
                 toast.classList.add("show");
-                setTimeout(() => toast.classList.remove("show"), 3000);
+                setTimeout(() => toast.classList.remove("show"), 2500);
             }
         }
 
-        // Interceptor del botón nativo de cerrar sesión ya provisto en el sidebar
-        const btnLogoutNode = document.getElementById("btn-cerrar-sesion-activo");
-        if (btnLogoutNode) {
-            btnLogoutNode.addEventListener("click", () => {
-                localStorage.removeItem("retorica_user_session");
-                window.location.reload();
-            });
-        }
-    </script>
+        document.getElementById("btn-cerrar-sesion-activo").onclick = () => {
+            localStorage.clear();
+            window.location.reload();
+        };
 
-    <!-- MOTOR INTERNO DE RESPALDO ANTE NAVEGADORES QUE NO COMPRENDEN PWA DE FORMA ASÍNCRONA -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=2026_Módulos', { scope: './' })
-                    .then(reg => {
-                        console.log("Service Worker Registrado Eficientemente con Fuerza de Caché V2026.");
-                        reg.onupdatefound = () => {
-                            const installingWorker = reg.installing;
-                            if (installingWorker) {
-                                installingWorker.onstatechange = () => {
-                                    if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                        console.log("Nueva versión detectada. Forzando refresco de memoria.");
-                                        caches.keys().then(names => {
-                                            for (let name of names) caches.delete(name);
-                                        });
-                                    }
-                                };
-                            }
-                        };
-                    })
-                    .catch(err => console.error("Fallo controlado en el registro del SW Adaptativo: ", err));
-            });
-        }
+        window.addEventListener('DOMContentLoaded', inicializarEcosistema);
     </script>
 </body>
 </html>
