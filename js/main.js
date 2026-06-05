@@ -1,135 +1,403 @@
-// --- CONMUTADOR CENTRAL Y CONTROLADOR DE INTERFAZ (MAIN) ---
+/**
+ * Retórica V2026 - Conmutador Central y Controlador de Ciclo de Vida Blindado[cite: 15]
+ */
+import { AuthManager } from './auth.js';
+import { initDB, guardarDocumento, obtenerDocumentosPorUsuario, eliminarDocumento } from './storage.js';
+import { iniciarDictado, detenerDictado, operarLecturaTexto, conmutarGrabacionMensajeVoz, renderizarTextoAAudioArchivoFisico, BIBLIOTECA_VOZ_INTERNA } from './audio.js';
+import { cargarSelectores, aplicarTraduccionInterfaz, DICCIONARIO_30_IDIOMAS } from './idiomas.js';
 
-import { initDB, guardarDocumento, obtenerDocumentos, eliminarDocumento } from './storage.js';
-import { iniciarDictado, detenerDictado, leerTexto, toggleGrabacionMensajeVoz, renderizarTextoAAudioArchivo } from './audio.js';
-import { cargarSelectores, aplicarTraduccionInterfaz } from './idiomas.js';
+// Registro de Instancias en Capa Global Inmutable contra borrados accidentales
+window.RetoricaModules = Object.freeze({
+    auth: new AuthManager(),
+    storage: { initDB, guardarDocumento, obtenerDocumentosPorUsuario, eliminarDocumento },
+    audio: { iniciarDictado, detenerDictado, operarLecturaTexto, conmutarGrabacionMensajeVoz, renderizarTextoAAudioArchivoFisico }
+});
 
-// Estado global de la aplicación
+// Estado atómico de ejecución
 let idDocumentoActual = null;
-let dictadoActivo = false;
-let lecturaActiva = false;
+let dictadoActivo = false;[cite: 15]
+let lecturaActiva = false;[cite: 15]
+let diferidoPromptPWA = null;
 
-// Elementos de la Interfaz de Usuario (DOM)
-const editor = document.getElementById('editor');
-const statsBar = document.getElementById('stats-bar');
-const btnMic = document.getElementById('btn-mic');
-const btnLectura = document.getElementById('btn-lectura');
-const comboApp = document.getElementById('app-lang');
-const comboVoz = document.getElementById('voice-lang');
-const btnTema = document.getElementById('btn-toggle-tema');
-const btnGuardar = document.getElementById('btn-main-guardar');
-const toast = document.getElementById('toast-notif');
+// Captura de Nodos Críticos bajo firma de anclaje (Blindaje estructural)
+const editorTextArea = document.getElementById('editor-core-textarea');
+const editorTitleInput = document.getElementById('editor-document-title');
+const txtContadorCaracteres = document.getElementById('txt-contador-caracteres');
+const txtContadorPalabras = document.getElementById('txt-contador-palabras');
+const txtContadorLineas = document.getElementById('txt-contador-lineas');
+const btnMic = document.getElementById('btn-operar-dictado');
+const btnLectura = document.getElementById('btn-operar-lectura');
+const btnGrabacionVoz = document.getElementById('btn-operar-grabacion-voz');
+const btnRenderAudio = document.getElementById('btn-operar-render-audio');
+const comboApp = document.getElementById('selector-idioma-app');
+const comboVoz = document.getElementById('selector-idioma-voz');
+const btnGuardarNativo = document.getElementById('btn-confirmar-guardado-nativo');
+const btnNuevoDoc = document.getElementById('btn-nuevo-documento-limpio');
+const contenedorLista = document.getElementById('contenedor-lista-documentos');
+const btnPwaInstalar = document.getElementById('btn-pwa-instalar-nativo');
 
-// 1. INICIALIZACIÓN DE COMPONENTES
-async function inicializarApp() {
-    // Configurar menús de lenguajes e interfaz
-    cargarSelectores(comboApp, comboVoz);
+async function inicializarEcosistema() {[cite: 15]
+    // Rastro e Inspección de Blindaje: Verificar que los elementos vitales existen
+    const anclajesVitales = ['editor-core-textarea', 'editor-document-title', 'btn-confirmar-guardado-nativo'];
+    anclajesVitales.forEach(id => {
+        if (!document.getElementById(id)) {
+            console.error(`🚨 ALERTA ESTRUCTURAL CRÍTICA: El elemento vital [${id}] fue omitido en el HTML.`);
+        }
+    });
+
+    cargarSelectores(comboApp, comboVoz);[cite: 15]
     
-    // Conectar base de datos persistente y cargar biblioteca de notas
+    // Forzar lectura de caché e idiomas preferidos desde localStorage
+    comboApp.value = localStorage.getItem('ret_pref_lang_app') || 'es';
+    comboVoz.value = localStorage.getItem('ret_pref_lang_voz') || 'es-MX';
+
     try {
-        await initDB();
-        configurarEventosBasicos();
-        actualizarContadoresEditor();
-        mostrarNotificacion("Retórica Modular Inicializada");
+        await initDB();[cite: 15]
+        verificarFirmaUsuarioYSesion();
+        configurarEventosOperacionales();
+        procesarContadoresInternos();[cite: 15]
     } catch (err) {
-        console.error("Error al levantar la persistencia IndexedDB:", err);
+        console.error("Fallo crítico en el encendido de base de datos indexada: ", err);[cite: 15]
     }
 }
 
-// 2. CONTROLADORES DE EVENTOS (ACCIONES DE BOTONES)
-function configurarEventosBasicos() {
-    // Evento de escucha para contadores de texto en tiempo real
-    editor.addEventListener('input', actualizarContadoresEditor);
+function verificarFirmaUsuarioYSesion() {
+    const usuarioActivo = window.RetoricaModules.auth.getUsuarioActivo();
+    const overlayAuth = document.getElementById('modulo-auth-screen');
+    
+    if (!usuarioActivo) {
+        overlayAuth.classList.remove('hidden');
+    } else {
+        overlayAuth.classList.add('hidden');
+        document.getElementById('display-user-activo').textContent = `👤 ${usuarioActivo}`;
+        refrescarBibliotecaVisual();
+    }
+}
 
-    // Botón Dictado por Voz (Microfóno)
-    btnMic.onclick = () => {
-        if (dictadoActivo) {
-            detenerDictado();
-            cambiarEstadoMic(false);
-        } else {
-            cambiarEstadoMic(true);
-            iniciarDictado(comboVoz.value, 
-                (textoFinal, textoIntermedio) => {
-                    if (textoFinal) {
-                        editor.value += (editor.value ? ' ' : '') + textoFinal;
-                        actualizarContadoresEditor();
-                    }
-                }, 
-                () => cambiarEstadoMic(false)
-            );
+function configurarEventosOperacionales() {
+    // Escucha de entrada para contadores e invalidación automática de caché
+    editorTextArea.addEventListener('input', () => {
+        procesarContadoresInternos();
+        salvaguardarCacheTemporalInmediato();
+    });
+    editorTitleInput.addEventListener('input', salvaguardarCacheTemporalInmediato);
+
+    // Login/Registro
+    document.getElementById('btn-auth-confirmar').onclick = () => {
+        const txtUser = document.getElementById('auth-username-field').value;
+        if (txtUser.trim()) {
+            window.RetoricaModules.auth.autenticarOServirUsuario(txtUser);
+            verificarFirmaUsuarioYSesion();
+            mostrarNotificacionToast("Sesión Iniciada de Forma Segura");
         }
     };
 
-    // Botón Lectura en Voz Alta
-    btnLectura.onclick = () => {
-        const comenzoLectura = leerTexto(editor.value, comboVoz.value.split('-')[0], () => {
-            lecturaActiva = false;
-            btnLectura.textContent = "🔊";
-        });
-
-        if (comenzoLectura) {
-            lecturaActiva = true;
-            btnLectura.textContent = "⏹️";
-        } else if (lecturaActiva === false) {
-            btnLectura.textContent = "🔊";
-        }
+    // Cerrar Sesión
+    document.getElementById('btn-cerrar-sesion-activo').onclick = () => {
+        window.RetoricaModules.auth.cerrarSesion();
+        idDocumentoActual = null;
+        editorTitleInput.value = '';
+        editorTextArea.value = '';
+        verificarFirmaUsuarioYSesion();
     };
 
-    // Botón Alternar Tema Visual (Luz / Oscuridad)
-    btnTema.onclick = () => {
-        const esClaro = document.body.classList.toggle('light-theme');
-        btnTema.textContent = esClaro ? "☀️" : "🌙";
+    // Manejo de Menú Desplegable Lateral (Pestaña Flotante)
+    document.getElementById('btn-toggle-pestaña').onclick = function() {
+        const sidebar = document.getElementById('sidebar-container');
+        const activo = sidebar.classList.toggle('hidden');
+        this.textContent = activo ? "▶" : "◀";
     };
 
-    // Botón Guardar Directo (HTML y Persistencia)
-    btnGuardar.onclick = async () => {
-        const contenido = editor.value;
-        if (!contenido.trim()) {
-            mostrarNotificacion("El editor está vacío");
+    // Botón Inamovible de Guardado Silencioso (✓)
+    btnGuardarNativo.onclick = async () => {[cite: 15]
+        const contenido = editorTextArea.value;[cite: 15]
+        const titulo = editorTitleInput.value;
+        const usuario = window.RetoricaModules.auth.getUsuarioActivo();
+
+        if (!contenido.trim() && !titulo.trim()) {[cite: 15]
+            mostrarNotificacionToast("Editor Vacío");[cite: 15]
             return;
         }
 
-        if (!idDocumentoActual) idDocumentoActual = Date.now();
-        const lineas = contenido.split('\n');
-        const titulo = lineas[0].substring(0, 25) || "Nota Nueva";
-
-        const exito = await guardarDocumento(idDocumentoActual, titulo, contenido);
-        if (exito) {
-            mostrarNotificacion("Nota guardada con éxito");
-            // Aquí puedes enlazar la descarga física si se requiere
+        if (!idDocumentoActual) idDocumentoActual = Date.now();[cite: 15]
+        
+        // Almacenamiento directo atómico (Evita la alerta de descarga física en pantallas)
+        const exito = await guardarDocumento(idDocumentoActual, titulo || "Nota Sin Título", contenido, usuario);[cite: 15]
+        if (exito) {[cite: 15]
+            mostrarNotificacionToast("✓ Guardado en Memoria Interna");[cite: 15]
+            refrescarBibliotecaVisual();
+            
+            // Sincronización en segundo plano restrictiva de forma asíncrona hacia la nube
+            const todosLosDocs = await obtenerDocumentosPorUsuario(usuario);
+            window.RetoricaModules.auth.sincronizarNotasNubeEsquemaRestringido(todosLosDocs);
         }
     };
 
-    // Manejo de cambio de idioma en la App
-    comboApp.onchange = (e) => {
-        aplicarTraduccionInterfaz(e.target.value, {
-            lblSaveAs: document.getElementById('lbl-save-as'),
-            btnNuevo: document.getElementById('btn-nuevo')
-        });
+    // Botón Limpiar para Creación de Nueva Nota
+    btnNuevoDoc.onclick = () => {
+        idDocumentoActual = null;
+        editorTitleInput.value = '';
+        editorTextArea.value = '';
+        procesarContadoresInternos();
+        mostrarNotificacionToast("Lienzo Limpio Iniciado");
+    };
+
+    // Operador de Dictado por Voz (Microfóno Integrado)[cite: 15]
+    btnMic.onclick = () => {[cite: 15]
+        if (dictadoActivo) {[cite: 15]
+            detenerDictado();[cite: 15]
+            conmutarEstadoEstiloMic(false);[cite: 15]
+        } else {
+            conmutarEstadoEstiloMic(true);[cite: 15]
+            iniciarDictado(comboVoz.value, (textoFragmento) => {[cite: 15]
+                if (textoFragmento) {
+                    editorTextArea.value += (editorTextArea.value ? ' ' : '') + textoFragmento;[cite: 15]
+                    procesarContadoresInternos();[cite: 15]
+                    salvaguardarCacheTemporalInmediato();
+                }
+            }, () => conmutarEstadoEstiloMic(false));[cite: 15]
+        }
+    };
+
+    // Operador de Lectura de Texto (Speech Synthesis)[cite: 15]
+    btnLectura.onclick = () => {[cite: 15]
+        const ejecutando = operarLecturaTexto(editorTextArea.value, comboVoz.value.split('-')[0], 
+            () => { btnLectura.classList.add('active-mode'); },
+            () => { btnLectura.classList.remove('active-mode'); }
+        );
+        if (!ejecutando) btnLectura.classList.remove('active-mode');
+    };
+
+    // Captura de Notas de Voz Física (Tipo Mensaje)
+    btnGrabacionVoz.onclick = async () => {
+        if (!idDocumentoActual) idDocumentoActual = Date.now();
+        
+        const activo = await conmutarGrabacionMensajeVoz(idDocumentoActual,
+            () => { btnGrabacionVoz.classList.add('active-mode'); mostrarNotificacionToast("Grabando Audio..."); },
+            (urlGenerada) => { 
+                btnGrabacionVoz.classList.remove('active-mode'); 
+                mostrarNotificacionToast("Audio Resguardado Internamente");
+                console.log(`Firma de Audio enlazada al guion: ${urlGenerada}`);
+            }
+        );
+    };
+
+    // Compilar e Iniciar Simulación de Renderizado de Audio
+    btnRenderAudio.onclick = () => {
+        if (!idDocumentoActual) idDocumentoActual = Date.now();
+        const urlFile = renderizarTextoAAudioArchivoFisico(editorTextArea.value, comboVoz.value, idDocumentoActual);
+        if (urlFile) {
+            mostrarNotificacionToast("Audio Compilado en Buffer Virtual");
+        } else {
+            mostrarNotificacionToast("Contenido Insuficiente");
+        }
+    };
+
+    // Cambios Dinámicos de Idioma e Internacionalización[cite: 15]
+    comboApp.onchange = (e) => {[cite: 15]
+        localStorage.setItem('ret_pref_lang_app', e.target.value);
+        aplicarTraduccionInterfaz(e.target.value, { btnGuardar: btnGuardarNativo, btnNuevo: btnNuevoDoc });[cite: 15]
+    };
+    comboVoz.onchange = (e) => {
+        localStorage.setItem('ret_pref_lang_voz', e.target.value);
+    };
+
+    // Alternar Tema Estético Luz / Obscuridad[cite: 15]
+    document.getElementById('btn-conmutar-tema-visual').onclick = () => {
+        const claro = document.body.classList.toggle('light-theme');
+        localStorage.setItem('ret_theme_claro', claro ? 'si' : 'no');
+    };
+    if (localStorage.getItem('ret_theme_claro') === 'si') document.body.classList.add('light-theme');
+
+    // Apertura de Archivos del Dispositivo (Ej. Currículum Vitae)
+    const cargadorArchivosEntrada = document.getElementById('fallback-file-loader');
+    document.getElementById('btn-abrir-archivo-local').onclick = () => cargadorArchivosEntrada.click();
+    
+    cargadorArchivosEntrada.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const lectorInstancia = new FileReader();
+        lectorInstancia.onload = (evt) => {
+            const extraido = evt.target.result;
+            
+            // Si viene con marcado HTML, se limpia el cuerpo conservando el texto plano para el editor
+            if (extraido.includes('<body')) {
+                const innerMarrow = extraido.split(/<body[^>]*>/i)[1].split(/<\/body>/i)[0];
+                editorTextArea.value = innerMarrow.replace(/<[^>]*>/g, '').trim();
+            } else {
+                editorTextArea.value = extraido;
+            }
+            
+            editorTitleInput.value = file.name.split('.')[0].toUpperCase();
+            idDocumentoActual = Date.now();
+            procesarContadoresInternos();
+            salvaguardarCacheTemporalInmediato();
+            mostrarNotificacionToast("Documento Cargado con Éxito");
+        };
+        lectorInstancia.readAsText(file);
+    };
+
+    // --- MANEJADORES DE EXPORTACIÓN DIRECTA MEDIANTE VOLCADOS DE MEMORIA ---
+    
+    // PDF Fijo
+    document.getElementById('btn-exportar-pdf-fijo').onclick = () => {
+        const element = document.getElementById('bloque-editor-retorica');
+        const opt = { margin: 10, filename: `${editorTitleInput.value || 'Guion'}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' } };
+        html2pdf().set(opt).from(element).save();
+    };
+
+    // PDF Editable (Preservando árbol estructural de controles)
+    document.getElementById('btn-exportar-pdf-editable').onclick = () => {
+        const plantillaHTML = `
+            <div style="padding:20px; font-family:sans-serif;">
+                <h2>${editorTitleInput.value || 'Documento Retórica'}</h2>
+                <hr/><br/>
+                <textarea style="width:100%; height:400px; border:1px solid #ccc; padding:10px;">${editorTextArea.value}</textarea>
+            </div>
+        `;
+        html2pdf().from(plantillaHTML).save(`${editorTitleInput.value || 'Formulario_Editable'}.pdf`);
+    };
+
+    // DOC de Microsoft Word (Volcado atómico por Blob de Texto)
+    document.getElementById('btn-exportar-word-doc').onclick = () => {
+        const esqueletoDoc = `
+            <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+            <head><title>Retorica Document Export</title><style>body {font-family: Arial; font-size:12pt;}</style></head>
+            <body><h2>${editorTitleInput.value || 'Sin Título'}</h2><p>${editorTextArea.value.replace(/\n/g, '<br/>')}</p></body>
+            </html>
+        `;
+        const blob = new Blob(['\ufeff' + esqueletoDoc], { type: 'application/msword' });
+        const url = URL.createObjectURL(blob);
+        const anclaDescargaVirtual = document.createElement('a');
+        anclaDescargaVirtual.href = url;
+        anclaDescargaVirtual.download = `${editorTitleInput.value || 'Nota'}.doc`;
+        document.body.appendChild(anclaDescargaVirtual);
+        anclaDescargaVirtual.click();
+        document.body.removeChild(anclaDescargaVirtual);
     };
 }
 
-// 3. AUXILIARES VINCULADOS
-function actualizarContadoresEditor() {
-    const texto = editor.value;
-    const caracteres = texto.length;
-    const palabras = texto.trim() === "" ? 0 : texto.trim().split(/\s+/).length;
-    const lineas = texto === "" ? 0 : texto.split('\n').length;
-    
-    statsBar.textContent = `Caracteres: ${caracteres} | Palabras: ${palabras} | Líneas: ${lineas}`;
+async function refrescarBibliotecaVisual() {
+    const user = window.RetoricaModules.auth.getUsuarioActivo();
+    if (!user) return;
+
+    const lista = await obtenerDocumentosPorUsuario(user);
+    contenedorLista.innerHTML = '';
+
+    if (lista.length === 0) {
+        contenedorLista.innerHTML = `<div style="color:var(--text-muted); font-size:0.75rem; text-align:center; padding:20px;">No hay documentos registrados</div>`;
+        return;
+    }
+
+    lista.forEach(doc => {
+        const item = document.createElement('div');
+        item.className = 'document-list-item';
+        item.innerHTML = `
+            <div style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:0.8rem; font-weight:bold;">
+                📄 ${doc.titulo}
+            </div>
+            <button class="btn-3d-round" id="btn-eliminar-nota-${doc.id}" style="width:28px; height:28px; font-size:0.8rem; box-shadow: 2px 2px 4px rgba(0,0,0,0.3);">🗑️</button>
+        `;
+        
+        item.onclick = (e) => {
+            // Evitar detonar carga si se presiona el botón interno de eliminación
+            if (e.target.id === `btn-eliminar-nota-${doc.id}`) return;
+            
+            idDocumentoActual = doc.id;
+            editorTitleInput.value = doc.titulo;
+            editorTextArea.value = doc.contenido;
+            procesarContadoresInternos();
+            document.getElementById('sidebar-container').classList.add('hidden');
+            document.getElementById('btn-toggle-pestaña').textContent = "▶";
+            mostrarNotificacionToast("Documento Abierto");
+        };
+
+        contenedorLista.appendChild(item);
+
+        document.getElementById(`btn-eliminar-nota-${doc.id}`).onclick = async (e) => {
+            e.stopPropagation();
+            if (confirm("¿Deseas eliminar permanentemente esta nota de tu almacenamiento?")) {
+                await eliminarDocumento(doc.id);
+                if (idDocumentoActual === doc.id) {
+                    idDocumentoActual = null;
+                    editorTitleInput.value = '';
+                    editorTextArea.value = '';
+                    procesarContadoresInternos();
+                }
+                refrescarBibliotecaVisual();
+                mostrarNotificacionToast("Nota Eliminada");
+            }
+        };
+    });
 }
 
-function cambiarEstadoMic(estaActivo) {
-    dictadoActivo = estaActivo;
-    btnMic.textContent = estaActivo ? "🛑" : "🎙️";
-    btnMic.style.borderColor = estaActivo ? "var(--danger)" : "var(--border)";
+function procesarContadoresInternos() {[cite: 15]
+    const rawTexto = editorTextArea.value;[cite: 15]
+    const caracteres = rawTexto.length;[cite: 15]
+    const palabras = rawTexto.trim() === "" ? 0 : rawTexto.trim().split(/\s+/).length;[cite: 15]
+    const lineas = rawTexto === "" ? 0 : rawTexto.split('\n').length;[cite: 15]
+
+    txtContadorCaracteres.textContent = `Caracteres: ${caracteres}`;
+    txtContadorPalabras.textContent = `Palabras: ${palabras}`;
+    txtContadorLineas.textContent = `Líneas: ${lineas}`;
 }
 
-function mostrarNotificacion(mensaje) {
-    toast.textContent = mensaje;
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 2500);
+function conmutarEstadoEstiloMic(activo) {[cite: 15]
+    dictadoActivo = activo;[cite: 15]
+    if (activo) {
+        btnMic.classList.add('active-mode');
+    } else {
+        btnMic.classList.remove('active-mode');
+    }
 }
 
-// Ejecutar al cargar el documento por completo
-window.addEventListener('DOMContentLoaded', inicializarApp);
+function salvaguardarCacheTemporalInmediato() {
+    localStorage.setItem('ret_cache_fast_title', editorTitleInput.value);
+    localStorage.setItem('ret_cache_fast_body', editorTextArea.value);
+    if (idDocumentoActual) localStorage.setItem('ret_cache_fast_id', idDocumentoActual);
+}
+
+function restaurarCacheTemporal() {
+    const t = localStorage.getItem('ret_cache_fast_title');
+    const b = localStorage.getItem('ret_cache_fast_body');
+    const i = localStorage.getItem('ret_cache_fast_id');
+
+    if (t || b) {
+        editorTitleInput.value = t || '';
+        editorTextArea.value = b || '';
+        if (i) idDocumentoActual = Number(i);
+        procesarContadoresInternos();
+    }
+}
+
+function mostrarNotificacionToast(msg) {[cite: 15]
+    const box = document.getElementById('toast-notificador-global');
+    box.textContent = msg;[cite: 15]
+    box.classList.add('show');[cite: 15]
+    setTimeout(() => box.classList.remove('show'), 2500);[cite: 15]
+}
+
+// Inicialización de la captura del evento de instalación nativa PWA
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    diferidoPromptPWA = e;
+    btnPwaInstalar.style.display = 'block';
+});
+
+btnPwaInstalar.onclick = () => {
+    if (!diferidoPromptPWA) return;
+    btnPwaInstalar.style.display = 'none';
+    diferidoPromptPWA.prompt();
+    diferidoPromptPWA.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+            console.log('El usuario instaló Retórica de forma nativa.');
+        }
+        diferidoPromptPWA = null;
+    });
+};
+
+window.addEventListener('DOMContentLoaded', () => {[cite: 15]
+    inicializarEcosistema();
+    restaurarCacheTemporal();
+});
