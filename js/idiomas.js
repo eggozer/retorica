@@ -1,22 +1,18 @@
-// --- MÓDULO DE TRADUCCIÓN E IDIOMAS INTERNACIONALES EXPANSIÓN ---
+// --- MÓDULO DE TRADUCCIÓN E IDIOMAS INTERNACIONALES ---
 
 export const LISTA_IDIOMAS = [
-    { code: 'es', name: 'Español', voiceCode: 'es-MX', saveAs: 'Guardar como:', newDoc: '➕', saveBtn: 'GUARDAR HTML', placeholder: 'Escribe tu guion o nota aquí...' },
-    { code: 'en', name: 'English', voiceCode: 'en-US', saveAs: 'Save as:', newDoc: '➕ New', saveBtn: 'SAVE HTML', placeholder: 'Write your script or note here...' },
-    { code: 'fr', name: 'Français', voiceCode: 'fr-FR', saveAs: 'Enregistrer:', newDoc: '➕ Nouveau', saveBtn: 'SAUVEGARDER', placeholder: 'Écrivez votre scénario ici...' },
-    { code: 'pt', name: 'Português', voiceCode: 'pt-BR', saveAs: 'Salvar como:', newDoc: '➕ Novo', saveBtn: 'SALVAR HTML', placeholder: 'Escreva seu roteiro aqui...' },
-    { code: 'de', name: 'Deutsch', voiceCode: 'de-DE', saveAs: 'Speichern als:', newDoc: '➕ Neu', saveBtn: 'HTML SPEICHERN', placeholder: 'Schreiben Sie Ihr Skript hier...' },
-    { code: 'ru', name: 'Русский', voiceCode: 'ru-RU', saveAs: 'Сохранить как:', newDoc: '➕ Новый', saveBtn: 'СОХРАНИТЬ', placeholder: 'Напишите свой сценарий здесь...' },
-    { code: 'ja', name: '日本語', voiceCode: 'ja-JP', saveAs: '名前を付けて保存:', newDoc: '➕ 新規', saveBtn: '保存する', placeholder: 'ここにスクリプトを書き込みます...' },
-    { code: 'zh', name: '中文', voiceCode: 'zh-CN', saveAs: '另存为:', newDoc: '➕ 新建', saveBtn: '保存 HTML', placeholder: '在这里写下 your 剧本...' },
-    { code: 'hi', name: 'हिन्दी', voiceCode: 'hi-IN', saveAs: 'इस रूप में सहेजें:', newDoc: '➕ नया', saveBtn: 'सहेजें', placeholder: 'यहाँ अपना स्क्रिप्ट लिखें...' },
-    { code: 'ar', name: 'العربية', voiceCode: 'ar-SA', saveAs: 'حفظ باسم:', newDoc: '➕ جديد', saveBtn: 'حفظ', placeholder: 'اكتب نصك هنا...' }
+    { code: 'es', name: 'Español', voiceCode: 'es-MX', saveAs: 'Guardar como:', newDoc: '➕' },
+    { code: 'en', name: 'English', voiceCode: 'en-US', saveAs: 'Save as:', newDoc: '➕ New' },
+    { code: 'fr', name: 'Français', voiceCode: 'fr-FR', saveAs: 'Enregistrer:', newDoc: '➕ Nouveau' },
+    { code: 'pt', name: 'Português', voiceCode: 'pt-BR', saveAs: 'Salvar como:', newDoc: '➕ Novo' }
 ];
 
 export function cargarSelectores(comboApp, comboVoz) {
+    // Limpiar selectores
     comboApp.innerHTML = '';
     comboVoz.innerHTML = '';
 
+    // Llenar selector de idioma de la aplicación
     LISTA_IDIOMAS.forEach(lang => {
         const option = document.createElement('option');
         option.value = lang.code;
@@ -24,18 +20,13 @@ export function cargarSelectores(comboApp, comboVoz) {
         comboApp.appendChild(option);
     });
 
+    // Llenar selector de idioma de dictado (Soporte inicial extendido)
     const vocesDisponibles = [
         { code: 'es-MX', name: 'Español (MX)' },
         { code: 'es-ES', name: 'Español (ES)' },
         { code: 'en-US', name: 'English (US)' },
         { code: 'fr-FR', name: 'Français (FR)' },
-        { code: 'pt-BR', name: 'Português (BR)' },
-        { code: 'de-DE', name: 'Deutsch (DE)' },
-        { code: 'ru-RU', name: 'Русский (RU)' },
-        { code: 'ja-JP', name: '日本語 (JP)' },
-        { code: 'zh-CN', name: '中文 (CN)' },
-        { code: 'hi-IN', name: 'हिन्दी (IN)' },
-        { code: 'ar-SA', name: 'العربية (SA)' }
+        { code: 'pt-BR', name: 'Português (BR)' }
     ];
 
     vocesDisponibles.forEach(voz => {
@@ -51,9 +42,9 @@ export function aplicarTraduccionInterfaz(codigoIdioma, elementos) {
     
     if (elementos.lblSaveAs) elementos.lblSaveAs.textContent = langConfig.saveAs;
     if (elementos.btnNuevo) elementos.btnNuevo.textContent = langConfig.newDoc;
-    if (elementos.btnGuardar) elementos.btnGuardar.textContent = langConfig.saveBtn;
-    if (elementos.editor) elementos.editor.placeholder = langConfig.placeholder;
     
+    // Cambiar dinámicamente el atributo lang del HTML para optimizar accesibilidad
     document.documentElement.lang = codigoIdioma;
+    
     return langConfig;
 }
