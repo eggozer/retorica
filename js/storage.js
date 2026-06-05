@@ -1,44 +1,52 @@
-/**
- * Retórica - Módulo de Persistencia de Datos (Notas e Historial)
- */
-class StorageManager {
-    constructor() {
-        this.notasKey = 'retorica_notas_db';
-        this.initStorage();
-    }
+// --- MÓDULO DE PERSISTENCIA Y BASE DE DATOS (IndexedDB) ---
+const DB_NAME = 'RetoricaDB';
+const DB_VERSION = 1;
+const STORE_NAME = 'documentos';
 
-    initStorage() {
-        if (!localStorage.getItem(this.notasKey)) {
-            localStorage.setItem(this.notasKey, JSON.stringify([]));
-        }
-    }
-
-    guardarNota(titulo, contenido, usuario) {
-        const notas = this.obtenerTodasLasNotas();
-        const notaId = Date.now().toString();
-
-        const nuevaNota = {
-            id: notaId,
-            titulo: titulo.trim() || "Nota sin título",
-            contenido: contenido,
-            autor: usuario || "Anónimo",
-            fecha: new Date().toLocaleString()
+export function initDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        request.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+                db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+            }
         };
-
-        notas.push(nuevaNota);
-        localStorage.setItem(this.notasKey, JSON.stringify(notas));
-        return nuevaNota;
-    }
-
-    obtenerTodasLasNotas() {
-        return JSON.parse(localStorage.getItem(this.notasKey)) || [];
-    }
-
-    obtenerNotasPorUsuario(usuario) {
-        const notas = this.obtenerTodasLasNotas();
-        if (!usuario) return notas.filter(n => n.autor === "Anónimo");
-        return notas.filter(n => n.autor === usuario);
-    }
+        request.onsuccess = (e) => resolve(e.target.result);
+        request.onerror = (e) => reject(e.target.error);
+    });
 }
 
-window.storageSystem = new StorageManager();
+export async function guardarDocumento(id, titulo, contenido) {
+    const db = await initDB();
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction([STORE_NAME], 'readwrite');
+        const store = transaction.objectStore();
+        const registro = { id, titulo, contenido, fechaModificacion: Date.now() };
+        const request = store.put(registro);
+        request.onsuccess = () => resolve(true);
+        request.onerror = (e) => reject(e.target.error);
+    });
+}
+
+export async function obtenerDocumentos() {
+    const db = await initDB();
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction([STORE_NAME], 'readonly');
+        const store = transaction.objectStore(STORE_NAME);
+        const request = store.getAll();
+        request.onsuccess = () => resolve(request.result || []);
+        request.onerror = (e) => reject(e.target.error);
+    });
+}
+
+export async function eliminarDocumento(id) {
+    const db = await initDB();
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction([STORE_NAME], 'readwrite');
+        const store = transaction.objectStore(STORE_NAME);
+        const request = store.delete(id);
+        request.onsuccess = () => resolve(true);
+        request.onerror = (e) => reject(e.target.error);
+    });
+}
