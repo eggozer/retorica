@@ -1,15 +1,11 @@
-// --- SERVICE WORKER AVANZADO DE CONTROL DE ENTORNO (V2026_MÓDULOS) ---
-const CACHE_NAME = 'retorica-cache-v2026-modulos';
+// --- SERVICE WORKER CONTROL DE ENTORNO UNIFICADO (V2026_FIJO) ---
+const CACHE_NAME = 'retorica-cache-v2026-unificado';
 
+// Listado limpio: Solo lo estrictamente necesario que se queda en la raíz
 const ASSETS_CRITICOS = [
   './',
   './index.html?v=2026_Módulos',
-  './manifest.json?v=2026_Módulos',
-  './js/main.js?v=2026_Módulos',
-  './js/storage.js?v=2026_Módulos',
-  './js/audio.js?v=2026_Módulos',
-  './js/idiomas.js?v=2026_Módulos',
-  './js/auth.js?v=2026_Módulos'
+  './manifest.json?v=2026_Módulos'
 ];
 
 // Instalación forzando el reemplazo de caché antiguo
@@ -56,8 +52,13 @@ self.addEventListener('fetch', (event) => {
       })
       .catch(() => {
         return caches.match(event.request).then((resCacheado) => {
-          if (resCacheado) return resCacheado;
-          if (event.request.mode === 'navigate') return caches.match('./index.html?v=2026_Módulos');
+          if (resCacheado) {
+            return resCacheado;
+          }
+          // Fallback en caso de desconexión absoluta para el documento base
+          if (event.request.mode === 'navigate') {
+            return caches.match('./index.html?v=2026_Módulos');
+          }
         });
       })
   );
