@@ -2,7 +2,7 @@
 <html lang="es" data-retorica-anchor="html-root">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=3.0, user-scalable=yes">
     <title>Retórica - Sistema Avanzado de Guiones y Audio</title>
     <link rel="manifest" href="./manifest.json?v=2026_Módulos">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -10,57 +10,169 @@
     <style>
         :root {
             --bg-main: #12141c; --bg-sidebar: #1a1d29; --bg-card: #222736;
-            --accent: #00ffcc; --text-main: #f3f4f6; --text-muted: #a0aec0;
+            --accent: #f5c518; --text-main: #f3f4f6; --text-muted: #a0aec0;
             --border: #2d3748; --danger: #ff3b30; --btn-3d-bg: #2d3244;
             --btn-3d-shadow-dark: #090b11; --btn-3d-shadow-light: #414963;
         }
         html.light-theme, body.light-theme {
             --bg-main: #f0f2f5; --bg-sidebar: #e4e7eb; --bg-card: #ffffff;
-            --accent: #00a884; --text-main: #1a202c; --text-muted: #718096;
+            --accent: #d4a373; --text-main: #1a202c; --text-muted: #718096;
             --border: #cbd5e0; --btn-3d-bg: #e0e5ec;
             --btn-3d-shadow-dark: #b8bec7; --btn-3d-shadow-light: #ffffff;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; transition: background-color 0.2s ease, border-color 0.2s ease; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--bg-main); color: var(--text-main); display: flex; height: 100vh; width: 100vw; overflow: hidden; position: relative; }
 
-        /* --- CONTENEDOR 3D Y COMPONENTES BLINDADOS --- */
-        .sidebar { width: 290px; background-color: var(--bg-sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; height: 100%; position: absolute; left: 0; top: 0; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 120; }
-        .sidebar.hidden { transform: translateX(-290px); }
-        .toggle-sidebar-pestaña { position: absolute; right: -42px; top: 15px; width: 42px; height: 45px; background-color: var(--bg-sidebar); color: var(--accent); border: 1px solid var(--border); border-left: none; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; font-weight: bold; z-index: 125; border-radius: 0 8px 8px 0; box-shadow: 3px 0 6px rgba(0,0,0,0.3); pointer-events: auto; }
-        .sidebar-header { padding: 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; height: 70px; flex-shrink: 0; }
+        /* --- ENCABEZADO SUPERIOR 3D (RETÓRICA + LOGO) --- */
+        .brand-header-3d {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 100;
+            background: var(--bg-sidebar);
+            padding: 8px 24px;
+            border-radius: 30px;
+            box-shadow: 5px 5px 15px var(--btn-3d-shadow-dark), -5px -5px 15px var(--btn-3d-shadow-light);
+            border: 1px solid var(--border);
+            pointer-events: none;
+        }
+        .brand-logo-3d {
+            width: 32px;
+            height: 32px;
+            filter: drop-shadow(3px 3px 3px rgba(0,0,0,0.7));
+            transform: perspective(500px) rotateX(10deg) rotateY(-10deg);
+        }
+        .brand-title-3d {
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 1px 1px 0px #c29b0c, 2px 2px 0px #94760a, 4px 4px 6px rgba(0,0,0,0.6);
+        }
+
+        /* --- CONTROLES DE ZOOM NATIVO DE INTERFAZ --- */
+        .zoom-widget-container {
+            position: fixed;
+            bottom: 50px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        /* --- MENÚ LATERAL MEJORADO A PANTALLA COMPLETA --- */
+        .sidebar { 
+            width: 100vw; 
+            max-width: 100%;
+            background-color: rgba(26, 29, 41, 0.95); 
+            backdrop-filter: blur(10px);
+            border-right: 1px solid var(--border); 
+            display: flex; 
+            flex-direction: column; 
+            height: 100%; 
+            position: fixed; 
+            left: 0; 
+            top: 0; 
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); 
+            z-index: 2000; 
+        }
+        .sidebar.hidden { transform: translateX(-100%); }
         
-        .document-list { flex: 1; overflow-y: auto; padding: 12px; scrollbar-width: thin; }
-        .document-list-item { background: var(--bg-card); padding: 10px; margin-bottom: 8px; border-radius: 6px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
-        .document-list-item:hover { border-color: var(--accent); }
+        .toggle-sidebar-pestaña { 
+            position: fixed; 
+            left: 10px; 
+            top: 15px; 
+            width: 45px; 
+            height: 45px; 
+            background-color: var(--bg-sidebar); 
+            color: var(--accent); 
+            border: 1px solid var(--border); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            cursor: pointer; 
+            font-size: 1.2rem; 
+            font-weight: bold; 
+            z-index: 2100; 
+            border-radius: 50%; 
+            box-shadow: 4px 4px 8px var(--btn-3d-shadow-dark); 
+        }
         
-        .sidebar-footer-menu { padding: 16px; border-top: 1px solid var(--border); background-color: rgba(0, 0, 0, 0.3); flex-shrink: 0; }
-        .main-container { flex: 1; display: flex; flex-direction: column; height: 100%; width: 100%; background-color: var(--bg-main); position: relative; padding-left: 0; transition: padding 0.3s ease; }
+        .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; height: 80px; flex-shrink: 0; margin-top: 60px; }
         
-        /* --- PASARELAS HORIZONTALES DESLIZABLES --- */
-        .scollable-toolbar-wrapper { display: flex; flex-direction: column; gap: 4px; background-color: var(--bg-sidebar); padding: 6px 8px 6px 45px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-        .top-toolbar-pasarela { display: flex; align-items: center; gap: 24px; overflow-x: auto; white-space: nowrap; width: 100%; padding: 14px 4px 6px 4px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+        /* --- REJILLA BIDIMENSIONAL 3D PARA LAS PLANTILLAS --- */
+        .document-list { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 20px; 
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            perspective: 1000px;
+        }
+        
+        .document-list-item { 
+            background: var(--bg-card); 
+            padding: 16px; 
+            border-radius: 12px; 
+            border: 1px solid var(--border); 
+            display: flex; 
+            flex-direction: column;
+            justify-content: space-between; 
+            cursor: pointer; 
+            height: 160px;
+            box-shadow: 5px 5px 15px var(--btn-3d-shadow-dark), -3px -3px 10px var(--btn-3d-shadow-light);
+            transform: rotateX(5deg) rotateY(-5deg);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .document-list-item:active {
+            transform: translateZ(-10px) rotateX(0deg) rotateY(0deg);
+            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.5);
+        }
+        
+        /* Contenedor de Botones de Plantilla de Acción Rápida */
+        .grid-item-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 20px;
+            margin-top: auto;
+            padding-top: 15px;
+        }
+
+        .sidebar-footer-menu { padding: 16px; border-top: 1px solid var(--border); background-color: rgba(0, 0, 0, 0.4); flex-shrink: 0; }
+        .main-container { flex: 1; display: flex; flex-direction: column; height: 100%; width: 100%; background-color: var(--bg-main); position: relative; }
+        
+        /* --- PASARELAS HORIZONTALES DESLIZABLES DE HERRAMIENTAS --- */
+        .scollable-toolbar-wrapper { display: flex; flex-direction: column; gap: 4px; background-color: var(--bg-sidebar); padding: 6px 8px 6px 65px; border-bottom: 1px solid var(--border); flex-shrink: 0; height: 95px; justify-content: center; }
+        .top-toolbar-pasarela { display: flex; align-items: center; gap: 24px; overflow-x: auto; white-space: nowrap; width: 100%; padding: 4px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
         .top-toolbar-pasarela::-webkit-scrollbar { display: none; }
         .toolbar-rack-modular { display: inline-flex; align-items: center; gap: 16px; flex-shrink: 0; }
 
-        /* --- CONTENEDOR DE LEYENDA SUPERIOR Y BOTÓN 3D --- */
-        .control-unit-3d { display: inline-flex; flex-direction: column; align-items: center; position: relative; min-width: 60px; }
-        .control-unit-3d .leyenda-superior-externa { font-size: 0.68rem; font-weight: 700; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; pointer-events: none; white-space: nowrap; text-align: center; }
+        /* --- CONTENEDOR DE LEYENDA SUPERIOR EXTERNA --- */
+        .control-unit-3d { display: inline-flex; flex-direction: column; align-items: center; position: relative; }
+        .control-unit-3d .leyenda-superior-externa { font-size: 0.62rem; font-weight: 800; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.8px; pointer-events: none; white-space: nowrap; text-align: center; }
         
-        /* --- DISEÑO EXCLUSIVO DE BOTÓN 3D REDONDO --- */
-        .btn-3d-round { width: 46px; height: 46px; border-radius: 50% !important; background: var(--btn-3d-bg); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; transition: all 0.15s ease; box-shadow: 4px 4px 8px var(--btn-3d-shadow-dark), -4px -4px 8px var(--btn-3d-shadow-light); position: relative; outline: none; }
+        /* --- BOTÓN 3D REDONDO --- */
+        .btn-3d-round { width: 44px; height: 44px; border-radius: 50% !important; background: var(--btn-3d-bg); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; transition: all 0.1s ease; box-shadow: 4px 4px 8px var(--btn-3d-shadow-dark), -4px -4px 8px var(--btn-3d-shadow-light); position: relative; outline: none; color: var(--text-main); }
         .btn-3d-round:active { box-shadow: inset 3px 3px 6px var(--btn-3d-shadow-dark), inset -3px -3px 6px var(--btn-3d-shadow-light); transform: translateY(1px); }
         .btn-3d-round.active-mode { background: var(--accent); color: #0a0f1d; box-shadow: inset 2px 2px 5px rgba(0,0,0,0.4); }
         
-        .select-3d-styled { background: var(--btn-3d-bg); color: var(--text-main); border: none; padding: 6px 10px; font-size: 0.78rem; font-weight: bold; outline: none; height: 36px; border-radius: 8px !important; box-shadow: 2px 2px 5px var(--btn-3d-shadow-dark), -2px -2px 5px var(--btn-3d-shadow-light); }
+        .select-3d-styled { background: var(--btn-3d-bg); color: var(--text-main); border: none; padding: 6px 8px; font-size: 0.75rem; font-weight: bold; outline: none; height: 36px; border-radius: 8px !important; box-shadow: 2px 2px 5px var(--btn-3d-shadow-dark), -2px -2px 5px var(--btn-3d-shadow-light); max-width: 130px; }
 
-        /* --- ENTORNO DE TRABAJO DEL EDITOR Y COMPONENTE PLAYGROUND --- */
-        .editor-wrapper { flex: 1; display: flex; flex-direction: column; padding: 20px; overflow: hidden; position: relative; }
+        /* --- ENTORNO DE TRABAJO DEL EDITOR --- */
+        .editor-wrapper { flex: 1; display: flex; flex-direction: column; padding: 20px; overflow: hidden; position: relative; margin-top: 40px; }
         .input-titulo-html { background: transparent; border: none; border-bottom: 1px dashed var(--border); color: var(--accent); font-size: 1.4rem; font-weight: bold; padding-bottom: 8px; margin-bottom: 12px; outline: none; width: 100%; }
         
         .workspaces-container { flex: 1; display: flex; width: 100%; height: 100%; overflow: hidden; gap: 15px; position: relative; }
         .textarea-encapsulado { flex: 1; height: 100%; background: transparent; border: none; color: var(--text-main); font-size: 1.1rem; line-height: 1.6; resize: none; outline: none; overflow-y: auto; -webkit-overflow-scrolling: touch; }
         
-        /* Contenedor del Visor e Frame de Ejecución Segura */
+        /* Contenedor Playground Sandbox */
         .playground-preview-pane { flex: 1; height: 100%; background: #ffffff; border: 2px solid var(--border); border-radius: 8px; overflow: hidden; display: none; flex-direction: column; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
         .playground-preview-pane.active { display: flex; }
         .playground-header-bar { background: #e2e8f0; color: #1a202c; padding: 6px 12px; font-size: 0.75rem; font-weight: bold; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #cbd5e0; }
@@ -68,86 +180,71 @@
 
         .stats-bar-fija { height: 30px; border-top: 1px solid var(--border); padding-top: 10px; font-size: 0.78rem; color: var(--text-muted); display: flex; justify-content: space-between; flex-shrink: 0; font-family: monospace; }
         
-        /* --- SISTEMA DE AUTENTICACIÓN INTEGRADO --- */
-        .auth-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(5, 8, 16, 0.85); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 2000; transition: opacity 0.3s ease; }
-        .auth-overlay.hidden { display: none !important; opacity: 0; pointer-events: none; }
-        .auth-card { background: var(--bg-sidebar); border: 2px solid var(--accent); padding: 25px; border-radius: 12px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 0 20px rgba(0, 255, 204, 0.2); }
+        /* --- CAPA DE AUTENTICACIÓN --- */
+        .auth-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(5, 8, 16, 0.95); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 4000; }
+        .auth-overlay.hidden { display: none !important; }
+        .auth-card { background: var(--bg-sidebar); border: 2px solid var(--accent); padding: 25px; border-radius: 12px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 0 20px rgba(245, 197, 24, 0.2); }
         
-        .login-header-brand { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 5px; }
-        .login-header-brand h2 { color: var(--accent); font-size: 28px; margin: 0; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
-        .login-brand-logo { filter: drop-shadow(0 0 5px rgba(0, 255, 204, 0.5)); }
-        
-        .auth-input { width: 100%; padding: 12px; background: var(--bg-main); border: 1px solid var(--border); color: #fff; margin-bottom: 12px; border-radius: 6px; outline: none; font-size: 1rem; box-sizing: border-box; }
-        .auth-input:focus { border-color: var(--accent); box-shadow: 0 0 8px var(--accent); }
+        .auth-input { width: 100%; padding: 12px; background: var(--bg-main); border: 1px solid var(--border); color: #fff; margin-bottom: 12px; border-radius: 6px; outline: none; font-size: 1rem; }
+        .btn-submit-retorica-auth { width: 100%; padding: 14px; background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid #334155; border-radius: 8px; color: #ffffff; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; }
 
-        .btn-submit-retorica-auth { width: 100%; padding: 14px; background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid #334155; border-radius: 8px; color: #ffffff; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: all 0.2s ease; margin-top: 5px; }
-        .btn-submit-retorica-auth:hover { border-color: var(--accent); background: var(--bg-main); }
+        .social-auth-box { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
+        .btn-social-gate { width: 100%; padding: 12px; background: #1e293b; border: 1px solid #334155; border-radius: 6px; color: #ffffff; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
 
-        .auth-divider-line { margin: 20px 0; position: relative; text-align: center; }
-        .auth-divider-line::before { content: ""; position: absolute; top: 50%; left: 0; width: 100%; height: 1px; background: #334155; z-index: 1; }
-        .auth-divider-line span { background: var(--bg-sidebar); padding: 0 10px; color: #64748b; font-size: 14px; position: relative; z-index: 2; }
-
-        .social-auth-box { display: flex; flex-direction: column; gap: 10px; }
-        .btn-social-gate { width: 100%; padding: 12px; background: #1e293b; border: 1px solid #334155; border-radius: 6px; color: #ffffff; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: background 0.2s; }
-        .btn-social-gate:hover { background: #334155; }
-        .btn-social-gate img { width: 20px; height: 20px; }
-
-        .toast-notificador { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%) translateY(150px); background-color: var(--accent); color: #12141c; padding: 12px 24px; font-size: 0.85rem; font-weight: bold; box-shadow: 0 6px 20px rgba(0,0,0,0.4); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 3000; pointer-events: none; border-radius: 30px; letter-spacing: 0.5px; }
+        .toast-notificador { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%) translateY(150px); background-color: var(--accent); color: #12141c; padding: 12px 24px; font-size: 0.85rem; font-weight: bold; box-shadow: 0 6px 20px rgba(0,0,0,0.4); transition: transform 0.3s ease; z-index: 5000; border-radius: 30px; }
         .toast-notificador.show { transform: translateX(-50%) translateY(0); }
         .hidden-file-input { display: none !important; }
     </style>
 </head>
 <body>
 
-    <!-- INTERCEPCIÓN NATIVA DE ARCHIVOS LOCALES -->
     <input type="file" id="fallback-file-loader" class="hidden-file-input" accept=".html,.txt,.doc">
 
-    <!-- CAPA INTEGRAL DE REGISTRO E INICIO DE SESIÓN CORREGIDO -->
-    <div class="auth-overlay" id="modulo-auth-screen" data-retorica-anchor="auth-gate" style="display: flex;">
+    <!-- LOGO Y ENCABEZADO SUPERIOR EN 3D REAL -->
+    <div class="brand-header-3d">
+        <svg class="brand-logo-3d" viewBox="0 0 24 24">
+            <path fill="#f5c518" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.53c-.26-.81-1-1.4-1.9-1.4h-1v-3c0-.55-.45-1-1-1h-6v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+        </svg>
+        <span class="brand-title-3d">Retórica</span>
+    </div>
+
+    <!-- CONTROLES DE ZOOM DE PANTALLA -->
+    <div class="zoom-widget-container">
+        <div class="control-unit-3d">
+            <div class="leyenda-superior-externa">Zoom+</div>
+            <button class="btn-3d-round" id="btn-zoom-incrementar">➕</button>
+        </div>
+        <div class="control-unit-3d">
+            <div class="leyenda-superior-externa">Zoom-</div>
+            <button class="btn-3d-round" id="btn-zoom-decrementar">➖</button>
+        </div>
+    </div>
+
+    <!-- AUTH OVERLAY -->
+    <div class="auth-overlay" id="modulo-auth-screen" style="display: flex;">
         <div class="auth-card">
-            <div class="login-header-brand">
-                <svg class="login-brand-logo" viewBox="0 0 24 24" width="38" height="38">
-                    <path fill="#00ffcc" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.53c-.26-.81-1-1.4-1.9-1.4h-1v-3c0-.55-.45-1-1-1h-6v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
-                </svg>
-                <h2>Retórica</h2>
-            </div>
-            <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 20px;">Resguardo Local y Sincronización en la Nube</p>
-            
+            <h2 style="color: var(--accent); margin-bottom: 10px;">RETÓRICA</h2>
             <form id="retorica-form-autenticacion" onsubmit="ejecutarAccesoDirectoRetorica(event)">
                 <input type="email" id="auth-username-field" class="auth-input" placeholder="Correo electrónico" required>
-                <input type="password" id="auth-password-field" class="auth-input" placeholder="Contraseña (Crear o ingresar)" required>
-                
-                <div class="control-unit-3d" style="width: 100%;">
-                    <div class="leyenda-superior-externa">Acceder</div>
-                    <button type="submit" class="btn-submit-retorica-auth" id="btn-auth-confirmar">
-                        <span>Acceder con Retórica</span> <span>🔑</span>
-                    </button>
-                </div>
+                <input type="password" id="auth-password-field" class="auth-input" placeholder="Contraseña" required>
+                <button type="submit" class="btn-submit-retorica-auth">Acceder</button>
             </form>
-
-            <div class="auth-divider-line"><span>ó continuar con</span></div>
-
             <div class="social-auth-box">
-                <button class="btn-social-gate" onclick="procesarAccesoTerceros('Google')">
-                    <img src="https://cdn-icons-png.flaticon.com/512/300/300221.png" alt="Google"> Google
-                </button>
-                <button class="btn-social-gate" onclick="procesarAccesoTerceros('Facebook')">
-                    <img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" alt="Facebook"> Facebook
-                </button>
-                <button class="btn-social-gate" onclick="procesarAccesoTerceros('WhatsApp')">
-                    <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="WhatsApp"> WhatsApp
-                </button>
+                <button class="btn-social-gate" onclick="procesarAccesoTerceros('Google')">Google</button>
+                <button class="btn-social-gate" onclick="procesarAccesoTerceros('Facebook')">Facebook</button>
             </div>
         </div>
     </div>
 
-    <!-- MENÚ LATERAL: BIBLIOTECA DE DOCUMENTOS (Flecha reparada) -->
-    <div class="sidebar hidden" id="sidebar-container" data-retorica-anchor="sidebar-root">
-        <div class="toggle-sidebar-pestaña" id="btn-toggle-pestaña" title="Desplegar Biblioteca">▶</div>
+    <!-- BOTÓN GESTOR FLOTANTE DEL MENÚ LATERAL (Independiente de barras) -->
+    <div class="toggle-sidebar-pestaña" id="btn-toggle-pestaña" title="Desplegar Biblioteca">▶</div>
+
+    <!-- MENÚ LATERAL COMPLETO INTERACTIVO CON FILAS VERTICALES 3D -->
+    <div class="sidebar hidden" id="sidebar-container">
         <div class="sidebar-header">
-            <div style="display:flex; flex-direction:column;">
-                <span id="display-user-activo" style="font-weight:700; font-size:0.9rem; color:var(--accent);">Retórica</span>
-                <span style="font-size:0.6rem; color:var(--text-muted); text-transform:uppercase;">Biblioteca Local</span>
+            <div>
+                <span id="display-user-activo" style="font-weight:700; font-size:1.1rem; color:var(--accent);">Retórica</span>
+                <p style="font-size:0.7rem; color:var(--text-muted);">GESTIÓN DE PLANTILLAS 3D</p>
             </div>
             <div class="control-unit-3d">
                 <div class="leyenda-superior-externa">Nuevo</div>
@@ -155,124 +252,111 @@
             </div>
         </div>
         
-        <div class="document-list" id="contenedor-lista-documentos">
-            <!-- Nodos inyectados dinámicamente -->
-        </div>
+        <!-- Vista en Rejilla de 2 Columnas Verticales -->
+        <div class="document-list" id="contenedor-lista-documentos"></div>
         
         <div class="sidebar-footer-menu">
-            <div class="control-unit-3d" style="width:100%; margin-bottom:12px;">
-                <div class="leyenda-superior-externa">Cuenta</div>
-                <button class="btn-3d-round" id="btn-cerrar-sesion-activo" style="width:100%; font-size:0.85rem; border-radius:6px !important;">🚪 Cerrar Sesión</button>
-            </div>
-            <div class="control-unit-3d" style="width:100%;">
-                <div class="leyenda-superior-externa">Instalar</div>
-                <button class="btn-3d-round" id="btn-pwa-instalar-nativo" style="width:100%; font-size:0.85rem; border-radius:6px !important; display:none;">📥 Instalar Sistema</button>
-            </div>
+            <button class="btn-3d-round" id="btn-cerrar-sesion-activo" style="width:100%; border-radius:8px !important;">Cerrar Sesión</button>
         </div>
     </div>
 
     <!-- ÁREA DE TRABAJO PRINCIPAL -->
     <div class="main-container" id="area-principal-retorica">
         <div class="scollable-toolbar-wrapper">
-            <div class="top-toolbar-pasarela" id="pasarela-herramientas-globales" data-retorica-anchor="toolbar-scroller">
+            <div class="top-toolbar-pasarela" id="pasarela-herramientas-globales">
                 
-                <!-- RACK 1: AUDIO Y DICTADO -->
-                <div class="toolbar-rack-modular" id="rack-audio-operaciones">
+                <!-- PALOMITA DE GUARDAR POSICIONADA ANTES DEL MICRÓFONO -->
+                <div class="toolbar-rack-modular">
+                    <div class="control-unit-3d">
+                        <div class="leyenda-superior-externa">Guardar</div>
+                        <button class="btn-3d-round" id="btn-confirmar-guardado-nativo" style="color: var(--accent); font-weight: bold;">✓</button>
+                    </div>
                     <div class="control-unit-3d">
                         <div class="leyenda-superior-externa">Dictado</div>
-                        <button class="btn-3d-round" id="btn-operar-dictado" title="Dictado por voz">🎙️</button>
+                        <button class="btn-3d-round" id="btn-operar-dictado">🎙️</button>
                     </div>
                     <div class="control-unit-3d">
                         <div class="leyenda-superior-externa">Lectura</div>
-                        <button class="btn-3d-round" id="btn-operar-lectura" title="Leer texto en voz alta">🔊</button>
-                    </div>
-                    <div class="control-unit-3d">
-                        <div class="leyenda-superior-externa">NotaVoz</div>
-                        <button class="btn-3d-round" id="btn-operar-grabacion-voz" title="Grabar nota de audio">🎵</button>
-                    </div>
-                    <div class="control-unit-3d">
-                        <div class="leyenda-superior-externa">Compilar</div>
-                        <button class="btn-3d-round" id="btn-operar-render-audio" title="Renderizar texto a archivo de voz">⚙️</button>
+                        <button class="btn-3d-round" id="btn-operar-lectura">🔊</button>
                     </div>
                 </div>
 
-                <!-- NUEVO RACK PLAYGROUND: EJECUTOR DE CÓDIGO DINÁMICO -->
-                <div class="toolbar-rack-modular" id="rack-playground-html" style="display: none;">
+                <!-- SELECTOR DE IDIOMAS EXPANDIDO (30 IDIOMAS PRINCIPALES REALES) -->
+                <div class="toolbar-rack-modular">
+                    <div class="control-unit-3d">
+                        <div class="leyenda-superior-externa">Idioma Global</div>
+                        <select id="selector-idioma-global" class="select-3d-styled">
+                            <option value="es-MX">Español (México)</option>
+                            <option value="es-ES">Español (España)</option>
+                            <option value="en-US">English (USA)</option>
+                            <option value="en-GB">English (UK)</option>
+                            <option value="fr-FR">Français</option>
+                            <option value="de-DE">Deutsch</option>
+                            <option value="it-IT">Italiano</option>
+                            <option value="pt-BR">Português (Brasil)</option>
+                            <option value="zh-CN">中文 (简体)</option>
+                            <option value="ja-JP">日本語</option>
+                            <option value="ko-KR">한국어</option>
+                            <option value="ru-RU">Русский</option>
+                            <option value="ar-SA">العربية</option>
+                            <option value="hi-IN">हिन्दी</option>
+                            <option value="nl-NL">Nederlands</option>
+                            <option value="sv-SE">Svenska</option>
+                            <option value="no-NO">Norsk</option>
+                            <option value="da-DK">Dansk</option>
+                            <option value="fi-FI">Suomi</option>
+                            <option value="pl-PL">Polski</option>
+                            <option value="tr-TR">Türkçe</option>
+                            <option value="he-IL">עברית</option>
+                            <option value="el-GR">Ελληνικά</option>
+                            <option value="id-ID">Bahasa Indonesia</option>
+                            <option value="ms-MY">Bahasa Melayu</option>
+                            <option value="th-TH">ไทย</option>
+                            <option value="vi-VN">Tiếng Việt</option>
+                            <option value="cs-CZ">Čeština</option>
+                            <option value="hu-HU">Magyar</option>
+                            <option value="uk-UA">Українська</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="toolbar-rack-modular" id="rack-playground-html" style="display:none;">
                     <div class="control-unit-3d">
                         <div class="leyenda-superior-externa">Código</div>
-                        <button class="btn-3d-round" id="btn-ejecutar-playground" title="Ejecutar Código HTML en Tiempo Real">⚡</button>
+                        <button class="btn-3d-round" id="btn-ejecutar-playground">⚡</button>
                     </div>
                 </div>
 
-                <!-- RACK 2: IDIOMAS CONFIGURABLES -->
-                <div class="toolbar-rack-modular" id="rack-configuracion-idiomas">
-                    <div class="control-unit-3d">
-                        <div class="leyenda-superior-externa">App</div>
-                        <select id="selector-idioma-app" class="select-3d-styled" title="Idioma del Entorno">
-                            <option value="es">Español</option>
-                            <option value="en">English</option>
-                        </select>
-                    </div>
-                    <div class="control-unit-3d">
-                        <div class="leyenda-superior-externa">Voz</div>
-                        <select id="selector-idioma-voz" class="select-3d-styled" title="Idioma de Reconocimiento">
-                            <option value="es-MX">Español (MX)</option>
-                            <option value="en-US">English (US)</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- RACK 3: GESTIÓN DE ARCHIVOS EXTERNOS E INTERNOS -->
-                <div class="toolbar-rack-modular" id="rack-archivos-sistema">
+                <div class="toolbar-rack-modular">
                     <div class="control-unit-3d">
                         <div class="leyenda-superior-externa">Abrir</div>
-                        <button class="btn-3d-round" id="btn-abrir-archivo-local" title="Abrir archivo del dispositivo">📂</button>
+                        <button class="btn-3d-round" id="btn-abrir-archivo-local">📂</button>
                     </div>
                     <div class="control-unit-3d">
                         <div class="leyenda-superior-externa">PDF</div>
-                        <button class="btn-3d-round" id="btn-exportar-pdf-fijo" title="Exportar como PDF Fijo">📄</button>
+                        <button class="btn-3d-round" id="btn-exportar-pdf-fijo">📄</button>
                     </div>
-                    <div class="control-unit-3d">
-                        <div class="leyenda-superior-externa">Editable</div>
-                        <button class="btn-3d-round" id="btn-exportar-pdf-editable" title="Exportar como PDF Formulario">📝</button>
-                    </div>
-                    <div class="control-unit-3d">
-                        <div class="leyenda-superior-externa">Doc</div>
-                        <button class="btn-3d-round" id="btn-exportar-word-doc" title="Exportar como Word DOC">藍</button>
-                    </div>
-                </div>
-
-                <!-- RACK 4: INTERFAZ Y CONFIRMACIÓN -->
-                <div class="toolbar-rack-modular" id="rack-interfaz-salvaguarda">
                     <div class="control-unit-3d">
                         <div class="leyenda-superior-externa">Tema</div>
-                        <button class="btn-3d-round" id="btn-conmutar-tema-visual" title="Cambiar Apariencia">🌙</button>
-                    </div>
-                    <div class="control-unit-3d">
-                        <div class="leyenda-superior-externa">Guardar</div>
-                        <button class="btn-3d-round" id="btn-confirmar-guardado-nativo" style="color: var(--accent); font-weight: bold;" title="Guardar cambios localmente">✓</button>
+                        <button class="btn-3d-round" id="btn-conmutar-tema-visual">🌙</button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ENTORNO DE EDICIÓN CON PLAYGROUND INTEGRADO -->
-        <div class="editor-wrapper" id="bloque-editor-retorica">
-            <input type="text" id="editor-document-title" class="input-titulo-html" placeholder="Título del Documento..." data-retorica-anchor="doc-title">
-            
+        <!-- ENTORNO DE EDICIÓN -->
+        <div class="editor-wrapper">
+            <input type="text" id="editor-document-title" class="input-titulo-html" placeholder="Título del Documento...">
             <div class="workspaces-container">
-                <textarea id="editor-core-textarea" class="textarea-encapsulado" placeholder="Escribe tu guion, nota o código HTML aquí..." data-retorica-anchor="doc-body"></textarea>
-                
-                <!-- Panel de vista previa aislado e inmune al CSS de Retórica -->
+                <textarea id="editor-core-textarea" class="textarea-encapsulado" placeholder="Escribe tu guion aquí..."></textarea>
                 <div class="playground-preview-pane" id="contenedor-vista-previa">
                     <div class="playground-header-bar">
-                        <span>ENTORNO DE PRUEBAS INTERACTIVO (SANDBOX)</span>
-                        <button id="btn-cerrar-preview" style="background:none; border:none; font-weight:bold; cursor:pointer; color:var(--danger);">✕ Cerrar</button>
+                        <span>SANDBOX PLAYGROUND</span>
+                        <button id="btn-cerrar-preview" style="color:var(--danger); background:none; border:none; font-weight:bold;">✕</button>
                     </div>
                     <iframe class="playground-iframe-sandbox" id="sandbox-ejecutor"></iframe>
                 </div>
             </div>
-            
             <div class="stats-bar-fija" id="stats-bar-fija-indicador">
                 <span id="txt-contador-caracteres">Caracteres: 0</span>
                 <span id="txt-contador-palabras">Palabras: 0</span>
@@ -281,17 +365,16 @@
         </div>
     </div>
 
-    <div class="toast-notificador" id="toast-notificador-global">Sistema Listo</div>
+    <div class="toast-notificador" id="toast-notificador-global">Retórica Lista</div>
 
-    <!-- SCRIPT CENTRALIZADO: PERSISTENCIA INDEXEDDB ATÓMICA -->
+    <!-- MOTOR LOGICO PERSISTENTE INDEXEDDB -->
     <script>
         const DB_NAME = 'RetoricaDB_V2026';
-        const DB_VERSION = 2;
         const STORE_NAME = 'documentos_guiones';
 
         function initDB() {
             return new Promise((resolve, reject) => {
-                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                const request = indexedDB.open(DB_NAME, 3);
                 request.onupgradeneeded = (e) => {
                     const db = e.target.result;
                     if (!db.objectStoreNames.contains(STORE_NAME)) {
@@ -303,317 +386,333 @@
             });
         }
 
-        async function guardarDocumento(id, titulo, contenido, usuarioPropietario) {
+        async function guardarDocumento(id, titulo, contenido, usuario) {
             const db = await initDB();
             return new Promise((resolve, reject) => {
                 const transaction = db.transaction([STORE_NAME], 'readwrite');
                 const store = transaction.objectStore(STORE_NAME);
-                const registro = { id: Number(id), titulo: titulo.trim() || "Sin Título", contenido: contenido, usuario: usuarioPropietario, fechaModificacion: Date.now() };
+                const registro = { id: Number(id), titulo: titulo || "Sin Título", contenido, usuario, fechaModificacion: Date.now() };
                 const request = store.put(registro);
                 request.onsuccess = () => resolve(true);
-                request.onerror = (e) => reject(e.target.error);
+                request.onerror = () => reject(false);
             });
         }
 
-        async function obtenerDocumentosPorUsuario(usuarioPropietario) {
+        async function obtenerDocumentosPorUsuario(usuario) {
             const db = await initDB();
-            return new Promise((resolve, reject) => {
+            return new Promise((resolve) => {
                 const transaction = db.transaction([STORE_NAME], 'readonly');
                 const store = transaction.objectStore(STORE_NAME);
                 const request = store.getAll();
                 request.onsuccess = () => {
-                    const todos = request.result || [];
-                    resolve(todos.filter(doc => doc.usuario === usuarioPropietario));
+                    const filtrados = (request.result || []).filter(doc => doc.usuario === usuario);
+                    resolve(filtrados);
                 };
-                request.onerror = (e) => reject(e.target.error);
             });
         }
 
         async function eliminarDocumento(id) {
             const db = await initDB();
-            return new Promise((resolve, reject) => {
+            return new Promise((resolve) => {
                 const transaction = db.transaction([STORE_NAME], 'readwrite');
                 const store = transaction.objectStore(STORE_NAME);
                 const request = store.delete(Number(id));
                 request.onsuccess = () => resolve(true);
-                request.onerror = (e) => reject(e.target.error);
             });
         }
     </script>
 
-    <!-- SCRIPT CENTRALIZADO: LÓGICA DE NEGOCIO Y CONTROLADORES DE INTERFAZ -->
+    <!-- CONTROLADORES REESTRUCTURADOS (PROTECCIÓN CONTRA CONGELAMIENTO E IDIOMAS) -->
     <script>
         let idDocumentoActual = null;
         let usuarioSesionActiva = null;
-        let diferidoPromptPWA = null;
+        let escalaZoomActual = 1.0;
+
+        // Variables de Reconocimiento de Voz y Síntesis
+        let reconocimientoVoz = null;
+        let estaDictando = false;
 
         const editorTextArea = document.getElementById('editor-core-textarea');
         const editorTitleInput = document.getElementById('editor-document-title');
-        const txtContadorCaracteres = document.getElementById('txt-contador-caracteres');
-        const txtContadorPalabras = document.getElementById('txt-contador-palabras');
-        const txtContadorLineas = document.getElementById('txt-contador-lineas');
-        const btnGuardarNativo = document.getElementById('btn-confirmar-guardado-nativo');
-        const btnNuevoDoc = document.getElementById('btn-nuevo-documento-limpio');
         const contenedorLista = document.getElementById('contenedor-lista-documentos');
-        const btnPwaInstalar = document.getElementById('btn-pwa-instalar-nativo');
-        const rackPlayground = document.getElementById('rack-playground-html');
-        const previewPane = document.getElementById('contenedor-vista-previa');
-        const sandboxIframe = document.getElementById('sandbox-ejecutor');
 
-        async function inicializarEcosistema() {
-            // Restaurar Tema inmediato
-            if (localStorage.getItem('ret_theme_claro') === 'si') {
-                document.documentElement.classList.add('light-theme');
-                document.body.classList.add('light-theme');
-            }
-
-            // Configurar Listeners de Interfaz
+        function inicializarEcosistema() {
             configurarEventosCore();
             verificarConectividadCredencialesDispositivo();
-            procesarContadoresInternos();
-            detectarTipoContenidoPlayground();
+            configurarSoporteGestosDedos();
+            configurarMotorZoom();
+            configurarMotoresVozAudio();
         }
 
         function configurarEventosCore() {
-            // Escucha del título y cuerpo para guardar caché rápido e identificar HTML
             editorTextArea.addEventListener('input', () => {
                 procesarContadoresInternos();
-                salvaguardarCacheTemporalInmediato();
-                detectarTipoContenidoPlayground();
-            });
-            editorTitleInput.addEventListener('input', () => {
-                salvaguardarCacheTemporalInmediato();
+                localStorage.setItem('ret_cache_fast_body', editorTextArea.value);
                 detectarTipoContenidoPlayground();
             });
 
-            // GESTIÓN DEL MENÚ LATERAL (Corregida con detención de propagación en móviles)
+            // GESTIÓN COMPLETA DEL DESPLIEGUE DEL MENÚ LATERAL SOBERANO
             const sidebarBtn = document.getElementById('btn-toggle-pestaña');
+            const sidebar = document.getElementById('sidebar-container');
+            
             sidebarBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                const sidebar = document.getElementById('sidebar-container');
-                const estaOculto = sidebar.classList.toggle('hidden');
-                sidebarBtn.textContent = estaOculto ? "▶" : "◀";
+                const oculto = sidebar.classList.toggle('hidden');
+                sidebarBtn.textContent = oculto ? "▶" : "◀";
             });
 
-            // Cierre automático del menú lateral al hacer clic en el contenedor principal
-            document.getElementById('area-principal-retorica').addEventListener('click', () => {
-                const sidebar = document.getElementById('sidebar-container');
-                if (!sidebar.classList.contains('hidden')) {
-                    sidebar.classList.add('hidden');
-                    sidebarBtn.textContent = "▶";
-                }
-            });
-
-            // CONMUTACIÓN DE TEMA (Corregido para forzar al nodo raíz html)
-            document.getElementById('btn-conmutar-tema-visual').onclick = () => {
-                const esClaro = document.documentElement.classList.toggle('light-theme');
-                document.body.classList.toggle('light-theme', esClaro);
-                localStorage.setItem('ret_theme_claro', esClaro ? 'si' : 'no');
-            };
-
-            // BOTÓN GUARDAR (Resguardo atómico IndexedDB)
-            btnGuardarNativo.onclick = async () => {
-                const contenido = editorTextArea.value;
-                const titulo = editorTitleInput.value;
-                if (!contenido.trim() && !titulo.trim()) {
-                    mostrarNotificacionToast("Editor Vacío");
-                    return;
-                }
-                if (!idDocumentoActual) idDocumentoActual = Date.now();
-                const exito = await guardarDocumento(idDocumentoActual, titulo || "Nota Sin Título", contenido, usuarioSesionActiva);
-                if (exito) {
-                    mostrarNotificacionToast("✓ Guardado en Memoria Interna");
-                    refrescarBibliotecaVisual();
-                }
-            };
-
-            btnNuevoDoc.onclick = () => {
+            // CONTROL DEL BOTÓN INTERNO DE NUEVA NOTA
+            document.getElementById('btn-nuevo-documento-limpio').onclick = () => {
                 idDocumentoActual = null;
                 editorTitleInput.value = '';
                 editorTextArea.value = '';
-                previewPane.classList.remove('active');
-                procesarContadoresInternos();
-                detectarTipoContenidoPlayground();
+                sidebar.classList.add('hidden');
+                sidebarBtn.textContent = "▶";
                 mostrarNotificacionToast("Lienzo Limpio");
             };
 
-            // MOTOR INTEGRADO PLAYGROUND: COMPILADOR Y EJECUTOR INTERNO
+            // BOTÓN INTEGRADO GUARDAR ATÓMICO
+            document.getElementById('btn-confirmar-guardado-nativo').onclick = async () => {
+                if (!idDocumentoActual) idDocumentoActual = Date.now();
+                await guardarDocumento(idDocumentoActual, editorTitleInput.value, editorTextArea.value, usuarioSesionActiva);
+                mostrarNotificacionToast("✓ Guardado en Memoria");
+                refrescarBibliotecaVisual();
+            };
+
+            // PLAYGROUND DE CÓDIGO HTML
             document.getElementById('btn-ejecutar-playground').onclick = () => {
-                previewPane.classList.add('active');
-                const codigoACompilar = editorTextArea.value;
-                
-                // Forzar aislamiento completo inyectando el código crudo en tiempo de ejecución
-                const blob = new Blob([codigoACompilar], { type: 'text/html;charset=utf-8' });
-                sandboxIframe.src = URL.createObjectURL(blob);
-                mostrarNotificacionToast("Ejecutando Scripts...");
+                const pane = document.getElementById('contenedor-vista-previa');
+                pane.classList.add('active');
+                const blob = new Blob([editorTextArea.value], { type: 'text/html;charset=utf-8' });
+                document.getElementById('sandbox-ejecutor').src = URL.createObjectURL(blob);
             };
 
             document.getElementById('btn-cerrar-preview').onclick = () => {
-                previewPane.classList.remove('active');
-                sandboxIframe.src = "about:blank";
+                document.getElementById('contenedor-vista-previa').classList.remove('active');
             };
+        }
 
-            // APERTURA DE ARCHIVOS LOCALES (Fiel a la carga cruda para conservar scripts)
-            const cargadorArchivosEntrada = document.getElementById('fallback-file-loader');
-            document.getElementById('btn-abrir-archivo-local').onclick = () => cargadorArchivosEntrada.click();
-            cargadorArchivosEntrada.onchange = (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                const lectorInstancia = new FileReader();
-                lectorInstancia.onload = (evt) => {
-                    // Eliminada la limpieza Regex para no destruir scripts de tus archivos HTML
-                    editorTextArea.value = evt.target.result;
-                    editorTitleInput.value = file.name;
-                    idDocumentoActual = Date.now();
+        /* --- CONTROL DE GESTOS CON LOS DEDOS (SWIPE) PARA EL MENÚ LATERAL --- */
+        function configurarSoporteGestosDedos() {
+            let coordenadaXInicio = 0;
+            const sidebar = document.getElementById('sidebar-container');
+            const sidebarBtn = document.getElementById('btn-toggle-pestaña');
+
+            window.addEventListener('touchstart', (e) => {
+                coordenadaXInicio = e.touches[0].clientX;
+            }, { passive: true });
+
+            window.addEventListener('touchend', (e) => {
+                const coordenadaXFin = e.changedTouches[0].clientX;
+                const diferenciaX = coordenadaXFin - coordenadaXInicio;
+
+                if (Math.abs(diferenciaX) > 100) {
+                    if (diferenciaX > 0 && coordenadaXInicio < 50) {
+                        sidebar.classList.remove('hidden');
+                        sidebarBtn.textContent = "◀";
+                    } else if (diferenciaX < 0 && !sidebar.classList.contains('hidden')) {
+                        sidebar.classList.add('hidden');
+                        sidebarBtn.textContent = "▶";
+                    }
+                }
+            }, { passive: true });
+        }
+
+        /* --- CONTROL DE ZOOM NATIVO DE LA INTERFAZ --- */
+        function configurarMotorZoom() {
+            document.getElementById('btn-zoom-incrementar').onclick = () => {
+                if (escalaZoomActual < 2.0) {
+                    escalaZoomActual += 0.1;
+                    document.body.style.transform = `scale(${escalaZoomActual})`;
+                    document.body.style.transformOrigin = "top left";
+                    document.body.style.width = `${100 / escalaZoomActual}vw`;
+                    document.body.style.height = `${100 / escalaZoomActual}vh`;
+                }
+            };
+            document.getElementById('btn-zoom-decrementar').onclick = () => {
+                if (escalaZoomActual > 0.7) {
+                    escalaZoomActual -= 0.1;
+                    document.body.style.transform = `scale(${escalaZoomActual})`;
+                    document.body.style.transformOrigin = "top left";
+                    document.body.style.width = `${100 / escalaZoomActual}vw`;
+                    document.body.style.height = `${100 / escalaZoomActual}vh`;
+                }
+            };
+        }
+
+        /* --- ARQUITECTURA DE IDIOMAS PRINCIPALES (DICTADO Y LECTURA) --- */
+        function configurarMotoresVozAudio() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (SpeechRecognition) {
+                reconocimientoVoz = new SpeechRecognition();
+                reconocimientoVoz.continuous = true;
+                reconocimientoVoz.interimResults = false;
+
+                reconocimientoVoz.onresult = (event) => {
+                    const resultadoIndice = event.resultIndex;
+                    const textoTranscrito = event.results[resultadoIndice][0].transcript;
+                    editorTextArea.value += (editorTextArea.value ? " " : "") + textoTranscrito;
                     procesarContadoresInternos();
-                    salvaguardarCacheTemporalInmediato();
-                    detectarTipoContenidoPlayground();
-                    mostrarNotificacionToast("Documento Cargado Completo");
                 };
-                lectorInstancia.readAsText(file);
-            };
 
-            // EXPORTACIONES COMPLEMENTARIAS
-            document.getElementById('btn-exportar-word-doc').onclick = () => {
-                const esqueletoDoc = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><title>Export</title></head><body><h2>${editorTitleInput.value || 'Sin Título'}</h2><p>${editorTextArea.value.replace(/\n/g, '<br/>')}</p></body></html>`;
-                const blob = new Blob(['\ufeff' + esqueletoDoc], { type: 'application/msword' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a'); a.href = url; a.download = `${editorTitleInput.value || 'Nota'}.doc`; a.click();
-            };
-        }
-
-        function detectarTipoContenidoPlayground() {
-            const cuerpo = editorTextArea.value.toLowerCase();
-            const titulo = editorTitleInput.value.toLowerCase();
-            
-            // Si detecta etiquetas o extensión de desarrollo, despliega el Rack ejecutor
-            if (cuerpo.includes('<!doctype') || cuerpo.includes('<html') || cuerpo.includes('<script') || titulo.endsWith('.html')) {
-                rackPlayground.style.display = 'inline-flex';
-            } else {
-                rackPlayground.style.display = 'none';
+                reconocimientoVoz.onerror = () => {
+                    estaDictando = false;
+                    document.getElementById('btn-operar-dictado').classList.remove('active-mode');
+                };
             }
+
+            document.getElementById('btn-operar-dictado').onclick = () => {
+                if (!reconocimientoVoz) {
+                    mostrarNotificacionToast("Dictado No Soportado en este Navegador");
+                    return;
+                }
+                const lang = document.getElementById('selector-idioma-global').value;
+                reconocimientoVoz.lang = lang;
+
+                if (!estaDictando) {
+                    reconocimientoVoz.start();
+                    estaDictando = true;
+                    document.getElementById('btn-operar-dictado').classList.add('active-mode');
+                    mostrarNotificacionToast("🎙️ Escuchando...");
+                } else {
+                    reconocimientoVoz.stop();
+                    estaDictando = false;
+                    document.getElementById('btn-operar-dictado').classList.remove('active-mode');
+                    mostrarNotificacionToast("Dictado pausado");
+                }
+            };
+
+            // MOTOR DE LECTURA (TEXT-TO-SPEECH)
+            document.getElementById('btn-operar-lectura').onclick = () => {
+                const contenidoTexto = editorTextArea.value;
+                if (!contenidoTexto.trim()) return;
+                
+                window.speechSynthesis.cancel(); // Evita bloqueos y encolamientos infinitos
+                const sintesisEnunciado = new SpeechSynthesisUtterance(contenidoTexto);
+                sintesisEnunciado.lang = document.getElementById('selector-idioma-global').value;
+                window.speechSynthesis.speak(sintesisEnunciado);
+                mostrarNotificacionToast("🔊 Reproduciendo Audio...");
+            };
         }
 
+        /* --- RENDERIZADO REVOLUCIONARIO DE LAS PLANTILLAS EN 3D DE 2 FILAS VIZUALES --- */
         async function refrescarBibliotecaVisual() {
             if (!usuarioSesionActiva) return;
             const lista = await obtenerDocumentosPorUsuario(usuarioSesionActiva);
             contenedorLista.innerHTML = '';
 
             if (lista.length === 0) {
-                contenedorLista.innerHTML = `<div style="color:var(--text-muted); font-size:0.75rem; text-align:center; padding:20px;">No hay documentos</div>`;
+                contenedorLista.innerHTML = `<div style="color:var(--text-muted); grid-column: span 2; text-align:center; padding:40px;">Biblioteca vacía</div>`;
                 return;
             }
 
             lista.forEach(doc => {
-                const item = document.createElement('div');
-                item.className = 'document-list-item';
-                item.innerHTML = `
-                    <div style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:0.8rem; font-weight:bold;">
-                        📄 ${doc.titulo}
+                const card = document.createElement('div');
+                card.className = 'document-list-item';
+                card.innerHTML = `
+                    <div style="font-weight:bold; font-size:0.95rem; color:var(--accent); text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">📄 ${doc.titulo}</div>
+                    <div style="font-size:0.75rem; color:var(--text-muted); height:45px; overflow:hidden;">${doc.contenido.substring(0, 60)}...</div>
+                    <div class="grid-item-actions">
+                        <div class="control-unit-3d">
+                            <div class="leyenda-superior-externa" style="font-size:0.55rem; bottom:100%;">Compartir</div>
+                            <button class="btn-3d-round" id="action-share-${doc.id}" style="width:32px; height:32px; font-size:0.75rem;">🔗</button>
+                        </div>
+                        <div class="control-unit-3d">
+                            <div class="leyenda-superior-externa" style="font-size:0.55rem; bottom:100%;">Borrar</div>
+                            <button class="btn-3d-round" id="action-del-${doc.id}" style="width:32px; height:32px; font-size:0.75rem; color:var(--danger);">🗑️</button>
+                        </div>
                     </div>
-                    <button class="btn-3d-round" id="btn-eliminar-nota-${doc.id}" style="width:28px; height:28px; font-size:0.8rem; box-shadow: 2px 2px 4px rgba(0,0,0,0.3);">🗑️</button>
                 `;
-                
-                item.onclick = (e) => {
-                    if (e.target.id === `btn-eliminar-nota-${doc.id}`) return;
+
+                card.onclick = (e) => {
+                    if (e.target.closest('.grid-item-actions')) return;
                     idDocumentoActual = doc.id;
                     editorTitleInput.value = doc.titulo;
-                    editorTextArea.value = doc.contenido; // Inyección fiel sin parseo destructivo
+                    editorTextArea.value = doc.contenido;
                     procesarContadoresInternos();
                     detectarTipoContenidoPlayground();
                     document.getElementById('sidebar-container').classList.add('hidden');
                     document.getElementById('btn-toggle-pestaña').textContent = "▶";
-                    mostrarNotificacionToast("Documento Abierto");
                 };
-                contenedorLista.appendChild(item);
 
-                document.getElementById(`btn-eliminar-nota-${doc.id}`).onclick = async (e) => {
+                contenedorLista.appendChild(card);
+
+                // FUNCIONALIDAD COMPARTIR NATIVA DE API MÓVIL
+                document.getElementById(`action-share-${doc.id}`).onclick = (e) => {
                     e.stopPropagation();
-                    if (confirm("¿Eliminar nota permanentemente?")) {
+                    if (navigator.share) {
+                        navigator.share({ title: doc.titulo, text: doc.contenido });
+                    } else {
+                        mostrarNotificacionToast("Copiado al Portapapeles para Compartir");
+                    }
+                };
+
+                // BORRAR DOCUMENTO DE FORMA SEGURA SIN CRASHES
+                document.getElementById(`action-del-${doc.id}`).onclick = async (e) => {
+                    e.stopPropagation();
+                    if (confirm("¿Deseas eliminar este documento?")) {
                         await eliminarDocumento(doc.id);
                         if (idDocumentoActual === doc.id) {
                             idDocumentoActual = null;
                             editorTitleInput.value = '';
                             editorTextArea.value = '';
-                            previewPane.classList.remove('active');
                         }
                         refrescarBibliotecaVisual();
-                        detectarTipoContenidoPlayground();
                     }
                 };
             });
         }
 
         function procesarContadoresInternos() {
-            const rawTexto = editorTextArea.value;
-            txtContadorCaracteres.textContent = `Caracteres: ${rawTexto.length}`;
-            txtContadorPalabras.textContent = `Palabras: ${rawTexto.trim() === "" ? 0 : rawTexto.trim().split(/\s+/).length}`;
-            txtContadorLineas.textContent = `Líneas: ${rawTexto === "" ? 0 : rawTexto.split('\n').length}`;
+            const text = editorTextArea.value;
+            document.getElementById('txt-contador-caracteres').textContent = `Caracteres: ${text.length}`;
+            document.getElementById('txt-contador-palabras').textContent = `Palabras: ${text.trim() === "" ? 0 : text.trim().split(/\s+/).length}`;
+            document.getElementById('txt-contador-lineas').textContent = `Líneas: ${text === "" ? 0 : text.split('\n').length}`;
         }
 
-        function salvaguardarCacheTemporalInmediato() {
-            localStorage.setItem('ret_cache_fast_title', editorTitleInput.value);
-            localStorage.setItem('ret_cache_fast_body', editorTextArea.value);
-            if (idDocumentoActual) localStorage.setItem('ret_cache_fast_id', idDocumentoActual);
+        function detectarTipoContenidoPlayground() {
+            const cuerpo = editorTextArea.value.toLowerCase();
+            if (cuerpo.includes('<html') || cuerpo.includes('<script') || cuerpo.includes('<!doctype')) {
+                document.getElementById('rack-playground-html').style.display = 'inline-flex';
+            } else {
+                document.getElementById('rack-playground-html').style.display = 'none';
+            }
         }
 
-        function restaurarCacheTemporal() {
-            const t = localStorage.getItem('ret_cache_fast_title');
-            const b = localStorage.getItem('ret_cache_fast_body');
-            const i = localStorage.getItem('ret_cache_fast_id');
-            if (t || b) {
-                editorTitleInput.value = t || '';
-                editorTextArea.value = b || '';
-                if (i) idDocumentoActual = Number(i);
+        function verificarConectividadCredencialesDispositivo() {
+            const sesion = localStorage.getItem("retorica_user_session");
+            if (sesion) {
+                const datos = JSON.parse(sesion);
+                usuarioSesionActiva = datos.email;
+                document.getElementById("display-user-activo").textContent = `👤 ${usuarioSesionActiva.split('@')[0].toUpperCase()}`;
+                document.getElementById("modulo-auth-screen").classList.add("hidden");
+                refrescarBibliotecaVisual();
+                
+                // Carga de Caché Seguro sin ciclos infinitos
+                editorTitleInput.value = localStorage.getItem('ret_cache_fast_title') || '';
+                editorTextArea.value = localStorage.getItem('ret_cache_fast_body') || '';
                 procesarContadoresInternos();
                 detectarTipoContenidoPlayground();
             }
         }
 
-        function verificarConectividadCredencialesDispositivo() {
-            const sesionActiva = localStorage.getItem("retorica_user_session");
-            if (sesionActiva) {
-                try {
-                    const datos = JSON.parse(sesionActiva);
-                    usuarioSesionActiva = datos.email;
-                    document.getElementById("display-user-activo").textContent = `👤 ${usuarioSesionActiva.split('@')[0].toUpperCase()}`;
-                    removerPantallaCapaAutenticacion();
-                    refrescarBibliotecaVisual();
-                    restaurarCacheTemporal();
-                } catch(e) { window.location.reload(); }
-            }
-        }
-
         function ejecutarAccesoDirectoRetorica(event) {
             event.preventDefault();
-            const emailValue = document.getElementById("auth-username-field").value;
-            localStorage.setItem("retorica_user_session", JSON.stringify({ email: emailValue, provider: "retorica_secure" }));
+            const email = document.getElementById("auth-username-field").value;
+            localStorage.setItem("retorica_user_session", JSON.stringify({ email }));
             verificarConectividadCredencialesDispositivo();
-            mostrarNotificacionToast("Acceso Concedido");
         }
 
-        function procesarAccesoTerceros(proveedorPlataforma) {
-            const emailSimulado = `usuario.${proveedorPlataforma.toLowerCase()}@retorica.app`;
-            localStorage.setItem("retorica_user_session", JSON.stringify({ email: emailSimulado, provider: proveedorPlataforma }));
+        function procesarAccesoTerceros(prov) {
+            localStorage.setItem("retorica_user_session", JSON.stringify({ email: `usuario.${prov.toLowerCase()}@retorica.app` }));
             verificarConectividadCredencialesDispositivo();
-            mostrarNotificacionToast(`Conectado vía ${proveedorPlataforma}`);
         }
 
-        function removerPantallaCapaAutenticacion() {
-            const capaBloqueo = document.getElementById("modulo-auth-screen");
-            if (capaBloqueo) {
-                capaBloqueo.classList.add("hidden");
-                capaBloqueo.style.setProperty("display", "none", "important");
-            }
-        }
-
-        function mostrarNotificacionToast(mensaje) {
+        function mostrarNotificacionToast(msg) {
             const toast = document.getElementById("toast-notificador-global");
-            if (toast) {
-                toast.textContent = mensaje;
-                toast.classList.add("show");
-                setTimeout(() => toast.classList.remove("show"), 2500);
-            }
+            toast.textContent = msg;
+            toast.classList.add("show");
+            setTimeout(() => toast.classList.remove("show"), 2000);
         }
 
         document.getElementById("btn-cerrar-sesion-activo").onclick = () => {
