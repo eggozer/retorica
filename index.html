@@ -136,7 +136,6 @@
             box-shadow: inset 2px 2px 5px rgba(0,0,0,0.5);
         }
         
-        /* Contenedor de Botones de Plantilla de Acción Rápida */
         .grid-item-actions {
             display: flex;
             justify-content: flex-end;
@@ -200,7 +199,6 @@
 
     <input type="file" id="fallback-file-loader" class="hidden-file-input" accept=".html,.txt,.doc">
 
-    <!-- LOGO Y ENCABEZADO SUPERIOR EN 3D REAL -->
     <div class="brand-header-3d">
         <svg class="brand-logo-3d" viewBox="0 0 24 24">
             <path fill="#f5c518" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.53c-.26-.81-1-1.4-1.9-1.4h-1v-3c0-.55-.45-1-1-1h-6v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
@@ -208,7 +206,6 @@
         <span class="brand-title-3d">Retórica</span>
     </div>
 
-    <!-- CONTROLES DE ZOOM DE PANTALLA -->
     <div class="zoom-widget-container">
         <div class="control-unit-3d">
             <div class="leyenda-superior-externa">Zoom+</div>
@@ -220,7 +217,6 @@
         </div>
     </div>
 
-    <!-- AUTH OVERLAY -->
     <div class="auth-overlay" id="modulo-auth-screen" style="display: flex;">
         <div class="auth-card">
             <h2 style="color: var(--accent); margin-bottom: 10px;">RETÓRICA</h2>
@@ -236,10 +232,8 @@
         </div>
     </div>
 
-    <!-- BOTÓN GESTOR FLOTANTE DEL MENÚ LATERAL (Independiente de barras) -->
     <div class="toggle-sidebar-pestaña" id="btn-toggle-pestaña" title="Desplegar Biblioteca">▶</div>
 
-    <!-- MENÚ LATERAL COMPLETO INTERACTIVO CON FILAS VERTICALES 3D -->
     <div class="sidebar hidden" id="sidebar-container">
         <div class="sidebar-header">
             <div>
@@ -252,7 +246,6 @@
             </div>
         </div>
         
-        <!-- Vista en Rejilla de 2 Columnas Verticales -->
         <div class="document-list" id="contenedor-lista-documentos"></div>
         
         <div class="sidebar-footer-menu">
@@ -260,12 +253,10 @@
         </div>
     </div>
 
-    <!-- ÁREA DE TRABAJO PRINCIPAL -->
     <div class="main-container" id="area-principal-retorica">
         <div class="scollable-toolbar-wrapper">
             <div class="top-toolbar-pasarela" id="pasarela-herramientas-globales">
                 
-                <!-- PALOMITA DE GUARDAR POSICIONADA ANTES DEL MICRÓFONO -->
                 <div class="toolbar-rack-modular">
                     <div class="control-unit-3d">
                         <div class="leyenda-superior-externa">Guardar</div>
@@ -281,7 +272,6 @@
                     </div>
                 </div>
 
-                <!-- SELECTOR DE IDIOMAS EXPANDIDO (30 IDIOMAS PRINCIPALES REALES) -->
                 <div class="toolbar-rack-modular">
                     <div class="control-unit-3d">
                         <div class="leyenda-superior-externa">Idioma Global</div>
@@ -344,7 +334,6 @@
             </div>
         </div>
 
-        <!-- ENTORNO DE EDICIÓN -->
         <div class="editor-wrapper">
             <input type="text" id="editor-document-title" class="input-titulo-html" placeholder="Título del Documento...">
             <div class="workspaces-container">
@@ -367,7 +356,6 @@
 
     <div class="toast-notificador" id="toast-notificador-global">Retórica Lista</div>
 
-    <!-- MOTOR LOGICO PERSISTENTE INDEXEDDB -->
     <script>
         const DB_NAME = 'RetoricaDB_V2026';
         const STORE_NAME = 'documentos_guiones';
@@ -422,13 +410,11 @@
         }
     </script>
 
-    <!-- CONTROLADORES REESTRUCTURADOS (PROTECCIÓN CONTRA CONGELAMIENTO E IDIOMAS) -->
     <script>
         let idDocumentoActual = null;
         let usuarioSesionActiva = null;
         let escalaZoomActual = 1.0;
 
-        // Variables de Reconocimiento de Voz y Síntesis
         let reconocimientoVoz = null;
         let estaDictando = false;
 
@@ -451,7 +437,6 @@
                 detectarTipoContenidoPlayground();
             });
 
-            // GESTIÓN COMPLETA DEL DESPLIEGUE DEL MENÚ LATERAL SOBERANO
             const sidebarBtn = document.getElementById('btn-toggle-pestaña');
             const sidebar = document.getElementById('sidebar-container');
             
@@ -461,7 +446,6 @@
                 sidebarBtn.textContent = oculto ? "▶" : "◀";
             });
 
-            // CONTROL DEL BOTÓN INTERNO DE NUEVA NOTA
             document.getElementById('btn-nuevo-documento-limpio').onclick = () => {
                 idDocumentoActual = null;
                 editorTitleInput.value = '';
@@ -471,7 +455,6 @@
                 mostrarNotificacionToast("Lienzo Limpio");
             };
 
-            // BOTÓN INTEGRADO GUARDAR ATÓMICO
             document.getElementById('btn-confirmar-guardado-nativo').onclick = async () => {
                 if (!idDocumentoActual) idDocumentoActual = Date.now();
                 await guardarDocumento(idDocumentoActual, editorTitleInput.value, editorTextArea.value, usuarioSesionActiva);
@@ -479,7 +462,6 @@
                 refrescarBibliotecaVisual();
             };
 
-            // PLAYGROUND DE CÓDIGO HTML
             document.getElementById('btn-ejecutar-playground').onclick = () => {
                 const pane = document.getElementById('contenedor-vista-previa');
                 pane.classList.add('active');
@@ -492,7 +474,6 @@
             };
         }
 
-        /* --- CONTROL DE GESTOS CON LOS DEDOS (SWIPE) PARA EL MENÚ LATERAL --- */
         function configurarSoporteGestosDedos() {
             let coordenadaXInicio = 0;
             const sidebar = document.getElementById('sidebar-container');
@@ -518,7 +499,6 @@
             }, { passive: true });
         }
 
-        /* --- CONTROL DE ZOOM NATIVO DE LA INTERFAZ --- */
         function configurarMotorZoom() {
             document.getElementById('btn-zoom-incrementar').onclick = () => {
                 if (escalaZoomActual < 2.0) {
@@ -540,7 +520,6 @@
             };
         }
 
-        /* --- ARQUITECTURA DE IDIOMAS PRINCIPALES (DICTADO Y LECTURA) --- */
         function configurarMotoresVozAudio() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (SpeechRecognition) {
@@ -563,7 +542,7 @@
 
             document.getElementById('btn-operar-dictado').onclick = () => {
                 if (!reconocimientoVoz) {
-                    mostrarNotificacionToast("Dictado No Soportado en este Navegador");
+                    mostrarNotificacionToast("Dictado No Soportado");
                     return;
                 }
                 const lang = document.getElementById('selector-idioma-global').value;
@@ -582,12 +561,11 @@
                 }
             };
 
-            // MOTOR DE LECTURA (TEXT-TO-SPEECH)
             document.getElementById('btn-operar-lectura').onclick = () => {
                 const contenidoTexto = editorTextArea.value;
                 if (!contenidoTexto.trim()) return;
                 
-                window.speechSynthesis.cancel(); // Evita bloqueos y encolamientos infinitos
+                window.speechSynthesis.cancel();
                 const sintesisEnunciado = new SpeechSynthesisUtterance(contenidoTexto);
                 sintesisEnunciado.lang = document.getElementById('selector-idioma-global').value;
                 window.speechSynthesis.speak(sintesisEnunciado);
@@ -595,7 +573,6 @@
             };
         }
 
-        /* --- RENDERIZADO REVOLUCIONARIO DE LAS PLANTILLAS EN 3D DE 2 FILAS VIZUALES --- */
         async function refrescarBibliotecaVisual() {
             if (!usuarioSesionActiva) return;
             const lista = await obtenerDocumentosPorUsuario(usuarioSesionActiva);
@@ -637,17 +614,15 @@
 
                 contenedorLista.appendChild(card);
 
-                // FUNCIONALIDAD COMPARTIR NATIVA DE API MÓVIL
                 document.getElementById(`action-share-${doc.id}`).onclick = (e) => {
                     e.stopPropagation();
                     if (navigator.share) {
                         navigator.share({ title: doc.titulo, text: doc.contenido });
                     } else {
-                        mostrarNotificacionToast("Copiado al Portapapeles para Compartir");
+                        mostrarNotificacionToast("Copiado al Portapapeles");
                     }
                 };
 
-                // BORRAR DOCUMENTO DE FORMA SEGURA SIN CRASHES
                 document.getElementById(`action-del-${doc.id}`).onclick = async (e) => {
                     e.stopPropagation();
                     if (confirm("¿Deseas eliminar este documento?")) {
@@ -688,7 +663,6 @@
                 document.getElementById("modulo-auth-screen").classList.add("hidden");
                 refrescarBibliotecaVisual();
                 
-                // Carga de Caché Seguro sin ciclos infinitos
                 editorTitleInput.value = localStorage.getItem('ret_cache_fast_title') || '';
                 editorTextArea.value = localStorage.getItem('ret_cache_fast_body') || '';
                 procesarContadoresInternos();
