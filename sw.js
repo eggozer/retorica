@@ -1,65 +1,71 @@
-// --- SERVICE WORKER CONTROL DE ENTORNO UNIFICADO (V2026_FIJO) ---
-const CACHE_NAME = 'retorica-cache-v2026-unificado';
+/**
+ * Retórica V2026 - Service Worker de Alto Rendimiento y Depurado
+ * Forzado para compatibilidad con Android 5+ y navegadores modernos.
+ */
 
-// Listado limpio: Solo lo estrictamente necesario que se queda en la raíz
-const ASSETS_CRITICOS = [
+var CACHE_NAME = 'retorica-v2026-depurado';
+var ASSETS_TO_CACHE = [
   './',
-  './index.html?v=2026_Módulos',
-  './manifest.json?v=2026_Módulos'
+  './index.html?v=2026_Depurado',
+  './manifest.json?v=2026_Depurado',
+  'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js'
 ];
 
-// Instalación forzando el reemplazo de caché antiguo
-self.addEventListener('install', (event) => {
+// 1. INSTALACIÓN: Almacenamiento seguro de recursos esenciales
+self.addEventListener('install', function(event) {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_CRITICOS);
+    caches.open(CACHE_NAME).then(function(cache) {
+      return cache.addAll(ASSETS_TO_CACHE);
+    }).then(function() {
+      // Fuerza al Service Worker actual a tomar el control inmediatamente
+      return self.skipWaiting();
     })
   );
-  self.skipWaiting();
 });
 
-// Activación destruyendo cualquier rastro viejo para evitar ruedas cuadradas
-self.addEventListener('activate', (event) => {
+// 2. ACTIVACIÓN: Limpieza absoluta de cachés antiguas (Evita interferencias con versiones previas)
+self.addEventListener('activate', function(event) {
   event.waitUntil(
-    caches.keys().then((keys) => {
+    caches.keys().then(function(cacheNames) {
       return Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) {
-            console.log("Removiendo Caché Obsoleto Controlado: ", key);
-            return caches.delete(key);
+        cacheNames.map(function(cache) {
+          if (cache !== CACHE_NAME) {
+            console.log('Retórica SW: Eliminando caché obsoleta ->', cache);
+            return caches.delete(cache);
           }
         })
       );
+    }).then(function() {
+      // Reclama el control de las pestañas activas de inmediato
+      return self.clients.claim();
     })
   );
-  self.clients.claim();
 });
 
-// Intercepción inteligente: Red primero con caída controlada a caché local
-self.addEventListener('fetch', (event) => {
-  if (!event.request.url.startsWith(self.location.origin)) return;
-
+// 3. INTERCEPCIÓN (FETCH): Estrategia Network-First con soporte Offline
+// Prioriza la red para obtener traducciones o scripts actualizados; si falla, usa la caché.
+self.addEventListener('fetch', function(event) {
   event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        if (response && response.status === 200) {
-          const copiaDestinadaCache = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, copiaDestinadaCache);
-          });
-        }
-        return response;
-      })
-      .catch(() => {
-        return caches.match(event.request).then((resCacheado) => {
-          if (resCacheado) {
-            return resCacheado;
-          }
-          // Fallback en caso de desconexión absoluta para el documento base
-          if (event.request.mode === 'navigate') {
-            return caches.match('./index.html?v=2026_Módulos');
-          }
+    fetch(event.request).then(function(networkResponse) {
+      // Si la respuesta es válida, clonamos y actualizamos la caché dinámicamente
+      if (networkResponse && networkResponse.status === 200 && event.request.method === 'GET') {
+        var responseToCache = networkResponse.clone();
+        caches.open(CACHE_NAME).then(function(cache) {
+          cache.put(event.request, responseToCache);
         });
-      })
+      }
+      return networkResponse;
+    }).catch(function() {
+      // Si el celular se encuentra sin conexión o en modo avión, responde con la caché
+      return caches.match(event.request).then(function(cachedResponse) {
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+        // Fallback en caso de que un recurso dinámico no exista en caché offline
+        if (event.request.headers.get('accept').includes('text/html')) {
+          return caches.match('./index.html?v=2026_Depurado');
+        }
+      });
+    })
   );
 });
