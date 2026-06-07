@@ -1,24 +1,35 @@
 {
   "short_name": "Retórica",
   "name": "Retórica - Sistema Profesional de Guiones",
-  "description": "Herramienta avanzada de dictado, traducción y producción de audio.",
+  "description": "Herramienta avanzada de dictado, guionismo y producción de audio.",
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "https://eggozer.github.io/retorica/icon-192.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any maskable"
     },
     {
-      "src": "icon-512.png",
+      "src": "https://eggozer.github.io/retorica/icon-512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ],
   "start_url": "./index.html",
-  "display": "standalone",
-  "theme_color": "#12141c",
   "background_color": "#12141c",
+  "theme_color": "#00ffcc",
+  "display": "standalone",
   "orientation": "portrait",
-  "scope": "./",
-  "lang": "es-MX"
+  "lang": "es-MX",
+  "dir": "ltr",
+  "categories": ["productivity", "utilities"],
+  "screenshots": [
+    {
+      "src": "https://eggozer.github.io/retorica/screenshot.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ]
 }
