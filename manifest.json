@@ -1,6 +1,7 @@
 {
   "short_name": "Retórica",
-  "name": "Retórica - Bloc de Notas",
+  "name": "Retórica - Sistema Profesional de Guiones",
+  "description": "Herramienta avanzada de dictado, traducción y producción de audio.",
   "icons": [
     {
       "src": "icon-192.png",
@@ -13,9 +14,11 @@
       "sizes": "512x512"
     }
   ],
-  "start_url": "index.html?v=7",
-  "background_color": "#0a0f1d",
-  "theme_color": "#0a0f1d",
+  "start_url": "./index.html",
   "display": "standalone",
-  "orientation": "portrait"
+  "theme_color": "#12141c",
+  "background_color": "#12141c",
+  "orientation": "portrait",
+  "scope": "./",
+  "lang": "es-MX"
 }
