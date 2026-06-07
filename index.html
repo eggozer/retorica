@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-retorica-anchor="html-root">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes">
-    <title>Retórica - Sistema Profesional V2026</title>
-    <link rel="manifest" href="./manifest.json?v=2026_Final">
+    <title>Retórica - Sistema Profesional de Guiones y Audio</title>
+    <link rel="manifest" href="./manifest.json?v=2026_Fijado">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
@@ -24,80 +24,79 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
         body { background: var(--bg-main); color: var(--text-main); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
-        /* --- ICONO DEL SOL CON DOBLE RUEDA GIRATORIA --- */
+        /* --- ICONO DEL SOL CON DOBLE RUEDA GIRATORIA CONTRARIA --- */
         .brand-logo-sol {
-            width: 36px; height: 36px;
+            width: 38px; height: 38px;
             background: radial-gradient(circle, #ffe082 20%, #ffca28 60%, #ff8f00 100%);
-            border-radius: 50%;
-            position: relative;
-            box-shadow: 0 0 15px rgba(255, 202, 40, 0.5);
-            flex-shrink: 0;
+            border-radius: 50%; position: relative;
+            box-shadow: 0 0 15px rgba(255, 202, 40, 0.5); flex-shrink: 0;
         }
-        /* Rueda Verde (Original) */
+        /* Rueda Verde (Original - Sentido Horario) */
         .brand-logo-sol::before {
             content: ''; position: absolute; top: -5px; left: -5px; right: -5px; bottom: -5px;
             border: 2px dashed var(--accent); border-radius: 50%;
-            animation: rotarVerde 8s linear infinite;
+            animation: rotarVerde 7s linear infinite;
         }
-        /* Rueda Azul Marino (Nueva - Sentido Opuesto) */
+        /* Rueda Azul Marino (Corregida - Sentido Antihorario) */
         .brand-logo-sol::after {
-            content: ''; position: absolute; top: -10px; left: -10px; right: -10px; bottom: -10px;
-            border: 2px dotted #000080; border-radius: 50%;
-            animation: rotarAzul 12s linear infinite reverse;
+            content: ''; position: absolute; top: -11px; left: -11px; right: -11px; bottom: -11px;
+            border: 2px dotted var(--navy-blue); border-radius: 50%;
+            animation: rotarAzulMarino 10s linear infinite reverse;
         }
         @keyframes rotarVerde { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        @keyframes rotarAzul { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes rotarAzulMarino { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* --- ENCABEZADOS --- */
+        /* --- ENCABEZADOS Y ELEMENTOS DE INTERFAZ 3D --- */
         .brand-header-3d {
-            height: 65px; background: var(--bg-sidebar);
-            display: flex; align-items: center; justify-content: center; gap: 15px;
-            border-bottom: 1px solid var(--border); z-index: 100;
+            height: 65px; background: var(--bg-sidebar); display: flex;
+            align-items: center; justify-content: center; gap: 15px;
+            border-bottom: 1px solid var(--border); z-index: 100; position: relative;
         }
-        .brand-title-3d { font-weight: 900; letter-spacing: 5px; color: var(--accent); text-transform: uppercase; }
+        .brand-title-3d { font-weight: 900; letter-spacing: 5px; color: var(--accent); text-transform: uppercase; font-size: 1.4rem; }
 
-        /* --- BARRA DE HERRAMIENTAS (PASARELA) --- */
+        /* BARRA DE HERRAMIENTAS HORIZONTAL DESLIZABLE (PASARELA) */
         .scollable-toolbar-wrapper { 
-            height: 85px; background: var(--bg-sidebar); border-bottom: 1px solid var(--border);
+            height: 90px; background: var(--bg-sidebar); border-bottom: 1px solid var(--border);
             display: flex; align-items: center; overflow-x: auto; padding: 0 15px; scrollbar-width: none;
         }
         .scollable-toolbar-wrapper::-webkit-scrollbar { display: none; }
-        .toolbar-rack { display: flex; align-items: center; gap: 20px; padding: 0 10px; }
+        .toolbar-rack { display: flex; align-items: center; gap: 22px; padding: 0 10px; }
         
-        .control-unit { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-        .label-unit { font-size: 0.6rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; }
+        .control-unit { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .label-unit { font-size: 0.62rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
 
-        /* --- BOTONES 3D --- */
+        /* BOTONES MECÁNICOS NEUMÓRFICOS (3D) */
         .btn-3d {
-            width: 46px; height: 46px; border-radius: 50%; border: none;
+            width: 48px; height: 48px; border-radius: 50%; border: none;
             background: var(--btn-3d-bg); color: var(--text-main);
             box-shadow: 4px 4px 8px var(--btn-3d-shadow-dark), -3px -3px 7px var(--btn-3d-shadow-light);
-            cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
-            transition: 0.2s;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;
+            transition: all 0.2s ease; outline: none;
         }
-        .btn-3d:active { box-shadow: inset 3px 3px 6px var(--btn-3d-shadow-dark); transform: scale(0.96); }
+        .btn-3d:active { box-shadow: inset 3px 3px 6px var(--btn-3d-shadow-dark), inset -2px -2px 5px var(--btn-3d-shadow-light); transform: scale(0.95); }
         .btn-3d.active { color: var(--accent); box-shadow: inset 2px 2px 5px #000; }
 
-        /* --- SIDEBAR CORREGIDO (ICONO + TITULO) --- */
+        /* --- CORRECCIÓN PANEL LATERAL (SIDEBAR CON ICONO Y TÍTULO FIJO) --- */
         .sidebar {
             position: fixed; left: -320px; top: 0; width: 320px; height: 100%;
             background: var(--bg-sidebar); z-index: 2000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex; flex-direction: column; border-right: 1px solid var(--border);
         }
         .sidebar.active { left: 0; }
-        .sidebar-header { padding: 30px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+        .sidebar-header { padding: 25px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 14px; }
 
-        /* --- EDITOR --- */
+        /* INTERFAZ DEL EDITOR PROTEGIDO */
         .editor-container { flex: 1; display: flex; flex-direction: column; padding: 20px; overflow-y: auto; background: var(--bg-main); }
-        .doc-title { background: transparent; border: none; border-bottom: 2px solid var(--border); color: var(--accent); font-size: 1.5rem; font-weight: bold; padding: 10px 0; outline: none; margin-bottom: 20px; }
-        .textarea-main { flex: 1; background: transparent; border: none; resize: none; outline: none; color: var(--text-main); font-size: 1.1rem; line-height: 1.8; min-height: 400px; }
+        .doc-title { background: transparent; border: none; border-bottom: 2px solid var(--border); color: var(--accent); font-size: 1.6rem; font-weight: bold; padding: 10px 0; outline: none; margin-bottom: 15px; width: 100%; }
+        .textarea-main { flex: 1; background: transparent; border: none; resize: none; outline: none; color: var(--text-main); font-size: 1.15rem; line-height: 1.8; min-height: 350px; width: 100%; }
 
-        /* --- AUTH SCREEN --- */
+        /* PANTALLA DE CONTROL DE ACCESO EXTENDIDO */
         .auth-overlay { position: fixed; inset: 0; background: var(--bg-main); z-index: 5000; display: flex; align-items: center; justify-content: center; }
-        .auth-card { background: var(--bg-sidebar); padding: 40px; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; border: 1px solid var(--border); }
-        .auth-input { width: 100%; padding: 15px; margin: 15px 0; background: var(--bg-main); border: 1px solid var(--border); border-radius: 10px; color: #fff; text-align: center; }
+        .auth-card { background: var(--bg-sidebar); padding: 40px; border-radius: 24px; width: 90%; max-width: 420px; text-align: center; border: 1px solid var(--border); box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+        .auth-input { width: 100%; padding: 16px; margin: 15px 0; background: var(--bg-main); border: 1px solid var(--border); border-radius: 12px; color: #fff; text-align: center; font-size: 1rem; outline: none; }
+        .auth-input:focus { border-color: var(--accent); }
 
-        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--accent); color: #000; padding: 12px 25px; border-radius: 25px; font-weight: bold; transition: 0.3s; z-index: 6000; }
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--accent); color: #12141c; padding: 14px 30px; border-radius: 30px; font-weight: bold; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 6000; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
         .toast.show { transform: translateX(-50%) translateY(0); }
         .hidden { display: none !important; }
     </style>
@@ -107,258 +106,393 @@
     <div id="auth-screen" class="auth-overlay">
         <div class="auth-card">
             <div class="brand-logo-sol" style="margin: 0 auto 20px;"></div>
-            <h2 style="color:var(--accent)">RETÓRICA</h2>
-            <p style="font-size:0.8rem; color:var(--text-muted)">Sistema de Autenticación Local</p>
-            <input type="text" id="user-input" class="auth-input" placeholder="Nombre de usuario...">
-            <button onclick="Engine.auth.login()" style="width:100%; padding:15px; border-radius:10px; border:none; background:var(--accent); font-weight:bold; cursor:pointer;">INICIAR SESIÓN</button>
-            <div id="user-list" style="margin-top:20px; font-size:0.75rem; color:var(--text-muted)"></div>
+            <h2 style="color:var(--accent); font-weight: 900; letter-spacing: 3px;">RETÓRICA</h2>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-top: 5px;">Control de Credenciales Local</p>
+            <input type="text" id="user-input" class="auth-input" placeholder="Nombre completo o ID...">
+            <button onclick="RetoricaEngine.auth.login()" style="width:100%; padding:16px; border-radius:12px; border:none; background:var(--accent); font-weight:900; cursor:pointer; color:#12141c; letter-spacing:1px; margin-top:10px;">ACCEDER AL ENTORNO</button>
+            <div id="user-registry-logs" style="margin-top:25px; font-size:0.78rem; color:var(--text-muted); text-align: left; background: var(--bg-main); padding: 10px; border-radius: 8px; max-height: 80px; overflow-y: auto;"></div>
         </div>
     </div>
 
     <header class="brand-header-3d">
+        <div id="btn-menu-toggle" onclick="document.getElementById('sidebar').classList.add('active')" style="position:absolute; left:20px; font-size:1.6rem; cursor:pointer; color:var(--accent)">☰</div>
         <div class="brand-logo-sol"></div>
         <h1 class="brand-title-3d">Retórica</h1>
     </header>
-
-    <div id="btn-menu-toggle" onclick="document.getElementById('sidebar').classList.add('active')" style="position:fixed; left:15px; top:18px; z-index:150; font-size:1.5rem; cursor:pointer; color:var(--accent)">☰</div>
-
-    <nav id="sidebar" class="sidebar">
-        <div class="sidebar-header">
-            <div class="brand-logo-sol" style="width:24px; height:24px;"></div>
-            <h2 style="color:var(--accent); font-size:1.2rem; letter-spacing:2px;">RETÓRICA</h2>
-            <span onclick="document.getElementById('sidebar').classList.remove('active')" style="margin-left:auto; cursor:pointer">✕</span>
-        </div>
-        
-        <div style="padding:20px;">
-            <p class="label-unit" style="margin-bottom:15px;">Exportar Documento</p>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                <button onclick="Engine.export('pdf')" class="btn-3d" style="width:100%; border-radius:8px; font-size:0.8rem;">PDF</button>
-                <button onclick="Engine.export('html')" class="btn-3d" style="width:100%; border-radius:8px; font-size:0.8rem;">HTML</button>
-                <button onclick="Engine.export('txt')" class="btn-3d" style="width:100%; border-radius:8px; font-size:0.8rem;">TXT</button>
-                <button onclick="Engine.export('doc')" class="btn-3d" style="width:100%; border-radius:8px; font-size:0.8rem;">DOCX</button>
-            </div>
-        </div>
-
-        <div id="library" style="flex:1; overflow-y:auto; padding:20px;">
-            <p class="label-unit" style="margin-bottom:10px;">Mis Guiones</p>
-            <div id="docs-list"></div>
-        </div>
-
-        <div style="padding:20px; border-top:1px solid var(--border)">
-            <p id="active-user-display" style="font-size:0.8rem; margin-bottom:10px;"></p>
-            <button onclick="location.reload()" style="color:var(--danger); background:transparent; border:none; cursor:pointer;">Cerrar Sesión</button>
-        </div>
-    </nav>
 
     <div class="scollable-toolbar-wrapper">
         <div class="toolbar-rack">
             <div class="control-unit">
                 <span class="label-unit">Guardar</span>
-                <button class="btn-3d" id="btn-save" onclick="Engine.db.save()">✓</button>
+                <button class="btn-3d" id="btn-save-main" onclick="RetoricaEngine.db.save()">✓</button>
             </div>
             <div class="control-unit">
                 <span class="label-unit">Nuevo</span>
-                <button class="btn-3d" onclick="Engine.editor.clear()">➕</button>
+                <button class="btn-3d" onclick="RetoricaEngine.editor.clear()">➕</button>
             </div>
             <div class="control-unit">
                 <span class="label-unit">Dictado</span>
-                <button class="btn-3d" id="btn-mic" onclick="Engine.audio.toggleMic()">🎙️</button>
+                <button class="btn-3d" id="btn-mic-main" onclick="RetoricaEngine.audio.toggleMic()">🎙️</button>
             </div>
             <div class="control-unit">
-                <span class="label-unit">Leer</span>
-                <button class="btn-3d" id="btn-play" onclick="Engine.audio.read()">🔊</button>
+                <span class="label-unit">Lectura</span>
+                <button class="btn-3d" id="btn-play-main" onclick="RetoricaEngine.audio.read()">🔊</button>
             </div>
             <div class="control-unit">
                 <span class="label-unit">Zoom</span>
-                <div style="display:flex; gap:5px;">
-                    <button class="btn-3d" style="width:35px; height:35px;" onclick="Engine.editor.zoom(0.1)">+</button>
-                    <button class="btn-3d" style="width:35px; height:35px;" onclick="Engine.editor.zoom(-0.1)">-</button>
+                <div style="display:flex; gap:8px;">
+                    <button class="btn-3d" style="width:38px; height:38px;" onclick="RetoricaEngine.editor.zoom(0.1)">+</button>
+                    <button class="btn-3d" style="width:38px; height:38px;" onclick="RetoricaEngine.editor.zoom(-0.1)">-</button>
                 </div>
             </div>
             <div class="control-unit">
-                <span class="label-unit">App</span>
-                <select id="lang-app" onchange="Engine.i18n.updateUI()" style="background:var(--btn-3d-bg); color:#fff; border:none; padding:5px; border-radius:5px;"></select>
+                <span class="label-unit">Idioma App</span>
+                <select id="lang-selector-app" onchange="RetoricaEngine.i18n.apply(this.value)" style="background:var(--btn-3d-bg); color:#fff; border:1px solid var(--border); padding:8px; border-radius:8px; font-size:0.75rem; outline:none;"></select>
             </div>
             <div class="control-unit">
                 <span class="label-unit">Tema</span>
-                <button class="btn-3d" onclick="Engine.ui.toggleTheme()">🌓</button>
+                <button class="btn-3d" onclick="RetoricaEngine.ui.toggleTheme()">🌓</button>
             </div>
         </div>
     </div>
 
-    <main class="editor-container" id="zoom-target">
-        <input type="text" id="main-title" class="doc-title" placeholder="Título del proyecto...">
-        <textarea id="main-editor" class="textarea-main" placeholder="Escribe aquí..."></textarea>
+    <nav id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <div class="brand-logo-sol" style="width:28px; height:28px;"></div>
+            <h2 style="color:var(--accent); font-size:1.3rem; letter-spacing:3px; font-weight:900;">RETÓRICA</h2>
+            <span onclick="document.getElementById('sidebar').classList.remove('active')" style="margin-left:auto; cursor:pointer; font-size:1.2rem; color:var(--text-muted)">✕</span>
+        </div>
+        
+        <div style="padding:20px;">
+            <p class="label-unit" style="margin-bottom:15px;">Exportación Profesional</p>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                <button onclick="RetoricaEngine.export.toPDF()" class="btn-3d" style="width:100%; border-radius:10px; font-size:0.75rem; font-weight:bold;">PDF</button>
+                <button onclick="RetoricaEngine.export.toHTML()" class="btn-3d" style="width:100%; border-radius:10px; font-size:0.75rem; font-weight:bold;">HTML</button>
+                <button onclick="RetoricaEngine.export.toTXT()" class="btn-3d" style="width:100%; border-radius:10px; font-size:0.75rem; font-weight:bold;">TXT</button>
+                <button onclick="RetoricaEngine.export.toDOC()" class="btn-3d" style="width:100%; border-radius:10px; font-size:0.75rem; font-weight:bold;">DOCX</button>
+            </div>
+        </div>
+
+        <div id="library-container" style="flex:1; overflow-y:auto; padding:0 20px;">
+            <p class="label-unit" style="margin-bottom:12px; border-bottom:1px solid var(--border); padding-bottom:5px;">Biblioteca de Proyectos</p>
+            <div id="docs-list-render">
+                </div>
+        </div>
+
+        <div style="padding:20px; border-top:1px solid var(--border); background: rgba(0,0,0,0.1);">
+            <div id="active-user-info" style="font-size:0.8rem; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+                <span style="width:8px; height:8px; background:var(--accent); border-radius:50%;"></span>
+                <span id="display-user-name">Sesión no iniciada</span>
+            </div>
+            <button onclick="location.reload()" style="color:var(--danger); background:transparent; border:none; cursor:pointer; font-weight:bold; font-size:0.8rem; text-transform:uppercase;">Cerrar Sistema</button>
+        </div>
+    </nav>
+
+    <main class="editor-container">
+        <div id="zoom-wrapper" style="width:100%; height:100%; display:flex; flex-direction:column; transition: transform 0.2s ease;">
+            <input type="text" id="editor-title" class="doc-title" placeholder="Título del Guion...">
+            <textarea id="editor-body" class="textarea-main" placeholder="Comienza a dictar o escribir tu retórica..."></textarea>
+        </div>
     </main>
 
-    <footer style="background:var(--bg-sidebar); padding:10px 20px; font-size:0.7rem; display:flex; gap:20px; border-top:1px solid var(--border);">
-        <span id="stat-chars">Caracteres: 0</span>
-        <span id="stat-words">Palabras: 0</span>
-        <span id="stat-lines">Líneas: 0</span>
+    <footer style="background:var(--bg-sidebar); padding:12px 25px; font-size:0.72rem; display:flex; gap:25px; border-top:1px solid var(--border); font-weight:bold; color:var(--text-muted);">
+        <span id="count-chars">CHARS: 0</span>
+        <span id="count-words">WORDS: 0</span>
+        <span id="count-lines">LINES: 1</span>
+        <span style="margin-left:auto; color:var(--accent);">V.2026.PRO</span>
     </footer>
 
-    <div id="toast" class="toast"></div>
+    <div id="toast-notif" class="toast"></div>
 
     <script>
-        // --- MOTOR RETÓRICA V2026: BLINDAJE ESTRUCTURAL ---
-        const Engine = {
-            state: { user: null, id: null, zoom: 1.0, isDark: true },
-            
-            i18n: {
-                data: [
-                    {c:'es', n:'Español', t:'Título...', s:'Guardado ✓'},
-                    {c:'en', n:'English', t:'Title...', s:'Saved ✓'},
-                    {c:'fr', n:'Français', n:'Titre...', s:'Enregistré ✓'},
-                    {c:'pt', n:'Português', t:'Título...', s:'Salvo ✓'},
-                    {c:'it', n:'Italiano', t:'Titolo...', s:'Salvato ✓'},
-                    {c:'de', n:'Deutsch', t:'Titel...', s:'Gespeichert ✓'},
-                    {c:'ja', n:'日本語', t:'タイトル...', s:'保存されました ✓'},
-                    {c:'ru', n:'Русский', t:'Заголовок...', s:'Сохранено ✓'},
-                    {c:'zh', n:'中文', t:'标题...', s:'已保存 ✓'},
-                    {c:'ar', n:'العربية', t:'عنوان...', s:'تم حفظه ✓'}
-                    // ... Aquí se extienden los 30 idiomas sin afectar la lógica
-                ],
-                init() {
-                    const sel = document.getElementById('lang-app');
-                    this.data.forEach(l => sel.innerHTML += `<option value="${l.c}">${l.n}</option>`);
-                },
-                updateUI() { Engine.ui.notify("Idioma actualizado"); }
-            },
+        // --- PROMOTOR CENTRAL DE BLINDAJE INMUTABLE V2026 ---
+        const RetoricaEngine = {
+            state: { activeUser: null, activeDocId: null, currentZoom: 1.0, isDarkTheme: true },
 
-            auth: {
-                login() {
-                    const name = document.getElementById('user-input').value.trim();
-                    if(!name) return;
-                    Engine.state.user = name;
-                    let users = JSON.parse(localStorage.getItem('ret_users') || '[]');
-                    if(!users.includes(name)) users.push(name);
-                    localStorage.setItem('ret_users', JSON.stringify(users));
-                    document.getElementById('auth-screen').classList.add('hidden');
-                    document.getElementById('active-user-display').innerText = `Usuario: ${name}`;
-                    Engine.db.loadList();
+            // CAPA 1: DICCIONARIO COMPLETO SIN OMISIONES (30 IDIOMAS FIJADOS)
+            i18n: {
+                currentLang: 'es',
+                dictionary: {
+                    'es': { name: 'Español', save: '✓', mic: '🎙️', new: '➕', title: 'Título...', body: 'Escribe aquí...' },
+                    'en': { name: 'English', save: '✓', mic: '🎙️', new: '➕', title: 'Title...', body: 'Type here...' },
+                    'fr': { name: 'Français', save: '✓', mic: '🎙️', new: '➕', title: 'Titre...', body: 'Écrivez ici...' },
+                    'pt': { name: 'Português', save: '✓', mic: '🎙️', new: '➕', title: 'Título...', body: 'Escreva aqui...' },
+                    'it': { name: 'Italiano', save: '✓', mic: '🎙️', new: '➕', title: 'Titolo...', body: 'Scrivi qui...' },
+                    'de': { name: 'Deutsch', save: '✓', mic: '🎙️', new: '➕', title: 'Titel...', body: 'Schreiben...' },
+                    'ja': { name: '日本語', save: '✓', mic: '🎙️', new: '➕', title: 'タイトル...', body: 'ここに書く...' },
+                    'ru': { name: 'Русский', save: '✓', mic: '🎙️', new: '➕', title: 'Заголовок...', body: 'Писать aquí...' },
+                    'zh': { name: '中文', save: '✓', mic: '🎙️', new: '➕', title: '标题...', body: '在这里写...' },
+                    'ar': { name: 'العربية', save: '✓', mic: '🎙️', new: '➕', title: 'عنوان...', body: 'اكتب هنا...' },
+                    'hi': { name: 'हिन्दी', save: '✓', mic: '🎙️', new: '➕', title: 'शीर्षक...', body: 'यहाँ लिखें...' },
+                    'bn': { name: 'नेपाली', save: '✓', mic: '🎙️', new: '➕', title: 'शीर्षक...', body: 'यहाँ लेख्नुहोस्...' },
+                    'id': { name: 'Indonesia', save: '✓', mic: '🎙️', new: '➕', title: 'Judul...', body: 'Tulis di sini...' },
+                    'ms': { name: 'Melayu', save: '✓', mic: '🎙️', new: '➕', title: 'Tajuk...', body: 'Tulis di sini...' },
+                    'nl': { name: 'Nederlands', save: '✓', mic: '🎙️', new: '➕', title: 'Titel...', body: 'Schrijf hier...' },
+                    'sv': { name: 'Svenska', save: '✓', mic: '🎙️', new: '➕', title: 'Titel...', body: 'Skriv här...' },
+                    'no': { name: 'Norsk', save: '✓', mic: '🎙️', new: '➕', title: 'Tittel...', body: 'Skriv her...' },
+                    'da': { name: 'Dansk', save: '✓', mic: '🎙️', new: '➕', title: 'Titel...', body: 'Skriv her...' },
+                    'fi': { name: 'Suomi', save: '✓', mic: '🎙️', new: '➕', title: 'Otsikko...', body: 'Kirjoita tähän...' },
+                    'pl': { name: 'Polski', save: '✓', mic: '🎙️', new: '➕', title: 'Tytuł...', body: 'Napisz tutaj...' },
+                    'tr': { name: 'Türkçe', save: '✓', mic: '🎙️', new: '➕', title: 'Başlık...', body: 'Buraya yazın...' },
+                    'el': { name: 'Ελληνικά', save: '✓', mic: '🎙️', new: '➕', title: 'Τίτλος...', body: 'Γράψτε εδώ...' },
+                    'he': { name: 'עברית', save: '✓', mic: '🎙️', new: '➕', title: 'כותרת...', body: 'כתוב כאן...' },
+                    'ko': { name: '한국어', save: '✓', mic: '🎙️', new: '➕', title: '제목...', body: '여기에 쓰십시오...' },
+                    'th': { name: 'ไทย', save: '✓', mic: '🎙️', new: '➕', title: 'ชื่อเรื่อง...', body: 'เขียนที่นี่...' },
+                    'vi': { name: 'Tiếng Việt', save: '✓', mic: '🎙️', new: '➕', title: 'Tiêu đề...', body: 'Viết ở đây...' },
+                    'uk': { name: 'Українська', save: '✓', mic: '🎙️', new: '➕', title: 'Заголовок...', body: 'Пишіть тут...' },
+                    'cs': { name: 'Čeština', save: '✓', mic: '🎙️', new: '➕', title: 'Nadpis...', body: 'Pište zde...' },
+                    'hu': { name: 'Magyar', save: '✓', mic: '🎙️', new: '➕', title: 'Cím...', body: 'Írj ide...' },
+                    'ro': { name: 'Română', save: '✓', mic: '🎙️', new: '➕', title: 'Titlu...', body: 'Scrie aici...' }
+                },
+                init() {
+                    const select = document.getElementById('lang-selector-app');
+                    select.innerHTML = '';
+                    Object.keys(this.dictionary).forEach(key => {
+                        select.innerHTML += `<option value="${key}">${this.dictionary[key].name}</option>`;
+                    });
+                },
+                apply(langCode) {
+                    if (!this.dictionary[langCode]) return;
+                    this.currentLang = langCode;
+                    const pack = this.dictionary[langCode];
+                    document.getElementById('editor-title').placeholder = pack.title;
+                    document.getElementById('editor-body').placeholder = pack.body;
+                    RetoricaEngine.ui.notify(`Sistema: ${pack.name}`);
                 }
             },
 
-            db: {
-                async save() {
-                    if(!Engine.state.user) return;
-                    const doc = {
-                        id: Engine.state.id || Date.now(),
-                        user: Engine.state.user,
-                        title: document.getElementById('main-title').value || "Sin título",
-                        content: document.getElementById('main-editor').value,
-                        date: new Date().toISOString()
-                    };
-                    let db = JSON.parse(localStorage.getItem('ret_docs') || '[]');
-                    db = db.filter(d => d.id !== doc.id);
-                    db.push(doc);
-                    localStorage.setItem('ret_docs', JSON.stringify(db));
-                    Engine.state.id = doc.id;
-                    Engine.ui.notify("Documento guardado ✓");
-                    this.loadList();
+            // CAPA 2: FORMATO EXTENDIDO DE REGISTRO DE USUARIOS
+            auth: {
+                login() {
+                    const nameInput = document.getElementById('user-input').value.trim();
+                    if (!nameInput) {
+                        RetoricaEngine.ui.notify("Por favor, introduce credenciales válidas.");
+                        return;
+                    }
+                    RetoricaEngine.state.activeUser = nameInput;
+                    
+                    // Registro persistente en bitácora local
+                    let registry = JSON.parse(localStorage.getItem('ret_users_registry') || '[]');
+                    if (!registry.includes(nameInput)) {
+                        registry.push(nameInput);
+                        localStorage.setItem('ret_users_registry', JSON.stringify(registry));
+                    }
+                    
+                    document.getElementById('auth-screen').classList.add('hidden');
+                    document.getElementById('display-user-name').innerText = `Usuario: ${nameInput}`;
+                    RetoricaEngine.db.refreshLibraryList();
+                    RetoricaEngine.ui.notify("Acceso Concedido ✓");
                 },
-                loadList() {
-                    const list = document.getElementById('docs-list');
-                    const db = JSON.parse(localStorage.getItem('ret_docs') || '[]');
-                    const myDocs = db.filter(d => d.user === Engine.state.user);
-                    list.innerHTML = myDocs.map(d => `
-                        <div onclick="Engine.db.open(${d.id})" style="background:var(--bg-card); padding:10px; border-radius:8px; margin-bottom:8px; cursor:pointer; font-size:0.8rem;">
-                            ${d.title} <br><small style="color:var(--text-muted)">${new Date(d.date).toLocaleDateString()}</small>
-                        </div>
-                    `).join('');
-                },
-                open(id) {
-                    const db = JSON.parse(localStorage.getItem('ret_docs') || '[]');
-                    const doc = db.find(d => d.id === id);
-                    if(doc) {
-                        Engine.state.id = doc.id;
-                        document.getElementById('main-title').value = doc.title;
-                        document.getElementById('main-editor').value = doc.content;
-                        document.getElementById('sidebar').classList.remove('active');
-                        Engine.ui.updateStats();
+                loadRegistryLogs() {
+                    const logsBox = document.getElementById('user-registry-logs');
+                    const registry = JSON.parse(localStorage.getItem('ret_users_registry') || '[]');
+                    if (registry.length === 0) {
+                        logsBox.innerHTML = "No hay registros previos en este terminal.";
+                    } else {
+                        logsBox.innerHTML = "<b>Cuentas en este dispositivo:</b><br>" + registry.join(', ');
                     }
                 }
             },
 
-            audio: {
-                rec: null,
-                toggleMic() {
-                    const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
-                    if(!Speech) return Engine.ui.notify("No soportado");
-                    if(this.rec) { this.rec.stop(); this.rec = null; return; }
-                    this.rec = new Speech();
-                    this.rec.lang = 'es-MX';
-                    this.rec.onresult = (e) => {
-                        document.getElementById('main-editor').value += e.results[0][0].transcript;
-                        Engine.ui.updateStats();
+            // CAPA 3: PERSISTENCIA COMPLETA DE GUIONES (BASE DE DATOS LOCAL)
+            db: {
+                save() {
+                    if (!RetoricaEngine.state.activeUser) return;
+                    
+                    const title = document.getElementById('editor-title').value.trim() || "Guion Sin Título";
+                    const body = document.getElementById('editor-body').value;
+                    
+                    const doc = {
+                        id: RetoricaEngine.state.activeDocId || Date.now(),
+                        user: RetoricaEngine.state.activeUser,
+                        title: title,
+                        content: body,
+                        timestamp: new Date().toISOString()
                     };
-                    this.rec.start();
-                    Engine.ui.notify("Escuchando...");
+                    
+                    let localDB = JSON.parse(localStorage.getItem('ret_documents_db') || '[]');
+                    // Evitar duplicados filtrando por ID único
+                    localDB = localDB.filter(item => item.id !== doc.id);
+                    localDB.push(doc);
+                    
+                    localStorage.setItem('ret_documents_db', JSON.stringify(localDB));
+                    RetoricaEngine.state.activeDocId = doc.id;
+                    
+                    RetoricaEngine.ui.notify("Documento guardado ✓");
+                    this.refreshLibraryList();
+                },
+                refreshLibraryList() {
+                    const container = document.getElementById('docs-list-render');
+                    const localDB = JSON.parse(localStorage.getItem('ret_documents_db') || '[]');
+                    // Filtrado estricto por usuario activo (blindaje de privacidad)
+                    const userDocs = localDB.filter(item => item.user === RetoricaEngine.state.activeUser);
+                    
+                    if (userDocs.length === 0) {
+                        container.innerHTML = `<p style="font-size:0.75rem; color:var(--text-muted); text-align:center; padding:15px;">No hay guiones guardados.</p>`;
+                        return;
+                    }
+                    
+                    container.innerHTML = userDocs.map(doc => `
+                        <div onclick="RetoricaEngine.db.openDocument(${doc.id})" style="background:var(--bg-card); padding:12px; border-radius:10px; margin-bottom:10px; cursor:pointer; border:1px solid var(--border); transition: 0.2s;">
+                            <div style="font-weight:bold; font-size:0.82rem; color:var(--accent); text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">${doc.title}</div>
+                            <div style="font-size:0.68rem; color:var(--text-muted); margin-top:4px;">${new Date(doc.timestamp).toLocaleDateString()}</div>
+                        </div>
+                    `).join('');
+                },
+                openDocument(id) {
+                    const localDB = JSON.parse(localStorage.getItem('ret_documents_db') || '[]');
+                    const target = localDB.find(item => item.id === id);
+                    if (target) {
+                        RetoricaEngine.state.activeDocId = target.id;
+                        document.getElementById('editor-title').value = target.title;
+                        document.getElementById('editor-body').value = target.content;
+                        document.getElementById('sidebar').classList.remove('active');
+                        RetoricaEngine.ui.updateCounters();
+                        RetoricaEngine.ui.notify("Proyecto Cargado");
+                    }
+                }
+            },
+
+            // CAPA 4: PROCESAMIENTO DE AUDIO Y DICTADO ASISTIDO
+            audio: {
+                recognitionInstance: null,
+                toggleMic() {
+                    const SpeechKit = window.SpeechRecognition || window.webkitSpeechRecognition;
+                    if (!SpeechKit) {
+                        RetoricaEngine.ui.notify("Dictado no soportado en este navegador.");
+                        return;
+                    }
+                    
+                    const btn = document.getElementById('btn-mic-main');
+                    if (this.recognitionInstance) {
+                        this.recognitionInstance.stop();
+                        this.recognitionInstance = null;
+                        btn.classList.remove('active');
+                        RetoricaEngine.ui.notify("Dictado Finalizado");
+                        return;
+                    }
+                    
+                    this.recognitionInstance = new SpeechKit();
+                    this.recognitionInstance.lang = 'es-MX';
+                    this.recognitionInstance.continuous = true;
+                    this.recognitionInstance.interimResults = false;
+                    
+                    this.recognitionInstance.onresult = (event) => {
+                        const transcript = event.results[event.results.length - 1][0].transcript;
+                        const mainTextArea = document.getElementById('editor-body');
+                        mainTextArea.value += (mainTextArea.value ? ' ' : '') + transcript;
+                        RetoricaEngine.ui.updateCounters();
+                    };
+                    
+                    this.recognitionInstance.onerror = () => {
+                        this.toggleMic();
+                    };
+                    
+                    this.recognitionInstance.start();
+                    btn.classList.add('active');
+                    RetoricaEngine.ui.notify("Escuchando Entorno...");
                 },
                 read() {
-                    const text = document.getElementById('main-editor').value;
-                    const u = new SpeechSynthesisUtterance(text);
-                    u.lang = 'es-MX';
-                    window.speechSynthesis.speak(u);
+                    const textToRead = document.getElementById('editor-body').value;
+                    if (!textToRead) {
+                        RetoricaEngine.ui.notify("Nada que leer.");
+                        return;
+                    }
+                    window.speechSynthesis.cancel();
+                    const utterance = new SpeechSynthesisUtterance(textToRead);
+                    utterance.lang = RetoricaEngine.i18n.currentLang === 'es' ? 'es-MX' : RetoricaEngine.i18n.currentLang;
+                    window.speechSynthesis.speak(utterance);
+                    RetoricaEngine.ui.notify("Leyendo Texto...");
                 }
             },
 
+            // CAPA 5: INTERFAZ DE USUARIO Y CONFIGURACIÓN DINÁMICA
             editor: {
                 clear() {
-                    Engine.state.id = null;
-                    document.getElementById('main-title').value = "";
-                    document.getElementById('main-editor').value = "";
-                    Engine.ui.updateStats();
+                    RetoricaEngine.state.activeDocId = null;
+                    document.getElementById('editor-title').value = '';
+                    document.getElementById('editor-body').value = '';
+                    RetoricaEngine.ui.updateCounters();
+                    RetoricaEngine.ui.notify("Nuevo Canvas Creado");
                 },
-                zoom(val) {
-                    Engine.state.zoom += val;
-                    document.getElementById('zoom-target').style.transform = `scale(${Engine.state.zoom})`;
-                    document.getElementById('zoom-target').style.transformOrigin = "top center";
+                zoom(scaleDelta) {
+                    let nextZoom = RetoricaEngine.state.currentZoom + scaleDelta;
+                    if (nextZoom < 0.6 || nextZoom > 2.5) return; // Límites de seguridad visual
+                    RetoricaEngine.state.currentZoom = nextZoom;
+                    const wrapper = document.getElementById('zoom-wrapper');
+                    wrapper.style.transform = `scale(${nextZoom})`;
+                    wrapper.style.transformOrigin = "top left";
                 }
             },
 
-            export(type) {
-                const title = document.getElementById('main-title').value || "Doc";
-                const content = document.getElementById('main-editor').value;
-                if(type === 'txt') {
-                    const blob = new Blob([content], {type:'text/plain'});
-                    const a = document.createElement('a');
-                    a.href = URL.createObjectURL(blob);
-                    a.download = `${title}.txt`;
-                    a.click();
-                } else if(type === 'pdf') {
-                    html2pdf().from(document.getElementById('zoom-target')).save(`${title}.pdf`);
+            // CAPA 6: MÓDULO DE EXPORTACIÓN EXTRACCIÓN DIRECTA
+            export: {
+                toTXT() {
+                    const txtContent = document.getElementById('editor-body').value;
+                    const title = document.getElementById('editor-title').value || "Guion";
+                    const blob = new Blob([txtContent], { type: 'text/plain;charset=utf-8' });
+                    const anchor = document.createElement('a');
+                    anchor.href = URL.createObjectURL(blob);
+                    anchor.download = `${title}.txt`;
+                    anchor.click();
+                },
+                toHTML() {
+                    const body = document.getElementById('editor-body').value;
+                    const title = document.getElementById('editor-title').value || "Guion";
+                    const fullHTML = `<html><head><title>${title}</title><style>body{font-family:sans-serif;padding:40px;line-height:1.6;}</style></head><body><h1>${title}</h1><p>${body.replace(/\n/g, '<br>')}</p></body></html>`;
+                    const blob = new Blob([fullHTML], { type: 'text/html;charset=utf-8' });
+                    const anchor = document.createElement('a');
+                    anchor.href = URL.createObjectURL(blob);
+                    anchor.download = `${title}.html`;
+                    anchor.click();
+                },
+                toPDF() {
+                    const title = document.getElementById('editor-title').value || "Guion";
+                    const element = document.getElementById('zoom-wrapper');
+                    RetoricaEngine.ui.notify("Generando PDF...");
+                    html2pdf().from(element).save(`${title}.pdf`);
+                },
+                toDOC() {
+                    const body = document.getElementById('editor-body').value;
+                    const title = document.getElementById('editor-title').value || "Guion";
+                    const docTemplate = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><title>${title}</title></head><body><h2>${title}</h2><p>${body}</p></body></html>`;
+                    const blob = new Blob([docTemplate], { type: 'application/msword' });
+                    const anchor = document.createElement('a');
+                    anchor.href = URL.createObjectURL(blob);
+                    anchor.download = `${title}.doc`;
+                    anchor.click();
                 }
-                Engine.ui.notify(`Exportando ${type.toUpperCase()}...`);
             },
 
+            // CAPA 7: CONTROLADORES VISUALES Y TOASTS
             ui: {
-                notify(msg) {
-                    const t = document.getElementById('toast');
-                    t.innerText = msg; t.classList.add('show');
-                    setTimeout(() => t.classList.remove('show'), 2000);
+                notify(message) {
+                    const box = document.getElementById('toast-notif');
+                    box.textContent = message;
+                    box.classList.add('show');
+                    setTimeout(() => box.classList.remove('show'), 2500);
                 },
                 toggleTheme() {
                     document.body.classList.toggle('light-theme');
-                    Engine.state.isDark = !Engine.state.isDark;
+                    RetoricaEngine.state.isDarkTheme = !RetoricaEngine.state.isDarkTheme;
                 },
-                updateStats() {
-                    const val = document.getElementById('main-editor').value;
-                    document.getElementById('stat-chars').innerText = `Caracteres: ${val.length}`;
-                    document.getElementById('stat-words').innerText = `Palabras: ${val.trim() ? val.trim().split(/\s+/).length : 0}`;
-                    document.getElementById('stat-lines').innerText = `Líneas: ${val.split('\n').length}`;
+                updateCounters() {
+                    const value = document.getElementById('editor-body').value;
+                    document.getElementById('count-chars').innerText = `CHARS: ${value.length}`;
+                    document.getElementById('count-words').innerText = `WORDS: ${value.trim() ? value.trim().split(/\s+/).length : 0}`;
+                    document.getElementById('count-lines').innerText = `LINES: ${value.split('\n').length}`;
                 }
             }
         };
 
-        // Inicialización
-        window.onload = () => {
-            Engine.i18n.init();
-            document.getElementById('main-editor').oninput = () => Engine.ui.updateStats();
-            // Mostrar lista de usuarios previos
-            const users = JSON.parse(localStorage.getItem('ret_users') || '[]');
-            if(users.length) document.getElementById('user-list').innerText = "Usuarios conocidos: " + users.join(', ');
-        };
+        // INICIALIZADOR ATÓMICO DEL ENTORNO DE TRABAJO
+        window.addEventListener('DOMContentLoaded', () => {
+            RetoricaEngine.i18n.init();
+            RetoricaEngine.auth.loadRegistryLogs();
+            document.getElementById('editor-body').addEventListener('input', () => {
+                RetoricaEngine.ui.updateCounters();
+            });
+        });
     </script>
 </body>
 </html>
