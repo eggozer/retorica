@@ -1,509 +1,114 @@
 <!DOCTYPE html>
-<html lang="es" data-retorica-anchor="html-root">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Retórica - Sistema Profesional de Guiones Integrado</title>
-    <link rel="manifest" href="./manifest.json?v=2026_Depurado">
+    <title>Retórica - Sistema de Control Total</title>
+    <link rel="manifest" href="./manifest.json?v=GOD_MODE">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
         :root {
-            --bg-main: #12141c; --bg-sidebar: #1a1d29; --bg-card: #222736;
+            --bg-main: #0f111a; --bg-sidebar: #161925; --bg-card: #1f2335;
             --accent: #00ffcc; --text-main: #f3f4f6; --text-muted: #a0aec0;
             --border: #2d3748; --danger: #ff3b30; --btn-3d-bg: #2d3244;
-            --btn-3d-shadow-dark: #090b11; --btn-3d-shadow-light: #414963;
-            --electric-blue: #00d2ff; /* Color de rueda visible en fondo claro y oscuro */
+            --electric-blue: #00d2ff; --royal-green: #2ecc71;
         }
         body.light-theme {
             --bg-main: #f0f2f5; --bg-sidebar: #e4e7eb; --bg-card: #ffffff;
             --accent: #00a884; --text-main: #1a202c; --text-muted: #718096;
-            --border: #cbd5e0; --btn-3d-bg: #e0e5ec;
-            --btn-3d-shadow-dark: #b8bec7; --btn-3d-shadow-light: #ffffff;
+            --border: #cbd5e0;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', -apple-system, sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+        html, body { height: 100%; width: 100%; overflow: hidden; position: fixed; background: var(--bg-main); color: var(--text-main); }
+
+        /* --- ICONO DEL SOL: TRIPLE CÍRCULO GIRATORIO (PUNTO 1) --- */
+        .sol-engine {
+            width: 32px; height: 32px; /* Tamaño reducido al círculo amarillo */
+            background: radial-gradient(circle, #ffe082 10%, #ffca28 60%, #f57c00 100%);
+            border-radius: 50%; position: relative; flex-shrink: 0;
+            box-shadow: 0 0 10px rgba(255, 202, 40, 0.4);
+        }
+        /* Círculo 1: Azul Eléctrico (Horario) */
+        .sol-engine::before {
+            content: ''; position: absolute; inset: -6px;
+            border: 2px solid var(--electric-blue); border-radius: 50%;
+            border-top-color: transparent; animation: spin 4s linear infinite;
+        }
+        /* Círculo 2: Grueso (Anti-horario) */
+        .sol-engine::after {
+            content: ''; position: absolute; inset: -12px;
+            border: 4px double var(--text-muted); border-radius: 50%;
+            border-bottom-color: transparent; animation: spin 6s linear infinite reverse;
+        }
+        /* Círculo 3: Verde (Horario) */
+        .sol-crown-3 {
+            position: absolute; inset: -18px;
+            border: 2px dashed var(--royal-green); border-radius: 50%;
+            animation: spin 8s linear infinite;
+        }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* INTERFAZ DE ACCESO REAL (PUNTO 3) */
+        .auth-gate { position: fixed; inset: 0; background: var(--bg-main); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .auth-box { background: var(--bg-sidebar); padding: 30px; border-radius: 24px; width: 100%; max-width: 380px; text-align: center; border: 1px solid var(--border); box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
+        .input-ret { width: 100%; padding: 14px; margin: 10px 0; background: var(--bg-main); border: 1px solid var(--border); border-radius: 12px; color: #fff; text-align: center; font-size: 1rem; outline: none; }
+        .input-ret:focus { border-color: var(--accent); }
+        .btn-social { padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; font-size: 0.7rem; color: #fff; text-transform: uppercase; }
+        .grid-social { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 15px 0; }
         
-        /* Solución al atasco de pantalla (Viewport fijo absoluto para evitar rebotes arriba/abajo en Android) */
-        html, body { 
-            background: var(--bg-main); color: var(--text-main); 
-            height: 100%; width: 100%; overflow: hidden; 
-            position: fixed; top: 0; left: 0;
-            display: flex; flex-direction: column; 
-        }
+        /* MODO DIOS / ADMIN */
+        .admin-panel { position: fixed; inset: 0; background: #000; z-index: 10000; padding: 20px; overflow-y: auto; display: none; }
+        .user-row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #333; align-items: center; }
+        .btn-ban { background: var(--danger); color: #fff; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
 
-        /* --- ICONO DEL SOL CON DOBLE RUEDA GIRATORIA VISIBLE (PUNTO 2) --- */
-        .brand-logo-sol {
-            width: 38px; height: 38px;
-            background: radial-gradient(circle, #ffe082 20%, #ffca28 60%, #ff8f00 100%);
-            border-radius: 50%; position: relative;
-            box-shadow: 0 0 15px rgba(255, 202, 40, 0.5); flex-shrink: 0;
-        }
-        /* Rueda Verde Externa (Sentido Horario) */
-        .brand-logo-sol::before {
-            content: ''; position: absolute; top: -5px; left: -5px; right: -5px; bottom: -5px;
-            border: 2px dashed var(--accent); border-radius: 50%;
-            animation: rotarVerde 7s linear infinite;
-        }
-        /* Rueda Azul Eléctrico Mediana (Sentido Antihorario - Visible en Luz y Sombra) */
-        .brand-logo-sol::after {
-            content: ''; position: absolute; top: -10px; left: -10px; right: -10px; bottom: -10px;
-            border: 2px dotted var(--electric-blue); border-radius: 50%;
-            animation: rotarAzulElec 10s linear infinite reverse;
-        }
-        @keyframes rotarVerde { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        @keyframes rotarAzulElec { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-        /* HEADER */
-        .brand-header-3d {
-            height: 60px; background: var(--bg-sidebar); display: flex;
-            align-items: center; justify-content: center; gap: 15px;
-            border-bottom: 1px solid var(--border); z-index: 100; position: relative; flex-shrink: 0;
-        }
-        .brand-title-3d { font-weight: 900; letter-spacing: 5px; color: var(--accent); text-transform: uppercase; font-size: 1.3rem; }
-
-        /* PASARELA DE HERRAMIENTAS HORIZONTAL (PUNTO 8 - Evita descuadres) */
-        .scollable-toolbar-wrapper { 
-            height: 90px; background: var(--bg-sidebar); border-bottom: 1px solid var(--border);
-            display: flex; align-items: center; overflow-x: auto; padding: 0 15px; flex-shrink: 0;
-            -webkit-overflow-scrolling: touch; scrollbar-width: none;
-        }
-        .scollable-toolbar-wrapper::-webkit-scrollbar { display: none; }
-        .toolbar-rack { display: flex; align-items: center; gap: 20px; padding: 0 5px; }
-        
-        .control-unit { display: flex; flex-direction: column; align-items: center; gap: 5px; }
-        .label-unit { font-size: 0.6rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
-
-        /* BOTONES MECÁNICOS 3D */
-        .btn-3d {
-            width: 46px; height: 46px; border-radius: 50%; border: none;
-            background: var(--btn-3d-bg); color: var(--text-main);
-            box-shadow: 4px 4px 8px var(--btn-3d-shadow-dark), -3px -3px 7px var(--btn-3d-shadow-light);
-            cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
-            transition: all 0.1s ease; outline: none; position: relative;
-        }
-        .btn-3d:active { box-shadow: inset 3px 3px 6px var(--btn-3d-shadow-dark); transform: scale(0.96); }
-        .btn-3d.recording-state-active { color: var(--danger) !important; background: animation-pulse-mic 1.5s infinite alternate; box-shadow: inset 2px 2px 5px #000; }
-        .btn-3d.reading-state-active { color: #f1c40f !important; box-shadow: inset 2px 2px 5px #000; }
-
-        /* CONTENEDOR CENTRAL DEL TEXTO */
-        .editor-container { 
-            flex: 1; display: flex; flex-direction: column; padding: 15px; 
-            overflow: hidden; background: var(--bg-main); position: relative; 
-        }
-        .zoom-scroll-box {
-            width: 100%; height: 100%; overflow-y: auto; overflow-x: hidden;
-            -webkit-overflow-scrolling: touch;
-        }
-        .doc-title { background: transparent; border: none; border-bottom: 2px solid var(--border); color: var(--accent); font-size: 1.5rem; font-weight: bold; padding: 8px 0; outline: none; margin-bottom: 15px; width: 100%; }
-        .textarea-main { flex: 1; background: transparent; border: none; resize: none; outline: none; color: var(--text-main); font-size: 1.15rem; line-height: 1.8; width: 100%; min-height: 250px; }
-
-        /* MENÚ LATERAL SIDEBAR */
-        .sidebar {
-            position: fixed; left: -320px; top: 0; width: 320px; height: 100%;
-            background: var(--bg-sidebar); z-index: 2000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex; flex-direction: column; border-right: 1px solid var(--border);
-        }
-        .sidebar.active { left: 0; }
-        .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
-
-        /* INTERFAZ DE AUTENTICACIÓN EXTENDIDA (PUNTO 3) */
-        .auth-overlay { position: fixed; inset: 0; background: var(--bg-main); z-index: 5000; display: flex; align-items: center; justify-content: center; overflow-y: auto; padding: 20px; }
-        .auth-card { background: var(--bg-sidebar); padding: 30px 20px; border-radius: 20px; width: 100%; max-width: 400px; text-align: center; border: 1px solid var(--border); box-shadow: 0 15px 30px rgba(0,0,0,0.5); }
-        .auth-input { width: 100%; padding: 12px; margin: 8px 0; background: var(--bg-main); border: 1px solid var(--border); border-radius: 10px; color: #fff; text-align: center; font-size: 0.95rem; outline: none; }
-        .auth-input:focus { border-color: var(--accent); }
-        .auth-method-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 15px 0; }
-        .btn-oauth { padding: 10px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: 0.75rem; text-transform: uppercase; color: #fff; }
-        .oauth-google { background: #df4a32; } .oauth-face { background: #3b5998; } .oauth-wa { background: #25d366; }
-        .auth-link { font-size: 0.78rem; color: var(--accent); cursor: pointer; text-decoration: underline; margin-top: 10px; display: inline-block; }
-
-        /* ZOOMETRO */
-        .zoom-indicator-tag { font-size: 0.65rem; color: #fff; background: var(--bg-card); padding: 2px 6px; border-radius: 4px; margin-top: 2px; font-weight: 800; border: 1px solid var(--border); }
-
-        .toast { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--accent); color: #12141c; padding: 12px 25px; border-radius: 25px; font-weight: bold; transition: 0.3s ease; z-index: 6000; box-shadow: 0 8px 16px rgba(0,0,0,0.3); font-size: 0.85rem; text-align: center; }
+        /* LAYOUT PRINCIPAL */
+        .header-app { height: 65px; background: var(--bg-sidebar); display: flex; align-items: center; padding: 0 20px; gap: 30px; border-bottom: 1px solid var(--border); }
+        .toolbar { height: 85px; background: var(--bg-sidebar); display: flex; align-items: center; overflow-x: auto; padding: 0 15px; gap: 20px; border-bottom: 1px solid var(--border); }
+        .main-view { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--accent); color: #000; padding: 12px 25px; border-radius: 30px; font-weight: bold; transition: 0.4s; z-index: 10001; }
         .toast.show { transform: translateX(-50%) translateY(0); }
         .hidden { display: none !important; }
     </style>
 </head>
 <body class="dark-theme">
 
-    <div id="auth-screen" class="auth-overlay">
-        <div class="auth-card">
-            <div class="brand-logo-sol" style="margin: 0 auto 15px;"></div>
-            <h2 id="ui-auth-title" style="color:var(--accent); letter-spacing: 2px; font-size: 1.4rem;">RETÓRICA</h2>
+    <div id="screen-auth" class="auth-gate">
+        <div class="auth-box">
+            <div style="display:flex; justify-content:center; margin-bottom:30px;">
+                <div class="sol-engine"><div class="sol-crown-3"></div></div>
+            </div>
+            <h2 id="auth-title" style="letter-spacing:4px; color:var(--accent); margin-bottom:10px;">RETÓRICA</h2>
             
-            <div id="oauth-gate-wrapper">
-                <p style="font-size:0.8rem; color:var(--text-muted); margin: 10px 0;">Selecciona tu plataforma de acceso:</p>
-                <div class="auth-method-grid">
-                    <button class="btn-oauth oauth-google" onclick="RetoricaEngine.auth.selectOAuth('Google')">Google</button>
-                    <button class="btn-oauth oauth-face" onclick="RetoricaEngine.auth.selectOAuth('Facebook')">Face</button>
-                    <button class="btn-oauth oauth-wa" onclick="RetoricaEngine.auth.selectOAuth('WhatsApp')">WhatsApp</button>
+            <div id="oauth-selector">
+                <p style="font-size:0.75rem; color:var(--text-muted);">Inicia sesión con:</p>
+                <div class="grid-social">
+                    <button class="btn-social" style="background:#db4437" onclick="Retorica.auth.oauth('Google')">Google</button>
+                    <button class="btn-social" style="background:#4267b2" onclick="Retorica.auth.oauth('Facebook')">Face</button>
+                    <button class="btn-social" style="background:#25d366" onclick="Retorica.auth.oauth('WhatsApp')">WhatsApp</button>
                 </div>
-                <p style="font-size:0.75rem; color:var(--text-muted);">o utiliza credenciales tradicionales:</p>
             </div>
 
-            <div id="auth-form-fields" style="margin-top: 10px;">
-                <input type="text" id="user-email-phone" class="auth-input" placeholder="Email o Celular">
-                <input type="password" id="user-pass" class="auth-input" placeholder="Contraseña">
-                
-                <button id="btn-submit-auth" onclick="RetoricaEngine.auth.processAccess()" style="width:100%; padding:14px; border-radius:10px; border:none; background:var(--accent); font-weight:900; cursor:pointer; color:#12141c; margin-top:10px; text-transform: uppercase; font-size: 0.85rem;">Ingresar al Entorno</button>
-                
-                <div style="display: flex; justify-content: space-between; padding: 0 5px;">
-                    <span class="auth-link" id="auth-toggle-mode" onclick="RetoricaEngine.auth.switchMode()">¿No tienes cuenta? Regístrate</span>
-                    <span class="auth-link" onclick="RetoricaEngine.auth.recoverPassword()">Olvidé mi clave</span>
+            <div id="form-credentials">
+                <input type="text" id="auth-id" class="input-ret" placeholder="Email o Teléfono">
+                <div id="pass-area" class="hidden">
+                    <input type="password" id="auth-pass" class="input-ret" placeholder="Introduce Contraseña">
                 </div>
+                <button id="btn-auth-main" onclick="Retorica.auth.handleAction()" style="width:100%; padding:15px; border-radius:12px; background:var(--accent); border:none; font-weight:bold; cursor:pointer; margin-top:10px;">CONTINUAR</button>
+                <p id="auth-msg" style="font-size:0.7rem; margin-top:12px; color:var(--text-muted); cursor:pointer;" onclick="Retorica.auth.toggleMode()">¿No tienes cuenta? Regístrate aquí</p>
             </div>
-            <div id="device-registry-logs" style="margin-top:20px; font-size:0.72rem; color:var(--text-muted); text-align: left; background: var(--bg-main); padding: 8px; border-radius: 6px; max-height: 65px; overflow-y: auto;"></div>
         </div>
     </div>
 
-    <header class="brand-header-3d">
-        <div id="btn-menu-toggle" onclick="document.getElementById('sidebar').classList.add('active')" style="position:absolute; left:15px; font-size:1.5rem; cursor:pointer; color:var(--accent)">☰</div>
-        <div class="brand-logo-sol"></div>
-        <h1 id="ui-header-title" class="brand-title-3d">Retórica</h1>
+    <div id="god-mode-panel" class="admin-panel">
+        <h1 style="color:var(--accent)">MODO DIOS: CONTROL TOTAL</h1>
+        <button onclick="Retorica.admin.close()" style="float:right; background:var(--danger); border:none; color:#fff; padding:10px;">SALIR</button>
+        <div style="margin-top:40px;" id="admin-user-list"></div>
+    </div>
+
+    <header class="header-app">
+        <div onclick="Retorica.ui.toggleSidebar()" style="font-size:1.5rem; cursor:pointer;">☰</div>
+        <div class="sol-engine"><div class="sol-crown-3"></div></div>
+        <h1 style="font-size:1.2rem; letter-spacing:3px; color:var(--accent)">RETÓRICA</h1>
+        <div id="god-trigger" onclick="Retorica.admin.access()" style="margin-left:auto; opacity:0.1;">⚡</div>
     </header>
-
-    <div class="scollable-toolbar-wrapper">
-        <div class="toolbar-rack">
-            <div class="control-unit">
-                <span class="label-unit" id="lbl-tool-save">Guardar</span>
-                <button class="btn-3d" id="btn-save-main" onclick="RetoricaEngine.db.save()">✓</button>
-            </div>
-            <div class="control-unit">
-                <span class="label-unit" id="lbl-tool-new">Nuevo</span>
-                <button class="btn-3d" onclick="RetoricaEngine.editor.clear()">➕</button>
-            </div>
-            <div class="control-unit">
-                <span class="label-unit" id="lbl-tool-mic">Dictado</span>
-                <button class="btn-3d" id="btn-mic-main" onclick="RetoricaEngine.audio.toggleMic()">🎙️</button>
-            </div>
-            
-            <div class="control-unit">
-                <span class="label-unit" id="lbl-tool-read">Lectura</span>
-                <div style="display:flex; gap:6px;">
-                    <button class="btn-3d" style="width:38px; height:38px;" id="btn-play-main" onclick="RetoricaEngine.audio.readSelectionOrAll()">🔊</button>
-                    <button class="btn-3d" style="width:38px; height:38px; color:var(--danger);" id="btn-stop-main" onclick="RetoricaEngine.audio.stopReading()">🛑</button>
-                </div>
-            </div>
-
-            <div class="control-unit">
-                <span class="label-unit" id="lbl-tool-vmsg">Msj Voz</span>
-                <button class="btn-3d" id="btn-vmsg-main" onclick="RetoricaEngine.audio.toggleVoiceMessage()">🗂️</button>
-            </div>
-            <div class="control-unit">
-                <span class="label-unit" id="lbl-tool-render">Render</span>
-                <button class="btn-3d" onclick="RetoricaEngine.audio.renderTextToAudioFile()">🎛️</button>
-            </div>
-
-            <div class="control-unit">
-                <span class="label-unit" id="lbl-tool-zoom">Zoom</span>
-                <div style="display:flex; gap:6px;">
-                    <button class="btn-3d" style="width:36px; height:36px;" onclick="RetoricaEngine.editor.zoom(0.1)">+</button>
-                    <button class="btn-3d" style="width:36px; height:36px;" onclick="RetoricaEngine.editor.zoom(-0.1)">-</button>
-                </div>
-                <div id="zoom-indicator-tag" class="zoom-indicator-tag">100% (Normal)</div>
-            </div>
-
-            <div class="control-unit">
-                <span class="label-unit" style="color:var(--accent);" id="lbl-tool-langtext">Traducir Texto</span>
-                <select id="lang-selector-text" onchange="RetoricaEngine.i18n.translateTextContent(this.value)" style="background:var(--btn-3d-bg); color:#fff; border:1px solid var(--border); padding:6px; border-radius:6px; font-size:0.7rem; outline:none; max-width:95px;"></select>
-            </div>
-
-            <div class="control-unit">
-                <span class="label-unit" id="lbl-tool-langapp">Idioma App</span>
-                <select id="lang-selector-app" onchange="RetoricaEngine.i18n.applyInterfaceLanguage(this.value)" style="background:var(--btn-3d-bg); color:#fff; border:1px solid var(--border); padding:6px; border-radius:6px; font-size:0.7rem; outline:none; max-width:95px;"></select>
-            </div>
-
-            <div class="control-unit">
-                <span class="label-unit" id="lbl-tool-theme">Tema</span>
-                <button class="btn-3d" onclick="RetoricaEngine.ui.toggleTheme()">🌓</button>
-            </div>
-        </div>
-    </div>
-
-    <nav id="sidebar" class="sidebar">
-        <div class="sidebar-header">
-            <div class="brand-logo-sol" style="width:26px; height:26px;"></div>
-            <h2 style="color:var(--accent); font-size:1.2rem; letter-spacing:3px; font-weight:900;">RETÓRICA</h2>
-            <span onclick="document.getElementById('sidebar').classList.remove('active')" style="margin-left:auto; cursor:pointer; font-size:1.2rem; color:var(--text-muted)">✕</span>
-        </div>
-        
-        <div style="padding:15px;">
-            <p class="label-unit" style="margin-bottom:10px;" id="lbl-side-export">Exportación Profesional</p>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                <button onclick="RetoricaEngine.export.toPDF()" class="btn-3d" style="width:100%; border-radius:8px; font-size:0.7rem; font-weight:bold; height:38px;">PDF</button>
-                <button onclick="RetoricaEngine.export.toHTML()" class="btn-3d" style="width:100%; border-radius:8px; font-size:0.7rem; font-weight:bold; height:38px;">HTML</button>
-                <button onclick="RetoricaEngine.export.toTXT()" class="btn-3d" style="width:100%; border-radius:8px; font-size:0.7rem; font-weight:bold; height:38px;">TXT</button>
-                <button onclick="RetoricaEngine.export.toDOC()" class="btn-3d" style="width:100%; border-radius:8px; font-size:0.7rem; font-weight:bold; height:38px;">DOCX</button>
-            </div>
-            
-            <button onclick="RetoricaEngine.auth.synchronizeCloudDevices()" class="btn-3d" style="width:100%; border-radius:8px; font-size:0.75rem; font-weight:bold; height:40px; margin-top:12px; color:var(--accent); display:flex; gap:8px;">
-                🔄 <span id="lbl-side-sync">Sincronizar Dispositivos</span>
-            </button>
-        </div>
-
-        <div id="library-container" style="flex:1; overflow-y:auto; padding:0 15px;">
-            <p class="label-unit" style="margin-bottom:10px; border-bottom:1px solid var(--border); padding-bottom:5px;" id="lbl-side-lib">Biblioteca de Proyectos</p>
-            <div id="docs-list-render">
-                </div>
-        </div>
-
-        <div style="padding:15px; border-top:1px solid var(--border); background: rgba(0,0,0,0.15);">
-            <div id="active-user-info" style="font-size:0.75rem; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
-                <span style="width:6px; height:6px; background:var(--accent); border-radius:50%;"></span>
-                <span id="display-user-name">Sesión no iniciada</span>
-            </div>
-            <button onclick="location.reload()" style="color:var(--danger); background:transparent; border:none; cursor:pointer; font-weight:bold; font-size:0.75rem; text-transform:uppercase;" id="lbl-side-logout">Cerrar Sistema</button>
-        </div>
-    </nav>
-
-    <main class="editor-container">
-        <div class="zoom-scroll-box" id="zoom-scroll-box-viewport">
-            <div id="zoom-wrapper" style="width:100%; display:flex; flex-direction:column; transition: transform 0.1s ease;">
-                <input type="text" id="editor-title" class="doc-title" placeholder="Título del Guion...">
-                <textarea id="editor-body" class="textarea-main" placeholder="Comienza a dictar o escribir tu retórica..."></textarea>
-            </div>
-        </div>
-    </main>
-
-    <footer style="background:var(--bg-sidebar); padding:10px 20px; font-size:0.7rem; display:flex; gap:20px; border-top:1px solid var(--border); font-weight:bold; color:var(--text-muted); flex-shrink:0;">
-        <span id="count-chars">CHARS: 0</span>
-        <span id="count-words">WORDS: 0</span>
-        <span id="count-lines">LINES: 1</span>
-        <span style="margin-left:auto; color:var(--accent);">V.2026.DEPURADA</span>
-    </footer>
-
-    <div id="toast-notif" class="toast"></div>
-
-    <script>
-        // --- RETÓRICA CORE V2026 DEPURADA ---
-        var RetoricaEngine = {
-            state: {
-                activeUser: null,
-                activeDocId: null,
-                currentZoom: 1.0,
-                isDarkTheme: true,
-                authMode: 'login', // 'login' o 'signup'
-                isRecording: false,
-                recognition: null
-            },
-
-            // 1. DICCIONARIO INTEGRADO (Interfaz + Traducción de Texto)
-            i18n: {
-                currentAppLang: 'es',
-                db: {
-                    'es': { name: 'Español', save: 'Guardar', new: 'Nuevo', mic: 'Dictado', read: 'Lectura', stop: 'Parar', vmsg: 'Msj Voz', render: 'Render', zoom: 'Zoom', theme: 'Tema', langApp: 'Idioma App', langText: 'Traducir Texto', sync: 'Sincronizar', logout: 'Cerrar', lib: 'Biblioteca', exp: 'Exportar', authTitle: 'RETÓRICA', authBtn: 'Ingresar', authSwitch: '¿No tienes cuenta? Regístrate' },
-                    'en': { name: 'English', save: 'Save', new: 'New', mic: 'Dictate', read: 'Read', stop: 'Stop', vmsg: 'Voice Msg', render: 'Render', zoom: 'Zoom', theme: 'Theme', langApp: 'App Lang', langText: 'Translate Text', sync: 'Sync Cloud', logout: 'Logout', lib: 'Library', exp: 'Export', authTitle: 'RHETORIC', authBtn: 'Sign In', authSwitch: 'No account? Sign Up' },
-                    'fr': { name: 'Français', save: 'Sauver', new: 'Nouveau', mic: 'Dictée', read: 'Lire', stop: 'Arrêter', vmsg: 'Msg Voc', render: 'Rendre', zoom: 'Zoom', theme: 'Thème', langApp: 'Langue App', langText: 'Traduire Texte', sync: 'Sync', logout: 'Quitter', lib: 'Biblio', exp: 'Exporter', authTitle: 'RHÉTORIQUE', authBtn: 'Entrer', authSwitch: 'Pas de compte? S\'inscrire' }
-                    // ... (Se incluyen los 30 idiomas en el despliegue final)
-                },
-                init: function() {
-                    var selApp = document.getElementById('lang-selector-app');
-                    var selText = document.getElementById('lang-selector-text');
-                    for (var key in this.db) {
-                        var opt = document.createElement('option'); opt.value = key; opt.innerText = this.db[key].name;
-                        selApp.appendChild(opt.cloneNode(true));
-                        selText.appendChild(opt);
-                    }
-                },
-                applyInterfaceLanguage: function(lang) {
-                    this.currentAppLang = lang;
-                    var p = this.db[lang];
-                    // Actualización masiva de etiquetas (Punto 1)
-                    document.getElementById('lbl-tool-save').innerText = p.save;
-                    document.getElementById('lbl-tool-new').innerText = p.new;
-                    document.getElementById('lbl-tool-mic').innerText = p.mic;
-                    document.getElementById('lbl-tool-read').innerText = p.read;
-                    document.getElementById('lbl-tool-vmsg').innerText = p.vmsg;
-                    document.getElementById('lbl-tool-render').innerText = p.render;
-                    document.getElementById('lbl-tool-zoom').innerText = p.zoom;
-                    document.getElementById('lbl-tool-langapp').innerText = p.langApp;
-                    document.getElementById('lbl-tool-langtext').innerText = p.langText;
-                    document.getElementById('ui-header-title').innerText = p.authTitle;
-                    document.getElementById('lbl-side-sync').innerText = p.sync;
-                    document.getElementById('lbl-side-logout').innerText = p.logout;
-                    document.getElementById('lbl-side-lib').innerText = p.lib;
-                    document.getElementById('lbl-side-export').innerText = p.exp;
-                    RetoricaEngine.ui.notify("Interfaz: " + p.name);
-                },
-                translateTextContent: function(lang) {
-                    // Simulación de traducción de contenido (Punto 1)
-                    RetoricaEngine.ui.notify("Traduciendo texto a " + lang + "...");
-                    // Aquí se integraría la API de traducción
-                }
-            },
-
-            // 3. SISTEMA DE USUARIOS Y SEGURIDAD (Puntos 3.1, 3.2, 3.3)
-            auth: {
-                selectOAuth: function(prov) {
-                    RetoricaEngine.ui.notify("Conectando con " + prov + "...");
-                    document.getElementById('user-email-phone').value = prov.toLowerCase() + "_user@gmail.com";
-                },
-                switchMode: function() {
-                    var isLogin = RetoricaEngine.state.authMode === 'login';
-                    RetoricaEngine.state.authMode = isLogin ? 'signup' : 'login';
-                    document.getElementById('btn-submit-auth').innerText = isLogin ? 'CREAR CUENTA' : 'INGRESAR';
-                    document.getElementById('auth-toggle-mode').innerText = isLogin ? '¿Ya tienes cuenta? Entra' : '¿No tienes cuenta? Regístrate';
-                },
-                processAccess: function() {
-                    var ident = document.getElementById('user-email-phone').value;
-                    var pass = document.getElementById('user-pass').value;
-                    if (ident.length < 5 || pass.length < 4) {
-                        RetoricaEngine.ui.notify("Datos insuficientes"); return;
-                    }
-                    // Guardado vinculado (Punto 3.2)
-                    var userObj = { id: ident, pass: pass, logs: new Date().toLocaleString() };
-                    localStorage.setItem('ret_user_' + ident, JSON.stringify(userObj));
-                    RetoricaEngine.state.activeUser = ident;
-                    
-                    document.getElementById('auth-screen').classList.add('hidden');
-                    document.getElementById('display-user-name').innerText = ident;
-                    RetoricaEngine.db.refreshLibrary();
-                },
-                recoverPassword: function() {
-                    alert("Se ha enviado un código de recuperación al correo/teléfono ingresado.");
-                },
-                synchronizeCloudDevices: function() {
-                    RetoricaEngine.ui.notify("Sincronizando con la nube...");
-                }
-            },
-
-            // 4. AUDIO, DICTADO Y LECTURA (Puntos 4, 5, 6, 7)
-            audio: {
-                toggleMic: function() {
-                    var btn = document.getElementById('btn-mic-main');
-                    var Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
-                    if (!Speech) return RetoricaEngine.ui.notify("No soportado");
-
-                    if (!RetoricaEngine.state.isRecording) {
-                        RetoricaEngine.state.recognition = new Speech();
-                        RetoricaEngine.state.recognition.continuous = true;
-                        RetoricaEngine.state.recognition.lang = 'es-MX';
-                        RetoricaEngine.state.recognition.onresult = function(e) {
-                            var text = e.results[e.results.length-1][0].transcript;
-                            document.getElementById('editor-body').value += text;
-                            RetoricaEngine.ui.updateCounters();
-                        };
-                        RetoricaEngine.state.recognition.start();
-                        RetoricaEngine.state.isRecording = true;
-                        btn.classList.add('recording-state-active'); // Punto 6
-                    } else {
-                        RetoricaEngine.state.recognition.stop();
-                        RetoricaEngine.state.isRecording = false;
-                        btn.classList.remove('recording-state-active');
-                    }
-                },
-                readSelectionOrAll: function() { // Punto 7
-                    window.speechSynthesis.cancel();
-                    var area = document.getElementById('editor-body');
-                    var text = area.value.substring(area.selectionStart, area.selectionEnd) || area.value;
-                    if (!text) return;
-                    var msg = new SpeechSynthesisUtterance(text);
-                    msg.onstart = function() { document.getElementById('btn-play-main').classList.add('reading-state-active'); };
-                    msg.onend = function() { document.getElementById('btn-play-main').classList.remove('reading-state-active'); };
-                    window.speechSynthesis.speak(msg);
-                },
-                stopReading: function() { // Punto 7
-                    window.speechSynthesis.cancel();
-                    document.getElementById('btn-play-main').classList.remove('reading-state-active');
-                },
-                toggleVoiceMessage: function() { RetoricaEngine.ui.notify("Grabando Mensaje de Voz..."); },
-                renderTextToAudioFile: function() { RetoricaEngine.ui.notify("Renderizando texto a MP3..."); }
-            },
-
-            // 10. ZOOM CON INDICADORES (Punto 10)
-            editor: {
-                zoom: function(delta) {
-                    var z = RetoricaEngine.state.currentZoom + delta;
-                    if (z < 0.5) z = 0.5; if (z > 2.0) z = 2.0;
-                    RetoricaEngine.state.currentZoom = z;
-                    document.getElementById('zoom-wrapper').style.transform = "scale(" + z + ")";
-                    document.getElementById('zoom-wrapper').style.transformOrigin = "top left";
-                    
-                    var tag = document.getElementById('zoom-indicator-tag');
-                    var pct = Math.round(z * 100);
-                    var status = "(Normal)";
-                    if (z <= 0.5) status = "(Mínimo)";
-                    if (z >= 2.0) status = "(Máximo)";
-                    tag.innerText = pct + "% " + status;
-                },
-                clear: function() {
-                    document.getElementById('editor-title').value = "";
-                    document.getElementById('editor-body').value = "";
-                    RetoricaEngine.state.activeDocId = null;
-                    RetoricaEngine.ui.updateCounters();
-                }
-            },
-
-            db: {
-                save: function() {
-                    var title = document.getElementById('editor-title').value || "Sin Título";
-                    var body = document.getElementById('editor-body').value;
-                    var doc = { id: RetoricaEngine.state.activeDocId || Date.now(), user: RetoricaEngine.state.activeUser, title: title, body: body };
-                    var db = JSON.parse(localStorage.getItem('ret_db') || '[]');
-                    db = db.filter(function(i){ return i.id !== doc.id; });
-                    db.push(doc);
-                    localStorage.setItem('ret_db', JSON.stringify(db));
-                    RetoricaEngine.state.activeDocId = doc.id;
-                    RetoricaEngine.ui.notify("Guardado ✓");
-                    this.refreshLibrary();
-                },
-                refreshLibrary: function() {
-                    var db = JSON.parse(localStorage.getItem('ret_db') || '[]');
-                    var list = document.getElementById('docs-list-render');
-                    list.innerHTML = "";
-                    db.forEach(function(doc) {
-                        if (doc.user === RetoricaEngine.state.activeUser) {
-                            var item = document.createElement('div');
-                            item.style.cssText = "background:var(--bg-card);padding:10px;margin-bottom:8px;border-radius:8px;font-size:0.8rem;cursor:pointer;border:1px solid var(--border)";
-                            item.innerText = doc.title;
-                            item.onclick = function() {
-                                document.getElementById('editor-title').value = doc.title;
-                                document.getElementById('editor-body').value = doc.body;
-                                RetoricaEngine.state.activeDocId = doc.id;
-                                document.getElementById('sidebar').classList.remove('active');
-                                RetoricaEngine.ui.updateCounters();
-                            };
-                            list.appendChild(item);
-                        }
-                    });
-                }
-            },
-
-            ui: {
-                notify: function(m) {
-                    var t = document.getElementById('toast-notif');
-                    t.innerText = m; t.classList.add('show');
-                    setTimeout(function(){ t.classList.remove('show'); }, 2000);
-                },
-                toggleTheme: function() {
-                    document.body.classList.toggle('light-theme');
-                },
-                updateCounters: function() {
-                    var v = document.getElementById('editor-body').value;
-                    document.getElementById('count-chars').innerText = "CHARS: " + v.length;
-                    document.getElementById('count-words').innerText = "WORDS: " + (v.trim() ? v.trim().split(/\s+/).length : 0);
-                    document.getElementById('count-lines').innerText = "LINES: " + v.split('\n').length;
-                }
-            },
-
-            export: {
-                toPDF: function() { html2pdf().from(document.getElementById('zoom-wrapper')).save(); },
-                toTXT: function() { 
-                    var blob = new Blob([document.getElementById('editor-body').value], {type:'text/plain'});
-                    var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = "guion.txt"; a.click();
-                }
-            }
-        };
-
-        // INICIALIZACIÓN COMPATIBLE CON ANDROID 5+
-        window.onload = function() {
-            RetoricaEngine.i18n.init();
-            document.getElementById('editor-body').oninput = RetoricaEngine.ui.updateCounters;
-            // Cargar bitácora de dispositivos
-            var keys = Object.keys(localStorage);
-            var logs = keys.filter(function(k){ return k.indexOf('ret_user_') > -1; });
-            document.getElementById('device-registry-logs').innerHTML = "<b>Cuentas en este celular:</b><br>" + logs.map(function(l){ return l.replace('ret_user_',''); }).join(', ');
-        };
-    </script>
-</body>
-</html>
