@@ -125,3 +125,10 @@ var RetoricaUI = {
 window.onload = function() {
     RetoricaUI.init();
 };
+
+// Registro automático del Service Worker Modular
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js?v=GOD_MODE')
+    .then(function() { console.log("Retorica PWA: Service Worker enlazado ✓"); })
+    .catch(function(err) { console.error("Error PWA Register: ", err); });
+}
