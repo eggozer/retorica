@@ -1,7 +1,7 @@
 {
   "short_name": "Retórica",
-  "name": "Retórica - Sistema de Control Supremo",
-  "description": "Herramienta profesional de producción con Modo Dios integrado.",
+  "name": "Retórica - Sistema Modular Profesional",
+  "description": "Entorno avanzado de scriptwriting, dictado asistido y control de audio.",
   "icons": [
     {
       "src": "https://eggozer.github.io/retorica/icon-192.png",
@@ -16,7 +16,7 @@
       "purpose": "any maskable"
     }
   ],
-  "start_url": "./index.html",
+  "start_url": "./index.html?v=2026_MODULAR_PRO",
   "background_color": "#0f111a",
   "theme_color": "#00ffcc",
   "display": "standalone",
