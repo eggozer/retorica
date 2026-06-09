@@ -7,17 +7,17 @@ var RetoricaAuth = {
 
     selectOAuth: function(prov) {
         this.state.provider = prov;
-        document.getElementById('auth-id').placeholder = "Email o Celular de " + prov;
-        document.getElementById('pass-area').classList.remove('hidden');
-        RetoricaUI.notify("Autenticación fijada vía: " + prov);
-    },
-
-    switchMode: function() {
-        var isLogin = this.state.mode === 'login';
-        this.state.mode = isLogin ? 'signup' : 'login';
-        document.getElementById('btn-submit-auth').innerText = isLogin ? 'REGISTRAR Y CREAR CLAVE' : 'CONTINUAR';
-        document.getElementById('auth-toggle-mode').innerText = isLogin ? '¿Ya tienes cuenta? Entra aquí' : '¿No tienes cuenta? Regístrate aquí';
-        document.getElementById('pass-area').classList.remove('hidden');
+        RetoricaUI.notify("Detectando cuenta activa de " + prov + " en el dispositivo...");
+        
+        // Acceso directo simulando cuenta vinculada al hardware
+        var autoUser = prov + "_DigitalUser";
+        
+        if (!localStorage.getItem('ret_profile_' + autoUser)) {
+            var autoProfile = { id: autoUser, pass: "DISPOSITIVO_LINKED", regDate: new Date().toLocaleDateString() };
+            localStorage.setItem('ret_profile_' + autoUser, JSON.stringify(autoProfile));
+        }
+        
+        this.grantAccess(autoUser);
     },
 
     process: function() {
@@ -29,7 +29,6 @@ var RetoricaAuth = {
             return;
         }
 
-        // Verificación perimetral contra la lista de baneos del Administrador
         var banList = JSON.parse(localStorage.getItem('ret_ban_list') || '[]');
         if (banList.indexOf(identifier) > -1) {
             alert("Acceso Restringido: Tu cuenta ha sido bloqueada permanentemente por el Administrador Supremo.");
@@ -37,24 +36,22 @@ var RetoricaAuth = {
         }
 
         if (this.state.mode === 'signup') {
-            if (password.length < 4) {
+            // Autogeneración automática si el campo de contraseña se deja vacío
+            if (!password) {
+                password = String(Math.floor(1000 + Math.random() * 9000));
+                alert("¡SISTEMA BLINDADO!\n\nNo ingresaste contraseña. Se ha autogenerado una clave de resguardo física para este dispositivo:\n\n🔑 " + password + "\n\nAnótala para futuros accesos.");
+            } else if (password.length < 4) {
                 RetoricaUI.notify("La contraseña debe tener al menos 4 caracteres.");
                 return;
             }
+            
             var userProfile = { id: identifier, pass: password, regDate: new Date().toLocaleDateString() };
             localStorage.setItem('ret_profile_' + identifier, JSON.stringify(userProfile));
             RetoricaUI.notify("Cuenta registrada con éxito ✓");
             this.state.mode = 'login';
             this.grantAccess(identifier);
         } else {
-            // Flujo de Login
-            if (this.state.provider && !password) {
-                document.getElementById('pass-area').classList.remove('hidden');
-                RetoricaUI.notify("Establece una clave de resguardo local para tu dispositivo.");
-                this.state.mode = 'signup';
-                return;
-            }
-
+            // Flujo de Login Ordinario
             var storedUser = localStorage.getItem('ret_profile_' + identifier);
             if (!storedUser) {
                 RetoricaUI.notify("El usuario no existe. Cambia a la pestaña de registro.");
