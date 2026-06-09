@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Retórica - Sistema Profesional</title>
-    <link rel="manifest" href="./manifest.json?v=2026_GOD_MODE">
+    <link class="manifest" href="./manifest.json?v=2026_GOD_MODE">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
@@ -31,19 +31,16 @@
             border-radius: 50%; position: relative;
             box-shadow: 0 0 8px rgba(255, 202, 40, 0.5);
         }
-        /* Círculo 1: Azul Eléctrico (Horario) */
         .sol-container::before {
             content: ''; position: absolute; width: 22px; height: 22px;
             border: 2px solid var(--electric-blue); border-radius: 50%;
             border-top-color: transparent; animation: spin-sol 3s linear infinite;
         }
-        /* Círculo 2: Grueso Gris/Muted (Anti-horario) */
         .sol-container::after {
             content: ''; position: absolute; width: 28px; height: 28px;
             border: 3.5px double var(--text-muted); border-radius: 50%;
             border-bottom-color: transparent; animation: spin-sol 5s linear infinite reverse;
         }
-        /* Círculo 3: Verde Real (Horario) */
         .sol-crown-3 {
             position: absolute; width: 36px; height: 36px;
             border: 2px dashed var(--royal-green); border-radius: 50%;
@@ -67,7 +64,6 @@
         .btn-3d { background: var(--btn-3d-bg); color: #fff; border: 1px solid var(--border); padding: 8px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; min-height: 36px; display: flex; align-items: center; justify-content: center; }
         .btn-3d:active { transform: translateY(1px); }
 
-        /* ANIMACIONES DE ESTADO */
         .recording-active { animation: pulse-red 1.5s infinite; background: #ff3b30 !important; }
         .reading-active { animation: pulse-blue 1.5s infinite; background: var(--electric-blue) !important; }
         @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(255,59,48,0.7); } 70% { box-shadow: 0 0 0 10px rgba(255,59,48,0); } 100% { box-shadow: 0 0 0 0 rgba(255,59,48,0); } }
@@ -106,11 +102,11 @@
                 </div>
             </div>
             <input type="text" id="auth-id" class="input-ret" placeholder="Email o Teléfono">
-            <div id="pass-area" class="hidden">
+            <div id="pass-area">
                 <input type="password" id="auth-pass" class="input-ret" placeholder="Contraseña de Resguardo">
             </div>
             <button id="btn-submit-auth" onclick="RetoricaAuth.process()" style="width:100%; padding:14px; border-radius:12px; background:var(--accent); border:none; font-weight:bold; cursor:pointer; margin-top:10px;">CONTINUAR</button>
-            <p id="auth-toggle-mode" style="font-size:0.7rem; margin-top:15px; color:var(--text-muted); cursor:pointer;" onclick="RetoricaAuth.switchMode()">¿No tienes cuenta? Regístrate aquí</p>
+            <p id="auth-toggle-mode" style="font-size:0.75rem; margin-top:15px; color:var(--accent); cursor:pointer; text-decoration:underline;" onclick="RetoricaAuth.switchMode()">¿No tienes cuenta? Regístrate aquí</p>
         </div>
     </div>
 
@@ -189,10 +185,10 @@
 
     <div id="toast-notif" class="toast"></div>
 
-    <script src="./auth.js?v=GOD_MODE"></script>
-    <script src="./idiomas.js?v=GOD_MODE"></script>
-    <script src="./audio.js?v=GOD_MODE"></script>
-    <script src="./storage.js?v=GOD_MODE"></script>
-    <script src="./main.js?v=GOD_MODE"></script>
+    <script src="./js/auth.js?v=GOD_MODE"></script>
+    <script src="./js/idiomas.js?v=GOD_MODE"></script>
+    <script src="./js/audio.js?v=GOD_MODE"></script>
+    <script src="./js/storage.js?v=GOD_MODE"></script>
+    <script src="./js/main.js?v=GOD_MODE"></script>
 </body>
 </html>
