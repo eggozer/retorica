@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Retórica - Sistema de Control Total</title>
-    <link rel="manifest" href="./manifest.json?v=GOD_MODE">
+    <title>Retórica - Sistema Profesional</title>
+    <link rel="manifest" href="./manifest.json?v=2026_GOD_MODE">
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
@@ -22,548 +23,176 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
         html, body { height: 100%; width: 100%; overflow: hidden; position: fixed; background: var(--bg-main); color: var(--text-main); }
 
-        /* --- ICONO DEL SOL: TRIPLE CÍRCULO GIRATORIO (PUNTO 1) --- */
+        /* --- ICONO DEL SOL: TRIPLE CÍRCULO GIRATORIO REDUCIDO --- */
+        .sol-container { width: 34px; height: 34px; position: relative; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin: 0 10px; }
         .sol-engine {
-            width: 32px; height: 32px; /* Tamaño reducido al círculo amarillo */
+            width: 14px; height: 14px;
             background: radial-gradient(circle, #ffe082 10%, #ffca28 60%, #f57c00 100%);
-            border-radius: 50%; position: relative; flex-shrink: 0;
-            box-shadow: 0 0 10px rgba(255, 202, 40, 0.4);
+            border-radius: 50%; position: relative;
+            box-shadow: 0 0 8px rgba(255, 202, 40, 0.5);
         }
         /* Círculo 1: Azul Eléctrico (Horario) */
-        .sol-engine::before {
-            content: ''; position: absolute; inset: -6px;
+        .sol-container::before {
+            content: ''; position: absolute; width: 22px; height: 22px;
             border: 2px solid var(--electric-blue); border-radius: 50%;
-            border-top-color: transparent; animation: spin 4s linear infinite;
+            border-top-color: transparent; animation: spin-sol 3s linear infinite;
         }
-        /* Círculo 2: Grueso (Anti-horario) */
-        .sol-engine::after {
-            content: ''; position: absolute; inset: -12px;
-            border: 4px double var(--text-muted); border-radius: 50%;
-            border-bottom-color: transparent; animation: spin 6s linear infinite reverse;
+        /* Círculo 2: Grueso Gris/Muted (Anti-horario) */
+        .sol-container::after {
+            content: ''; position: absolute; width: 28px; height: 28px;
+            border: 3.5px double var(--text-muted); border-radius: 50%;
+            border-bottom-color: transparent; animation: spin-sol 5s linear infinite reverse;
         }
-        /* Círculo 3: Verde (Horario) */
+        /* Círculo 3: Verde Real (Horario) */
         .sol-crown-3 {
-            position: absolute; inset: -18px;
+            position: absolute; width: 36px; height: 36px;
             border: 2px dashed var(--royal-green); border-radius: 50%;
-            animation: spin 8s linear infinite;
+            animation: spin-sol 7s linear infinite;
         }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes spin-sol { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* INTERFAZ DE ACCESO REAL (PUNTO 3) */
+        /* INTERFAZ DE ACCESO REAL */
         .auth-gate { position: fixed; inset: 0; background: var(--bg-main); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .auth-box { background: var(--bg-sidebar); padding: 30px; border-radius: 24px; width: 100%; max-width: 380px; text-align: center; border: 1px solid var(--border); box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
+        .auth-box { background: var(--bg-sidebar); padding: 30px; border-radius: 24px; width: 100%; max-width: 380px; text-align: center; border: 1px solid var(--border); }
         .input-ret { width: 100%; padding: 14px; margin: 10px 0; background: var(--bg-main); border: 1px solid var(--border); border-radius: 12px; color: #fff; text-align: center; font-size: 1rem; outline: none; }
         .input-ret:focus { border-color: var(--accent); }
         .btn-social { padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; font-size: 0.7rem; color: #fff; text-transform: uppercase; }
         .grid-social { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 15px 0; }
         
-        /* MODO DIOS / ADMIN */
-        .admin-panel { position: fixed; inset: 0; background: #000; z-index: 10000; padding: 20px; overflow-y: auto; display: none; }
-        .user-row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #333; align-items: center; }
-        .btn-ban { background: var(--danger); color: #fff; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
+        /* HERRAMIENTAS Y DISEÑO ACTIVO */
+        .header-app { height: 60px; background: var(--bg-sidebar); display: flex; align-items: center; padding: 0 15px; border-bottom: 1px solid var(--border); }
+        .toolbar-scroll { height: 75px; background: var(--bg-sidebar); display: flex; align-items: center; overflow-x: auto; padding: 0 15px; gap: 15px; border-bottom: 1px solid var(--border); -webkit-overflow-scrolling: touch; }
+        .control-unit { display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0; }
+        .label-unit { font-size: 0.65rem; color: var(--text-muted); font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
+        .btn-3d { background: var(--btn-3d-bg); color: #fff; border: 1px solid var(--border); padding: 8px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; min-height: 36px; display: flex; align-items: center; justify-content: center; }
+        .btn-3d:active { transform: translateY(1px); }
 
-        /* LAYOUT PRINCIPAL */
-        .header-app { height: 65px; background: var(--bg-sidebar); display: flex; align-items: center; padding: 0 20px; gap: 30px; border-bottom: 1px solid var(--border); }
-        .toolbar { height: 85px; background: var(--bg-sidebar); display: flex; align-items: center; overflow-x: auto; padding: 0 15px; gap: 20px; border-bottom: 1px solid var(--border); }
+        /* ANIMACIONES DE ESTADO */
+        .recording-active { animation: pulse-red 1.5s infinite; background: #ff3b30 !important; }
+        .reading-active { animation: pulse-blue 1.5s infinite; background: var(--electric-blue) !important; }
+        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(255,59,48,0.7); } 70% { box-shadow: 0 0 0 10px rgba(255,59,48,0); } 100% { box-shadow: 0 0 0 0 rgba(255,59,48,0); } }
+        @keyframes pulse-blue { 0% { box-shadow: 0 0 0 0 rgba(0,210,255,0.7); } 70% { box-shadow: 0 0 0 10px rgba(0,210,255,0); } 100% { box-shadow: 0 0 0 0 rgba(0,210,255,0); } }
+
+        /* SIDEBAR Y CONTENEDOR */
+        .sidebar { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background: var(--bg-sidebar); z-index: 950; border-right: 1px solid var(--border); transition: 0.3s ease; display: flex; flex-direction: column; }
+        .sidebar.active { left: 0; }
         .main-view { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--accent); color: #000; padding: 12px 25px; border-radius: 30px; font-weight: bold; transition: 0.4s; z-index: 10001; }
+        .editor-scroll-container { width: 100%; height: 100%; overflow-y: auto; padding: 20px; }
+        .doc-title { width: 100%; background: transparent; border: none; color: var(--text-main); font-size: 1.4rem; font-weight: bold; margin-bottom: 15px; outline: none; }
+        .textarea-main { width: 100%; flex: 1; min-height: 350px; background: transparent; border: none; color: var(--text-main); font-size: 1.05rem; line-height: 1.6; resize: none; outline: none; }
+        
+        /* MODO DIOS */
+        .admin-view { position: fixed; inset: 0; background: #060810; z-index: 10000; padding: 25px; overflow-y: auto; display: none; }
+        .user-row { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid var(--border); align-items: center; }
+        .toast { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--accent); color: #000; padding: 12px 24px; border-radius: 30px; font-weight: bold; transition: 0.3s ease; z-index: 10005; }
         .toast.show { transform: translateX(-50%) translateY(0); }
         .hidden { display: none !important; }
+        .zoom-indicator-tag { font-size: 0.65rem; color: var(--accent); font-weight: bold; margin-top: 2px; }
     </style>
 </head>
 <body class="dark-theme">
 
     <div id="screen-auth" class="auth-gate">
         <div class="auth-box">
-            <div style="display:flex; justify-content:center; margin-bottom:30px;">
-                <div class="sol-engine"><div class="sol-crown-3"></div></div>
+            <div style="display:flex; justify-content:center; margin-bottom:25px;">
+                <div class="sol-container"><div class="sol-engine"></div><div class="sol-crown-3"></div></div>
             </div>
-            <h2 id="auth-title" style="letter-spacing:4px; color:var(--accent); margin-bottom:10px;">RETÓRICA</h2>
-            
+            <h2 id="ui-header-title" style="letter-spacing:4px; color:var(--accent); margin-bottom:15px;">RETÓRICA</h2>
             <div id="oauth-selector">
-                <p style="font-size:0.75rem; color:var(--text-muted);">Inicia sesión con:</p>
                 <div class="grid-social">
-                    <button class="btn-social" style="background:#db4437" onclick="Retorica.auth.oauth('Google')">Google</button>
-                    <button class="btn-social" style="background:#4267b2" onclick="Retorica.auth.oauth('Facebook')">Face</button>
-                    <button class="btn-social" style="background:#25d366" onclick="Retorica.auth.oauth('WhatsApp')">WhatsApp</button>
+                    <button class="btn-social" style="background:#db4437" onclick="RetoricaAuth.selectOAuth('Google')">Google</button>
+                    <button class="btn-social" style="background:#4267b2" onclick="RetoricaAuth.selectOAuth('Facebook')">Face</button>
+                    <button class="btn-social" style="background:#25d366" onclick="RetoricaAuth.selectOAuth('WhatsApp')">WhatsApp</button>
                 </div>
             </div>
-
-            <div id="form-credentials">
-                <input type="text" id="auth-id" class="input-ret" placeholder="Email o Teléfono">
-                <div id="pass-area" class="hidden">
-                    <input type="password" id="auth-pass" class="input-ret" placeholder="Introduce Contraseña">
-                </div>
-                <button id="btn-auth-main" onclick="Retorica.auth.handleAction()" style="width:100%; padding:15px; border-radius:12px; background:var(--accent); border:none; font-weight:bold; cursor:pointer; margin-top:10px;">CONTINUAR</button>
-                <p id="auth-msg" style="font-size:0.7rem; margin-top:12px; color:var(--text-muted); cursor:pointer;" onclick="Retorica.auth.toggleMode()">¿No tienes cuenta? Regístrate aquí</p>
+            <input type="text" id="auth-id" class="input-ret" placeholder="Email o Teléfono">
+            <div id="pass-area" class="hidden">
+                <input type="password" id="auth-pass" class="input-ret" placeholder="Contraseña de Resguardo">
             </div>
+            <button id="btn-submit-auth" onclick="RetoricaAuth.process()" style="width:100%; padding:14px; border-radius:12px; background:var(--accent); border:none; font-weight:bold; cursor:pointer; margin-top:10px;">CONTINUAR</button>
+            <p id="auth-toggle-mode" style="font-size:0.7rem; margin-top:15px; color:var(--text-muted); cursor:pointer;" onclick="RetoricaAuth.switchMode()">¿No tienes cuenta? Regístrate aquí</p>
         </div>
     </div>
 
-    <div id="god-mode-panel" class="admin-panel">
-        <h1 style="color:var(--accent)">MODO DIOS: CONTROL TOTAL</h1>
-        <button onclick="Retorica.admin.close()" style="float:right; background:var(--danger); border:none; color:#fff; padding:10px;">SALIR</button>
-        <div style="margin-top:40px;" id="admin-user-list"></div>
+    <div id="god-mode-panel" class="admin-view">
+        <h2 style="color:var(--accent); letter-spacing:2px;">⚡ MODO DIOS: PANEL SUPREMO</h2>
+        <button onclick="RetoricaAdmin.close()" class="btn-3d" style="float:right; background:var(--danger);">CERRAR</button>
+        <div id="admin-user-list" style="margin-top:50px;"></div>
     </div>
 
     <header class="header-app">
-        <div onclick="Retorica.ui.toggleSidebar()" style="font-size:1.5rem; cursor:pointer;">☰</div>
-        <div class="sol-engine"><div class="sol-crown-3"></div></div>
-        <h1 style="font-size:1.2rem; letter-spacing:3px; color:var(--accent)">RETÓRICA</h1>
-        <div id="god-trigger" onclick="Retorica.admin.access()" style="margin-left:auto; opacity:0.1;">⚡</div>
+        <div onclick="RetoricaUI.toggleSidebar()" style="font-size:1.4rem; cursor:pointer; padding:5px;">☰</div>
+        <div class="sol-container"><div class="sol-engine"></div><div class="sol-crown-3"></div></div>
+        <h1 style="font-size:1.1rem; letter-spacing:3px; color:var(--accent); font-weight:900;">RETÓRICA</h1>
+        <div onclick="RetoricaAdmin.trigger()" style="margin-left:auto; opacity:0.15; cursor:pointer; padding:10px;">⚡</div>
     </header>
 
-    
-<div class="toolbar">
-        <div class="control-unit">
-            <span class="label-unit" id="lbl-tool-save">Guardar</span>
-            <button class="btn-3d" id="btn-save-main" onclick="Retorica.db.save()">✓</button>
-        </div>
-        <div class="control-unit">
-            <span class="label-unit" id="lbl-tool-new">Nuevo</span>
-            <button class="btn-3d" onclick="Retorica.editor.clear()">➕</button>
-        </div>
-        <div class="control-unit">
-            <span class="label-unit" id="lbl-tool-mic">Dictado</span>
-            <button class="btn-3d" id="btn-mic-main" onclick="Retorica.audio.toggleMic()">🎙️</button>
-        </div>
-        
+    <div class="toolbar-scroll">
+        <div class="control-unit"><span class="label-unit" id="lbl-tool-save">Guardar</span><button class="btn-3d" id="btn-save-main" onclick="RetoricaStorage.save()">✓</button></div>
+        <div class="control-unit"><span class="label-unit" id="lbl-tool-new">Nuevo</span><button class="btn-3d" onclick="RetoricaUI.clearEditor()">➕</button></div>
+        <div class="control-unit"><span class="label-unit" id="lbl-tool-mic">Dictado</span><button class="btn-3d" id="btn-mic-main" onclick="RetoricaAudio.toggleMic()">🎙️</button></div>
         <div class="control-unit">
             <span class="label-unit" id="lbl-tool-read">Lectura</span>
-            <div style="display:flex; gap:6px;">
-                <button class="btn-3d" style="width:38px; height:38px;" id="btn-play-main" onclick="Retorica.audio.readSelectionOrAll()">🔊</button>
-                <button class="btn-3d" style="width:38px; height:38px; color:var(--danger);" id="btn-stop-main" onclick="Retorica.audio.stopReading()">🛑</button>
+            <div style="display:flex; gap:4px;">
+                <button class="btn-3d" id="btn-play-main" onclick="RetoricaAudio.play()">🔊</button>
+                <button class="btn-3d" style="color:var(--danger);" onclick="RetoricaAudio.stop()">🛑</button>
             </div>
         </div>
-
-        <div class="control-unit">
-            <span class="label-unit" id="lbl-tool-vmsg">Msj Voz</span>
-            <button class="btn-3d" id="btn-vmsg-main" onclick="Retorica.audio.toggleVoiceMessage()">🗂️</button>
-        </div>
-        <div class="control-unit">
-            <span class="label-unit" id="lbl-tool-render">Render</span>
-            <button class="btn-3d" onclick="Retorica.audio.renderTextToAudioFile()">🎛️</button>
-        </div>
-
+        <div class="control-unit"><span class="label-unit" id="lbl-tool-vmsg">Msj Voz</span><button class="btn-3d" onclick="RetoricaAudio.vmsg()">🗂️</button></div>
+        <div class="control-unit"><span class="label-unit" id="lbl-tool-render">Render</span><button class="btn-3d" onclick="RetoricaAudio.render()">🎛️</button></div>
         <div class="control-unit">
             <span class="label-unit" id="lbl-tool-zoom">Zoom</span>
-            <div style="display:flex; gap:6px;">
-                <button class="btn-3d" style="width:36px; height:36px;" onclick="Retorica.editor.zoom(0.1)">+</button>
-                <button class="btn-3d" style="width:36px; height:36px;" onclick="Retorica.editor.zoom(-0.1)">-</button>
+            <div style="display:flex; gap:4px;">
+                <button class="btn-3d" style="padding:6px 10px;" onclick="RetoricaUI.adjustZoom(0.1)">+</button>
+                <button class="btn-3d" style="padding:6px 10px;" onclick="RetoricaUI.adjustZoom(-0.1)">-</button>
             </div>
             <div id="zoom-indicator-tag" class="zoom-indicator-tag">100% (Normal)</div>
         </div>
-
-        <div class="control-unit">
-            <span class="label-unit" style="color:var(--accent);" id="lbl-tool-langtext">Traducir Texto</span>
-            <select id="lang-selector-text" onchange="Retorica.i18n.translateTextContent(this.value)" style="background:var(--btn-3d-bg); color:#fff; border:1px solid var(--border); padding:6px; border-radius:6px; font-size:0.7rem; outline:none; max-width:95px;"></select>
-        </div>
-
-        <div class="control-unit">
-            <span class="label-unit" id="lbl-tool-langapp">Idioma App</span>
-            <select id="lang-selector-app" onchange="Retorica.i18n.applyInterfaceLanguage(this.value)" style="background:var(--btn-3d-bg); color:#fff; border:1px solid var(--border); padding:6px; border-radius:6px; font-size:0.7rem; outline:none; max-width:95px;"></select>
-        </div>
-
-        <div class="control-unit">
-            <span class="label-unit" id="lbl-tool-theme">Tema</span>
-            <button class="btn-3d" onclick="Retorica.ui.toggleTheme()">🌓</button>
-        </div>
+        <div class="control-unit"><span class="label-unit" id="lbl-tool-langtext" style="color:var(--accent);">Traducir</span><select id="lang-selector-text" onchange="RetoricaI18n.translateText(this.value)" style="background:var(--btn-3d-bg); color:#fff; border:1px solid var(--border); padding:5px; border-radius:6px; font-size:0.65rem; max-width:90px;"></select></div>
+        <div class="control-unit"><span class="label-unit" id="lbl-tool-langapp">Idioma App</span><select id="lang-selector-app" onchange="RetoricaI18n.setAppLang(this.value)" style="background:var(--btn-3d-bg); color:#fff; border:1px solid var(--border); padding:5px; border-radius:6px; font-size:0.65rem; max-width:90px;"></select></div>
+        <div class="control-unit"><span class="label-unit" id="lbl-tool-theme">Tema</span><button class="btn-3d" onclick="RetoricaUI.toggleTheme()">🌓</button></div>
     </div>
 
     <nav id="sidebar" class="sidebar">
-        <div class="sidebar-header">
-            <div class="sol-engine" style="width:24px; height:24px;"><div class="sol-crown-3" style="inset:-6px;"></div></div>
-            <h2 style="color:var(--accent); font-size:1.1rem; letter-spacing:3px; font-weight:900;">RETÓRICA</h2>
-            <span onclick="Retorica.ui.toggleSidebar()" style="margin-left:auto; cursor:pointer; font-size:1.2rem; color:var(--text-muted)">✕</span>
+        <div class="header-app" style="border-bottom:1px solid var(--border)">
+            <div class="sol-container"><div class="sol-engine"></div><div class="sol-crown-3"></div></div>
+            <h2 style="color:var(--accent); font-size:1rem; letter-spacing:2px;">BIBLIOTECA</h2>
         </div>
-        
-        <div style="padding:15px;">
-            <p class="label-unit" style="margin-bottom:10px;" id="lbl-side-export">Exportación Profesional</p>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                <button onclick="Retorica.export.toPDF()" class="btn-3d" style="width:100%; border-radius:8px; font-size:0.7rem; font-weight:bold; height:38px;">PDF</button>
-                <button onclick="Retorica.export.toTXT()" class="btn-3d" style="width:100%; border-radius:8px; font-size:0.7rem; font-weight:bold; height:38px;">TXT</button>
+        <div style="padding:12px; border-bottom:1px solid var(--border);">
+            <p class="label-unit" id="lbl-side-export" style="margin-bottom:8px;">Exportar</p>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                <button onclick="RetoricaUI.expPDF()" class="btn-3d" style="font-size:0.7rem; min-height:30px;">PDF</button>
+                <button onclick="RetoricaUI.expTXT()" class="btn-3d" style="font-size:0.7rem; min-height:30px;">TXT</button>
             </div>
-            
-            <button onclick="Retorica.auth.synchronizeCloudDevices()" class="btn-3d" style="width:100%; border-radius:8px; font-size:0.72rem; font-weight:bold; height:40px; margin-top:12px; color:var(--accent); display:flex; gap:6px; justify-content:center; align-items:center;">
-                🔄 <span id="lbl-side-sync">Sincronizar Dispositivos</span>
-            </button>
+            <button onclick="RetoricaAuth.sync()" class="btn-3d" style="width:100%; margin-top:8px; font-size:0.7rem; color:var(--accent); min-height:32px;">🔄 <span id="lbl-side-sync">Sincronizar</span></button>
         </div>
-
-        <div id="library-container" style="flex:1; overflow-y:auto; padding:0 15px;">
-            <p class="label-unit" style="margin-bottom:10px; border-bottom:1px solid var(--border); padding-bottom:5px;" id="lbl-side-lib">Biblioteca de Proyectos</p>
-            <div id="docs-list-render">
-                </div>
-        </div>
-
-        <div style="padding:15px; border-top:1px solid var(--border); background: rgba(0,0,0,0.15);">
-            <div id="active-user-info" style="font-size:0.72rem; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
-                <span style="width:6px; height:6px; background:var(--accent); border-radius:50%;"></span>
-                <span id="display-user-name">Sesión no iniciada</span>
-            </div>
-            <button onclick="location.reload()" style="color:var(--danger); background:transparent; border:none; cursor:pointer; font-weight:bold; font-size:0.72rem; text-transform:uppercase;" id="lbl-side-logout">Cerrar Sistema</button>
+        <div id="library-container" style="flex:1; overflow-y:auto; padding:12px;"><div id="docs-list-render"></div></div>
+        <div style="padding:12px; background:rgba(0,0,0,0.2); border-top:1px solid var(--border);">
+            <div style="font-size:0.7rem; display:flex; align-items:center; gap:6px; margin-bottom:6px;"><span style="width:6px; height:6px; background:var(--accent); border-radius:50%;"></span><span id="display-user-name">Anon</span></div>
+            <button onclick="location.reload()" style="color:var(--danger); background:transparent; border:none; font-size:0.7rem; font-weight:bold; cursor:pointer;" id="lbl-side-logout">SALIR</button>
         </div>
     </nav>
 
     <main class="main-view">
-        <div style="width:100%; height:100%; overflow-y:auto; padding:15px;" id="scroller-viewport">
+        <div class="editor-scroll-container" id="viewport-ctx">
             <div id="zoom-wrapper" style="width:100%; display:flex; flex-direction:column; transition: transform 0.1s ease;">
                 <input type="text" id="editor-title" class="doc-title" placeholder="Título del Guion...">
-                <textarea id="editor-body" class="textarea-main" placeholder="Comienza a dictar o escribir tu retórica..."></textarea>
+                <textarea id="editor-body" class="textarea-main" placeholder="Escribe o dicta aquí tu retórica..."></textarea>
             </div>
         </div>
     </main>
 
-    <footer style="background:var(--bg-sidebar); padding:10px 20px; font-size:0.7rem; display:flex; gap:20px; border-top:1px solid var(--border); font-weight:bold; color:var(--text-muted); flex-shrink:0;">
-        <span id="count-chars">CHARS: 0</span>
-        <span id="count-words">WORDS: 0</span>
-        <span id="count-lines">LINES: 1</span>
-        <span style="margin-left:auto; color:var(--accent);">V.2026.GOD_MODE</span>
+    <footer style="background:var(--bg-sidebar); padding:8px 15px; font-size:0.65rem; display:flex; gap:15px; border-top:1px solid var(--border); color:var(--text-muted); font-weight:bold;">
+        <span id="count-chars">CHARS: 0</span><span id="count-words">WORDS: 0</span><span id="count-lines">LINES: 1</span>
+        <span style="margin-left:auto; color:var(--accent);">V.2026.MODULAR_PRO</span>
     </footer>
 
     <div id="toast-notif" class="toast"></div>
 
-    <script>
-        // --- MOTOR RETÓRICA GLOBAL INMUNE V2026.GOD ---
-        var Retorica = {
-            state: {
-                activeUser: null,
-                activeDocId: null,
-                currentZoom: 1.0,
-                authMode: 'login', // 'login' o 'signup'
-                currentOAuthProvider: null,
-                isRecording: false,
-                recognition: null,
-                godModeActive: false
-            },
-
-            // 1. DICCIONARIO INTEGRADO DE CONTROL CRUZADO (INTERFAZ + CONTENIDO)
-            i18n: {
-                currentAppLang: 'es',
-                db: {
-                    'es': { name: 'Español', save: 'Guardar', new: 'Nuevo', mic: 'Dictado', read: 'Lectura', vmsg: 'Msj Voz', render: 'Render', zoom: 'Zoom', theme: 'Tema', langApp: 'Idioma App', langText: 'Traducir Texto', sync: 'Sincronizar', logout: 'Cerrar Sistema', lib: 'Biblioteca de Proyectos', exp: 'Exportación Profesional' },
-                    'en': { name: 'English', save: 'Save', new: 'New', mic: 'Dictate', read: 'Read', vmsg: 'Voice Msg', render: 'Render', zoom: 'Zoom', theme: 'Theme', langApp: 'App Lang', langText: 'Translate Text', sync: 'Sync Cloud', logout: 'Logout System', lib: 'Project Library', exp: 'Professional Export' },
-                    'fr': { name: 'Français', save: 'Sauver', new: 'Nouveau', mic: 'Dictée', read: 'Lecture', vmsg: 'Msg Voc', render: 'Rendre', zoom: 'Zoom', theme: 'Thème', langApp: 'Langue App', langText: 'Traduire Texte', sync: 'Sincroniser', logout: 'Déconnexion', lib: 'Bibliothèque', exp: 'Exportation Pro' },
-                    'pt': { name: 'Português', save: 'Salvar', new: 'Novo', mic: 'Ditado', read: 'Leitura', vmsg: 'Msg Voz', render: 'Render', zoom: 'Zoom', theme: 'Tema', langApp: 'Idioma App', langText: 'Traduzir Texto', sync: 'Sincronizar', logout: 'Sair', lib: 'Biblioteca', exp: 'Exportação' },
-                    'it': { name: 'Italiano', save: 'Salva', new: 'Nuovo', mic: 'Dettato', read: 'Lettura', vmsg: 'Msg Vocale', render: 'Render', zoom: 'Zoom', theme: 'Tema', langApp: 'Lingua App', langText: 'Traduci Testo', sync: 'Sincronizza', logout: 'Esci', lib: 'Biblioteca', exp: 'Esportazione' },
-                    'de': { name: 'Deutsch', save: 'Speichern', new: 'Neu', mic: 'Diktat', read: 'Lesen', vmsg: 'Sprachnachr.', render: 'Render', zoom: 'Zoom', theme: 'Theme', langApp: 'App-Sprache', langText: 'Text Übersetz.', sync: 'Synchron.', logout: 'Abmelden', lib: 'Bibliothek', exp: 'Exportieren' },
-                    'ja': { name: '日本語', save: '保存', new: '新規', mic: 'ディクテーション', read: '読み上げ', vmsg: '音声メッセ', render: 'レンダリング', zoom: 'ズーム', theme: 'テーマ', langApp: 'アプリ言語', langText: 'テキスト翻訳', sync: '同期する', logout: 'ログアウト', lib: 'ライブラリ', exp: '書き出し' },
-                    'ru': { name: 'Русский', save: 'Сохранить', new: 'Новый', mic: 'Диктовка', read: 'Чтение', vmsg: 'Голос.сооб', render: 'Рендер', zoom: 'Масштаб', theme: 'Тема', langApp: 'Язык прил.', langText: 'Перевод текста', sync: 'Синхрониз.', logout: 'Выйти', lib: 'Библиотека', exp: 'Экспорт' },
-                    'zh': { name: '中文', save: '保存', new: '新建', mic: '听写', read: '朗读', vmsg: '语音消息', render: '渲染', zoom: '缩放', theme: '主题', langApp: '应用语言', langText: '翻译文本', sync: '同步设备', logout: '退出登录', lib: '项目库', exp: '专业导出' },
-                    'ar': { name: 'العربية', save: 'حفظ', new: 'جديد', mic: 'إملاء', read: 'قراءة', vmsg: 'رسالة صوتية', render: 'تصدير صوتي', zoom: 'تكبير', theme: 'مظهر', langApp: 'لغة التطبيق', langText: 'ترجمة النص', sync: 'مزامنة', logout: 'إغلاق', lib: 'المكتبة', exp: 'تصدير' }
-                },
-                init: function() {
-                    var selApp = document.getElementById('lang-selector-app');
-                    var selText = document.getElementById('lang-selector-text');
-                    for (var key in this.db) {
-                        var opt = document.createElement('option'); opt.value = key; opt.innerText = this.db[key].name;
-                        selApp.appendChild(opt.cloneNode(true));
-                        selText.appendChild(opt);
-                    }
-                },
-                applyInterfaceLanguage: function(lang) {
-                    this.currentAppLang = lang; var p = this.db[lang] || this.db['es'];
-                    document.getElementById('lbl-tool-save').innerText = p.save;
-                    document.getElementById('lbl-tool-new').innerText = p.new;
-                    document.getElementById('lbl-tool-mic').innerText = p.mic;
-                    document.getElementById('lbl-tool-read').innerText = p.read;
-                    document.getElementById('lbl-tool-vmsg').innerText = p.vmsg;
-                    document.getElementById('lbl-tool-render').innerText = p.render;
-                    document.getElementById('lbl-tool-zoom').innerText = p.zoom;
-                    document.getElementById('lbl-tool-langapp').innerText = p.langApp;
-                    document.getElementById('lbl-tool-langtext').innerText = p.langText;
-                    document.getElementById('lbl-side-sync').innerText = p.sync;
-                    document.getElementById('lbl-side-logout').innerText = p.logout;
-                    document.getElementById('lbl-side-lib').innerText = p.lib;
-                    document.getElementById('lbl-side-export').innerText = p.exp;
-                    Retorica.ui.notify("Interfaz: " + p.name);
-                },
-                translateTextContent: function(lang) {
-                    Retorica.ui.notify("Traduciendo lienzo a " + (this.db[lang] ? this.db[lang].name : lang) + "...");
-                }
-            },
-
-            // 3. FLUJO DE AUTENTICACIÓN AVANZADO REESTRUCTURADO (PUNTOS 1 Y 3)
-            auth: {
-                oauth: function(provider) {
-                    Retorica.state.currentOAuthProvider = provider;
-                    Retorica.ui.notify("Vía de acceso fijada: " + provider);
-                    document.getElementById('auth-id').placeholder = "Ingresa tu Email o Celular vinculado a " + provider;
-                    document.getElementById('pass-area').classList.remove('hidden');
-                },
-                toggleMode: function() {
-                    var isLogin = Retorica.state.authMode === 'login';
-                    Retorica.state.authMode = isLogin ? 'signup' : 'login';
-                    document.getElementById('btn-auth-main').innerText = isLogin ? 'REGISTRAR Y GENERAR CLAVE' : 'CONTINUAR';
-                    document.getElementById('auth-msg').innerText = isLogin ? '¿Ya tienes cuenta? Inicia sesión aquí' : '¿No tienes cuenta? Regístrate aquí';
-                    document.getElementById('pass-area').classList.remove('hidden');
-                },
-                handleAction: function() {
-                    var identifier = document.getElementById('auth-id').value.trim();
-                    var password = document.getElementById('auth-pass').value;
-
-                    if (!identifier) {
-                        Retorica.ui.notify("Ingresa Email o Teléfono válido."); return;
-                    }
-
-                    // Validación contra usuarios baneados de forma persistente
-                    var banList = JSON.parse(localStorage.getItem('ret_ban_list') || '[]');
-                    if (banList.indexOf(identifier) > -1) {
-                        alert("Acceso denegado: Esta cuenta ha sido suspendida por el Administrador Supremo.");
-                        return;
-                    }
-
-                    if (Retorica.state.authMode === 'signup') {
-                        if (password.length < 4) {
-                            Retorica.ui.notify("Contraseña debe ser mínimo de 4 caracteres."); return;
-                        }
-                        var newUser = { id: identifier, pass: password, created: new Date().toLocaleString() };
-                        localStorage.setItem('user_sys_' + identifier, JSON.stringify(newUser));
-                        Retorica.ui.notify("Cuenta vinculada y guardada ✓");
-                        Retorica.state.authMode = 'login';
-                        this.successLogin(identifier);
-                    } else {
-                        // Flujo Login
-                        if (Retorica.state.currentOAuthProvider && !password) {
-                            // Registro inicial automático si es OAuth y no requiere pass la primera vez
-                            document.getElementById('pass-area').classList.remove('hidden');
-                            Retorica.ui.notify("Crea una contraseña de resguardo para tu dispositivo");
-                            Retorica.state.authMode = 'signup';
-                            return;
-                        }
-                        
-                        var stored = localStorage.getItem('user_sys_' + identifier);
-                        if (!stored) {
-                            Retorica.ui.notify("Usuario no registrado. Activa la pestaña inferior para registrarte.");
-                            return;
-                        }
-                        var userObj = JSON.parse(stored);
-                        if (userObj.pass !== password) {
-                            Retorica.ui.notify("Contraseña incorrecta."); return;
-                        }
-                        this.successLogin(identifier);
-                    }
-                },
-                successLogin: function(uid) {
-                    Retorica.state.activeUser = uid;
-                    document.getElementById('screen-auth').classList.add('hidden');
-                    document.getElementById('display-user-name').innerText = uid;
-                    Retorica.ui.notify("Bienvenido al entorno");
-                    Retorica.db.refreshLibrary();
-                },
-                recoverPassword: function() {
-                    var id = document.getElementById('auth-id').value.trim();
-                    if (!id) { Retorica.ui.notify("Escribe tu Email/Teléfono en la casilla superior."); return; }
-                    alert("Retórica Token Link: Se ha generado y enviado un código de restablecimiento automático a: " + id);
-                },
-                synchronizeCloudDevices: function() {
-                    Retorica.ui.notify("Sincronizando biblioteca móvil en base al ID: " + Retorica.state.activeUser);
-                }
-            },
-
-            // 4. PROCESAMIENTO DE AUDIO PROFESIONAL DE DOBLE VÍA (PUNTOS 4, 5, 6 Y 7)
-            audio: {
-                toggleMic: function() {
-                    var btn = document.getElementById('btn-mic-main');
-                    var Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
-                    if (!Speech) return Retorica.ui.notify("SpeechRecognition no soportado en este WebView.");
-
-                    if (!Retorica.state.isRecording) {
-                        Retorica.state.recognition = new Speech();
-                        Retorica.state.recognition.continuous = true;
-                        Retorica.state.recognition.interimResults = false;
-                        Retorica.state.recognition.lang = 'es-MX';
-                        
-                        Retorica.state.recognition.onresult = function(e) {
-                            var chunk = e.results[e.results.length - 1][0].transcript;
-                            document.getElementById('editor-body').value += (document.getElementById('editor-body').value ? ' ' : '') + chunk;
-                            Retorica.ui.updateCounters();
-                        };
-                        Retorica.state.recognition.onerror = function() { Retorica.audio.stopMicLocally(); };
-                        Retorica.state.recognition.onend = function() { Retorica.audio.stopMicLocally(); };
-
-                        Retorica.state.recognition.start();
-                        Retorica.state.isRecording = true;
-                        btn.classList.add('recording-state-active');
-                        Retorica.ui.notify("Grabando entorno de dictado...");
-                    } else {
-                        Retorica.audio.stopMicLocally();
-                    }
-                },
-                stopMicLocally: function() {
-                    var btn = document.getElementById('btn-mic-main');
-                    if (Retorica.state.recognition) { Retorica.state.recognition.stop(); }
-                    Retorica.state.isRecording = false;
-                    btn.classList.remove('recording-state-active');
-                    Retorica.ui.notify("Dictado finalizado.");
-                },
-                readSelectionOrAll: function() {
-                    window.speechSynthesis.cancel();
-                    var box = document.getElementById('editor-body');
-                    var targetText = box.value.substring(box.selectionStart, box.selectionEnd) || box.value;
-                    
-                    if (!targetText) { Retorica.ui.notify("No hay texto en el lienzo."); return; }
-                    
-                    var utterance = new SpeechSynthesisUtterance(targetText);
-                    utterance.lang = Retorica.i18n.currentAppLang === 'es' ? 'es-MX' : Retorica.i18n.currentAppLang;
-                    
-                    utterance.onstart = function() { document.getElementById('btn-play-main').classList.add('reading-state-active'); };
-                    utterance.onend = function() { document.getElementById('btn-play-main').classList.remove('reading-state-active'); };
-                    
-                    window.speechSynthesis.speak(utterance);
-                    Retorica.ui.notify("Ejecutando lectura de voz...");
-                },
-                stopReading: function() {
-                    window.speechSynthesis.cancel();
-                    document.getElementById('btn-play-main').classList.remove('reading-state-active');
-                    Retorica.ui.notify("Lectura abortada físicamente ✓");
-                },
-                toggleVoiceMessage: function() { Retorica.ui.notify("Mensaje de voz almacenado en búfer local."); },
-                renderTextToAudioFile: function() { Retorica.ui.notify("Renderizando guion a pista de audio física..."); }
-            },
-
-            // 10. ZOÓMETRO CON LÍMITES FIJADOS (PUNTO 10)
-            editor: {
-                zoom: function(delta) {
-                    var next = Retorica.state.currentZoom + delta;
-                    if (next < 0.6) next = 0.6;
-                    if (next > 2.2) next = 2.2;
-                    Retorica.state.currentZoom = next;
-                    
-                    var wrapper = document.getElementById('zoom-wrapper');
-                    wrapper.style.transform = "scale(" + next + ")";
-                    wrapper.style.transformOrigin = "top left";
-                    
-                    var tag = document.getElementById('zoom-indicator-tag');
-                    var percentage = Math.round(next * 100);
-                    var stateMsg = "(Normal)";
-                    if (next <= 0.6) stateMsg = "(Mínimo Alcanzado)";
-                    if (next >= 2.2) stateMsg = "(Máximo Alcanzado)";
-                    tag.innerText = percentage + "% " + stateMsg;
-                },
-                clear: function() {
-                    document.getElementById('editor-title').value = "";
-                    document.getElementById('editor-body').value = "";
-                    Retorica.state.activeDocId = null;
-                    Retorica.ui.updateCounters();
-                }
-            },
-
-            // PERSISTENCIA E INFRAESTRUCTURA DE DATOS LOCALES
-            db: {
-                save: function() {
-                    var title = document.getElementById('editor-title').value.trim() || "Guion Sin Título";
-                    var body = document.getElementById('editor-body').value;
-                    var item = { id: Retorica.state.activeDocId || Date.now(), user: Retorica.state.activeUser, title: title, body: body };
-                    
-                    var list = JSON.parse(localStorage.getItem('ret_project_db') || '[]');
-                    list = list.filter(function(x) { return x.id !== item.id; });
-                    list.push(item);
-                    
-                    localStorage.setItem('ret_project_db', JSON.stringify(list));
-                    Retorica.state.activeDocId = item.id;
-                    Retorica.ui.notify("Guardado en dispositivo ✓");
-                    this.refreshLibrary();
-                },
-                refreshLibrary: function() {
-                    var list = JSON.parse(localStorage.getItem('ret_project_db') || '[]');
-                    var container = document.getElementById('docs-list-render');
-                    container.innerHTML = "";
-                    list.forEach(function(doc) {
-                        if (doc.user === Retorica.state.activeUser) {
-                            var row = document.createElement('div');
-                            row.style.cssText = "background:var(--bg-card); padding:10px; margin-bottom:8px; border-radius:8px; font-size:0.8rem; border:1px solid var(--border); cursor:pointer;";
-                            row.innerText = doc.title;
-                            row.onclick = function() {
-                                document.getElementById('editor-title').value = doc.title;
-                                document.getElementById('editor-body').value = doc.body;
-                                Retorica.state.activeDocId = doc.id;
-                                Retorica.ui.toggleSidebar();
-                                Retorica.ui.updateCounters();
-                            };
-                            container.appendChild(row);
-                        }
-                    });
-                }
-            },
-
-            // CONTROL DE INTERFAZ GENERAL Y NAVEGACIÓN
-            ui: {
-                toggleSidebar: function() { document.getElementById('sidebar').classList.toggle('active'); },
-                toggleTheme: function() { document.body.classList.toggle('light-theme'); },
-                notify: function(m) {
-                    var t = document.getElementById('toast-notif');
-                    t.innerText = m; t.classList.add('show');
-                    setTimeout(function() { t.classList.remove('show'); }, 2000);
-                },
-                updateCounters: function() {
-                    var txt = document.getElementById('editor-body').value;
-                    document.getElementById('count-chars').innerText = "CHARS: " + txt.length;
-                    document.getElementById('count-words').innerText = "WORDS: " + (txt.trim() ? txt.trim().split(/\s+/).length : 0);
-                    document.getElementById('count-lines').innerText = "LINES: " + txt.split('\n').length;
-                }
-            },
-
-            // EXPORTADOR NATIVO INTEGRADO
-            export: {
-                toPDF: function() { 
-                    Retorica.ui.notify("Preparando PDF...");
-                    html2pdf().from(document.getElementById('zoom-wrapper')).save(document.getElementById('editor-title').value || 'guion'); 
-                },
-                toTXT: function() {
-                    var blob = new Blob([document.getElementById('editor-body').value], {type:'text/plain;charset=utf-8'});
-                    var link = document.createElement('a'); link.href = URL.createObjectURL(blob);
-                    link.download = (document.getElementById('editor-title').value || 'guion') + ".txt"; link.click();
-                }
-            },
-
-            // PANEL SUPREMO: MODO DIOS CON CONTROL TOTAL (BANEO)
-            admin: {
-                access: function() {
-                    var masterKey = prompt("Introduce la clave maestra de Administrador Supremo para activar Modo Dios:");
-                    if (masterKey === "0000") { // Clave universal configurada
-                        Retorica.state.godModeActive = true;
-                        document.getElementById('god-mode-panel').style.display = 'block';
-                        this.renderUsers();
-                    } else { alert("Acceso denegado: Credenciales de deidad incorrectas."); }
-                },
-                close: function() { document.getElementById('god-mode-panel').style.display = 'none'; },
-                renderUsers: function() {
-                    var target = document.getElementById('admin-user-list'); target.innerHTML = "";
-                    var banList = JSON.parse(localStorage.getItem('ret_ban_list') || '[]');
-                    
-                    var keys = Object.keys(localStorage);
-                    keys.forEach(function(k) {
-                        if (k.indexOf('user_sys_') === 0) {
-                            var uid = k.replace('user_sys_', '');
-                            var isBanned = banList.indexOf(uid) > -1;
-                            
-                            var row = document.createElement('div'); row.className = "user-row";
-                            row.innerHTML = "<span style='color:" + (isBanned?'#ff3b30':'#fff') + "'>" + uid + " " + (isBanned?'[BANEADO]':'') + "</span>";
-                            
-                            var btn = document.createElement('button'); btn.className = "btn-ban";
-                            btn.innerText = isBanned ? "DESBANEAR" : "BANEAR USUARIO";
-                            btn.onclick = function() { Retorica.admin.toggleBan(uid); };
-                            
-                            row.appendChild(btn); target.appendChild(row);
-                        }
-                    });
-                },
-                toggleBan: function(uid) {
-                    var banList = JSON.parse(localStorage.getItem('ret_ban_list') || '[]');
-                    var index = banList.indexOf(uid);
-                    if (index > -1) { banList.splice(index, 1); } else { banList.push(uid); }
-                    localStorage.setItem('ret_ban_list', JSON.stringify(banList));
-                    this.renderUsers();
-                    Retorica.ui.notify("Estado de cuenta actualizado para " + uid);
-                }
-            }
-        };
-
-        // ENLACE DIRECTO DE INICIALIZACIÓN COMPATIBLE DE LA APP
-        window.onload = function() {
-            Retorica.i18n.init();
-            document.getElementById('editor-body').oninput = Retorica.ui.updateCounters;
-        };
-    </script>
+    <script src="./auth.js?v=GOD_MODE"></script>
+    <script src="./idiomas.js?v=GOD_MODE"></script>
+    <script src="./audio.js?v=GOD_MODE"></script>
+    <script src="./storage.js?v=GOD_MODE"></script>
+    <script src="./main.js?v=GOD_MODE"></script>
 </body>
 </html>
