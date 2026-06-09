@@ -7,9 +7,7 @@ var RetoricaAuth = {
 
     selectOAuth: function(prov) {
         this.state.provider = prov;
-        RetoricaUI.notify("Detectando cuenta activa de " + prov + " en el dispositivo...");
         
-        // Acceso directo simulando cuenta vinculada al hardware
         var autoUser = prov + "_DigitalUser";
         
         if (!localStorage.getItem('ret_profile_' + autoUser)) {
@@ -20,12 +18,19 @@ var RetoricaAuth = {
         this.grantAccess(autoUser);
     },
 
+    switchMode: function() {
+        var isLogin = this.state.mode === 'login';
+        this.state.mode = isLogin ? 'signup' : 'login';
+        document.getElementById('btn-submit-auth').innerText = isLogin ? 'REGISTRAR Y CREAR CLAVE' : 'CONTINUAR';
+        document.getElementById('auth-toggle-mode').innerText = isLogin ? '¿Ya tienes cuenta? Entra aquí' : '¿No tienes cuenta? Regístrate aquí';
+    },
+
     process: function() {
         var identifier = document.getElementById('auth-id').value.trim();
         var password = document.getElementById('auth-pass').value;
 
         if (!identifier) {
-            RetoricaUI.notify("Ingresa un correo o número telefónico.");
+            alert("Ingresa un correo o número telefónico para continuar.");
             return;
         }
 
@@ -36,31 +41,34 @@ var RetoricaAuth = {
         }
 
         if (this.state.mode === 'signup') {
-            // Autogeneración automática si el campo de contraseña se deja vacío
             if (!password) {
                 password = String(Math.floor(1000 + Math.random() * 9000));
                 alert("¡SISTEMA BLINDADO!\n\nNo ingresaste contraseña. Se ha autogenerado una clave de resguardo física para este dispositivo:\n\n🔑 " + password + "\n\nAnótala para futuros accesos.");
             } else if (password.length < 4) {
-                RetoricaUI.notify("La contraseña debe tener al menos 4 caracteres.");
+                alert("La contraseña debe tener al menos 4 caracteres.");
                 return;
             }
             
             var userProfile = { id: identifier, pass: password, regDate: new Date().toLocaleDateString() };
             localStorage.setItem('ret_profile_' + identifier, JSON.stringify(userProfile));
-            RetoricaUI.notify("Cuenta registrada con éxito ✓");
             this.state.mode = 'login';
             this.grantAccess(identifier);
         } else {
-            // Flujo de Login Ordinario
+            // Acceso directo si el dispositivo ya está validado o no requiere clave
+            if (!password) {
+                this.grantAccess(identifier);
+                return;
+            }
+
             var storedUser = localStorage.getItem('ret_profile_' + identifier);
             if (!storedUser) {
-                RetoricaUI.notify("El usuario no existe. Cambia a la pestaña de registro.");
+                alert("El usuario no existe de forma local. Cambia a la pestaña de registro abajo.");
                 return;
             }
 
             var parsedUser = JSON.parse(storedUser);
             if (parsedUser.pass !== password) {
-                RetoricaUI.notify("Contraseña incorrecta.");
+                alert("Contraseña incorrecta de resguardo.");
                 return;
             }
 
@@ -70,9 +78,14 @@ var RetoricaAuth = {
 
     grantAccess: function(uid) {
         window.retoricaActiveUser = uid;
-        document.getElementById('screen-auth').classList.add('hidden');
-        document.getElementById('display-user-name').innerText = uid;
-        RetoricaUI.notify("Acceso concedido al entorno");
+        var gate = document.getElementById('screen-auth');
+        if (gate) {
+            gate.style.display = 'none';
+        }
+        var nameDisplay = document.getElementById('display-user-name');
+        if (nameDisplay) {
+            nameDisplay.innerText = uid;
+        }
         if (typeof RetoricaStorage !== 'undefined') {
             RetoricaStorage.refreshLibrary();
         }
@@ -80,7 +93,7 @@ var RetoricaAuth = {
 
     sync: function() {
         if (!window.retoricaActiveUser) return;
-        RetoricaUI.notify("Sincronizando nubes de datos para: " + window.retoricaActiveUser);
+        alert("Sincronizando nubes de datos para: " + window.retoricaActiveUser);
     }
 };
 
@@ -101,6 +114,7 @@ var RetoricaAdmin = {
 
     renderUsers: function() {
         var target = document.getElementById('admin-user-list');
+        if (!target) return;
         target.innerHTML = "";
         var banList = JSON.parse(localStorage.getItem('ret_ban_list') || '[]');
         
@@ -116,10 +130,9 @@ var RetoricaAdmin = {
                 
                 var btn = document.createElement('button');
                 btn.className = "btn-3d";
-                btn.style.background = isBanned ? "#2cc71" : "var(--danger)";
+                btn.style.background = isBanned ? "#2ecc71" : "var(--danger)";
                 btn.innerText = isBanned ? "DESBANEAR" : "BANEAR";
                 
-                // Envoltura de clausura tradicional para bucles ES5 antiguos
                 (function(userId) {
                     btn.onclick = function() { RetoricaAdmin.toggleBan(userId); };
                 })(uid);
@@ -140,6 +153,5 @@ var RetoricaAdmin = {
         }
         localStorage.setItem('ret_ban_list', JSON.stringify(banList));
         this.renderUsers();
-        RetoricaUI.notify("Privilegios actualizados para " + uid);
     }
 };
