@@ -11,8 +11,6 @@ var ASSETS = [
   './main.js?v=GOD_MODE',
   'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js'
 ];
-
-// Instalación y almacenamiento en caché de todas las capas lógicas individuales
 self.addEventListener('install', function(e) {
   e.waitUntil(
     caches.open(CACHE_NAME).then(function(c) {
@@ -22,38 +20,28 @@ self.addEventListener('install', function(e) {
     })
   );
 });
-
-// Activación y evacuación automática de memorias obsoletas anteriores
 self.addEventListener('activate', function(e) {
   e.waitUntil(
     caches.keys().then(function(keys) {
       return Promise.all(keys.map(function(k) {
-        if (k !== CACHE_NAME) {
-          return caches.delete(k);
-        }
+        if (k !== CACHE_NAME) { return caches.delete(k); }
       }));
     }).then(function() {
       return self.clients.claim();
     })
   );
 });
-
-// Intercepción de peticiones con estrategia de actualización inmediata
 self.addEventListener('fetch', function(e) {
   if (e.request.method !== 'GET') return;
   e.respondWith(
     fetch(e.request).then(function(res) {
       if (res && res.status === 200) {
-        var clone = res.clone();
-        caches.open(CACHE_NAME).then(function(c) {
-          c.put(e.request, clone);
-        });
+        var resClone = res.clone();
+        caches.open(CACHE_NAME).then(function(c) { c.put(e.request, resClone); });
       }
       return res;
     }).catch(function() {
-      return caches.match(e.request).then(function(cached) {
-        return cached || caches.match('./index.html?v=GOD_MODE');
-      });
+      return caches.match(e.request);
     })
   );
 });
