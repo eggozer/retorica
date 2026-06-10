@@ -1,4 +1,3 @@
-
 // --- RETÓRICA INTERFACE & MAIN ORCHESTRATION MODULE (main.js) ---
 var RetoricaUI = {
     state: {
@@ -14,18 +13,40 @@ var RetoricaUI = {
             };
         }
         
-        // Inicializar el motor de idiomas de la interfaz
+        // Inicializar el motor de idiomas de la interfaz de forma segura
         if (typeof RetoricaI18n !== 'undefined') {
             RetoricaI18n.init();
-            RetoricaI18n.setAppLang('es'); // Forzar inicio en español base
+            RetoricaI18n.setAppLang('es'); 
         }
 
-        RetoricaUI.updateCounters();
+        // Habilitar cierre por software deslizante (Swipe Gestures) a pantalla completa
+        this.bindSwipeEvents();
+        this.updateCounters();
     },
 
     toggleSidebar: function() {
         var sidebar = document.getElementById('sidebar');
         if (sidebar) sidebar.classList.toggle('active');
+    },
+
+    bindSwipeEvents: function() {
+        var sidebar = document.getElementById('sidebar');
+        if (!sidebar) return;
+
+        var touchstartX = 0;
+        var touchendX = 0;
+
+        sidebar.addEventListener('touchstart', function(event) {
+            touchstartX = event.changedTouches[0].screenX;
+        }, { passive: true });
+
+        sidebar.addEventListener('touchend', function(event) {
+            touchendX = event.changedTouches[0].screenX;
+            // Si el deslizamiento de derecha a izquierda supera el umbral táctil de resguardo
+            if (touchstartX - touchendX > 60) {
+                sidebar.classList.remove('active');
+            }
+        }, { passive: true });
     },
 
     toggleTheme: function() {
@@ -36,7 +57,6 @@ var RetoricaUI = {
     adjustZoom: function(delta) {
         var targetZoom = this.state.zoom + delta;
         
-        // Límites estrictos del Zoómetro para evitar desbordes del Lienzo
         if (targetZoom < 0.6) targetZoom = 0.6;
         if (targetZoom > 2.2) targetZoom = 2.2;
         
@@ -45,49 +65,36 @@ var RetoricaUI = {
         var wrapper = document.getElementById('zoom-wrapper');
         if (wrapper) {
             wrapper.style.transform = "scale(" + targetZoom + ")";
-            wrapper.style.transformOrigin = "top left";
         }
 
-        var tag = document.getElementById('zoom-indicator-tag');
-        if (tag) {
-            var percentage = Math.round(targetZoom * 100);
-            var statusMsg = "(Normal)";
-            if (targetZoom <= 0.6) statusMsg = "(Mínimo)";
-            if (targetZoom >= 2.2) statusMsg = "(Máximo)";
-            tag.innerText = percentage + "% " + statusMsg;
+        var indicator = document.getElementById('zoom-indicator-tag');
+        if (indicator) {
+            indicator.innerText = Math.round(targetZoom * 100) + "%";
+        }
+    },
+
+    clearEditor: function() {
+        if (confirm("¿Limpiar el lienzo activo? Perderás los datos no guardados.")) {
+            document.getElementById('editor-title').value = "";
+            document.getElementById('editor-body').value = "";
+            if (typeof RetoricaStorage !== 'undefined') {
+                RetoricaStorage.activeDocId = null;
+            }
+            this.updateCounters();
+            this.notify("Lienzo restaurado.");
         }
     },
 
     updateCounters: function() {
-        var editor = document.getElementById('editor-body');
-        var text = editor ? editor.value : "";
-
-        var charCount = text.length;
-        var wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
-        var lineCount = text ? text.split('\n').length : 1;
-
-        var elChars = document.getElementById('count-chars');
-        var elWords = document.getElementById('count-words');
-        var elLines = document.getElementById('count-lines');
-
-        if (elChars) elChars.innerText = "CHARS: " + charCount;
-        if (elWords) elWords.innerText = "WORDS: " + wordCount;
-        if (elLines) elLines.innerText = "LINES: " + lineCount;
-    },
-
-    clearEditor: function() {
-        var title = document.getElementById('editor-title');
-        var body = document.getElementById('editor-body');
+        var body = document.getElementById('editor-body') ? document.getElementById('editor-body').value : "";
         
-        if (title) title.value = "";
-        if (body) body.value = "";
-        
-        if (typeof RetoricaStorage !== 'undefined') {
-            RetoricaStorage.activeDocId = null;
-        }
-        
-        this.updateCounters();
-        this.notify("Lienzo reiniciado limpia y modularmente.");
+        var chars = body.length;
+        var words = body.trim() === "" ? 0 : body.trim().split(/\s+/).length;
+        var lines = body === "" ? 1 : body.split('\n').length;
+
+        if (document.getElementById('count-chars')) document.getElementById('count-chars').innerText = "CHARS: " + chars;
+        if (document.getElementById('count-words')) document.getElementById('count-words').innerText = "WORDS: " + words;
+        if (document.getElementById('count-lines')) document.getElementById('count-lines').innerText = "LINES: " + lines;
     },
 
     notify: function(msg) {
@@ -115,20 +122,19 @@ var RetoricaUI = {
         var blob = new Blob([body], { type: 'text/plain;charset=utf-8' });
         var link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = title + ".txt";
+        link.download = title + \".txt\";
         link.click();
         this.notify("Archivo TXT descargado.");
     }
 };
 
-// Disparador de Carga Estricta del Ciclo de Vida
+// Inicialización estricta del ciclo de vida
 window.onload = function() {
     RetoricaUI.init();
 };
 
-// Registro automático del Service Worker Modular
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js?v=GOD_MODE')
-    .then(function() { console.log("Retorica PWA: Service Worker enlazado ✓"); })
-    .catch(function(err) { console.error("Error PWA Register: ", err); });
+    .then(function() { console.log("Retorica Service Worker Sincronizado."); })
+    .catch(function(err) { console.error("Fallo de Service Worker: ", err); });
 }
