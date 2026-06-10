@@ -1,12 +1,14 @@
 // --- RETÓRICA INTERFACE & MAIN ORCHESTRATION MODULE (main.js) ---
 var RetoricaUI = {
-    state: { zoom: 1.0 },
+    state: { zoom: 1.0, deferredPrompt: null },
     init: function() {
         var editor = document.getElementById('editor-body');
         if (editor) { editor.oninput = function() { RetoricaUI.updateCounters(); }; }
         if (typeof RetoricaI18n !== 'undefined') { RetoricaI18n.init(); RetoricaI18n.setAppLang('es'); }
         this.bindSwipeEvents();
         this.updateCounters();
+        this.listenPWAInstallation();
+        if (typeof RetoricaAuth !== 'undefined') { RetoricaAuth.initLifecycle(); }
     },
     toggleSidebar: function() {
         var sidebar = document.getElementById('sidebar');
@@ -33,41 +35,30 @@ var RetoricaUI = {
         this.state.zoom = targetZoom;
         var wrapper = document.getElementById('zoom-wrapper');
         if (wrapper) { wrapper.style.transform = "scale(" + targetZoom + ")"; }
-        var indicator = document.getElementById('zoom-indicator-tag');
-        if (indicator) { indicator.innerText = Math.round(targetZoom * 100) + "%"; }
-    },
-    clearEditor: function() {
-        if (confirm("¿Limpiar el lienzo activo? Perderás los datos no guardados.")) {
-            document.getElementById('editor-title').value = "";
-            document.getElementById('editor-body').value = "";
-            if (typeof RetoricaStorage !== 'undefined') { RetoricaStorage.activeDocId = null; }
-            this.updateCounters();
-            this.notify("Lienzo restaurado.");
-        }
     },
     updateCounters: function() {
-        var body = document.getElementById('editor-body') ? document.getElementById('editor-body').value : "";
-        var chars = body.length;
-        var words = body.trim() === "" ? 0 : body.trim().split(/\s+/).length;
-        var lines = body === "" ? 1 : body.split('\n').length;
-        if (document.getElementById('count-chars')) document.getElementById('count-chars').innerText = "CHARS: " + chars;
-        if (document.getElementById('count-words')) document.getElementById('count-words').innerText = "WORDS: " + words;
-        if (document.getElementById('count-lines')) document.getElementById('count-lines').innerText = "LINES: " + lines;
+        var body = document.getElementById('editor-body'); if (!body) return;
+        var text = body.value;
+        var chars = text.length;
+        var words = text.trim() === "" ? 0 : text.trim().split(/\s+/).length;
+        var lines = text.split('\n').length;
+        document.getElementById('count-chars').innerText = "CHARS: " + chars;
+        document.getElementById('count-words').innerText = "WORDS: " + words;
+        document.getElementById('count-lines').innerText = "LINES: " + lines;
     },
     notify: function(msg) {
-        var toast = document.getElementById('toast-notif');
-        if (!toast) return;
+        var toast = document.getElementById('toast-notif'); if (!toast) return;
         toast.innerText = msg; toast.classList.add('show');
         setTimeout(function() { toast.classList.remove('show'); }, 2200);
     },
-    expPDF: function(isEditable) {
-        this.notify(isEditable ? "Generando PDF Editable..." : "Generando PDF Profesional...");
+    expPDF: function() {
+        this.notify("Generando PDF profesional...");
         var wrapper = document.getElementById('zoom-wrapper');
         var title = document.getElementById('editor-title').value.trim() || "guion";
         if (wrapper) {
-            var opt = { margin: 1, filename: title + '.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } };
-            if (isEditable) { html2pdf().set(opt).from(wrapper).toPdf().get('pdf').then(function(pdf) { pdf.addField(new createTextField()); }).save(); }
-            else { html2pdf().from(wrapper).set(opt).save(); }
+            var opt = { margin: 10, filename: title + '.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, backgroundColor: '#0f111a' }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
+            if (document.body.classList.contains('light-theme')) { opt.html2canvas.backgroundColor = '#f0f2f5'; }
+            html2pdf().from(wrapper).set(opt).save();
         }
     },
     expDOC: function() {
@@ -85,7 +76,35 @@ var RetoricaUI = {
         var blob = new Blob([body], { type: 'text/plain;charset=utf-8' });
         var link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = title + ".txt"; link.click();
         this.notify("Archivo TXT descargado.");
+    },
+    listenPWAInstallation: function() {
+        window.addEventListener('beforeinstallprompt', function(e) {
+            e.preventDefault();
+            RetoricaUI.state.deferredPrompt = e;
+            var installBtn = document.getElementById('btn-install-pwa');
+            if (installBtn) installBtn.style.display = 'block';
+        });
+        window.addEventListener('appinstalled', function() {
+            RetoricaUI.state.deferredPrompt = null;
+            var installBtn = document.getElementById('btn-install-pwa');
+            if (installBtn) installBtn.style.display = 'none';
+            RetoricaUI.notify("¡Retórica instalada con éxito!");
+        });
+    },
+    triggerInstallPWA: function() {
+        var promptEvent = this.state.deferredPrompt; if (!promptEvent) return;
+        promptEvent.prompt();
+        promptEvent.userChoice.then(function(choiceResult) {
+            if (choiceResult.outcome === 'accepted') { console.log('El usuario aceptó la instalación nativa.'); }
+            RetoricaUI.state.deferredPrompt = null;
+            var installBtn = document.getElementById('btn-install-pwa');
+            if (installBtn) installBtn.style.display = 'none';
+        });
     }
 };
 window.onload = function() { RetoricaUI.init(); };
-if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js?v=GOD_MODE').then(function() { console.log("Retorica SW Sync."); }); }
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js?v=GOD_MODE')
+    .then(function() { console.log("Retorica Service Worker Sincronizado Físicamente ✓"); })
+    .catch(function(err) { console.error("Fallo crítico en Service Worker:", err); });
+}
