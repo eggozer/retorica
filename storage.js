@@ -77,5 +77,11 @@ var RetoricaStorage = {
                 container.appendChild(row);
             }
         }
+    },
+    clearCanvas: function() {
+        if(document.getElementById('editor-title')) document.getElementById('editor-title').value = "";
+        if(document.getElementById('editor-body')) document.getElementById('editor-body').value = "";
+        this.activeDocId = null;
+        RetoricaUI.notify("Lienzo limpio para nuevo proyecto.");
     }
 };
