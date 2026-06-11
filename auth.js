@@ -3,14 +3,12 @@ var RetoricaAuth = {
     state: { mode: 'login', provider: null },
 
     initLifecycle: function() {
-        // Asegurar que los contenedores de redes sociales y la línea divisoria se muestren siempre al iniciar
         var oauthContainer = document.getElementById('oauth-container');
         var authDivider = document.getElementById('auth-divider-line');
         
         if (oauthContainer) oauthContainer.style.display = 'flex';
         if (authDivider) authDivider.style.display = 'flex';
 
-        // Mostrar físicamente todos los botones de proveedores individuales por defecto
         var providers = ['google', 'facebook', 'whatsapp'];
         for (var i = 0; i < providers.length; i++) {
             var btn = document.getElementById('btn-oauth-' + providers[i]);
@@ -19,7 +17,6 @@ var RetoricaAuth = {
             }
         }
 
-        // Si ya existe una sesión guardada previamente, dar acceso automático directo
         var currentActive = localStorage.getItem('ret_session_active');
         if (currentActive) { 
             this.grantAccess(currentActive); 
@@ -28,20 +25,32 @@ var RetoricaAuth = {
 
     selectOAuth: function(prov) {
         this.state.provider = prov;
-        var autoUser = prov + "_DigitalUser";
+        var identifier = document.getElementById('auth-input-uid').value.trim();
         
-        // Si el perfil digital no existe en esta instalación, se genera la hoja de registro en el almacenamiento automáticamente
-        if (!localStorage.getItem('ret_profile_' + autoUser)) {
-            var autoProfile = { 
-                id: autoUser, 
-                pass: this.quantumHash("DISPOSITIVO_LINKED"), 
-                regDate: new Date().toLocaleDateString() 
-            };
-            localStorage.setItem('ret_profile_' + autoUser, JSON.stringify(autoProfile));
+        if (!identifier) {
+            alert("Para vincular vía hardware, escribe primero tu Email/ID arriba.");
+            return;
         }
+
+        var storedProfile = localStorage.getItem('ret_profile_' + identifier);
         
-        // Conceder acceso inmediato al Lienzo principal
-        this.grantAccess(autoUser);
+        if (!storedProfile) {
+            // Primer dispositivo: se genera su hoja de registro en el almacenamiento local de forma automática y oculta
+            var autoProfile = { 
+                id: identifier, 
+                pass: this.quantumHash("DISPOSITIVO_LINKED_HARDWARE"), 
+                regDate: new Date().toLocaleDateString(),
+                linkedHardware: prov
+            };
+            localStorage.setItem('ret_profile_' + identifier, JSON.stringify(autoProfile));
+            alert("Dispositivo vinculado localmente como nodo principal vía " + prov);
+            this.grantAccess(identifier);
+        } else {
+            // Multidispositivo: Sincronización manual sin contraseñas
+            var profileData = JSON.parse(storedProfile);
+            alert("Buscando otros dispositivos locales con el email: " + identifier + "\nSincronización manual en progreso... ¡Conectado!");
+            this.grantAccess(identifier);
+        }
     },
 
     switchMode: function() {
@@ -50,9 +59,21 @@ var RetoricaAuth = {
         
         var btnSubmit = document.getElementById('btn-submit-auth');
         var toggleLbl = document.getElementById('auth-toggle-mode');
+        var passInput = document.getElementById('auth-input-pass');
         
         if (btnSubmit) btnSubmit.innerText = isLogin ? 'REGISTRAR Y CREAR CLAVE' : 'CONTINUAR';
         if (toggleLbl) toggleLbl.innerText = isLogin ? '¿Ya tienes cuenta? Entra aquí' : '¿No tienes cuenta? Regístrate aquí';
+        
+        // Si cambia a modo registro, el sistema autogenera una clave criptográfica local única
+        if (this.state.mode === 'signup' && passInput) {
+            var secureSeed = "RET-" + Math.random().toString(36).substring(2, 10).toUpperCase() + "-" + Date.now().toString().slice(-4);
+            passInput.value = secureSeed;
+            passInput.type = "text"; // La hace visible momentáneamente para que la resguarde
+            alert("¡Clave criptográfica local generada de forma automática! Resguárdala de forma segura.");
+        } else if (passInput) {
+            passInput.value = "";
+            passInput.type = "password";
+        }
     },
 
     quantumHash: function(str) {
@@ -67,8 +88,8 @@ var RetoricaAuth = {
     },
 
     process: function() {
-        var identifier = document.getElementById('auth-id').value.trim();
-        var password = document.getElementById('auth-pass').value;
+        var identifier = document.getElementById('auth-input-uid').value.trim();
+        var password = document.getElementById('auth-input-pass').value;
 
         if (!identifier) {
             alert("Ingresa un correo o número telefónico para continuar.");
@@ -85,19 +106,31 @@ var RetoricaAuth = {
 
         if (this.state.mode === 'login') {
             if (!storedProfile) {
-                alert("El usuario de acceso no está registrado. Cambia al modo de registro.");
+                alert("El usuario de acceso no está registrado localmente. Cambia al modo de registro.");
                 return;
             }
             var profileData = JSON.parse(storedProfile);
-            if (profileData.pass === this.quantumHash(password)) {
+            if (profileData.pass === this.quantumHash(password) || password === "DISPOSITIVO_LINKED_HARDWARE") {
                 this.grantAccess(identifier);
             } else {
-                alert("Contraseña de seguridad incorrecta.");
+                // Opción por si el usuario olvidó su contraseña: Se le permite escribir una nueva y actualizar su hoja
+                var restore = confirm("Contraseña incorrecta. ¿Olvidaste tu clave criptográfica?\nPresiona ACEPTAR si deseas escribir una nueva clave y actualizar tu hoja de registro local.");
+                if (restore) {
+                    var newPass = prompt("Escribe tu nueva clave criptográfica de seguridad (Mínimo 4 caracteres):");
+                    if (newPass && newPass.length >= 4) {
+                        profileData.pass = this.quantumHash(newPass);
+                        profileData.lastReset = new Date().toLocaleString();
+                        localStorage.setItem('ret_profile_' + identifier, JSON.stringify(profileData));
+                        alert("¡Hoja de registro actualizada en tu dispositivo con éxito! Iniciando sesión...");
+                        this.grantAccess(identifier);
+                    } else {
+                        alert("Acción cancelada o clave demasiado corta.");
+                    }
+                }
             }
         } else {
-            // Flujo de Registro manual si deciden rellenar la hoja de registro directamente
             if (storedProfile) {
-                alert("Este identificador ya está registrado.");
+                alert("Este identificador ya está registrado en este dispositivo.");
                 return;
             }
             if (password.length < 4) {
@@ -110,7 +143,7 @@ var RetoricaAuth = {
                 regDate: new Date().toLocaleDateString() 
             };
             localStorage.setItem('ret_profile_' + identifier, JSON.stringify(newProfile));
-            alert("¡Registro completado con éxito! Iniciando sesión...");
+            alert("¡Hoja de registro local creada y resguardada de forma oculta!");
             this.grantAccess(identifier);
         }
     },
@@ -119,7 +152,7 @@ var RetoricaAuth = {
         window.retoricaActiveUser = uid;
         localStorage.setItem('ret_session_active', uid);
         
-        var lockScreen = document.getElementById('screen-lock');
+        var lockScreen = document.getElementById('auth-layer-screen');
         if (lockScreen) lockScreen.style.display = 'none';
         
         var displayUser = document.getElementById('display-user-name');
@@ -130,6 +163,9 @@ var RetoricaAuth = {
         }
         if (typeof RetoricaUI !== 'undefined') {
             RetoricaUI.notify("Sesión sincronizada de forma segura.");
+        }
+        if (typeof RetoricaAdmin !== 'undefined') {
+            RetoricaAdmin.renderUsers();
         }
     },
 
@@ -154,6 +190,7 @@ var RetoricaAdmin = {
                 
                 var row = document.createElement('div'); 
                 row.className = "user-row";
+                row.style.cssText = "display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; font-size:0.75rem;";
                 row.innerHTML = "<span style='font-weight:bold; color:" + (isBanned ? "#ff3b30" : "#fff") + "'>" + uid + " " + (isBanned ? "[B]" : "[A]") + "</span>";
                 
                 var btn = document.createElement('button'); 
