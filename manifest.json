@@ -5,8 +5,7 @@
   "icons": [
     {
       "src": "https://eggozer.github.io/retorica/icon-192.png",
-      "type": "image/png",
-      "sizes": "192x192",
+      "type": "image/png",\n      "sizes": "192x192",
       "purpose": "any maskable"
     },
     {
@@ -16,8 +15,7 @@
       "purpose": "any maskable"
     }
   ],
-  "start_url": "./index.html?v=2026_MODULAR_PRO",
-  "background_color": "#0f111a",
+  "start_url": "./index.html?v=2026_MODULAR_PRO",\n  "background_color": "#0f111a",
   "theme_color": "#00ffcc",
   "display": "standalone",
   "orientation": "portrait",
