@@ -4,7 +4,9 @@ var RetoricaUI = {
 
     init: function() {
         var editor = document.getElementById('editor-body');
-        if (editor) { editor.oninput = function() { RetoricaUI.updateCounters(); }; }
+        if (editor) {
+            editor.oninput = function() { RetoricaUI.updateCounters(); };
+        }
         if (typeof RetoricaI18n !== 'undefined') RetoricaI18n.init();
         
         var unifiedContainer = document.getElementById('unified-sel-container');
@@ -16,9 +18,9 @@ var RetoricaUI = {
                 }
             };
         }
+        this.bindSwipeEvents();
         this.updateCounters();
-        if (typeof RetoricaAuth !== 'undefined') RetoricaAuth.initLifecycle();
-    },
+        if (typeof RetoricaAuth !== 'undefined') RetoricaAuth.initLifecycle();\n    },
 
     toggleSidebar: function() {
         var sidebar = document.getElementById('sidebar');
@@ -36,61 +38,109 @@ var RetoricaUI = {
     adjustZoom: function(delta) {
         var targetZoom = this.state.zoom + delta;
         if (targetZoom < 0.6) targetZoom = 0.6;
-        if (targetZoom > 2.0) targetZoom = 2.0;
+        if (targetZoom > 1.8) targetZoom = 1.8;
         this.state.zoom = targetZoom;
+        
         var wrapper = document.getElementById('zoom-wrapper');
-        if (wrapper) wrapper.style.transform = "scale(" + targetZoom + ")";
+        if (wrapper) {
+            wrapper.style.transform = "scale(" + this.state.zoom + ")";
+            wrapper.style.transformOrigin = "top left";
+            wrapper.style.width = (100 / this.state.zoom) + "%";
+        }
+        this.notify("Zoom: " + Math.round(this.state.zoom * 100) + "%");
+    },
+
+    bindSwipeEvents: function() {
+        var sidebar = document.getElementById('sidebar');
+        if (!sidebar) return;
+        
+        sidebar.addEventListener('touchstart', function(e) {
+            e.stopPropagation();
+        }, false);
+        sidebar.addEventListener('touchmove', function(e) {
+            e.stopPropagation();
+        }, false);
     },
 
     updateCounters: function() {
-        var body = document.getElementById('editor-body') ? document.getElementById('editor-body').value : "";
-        var chars = body.length;
-        var words = body.trim() === "" ? 0 : body.trim().split(/\s+/).length;
-        var lines = body === "" ? 1 : body.split('\n').length;
-
-        var countCharsEl = document.getElementById('count-chars');
-        var countWordsEl = document.getElementById('count-words');
-        var countLinesEl = document.getElementById('count-lines');
-
-        if (countCharsEl) countCharsEl.innerText = "CHARS: " + chars;
-        if (countWordsEl) countWordsEl.innerText = "WORDS: " + words;
-        if (countLinesEl) countLinesEl.innerText = "LINES: " + lines;
+        var editor = document.getElementById('editor-body');
+        if (!editor) return;
+        var text = editor.innerText || editor.textContent || "";
+        
+        var chars = text.length;
+        var words = text.trim() === "" ? 0 : text.trim().split(/\s+/).length;
+        var lines = text.split('\n').length;
+        
+        if (document.getElementById('count-chars')) document.getElementById('count-chars').innerText = "CHARS: " + chars;
+        if (document.getElementById('count-words')) document.getElementById('count-words').innerText = "WORDS: " + words;
+        if (document.getElementById('count-lines')) document.getElementById('count-lines').innerText = "LINES: " + lines;
     },
 
     notify: function(msg) {
         var toast = document.getElementById('toast-notif');
         if (!toast) return;
-        toast.innerText = msg; toast.classList.add('show');
-        setTimeout(function() { toast.classList.remove('show'); }, 2200);
+        toast.innerText = msg;
+        toast.classList.add('show');
+        setTimeout(function() { toast.classList.remove('show'); }, 2500);
     },
 
-    expPDF: function() {
-        this.notify("Generando PDF plano...");
-        var wrapper = document.getElementById('unified-sel-container');
-        var title = document.getElementById('editor-title').value.trim() || "guion";
-        if (wrapper && typeof html2pdf !== 'undefined') {
-            var opt = { margin: 15, filename: title + '.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
-            html2pdf().from(wrapper).set(opt).save();
+    // --- MÓDULO ENRIQUECIDO DE EDICIÓN AVANZADA ---
+    execEditorCmd: function(cmd, val) {
+        document.execCommand(cmd, false, val || null);
+        this.focusBody();
+    },
+    
+    insertTable: function() {
+        var rows = prompt("Número de Filas:", "3");
+        var cols = prompt("Número de Columnas:", "3");
+        if(!rows || !cols) return;
+        var html = "<table style='width:100%; border-collapse:collapse; margin:10px 0; border:1px solid var(--border);'>";
+        for(var r=0; r<parseInt(rows); r++){
+            html += "<tr>";
+            for(var c=0; c<parseInt(cols); c++){
+                html += "<td style='border:1px solid var(--border); padding:6px; min-width:30px; color:var(--text-main);'>...</td>";
+            }
+            html += "</tr>";
         }
+        html += "</table><br>";
+        this.execEditorCmd('insertHTML', html);
+    },
+    
+    insertLocalImage: function() {
+        var url = prompt("Introduce la URL de la imagen o Base64:", "https://");
+        if(url) this.execEditorCmd('insertImage', url);
+    },
+
+    focusBody: function() {
+        var b = document.getElementById('editor-body');
+        if(b) b.focus();
+    },
+
+    // --- ENLACES DE EXPORTACIÓN DEL SUBMENÚ DESLIZABLE ---
+    expPDFPlano: function() {
+        this.notify("Exportando PDF Fijo...");
+        var title = (document.getElementById('editor-title').value || "guion_plano").trim();
+        var element = document.getElementById('unified-sel-container');
+        html2pdf().from(element).set({ margin:15, filename: title+'.pdf' }).save();
     },
 
     expPDFEditable: function() {
-        this.notify("Generando PDF Formulario Editable...");
-        var title = document.getElementById('editor-title').value.trim() || "guion_editable";
-        var bodyValue = document.getElementById('editor-body').value;
-        var htmlForm = "<html><body><h2>" + title + "</h2><p>Formulario interactivo:</p><input type='text' value='" + title + "' style='width:100%; font-weight:bold; margin-bottom:10px;'><br><textarea style='width:100%; height:400px;'>" + bodyValue + "</textarea></body></html>";
-        var worker = html2pdf().from(htmlForm).set({ margin: 15, filename: title + '_editable.pdf' }).save();
-        this.notify("PDF Editable exportado ✓");
+        this.notify("Construyendo Formulario PDF...");
+        var title = (document.getElementById('editor-title').value || "guion_editable").trim();
+        var bodyValue = document.getElementById('editor-body').innerHTML;
+        var htmlForm = "<html><body><h2>" + title + "</h2><textarea style='width:100%; height:500px;'>" + bodyValue + "</textarea></body></html>";
+        html2pdf().from(htmlForm).set({ margin: 15, filename: title + '_editable.pdf' }).save();
+        this.notify("PDF Editable generado ✓");
     },
 
     expDOC: function() {
-        var body = document.getElementById('editor-body').value;
-        var title = document.getElementById('editor-title').value.trim() || "guion";
-        var htmlContent = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><title>" + title + "</title><style>body{font-family:Arial;line-height:1.6;}</style></head><body><h2>" + title + "</h2>" + body.replace(/\n/g, "<br>") + "</body></html>";
+        var body = document.getElementById('editor-body').innerHTML;
+        var title = (document.getElementById('editor-title').value || "guion").trim();
+        var htmlContent = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><title>" + title + "</title></head><body><h2>" + title + "</h2>" + body + "</body></html>";
         var blob = new Blob(['\ufeff' + htmlContent], { type: 'application/msword' });
         var url = URL.createObjectURL(blob);
         var a = document.createElement('a'); a.href = url; a.download = title + ".doc"; a.click();
-        this.notify("Documento Word (.doc) generado ✓");
+        this.notify("Documento de Word generado ✓");
     }
 };
 
