@@ -4,19 +4,19 @@
   "description": "Entorno avanzado de scriptwriting, dictado asistido y control de audio.",
   "icons": [
     {
-      "src": "https://eggozer.github.io/retorica/icon-192.png",
+      "src": "./icon-192.png",
       "type": "image/png",
       "sizes": "192x192",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
-      "src": "https://eggozer.github.io/retorica/icon-512.png",
+      "src": "./icon-512.png",
       "type": "image/png",
       "sizes": "512x512",
-      "purpose": "any"
+      "purpose": "any maskable"
     }
   ],
-  "start_url": "./index.html?v=2026_MODULAR_PRO",
+  "start_url": "./index.html?v=2026_GOD_MODE",
   "background_color": "#0f111a",
   "theme_color": "#00ffcc",
   "display": "standalone",
