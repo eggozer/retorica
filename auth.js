@@ -1,7 +1,7 @@
 // --- RETÓRICA SECURITY MODULE (auth.js) ---
 var RetoricaAuth = {
     // CAMBIA ESTE VALOR POR TU EMAIL ADMINISTRATIVO REAL
-    GOD_EMAIL: "tu_email_god@dominio.com", 
+    GOD_EMAIL: "fabian10109@gmail.com", 
     
     initLifecycle: function() {
         var currentActive = localStorage.getItem('ret_session_active');
