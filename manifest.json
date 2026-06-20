@@ -5,17 +5,19 @@
   "icons": [
     {
       "src": "https://eggozer.github.io/retorica/icon-192.png",
-      "type": "image/png",\n      "sizes": "192x192",
-      "purpose": "any maskable"
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any"
     },
     {
       "src": "https://eggozer.github.io/retorica/icon-512.png",
       "type": "image/png",
       "sizes": "512x512",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ],
-  "start_url": "./index.html?v=2026_MODULAR_PRO",\n  "background_color": "#0f111a",
+  "start_url": "./index.html?v=2026_MODULAR_PRO",
+  "background_color": "#0f111a",
   "theme_color": "#00ffcc",
   "display": "standalone",
   "orientation": "portrait",
