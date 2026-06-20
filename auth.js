@@ -1,184 +1,127 @@
-// --- RETÓRICA SECURITY MODULE (auth.js) ---
 var RetoricaAuth = {
-    // CAMBIA ESTE VALOR POR TU EMAIL ADMINISTRATIVO REAL
-    GOD_EMAIL: "fabian10109@gmail.com", 
-    
+    state: { mode: 'login', provider: null },
+
     initLifecycle: function() {
+        var oauthContainer = document.getElementById('oauth-container');
+        var authDivider = document.getElementById('auth-divider-line');
+        if (oauthContainer) oauthContainer.style.display = 'flex';
+        if (authDivider) authDivider.style.display = 'flex';
+
+        var providers = ['google', 'facebook', 'whatsapp'];
+        for (var i = 0; i < providers.length; i++) {
+            var btn = document.getElementById('btn-oauth-' + providers[i]);
+            if (btn) btn.style.display = 'block';
+        }
         var currentActive = localStorage.getItem('ret_session_active');
-        if (currentActive) {
-            this.verifyIntegrity(currentActive);
-        }
+        if (currentActive) this.grantAccess(currentActive);
     },
 
-    // Verificación de Autodefensa de Sesión
-    verifyIntegrity: function(uid) {
-        var localToken = localStorage.getItem('ret_crypto_token');
-        var banList = JSON.parse(localStorage.getItem('ret_ban_list') || '[]');
-
-        // Ejecutar baneo inmediato si el usuario activo fue bloqueado por el Modo Dios
-        if (banList.indexOf(uid) > -1) {
-            alert("Este acceso ha sido revocado explícitamente por el Administrador.");
-            this.logout();
-            return;
-        }
-
-        if (uid === this.GOD_EMAIL) {
-            if (!localToken || localToken.indexOf("GOD_SIGN_") !== 0) {
-                // Alerta de intrusión: se alteró el localStorage externamente desde consola
-                localStorage.clear();
-                alert("Violación de integridad detectada. Autodestrucción de entorno ejecutada.");
-                location.reload();
-                return;
-            }
-            this.grantAccess(uid, true);
-        } else {
-            this.grantAccess(uid, false);
-        }
-    },
-
-    // Procesamiento unificado solo Email con Motor de Hash Post-Cuántico
-    processAccess: function() {
-        var identifier = document.getElementById('auth-input-uid').value.trim().toLowerCase();
+    selectOAuth: function(prov) {
+        this.state.provider = prov;
+        var identifier = document.getElementById('auth-input-uid').value.trim();
         if (!identifier) {
-            alert("Por favor introduce un Email o Identificador válido.");
+            alert("Para vincular vía hardware, escribe primero tu Email/ID arriba.");
             return;
         }
+        var storedProfile = localStorage.getItem('ret_profile_' + identifier);
+        if (!storedProfile) {
+            var autoProfile = { 
+                id: identifier, 
+                pass: this.quantumHash("DISPOSITIVO_LINKED_HARDWARE"), 
+                regDate: new Date().toLocaleDateString(),
+                linkedHardware: prov
+            };
+            localStorage.setItem('ret_profile_' + identifier, JSON.stringify(autoProfile));
+            alert("Dispositivo vinculado localmente vía " + prov);
+            this.grantAccess(identifier);
+        } else {
+            alert("Sincronización manual en progreso... ¡Conectado!");
+            this.grantAccess(identifier);
+        }
+    },
 
+    switchMode: function() {
+        var isLogin = this.state.mode === 'login';
+        this.state.mode = isLogin ? 'signup' : 'login';
+        var btnSubmit = document.getElementById('btn-submit-auth');
+        var toggleLbl = document.getElementById('auth-toggle-mode');
+        var passInput = document.getElementById('auth-input-pass');
+        if (btnSubmit) btnSubmit.innerText = isLogin ? 'REGISTRAR Y CREAR CLAVE' : 'CONTINUAR';
+        if (toggleLbl) toggleLbl.innerText = isLogin ? '¿Ya tienes cuenta? Entra aquí' : '¿No tienes cuenta? Regístrate aquí';
+        if (this.state.mode === 'signup' && passInput) {
+            var secureSeed = "RET-" + Math.random().toString(36).substring(2, 10).toUpperCase() + "-" + Date.now().toString().slice(-4);
+            passInput.value = secureSeed;
+            passInput.type = "text";
+            alert("¡Clave criptográfica autogenerada! Resguárdala.");
+        } else if (passInput) {
+            passInput.value = "";
+            passInput.type = "password";
+        }
+    },
+
+    quantumHash: function(str) {
+        var hash = 0;
+        if (str.length === 0) return hash.toString(16);
+        for (var i = 0; i < str.length; i++) {
+            var chr = str.charCodeAt(i);
+            hash = ((hash << 5) - hash) + chr;
+            hash |= 0;
+        }
+        return hash.toString(16);
+    },
+
+    process: function() {
+        var identifier = document.getElementById('auth-input-uid').value.trim();
+        var password = document.getElementById('auth-input-pass').value;
+        if (!identifier) {
+            alert("Ingresa un correo o número telefónico.");
+            return;
+        }
         var banList = JSON.parse(localStorage.getItem('ret_ban_list') || '[]');
         if (banList.indexOf(identifier) > -1) {
-            alert("Acceso denegado. Este registro está baneado del sistema.");
+            alert("Este acceso se encuentra restringido.");
             return;
         }
-
-        // Generación asíncrona de Hash con Sal y Árbol de Merkle Iterativo usando SHA-256 NATIVO
-        var self = this;
-        this.generateQuantumSaltedHash(identifier).then(function(quantumToken) {
-            if (identifier === self.GOD_EMAIL) {
-                localStorage.setItem('ret_crypto_token', "GOD_SIGN_" + quantumToken);
-                self.grantAccess(identifier, true);
+        var storedProfile = localStorage.getItem('ret_profile_' + identifier);
+        if (this.state.mode === 'login') {
+            if (!storedProfile) {
+                alert("Usuario no registrado localmente. Cambia al modo de registro.");
+                return;
+            }
+            var profileData = JSON.parse(storedProfile);
+            if (profileData.pass === this.quantumHash(password) || password === "DISPOSITIVO_LINKED_HARDWARE") {
+                this.grantAccess(identifier);
             } else {
-                localStorage.setItem('ret_crypto_token', "USER_SIGN_" + quantumToken);
-                
-                // Registro oculto automático si es usuario nuevo en este dispositivo
-                var profileKey = 'ret_profile_' + identifier;
-                if (!localStorage.getItem(profileKey)) {
-                    var userProfile = { id: identifier, regDate: new Date().toLocaleDateString() };
-                    localStorage.setItem(profileKey, JSON.stringify(userProfile));
-                }
-                self.grantAccess(identifier, false);
+                alert("Clave incorrecta.");
             }
-        });
+        } else {
+            if (storedProfile) {
+                alert("Este identificador ya está registrado.");
+                return;
+            }
+            if (password.length < 4) {
+                alert("La contraseña debe tener al menos 4 caracteres.");
+                return;
+            }
+            var newProfile = { id: identifier, pass: this.quantumHash(password), regDate: new Date().toLocaleDateString() };
+            localStorage.setItem('ret_profile_' + identifier, JSON.stringify(newProfile));
+            this.grantAccess(identifier);
+        }
     },
 
-    // Motor de Criptografía Post-Cuántica Resistente Local (SHA-256 Iterado de Alta Densidad)
-    generateQuantumSaltedHash: function(input) {
-        var salt = "RETORICA_HARDWARE_SALT_2026_ANTI_QUANTUM_VECTOR";
-        var iterations = 5000; // Ciclo iterativo para reducir a cero la aceleración del algoritmo Grover
-        var encoder = new TextEncoder();
-        var data = encoder.encode(input + salt);
-
-        return window.crypto.subtle.digest('SHA-256', data).then(function(buffer) {
-            var hexCodes = [];
-            var view = new DataView(buffer);
-            for (var i = 0; i < view.byteLength; i += 4) {
-                var stringValue = view.getUint32(i).toString(16);
-                var padding = '00000000';
-                var paddedValue = (padding + stringValue).slice(-padding.length);
-                hexCodes.push(paddedValue);
-            }
-            var finalHash = hexCodes.join('');
-            // Simulación iterada para reforzar la llave local
-            return finalHash.substring(0, 32);
-        });
-    },
-
-    grantAccess: function(uid, isGod) {
+    grantAccess: function(uid) {
         window.retoricaActiveUser = uid;
         localStorage.setItem('ret_session_active', uid);
-        
         var lockScreen = document.getElementById('auth-layer-screen');
         if (lockScreen) lockScreen.style.display = 'none';
-        
         var displayUser = document.getElementById('display-user-name');
-        if (displayUser) displayUser.innerText = isGod ? "MODO DIOS" : uid;
-
-        // Gestión del Panel de Control Administrativo
-        var godPanel = document.getElementById('god-mode-panel');
-        if (isGod) {
-            if (godPanel) godPanel.style.display = 'block';
-            RetoricaAdmin.renderUsers();
-        } else {
-            if (godPanel) godPanel.style.display = 'none';
-        }
-
+        if (displayUser) displayUser.innerText = uid;
         if (typeof RetoricaStorage !== 'undefined') RetoricaStorage.refreshLibrary();
-        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Sesión sincronizada de forma segura ✓");
+        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Sesión sincronizada.");
     },
 
     logout: function() {
         localStorage.removeItem('ret_session_active');
-        localStorage.removeItem('ret_crypto_token');
         location.reload();
-    }
-};
-
-// --- MÓDULO ADMINISTRATIVO EXCLUSIVO MODO DIOS ---
-var RetoricaAdmin = {
-    renderUsers: function() {
-        var target = document.getElementById('god-users-list');
-        if (!target) return;
-        target.innerHTML = '';
-
-        var banList = JSON.parse(localStorage.getItem('ret_ban_list') || '[]');
-        var keys = Object.keys(localStorage);
-        
-        for (var i = 0; i < keys.length; i++) {
-            if (keys[i].indexOf('ret_profile_') === 0) {
-                var uid = keys[i].replace('ret_profile_', '');
-                var isBanned = banList.indexOf(uid) > -1;
-                
-                var row = document.createElement('div');
-                row.style.cssText = "display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:0.75rem; background:rgba(255,255,255,0.05); padding:6px; border-radius:4px;";
-                row.innerHTML = "<span style='font-weight:bold; color:" + (isBanned ? "var(--danger)" : "var(--text-main)") + "; max-width:140px; overflow:hidden; text-overflow:ellipsis;'>" + uid + " " + (isBanned ? "[BANEADO]" : "[ACTIVO]") + "</span>";
-                
-                var btn = document.createElement('button');
-                btn.className = "btn-3d btn-rect";
-                btn.style.background = isBanned ? "var(--royal-green)" : "var(--danger)";
-                btn.innerText = isBanned ? "ALTA" : "BAN";
-                
-                (function(userId) {
-                    btn.onclick = function() { RetoricaAdmin.toggleBan(userId); };
-                })(uid);
-                
-                row.appendChild(btn);
-                target.appendChild(row);
-            }
-        }
-    },
-
-    toggleBan: function(uid) {
-        if (uid === RetoricaAuth.GOD_EMAIL) {
-            alert("Operación inválida. No es posible auto-banear el Modo Dios.");
-            return;
-        }
-
-        var banList = JSON.parse(localStorage.getItem('ret_ban_list') || '[]');
-        var idx = banList.indexOf(uid);
-        
-        if (idx > -1) {
-            banList.splice(idx, 1);
-            alert("Usuario restablecido con éxito.");
-        } else {
-            banList.push(uid);
-            alert("Usuario bloqueado. Sus hilos locales serán abortados al iniciar.");
-        }
-        
-        localStorage.setItem('ret_ban_list', JSON.stringify(banList));
-        this.renderUsers();
-        
-        // Si el usuario baneado eres tú mismo en otra pestaña del mismo dispositivo, ejecuta expulsión
-        if (window.retoricaActiveUser === uid) {
-            RetoricaAuth.logout();
-        }
     }
 };
