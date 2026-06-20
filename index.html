@@ -2,128 +2,201 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover\">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Retórica - Sistema Profesional</title>
     <link rel="manifest" href="./manifest.json?v=2026_GOD_MODE">
-    <link rel="icon" type="image/png" href="https://eggozer.github.io/retorica/icon-192.png">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root {
             --bg-main: #0f111a; --bg-sidebar: #161925; --bg-card: #1f2335;
             --accent: #e2e8f0; --text-main: #f3f4f6; --text-muted: #a0aec0;
-            --border: #2d3748; --danger: #e53e3e; --btn-3d-bg: #2d3244;
-            --btn-shadow: #11131c; --royal-green: #2ecc71;
+            --border: #2d3748; --danger: #718096; --btn-3d-bg: #2d3244;
+            --btn-shadow: #11131c;
         }
         body.light-theme {
             --bg-main: #f0f2f5; --bg-sidebar: #e4e7eb; --bg-card: #ffffff;
             --accent: #2d3748; --text-main: #1a202c; --text-muted: #718096;
-            --border: #e2e8f0; --danger: #e53e3e; --btn-3d-bg: #edf2f7;
+            --border: #cbd5e0; --danger: #a0aec0; --btn-3d-bg: #e2e8f0;
             --btn-shadow: #cbd5e0;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body, html { width: 100%; height: 100%; background: var(--bg-main); color: var(--text-main); overflow: hidden; position: relative; }
-        
-        /* Capa de Autenticación Unificada */
-        .auth-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-main); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .auth-card { background: var(--bg-sidebar); width: 100%; max-width: 360px; padding: 30px; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 10px 25px var(--btn-shadow); text-align: center; }
-        .auth-logo { width: 64px; height: 64px; margin-bottom: 15px; }
-        .auth-title { font-size: 1.4rem; font-weight: bold; margin-bottom: 5px; color: var(--text-main); }
-        .auth-subtitle { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 25px; }
-        .auth-input-group { margin-bottom: 20px; text-align: left; }
-        .auth-label { font-size: 0.7rem; font-weight: bold; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; display: block; letter-spacing: 1px; }
-        .auth-input { width: 100%; background: var(--bg-main); border: 1px solid var(--border); padding: 12px 15px; border-radius: 8px; color: var(--text-main); font-size: 0.95rem; outline: none; transition: border 0.2s; }
-        .auth-input:focus { border-color: var(--royal-green); }
-        
-        /* Botones 3D Pro */
-        .btn-3d { width: 100%; background: var(--btn-3d-bg); border: none; padding: 12px 20px; border-radius: 8px; color: var(--text-main); font-weight: bold; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px var(--btn-shadow); transition: all 0.1s; position: relative; top: 0; outline: none; }
-        .btn-3d:active { top: 3px; box-shadow: 0 1px var(--btn-shadow); }
-        .btn-rect { border-radius: 6px; padding: 6px 12px; font-size: 0.75rem; width: auto; }
-
-        /* Estructura de la Barra Superior e Icono Ajustado */
-        .top-bar { height: 60px; background: var(--bg-sidebar); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 15px; z-index: 1000; position: relative; }
-        .brand-area { display: flex; align-items: center; gap: 10px; cursor: pointer; height: 100%; }
-        .icon-nav-logo { width: 32px; height: 32px; object-fit: contain; display: block; pointer-events: none; }
-        .app-title { font-size: 1.1rem; font-weight: 800; letter-spacing: 0.5px; }
-        
-        .action-row { margin-left: auto; display: flex; gap: 8px; }
-        .btn-circle { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; padding: 0; }
-
-        /* Contenedor Principal Deslizable */
-        .sidebar { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background: var(--bg-sidebar); border-right: 1px solid var(--border); z-index: 5000; transition: left 0.3s cubic-bezier(0.1, 0.9, 0.2, 1); display: flex; flex-direction: column; }
-        .sidebar.active { left: 0; }
-        .sidebar-header { padding: 20px 15px; border-bottom: 1px solid var(--border); font-size: 0.85rem; font-weight: bold; color: var(--text-muted); }
-        .sidebar-content { flex: 1; overflow-y: auto; padding: 15px; }
-        .sidebar-footer { padding: 15px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 10px; background: var(--bg-main); }
-
-        .main-view { width: 100%; height: calc(100% - 95px); position: relative; background: var(--bg-main); }
-        .editor-scroll-container { width: 100%; height: 100%; overflow-y: auto; padding: 20px; }
-        #zoom-wrapper { width: 100%; transform-origin: top center; transition: transform 0.15s ease; }
-        
-        .unified-container { width: 100%; max-width: 800px; margin: 0 auto; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px var(--btn-shadow); }
-        .doc-title { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 15px; color: var(--text-main); font-size: 1.25rem; font-weight: bold; outline: none; }
-        .rich-editor-body { width: 100%; min-height: 300px; background: transparent; border: none; color: var(--text-main); font-size: 1rem; line-height: 1.6; outline: none; resize: none; white-space: pre-wrap; word-wrap: break-word; }
-        .rich-editor-body:[contenteditable]:empty:before { content: attr(placeholder); color: var(--text-muted); pointer-events: none; }
-
-        footer { height: 35px; background: var(--bg-sidebar); padding: 0 15px; font-size: 0.65rem; display: flex; align-items: center; gap: 15px; border-top: 1px solid var(--border); color: var(--text-muted); font-weight: bold; z-index: 900; position: relative; }
-        .toast { position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.85); color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; z-index: 10000; display: none; border: 1px solid var(--border); }
-        
-        .recording-active { background: var(--danger) !important; animation: pulse 1.5s infinite; }
-        .reading-active { background: var(--royal-green) !important; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body, html { width: 100%; height: 100%; background: var(--bg-main); color: var(--text-main); overflow: hidden; display: flex; flex-direction: column; }
+        .auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-main); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .auth-card { background: var(--bg-sidebar); border: 1px solid var(--border); border-radius: 16px; width: 100%; max-width: 400px; padding: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); text-align: center; }
+        .auth-logo-container { display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 25px; gap: 10px; }
+        .auth-icon { width: 64px; height: 64px; object-fit: contain; display: block; margin: 0 auto; }
+        .auth-logo { font-size: 2rem; font-weight: 900; color: var(--text-main); letter-spacing: 2px; text-align: center; }
+        .auth-subtitle { font-size: 0.75rem; color: var(--text-muted); font-weight: bold; letter-spacing: 1px; text-align: center; }
+        .input-group { position: relative; margin-bottom: 15px; text-align: left; }
+        .input-group label { display: block; font-size: 0.65rem; color: var(--text-muted); font-weight: bold; margin-bottom: 5px; letter-spacing: 0.5px; }
+        .input-field { width: 100%; background: var(--bg-card); border: 1px solid var(--border); padding: 12px 15px; border-radius: 8px; color: var(--text-main); font-size: 0.9rem; font-weight: bold; }
+        .input-field:focus { border-color: var(--text-muted); outline: none; }
+        .btn-auth-3d { width: 100%; background: var(--btn-3d-bg); border: none; border-bottom: 4px solid var(--btn-shadow); padding: 12px; border-radius: 8px; color: var(--text-main); font-weight: bold; font-size: 0.85rem; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
+        .btn-auth-3d:active { transform: translateY(2px); border-bottom-width: 2px; }
+        .oauth-container { display: none; flex-direction: column; gap: 10px; margin-top: 15px; }
+        .btn-oauth { text-align: left; padding: 10px 15px; font-size: 0.8rem; display: none; background: var(--btn-3d-bg); border-bottom: 4px solid var(--btn-shadow); color: var(--text-main); border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .btn-oauth:active { transform: translateY(2px); border-bottom-width: 2px; }
+        .auth-divider { display: none; align-items: center; text-align: center; color: var(--text-muted); font-size: 0.65rem; font-weight: bold; margin: 20px 0; }
+        .auth-divider::before, .auth-divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--border); }
+        .auth-divider:not(:empty)::before { margin-right: .55em; }
+        .auth-divider:not(:empty)::after { margin-left: .55em; }
+        .header-app { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px 0 5px 0; background: var(--bg-sidebar); border-bottom: 1px solid var(--border); gap: 4px; }
+        .header-title-container { display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .header-icon { width: 24px; height: 24px; object-fit: contain; }
+        .header-app h1 { font-size: 1.2rem; font-weight: 900; letter-spacing: 3px; color: var(--text-main); text-align: center; }
+        .top-navbar { background: var(--bg-sidebar); border-bottom: 1px solid var(--border); padding: 25px 10px 10px 10px; display: flex; align-items: center; gap: 15px; z-index: 1000; }
+        .menu-slider-container { flex: 1; overflow-x: auto; white-space: nowrap; display: flex; gap: 18px; padding: 15px 5px 5px 5px; -webkit-overflow-scrolling: touch; }
+        .menu-slider-container::-webkit-scrollbar { height: 0px; }
+        .btn-wrapper-3d { display: inline-flex; flex-direction: column; align-items: center; position: relative; vertical-align: top; }
+        .btn-label-3d { font-size: 0.6rem; font-weight: bold; color: var(--text-muted); text-align: center; line-height: 0.75rem; min-height: 1.5rem; display: flex; align-items: flex-end; justify-content: center; margin-bottom: 6px; text-transform: uppercase; white-space: pre-line; }
+        .btn-round-3d { width: 44px; height: 44px; border-radius: 50%; background: var(--btn-3d-bg); border: none; border-bottom: 4px solid var(--btn-shadow); color: var(--text-main); font-size: 1.1rem; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: all 0.1s; }
+        .btn-round-3d:active { transform: translateY(2px); border-bottom-width: 1px; box-shadow: 0 2px 3px rgba(0,0,0,0.3); }
+        .sidebar-panel { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-sidebar); border-right: none; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1); z-index: 1500; display: flex; flex-direction: column; }
+        .sidebar-panel.active { transform: translateX(0); }
+        .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border); font-size: 0.9rem; font-weight: bold; color: var(--text-main); letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center; }
+        .sidebar-content { flex: 1; overflow-y: auto; padding: 20px; }
+        .grid-templates { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .card-template { background: var(--bg-card); padding: 12px; border-radius: 8px; border: 1px solid var(--border); display: flex; flex-direction: column; justify-content: space-between; min-height: 110px; }
+        .card-template-title { font-size: 0.8rem; font-weight: bold; color: var(--text-main); margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .card-template-body { font-size: 0.7rem; color: var(--text-muted); line-height: 0.95rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 10px; flex: 1; }
+        .card-template-actions { display: flex; gap: 6px; border-top: 1px solid var(--border); padding-top: 8px; }
+        .btn-action-tmpl { flex: 1; background: var(--btn-3d-bg); border: none; border-bottom: 2px solid var(--btn-shadow); padding: 4px; font-size: 0.6rem; font-weight: bold; color: var(--text-main); border-radius: 4px; cursor: pointer; text-align: center; }
+        .btn-action-tmpl:active { transform: translateY(1px); border-bottom-width: 1px; }
+        .sidebar-footer { padding: 20px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--bg-main); }
+        .main-view { flex: 1; display: flex; flex-direction: column; position: relative; z-index: 10; overflow: hidden; }
+        .editor-scroll-container { width: 100%; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; }
+        #zoom-wrapper { width: 100%; display: flex; flex-direction: column; flex: 1; }
+        .unified-container { border: 1px solid transparent; width: 100%; display: flex; flex-direction: column; flex: 1; }
+        .doc-title { background: transparent; border: none; color: var(--text-main); font-size: 1.4rem; font-weight: 800; margin-bottom: 15px; width: 100%; outline: none; padding: 5px 0; border-bottom: 1px dashed var(--border); }
+        .textarea-main { background: transparent; border: none; color: var(--text-main); font-size: 1rem; line-height: 1.6; resize: none; flex: 1; width: 100%; min-height: 250px; outline: none; font-weight: 500; }
+        .toast { position: fixed; bottom: 55px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--text-main); color: var(--bg-main); padding: 10px 20px; border-radius: 30px; font-size: 0.75rem; font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.3); transition: transform 0.2s ease-out; z-index: 3000; pointer-events: none; }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        .recording-active { border-color: #ff3b30 !important; animation: pulseMic 1.5s infinite; }
+        .reading-active { border-color: #00d2ff !important; }
+        @keyframes pulseMic { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        .file-input-hidden { display: none; }
     </style>
 </head>
 <body>
 
-    <div id="auth-layer-screen" class="auth-screen">
+    <div class="auth-overlay" id="auth-layer-screen">
         <div class="auth-card">
-            <img src="https://eggozer.github.io/retorica/icon-192.png" class="auth-logo" alt="Logo">
-            <div class="auth-title">Retórica</div>
-            <div class="auth-subtitle">Sistema Modular de Guiones</div>
-            <div class="auth-input-group">
-                <label class="auth-label" id="lbl-auth-user">Email / Identificador</label>
-                <input type="text" id="auth-input-uid" class="auth-input" placeholder="ejemplo@correo.com">
+            <div class="auth-logo-container">
+                <img src="./icon-192.png" class="auth-icon" alt="Retórica Logo" onerror="this.style.display='none';">
+                <div class="auth-logo">RETÓRICA</div>
+                <div class="auth-subtitle">SISTEMA MODULAR PROFESIONAL</div>
             </div>
-            <button class="btn-3d" onclick="RetoricaAuth.processAccess()" id="btn-auth-execute">INGRESAR</button>
+            <div class="input-group">
+                <label id="lbl-auth-user">USUARIO DIGITAL (EMAIL / ID)</label>
+                <input type="text" id="auth-input-uid" class="input-field" placeholder="ejemplo@retorica.com">
+            </div>
+            <div class="input-group">
+                <label id="lbl-auth-pass">CLAVE CRIPTOGRÁFICA</label>
+                <input type="password" id="auth-input-pass" class="input-field" placeholder="••••••••">
+            </div>
+            <button class="btn-auth-3d" id="btn-submit-auth" onclick="RetoricaAuth.process()">CONTINUAR</button>
+            <div style="margin-top:15px; font-size:0.7rem; font-weight:bold;">
+                <span id="auth-toggle-mode" style="color:var(--text-muted); cursor:pointer;" onclick="RetoricaAuth.switchMode()">¿No tienes cuenta? Regístrate aquí</span>
+            </div>
+            <div class="auth-divider" id="auth-divider-line">O ACCEDER VÍA HARDWARE</div>
+            <div class="oauth-container" id="oauth-container">
+                <button class="btn-oauth" id="btn-oauth-google" onclick="RetoricaAuth.selectOAuth('Google')">VINCULAR DISPOSITIVO GOOGLE</button>
+                <button class="btn-oauth" id="btn-oauth-facebook" onclick="RetoricaAuth.selectOAuth('Facebook')">VINCULAR DISPOSITIVO FACEBOOK</button>
+                <button class="btn-oauth" id="btn-oauth-whatsapp" onclick="RetoricaAuth.selectOAuth('WhatsApp')">VINCULAR DISPOSITIVO WHATSAPP</button>
+            </div>
         </div>
     </div>
 
-    <header class="top-bar">
-        <div class="brand-area" onclick="RetoricaUI.toggleSidebar()">
-            <img src="https://eggozer.github.io/retorica/icon-192.png" class="icon-nav-logo" alt="Retórica">
-            <span class="app-title">RETÓRICA</span>
+    <div class="header-app">
+        <div class="header-title-container">
+            <img src="./icon-192.png" class="header-icon" alt="Icono Retórica" onerror="this.style.display='none';">
+            <h1>RETÓRICA</h1>
         </div>
-        <div class="action-row">
-            <button class="btn-3d btn-circle" onclick="RetoricaStorage.save()" id="lbl-tool-save">💾</button>
-            <button class="btn-3d btn-circle" onclick="RetoricaStorage.clearCanvas()" id="lbl-tool-new">📄</button>
-            <button class="btn-3d btn-circle" onclick="RetoricaAudio.toggleMic()" id="btn-mic-main">🎙️</button>
-            <button class="btn-3d btn-circle" onclick="RetoricaAudio.play()" id="btn-play-main">▶️</button>
-            <button class="btn-3d btn-circle" onclick="RetoricaAudio.stop()" style="color:var(--danger)">🛑</button>
-        </div>
-    </header>
+    </div>
 
-    <div id="sidebar" class="sidebar">
-        <div class="sidebar-header">BIBLIOTECA & CONFIGURACIÓN</div>
+    <nav class="top-navbar">
+        <div class="btn-wrapper-3d">
+            <div class="btn-label-3d">Menú</div>
+            <button class="btn-round-3d" style="border-color:var(--text-muted);" onclick="RetoricaUI.toggleSidebar()">☰</button>
+        </div>
+        <div class="menu-slider-container">
+            <div class="btn-wrapper-3d">
+                <div class="btn-label-3d" id="lbl-tool-save">Guardar</div>
+                <button class="btn-round-3d" onclick="RetoricaStorage.save()">💾</button>
+            </div>
+            <div class="btn-wrapper-3d">
+                <div class="btn-label-3d" id="lbl-tool-new">Nuevo</div>
+                <button class="btn-round-3d" onclick="RetoricaStorage.clearCanvas()">📄</button>
+            </div>
+            <div class="btn-wrapper-3d">
+                <div class="btn-label-3d" id="lbl-tool-mic">Dictado</div>
+                <button class="btn-round-3d" id="btn-mic-main" onclick="RetoricaAudio.toggleMic()">🎙️</button>
+            </div>
+            <div class="btn-wrapper-3d">
+                <div class="btn-label-3d" id="lbl-tool-read">Lectura</div>
+                <button class="btn-round-3d" id="btn-play-main" onclick="RetoricaAudio.play()">🔊</button>
+            </div>
+            <div class="btn-wrapper-3d">
+                <div class="btn-label-3d" id="lbl-tool-stop">Abortar</div>
+                <button class="btn-round-3d" style="color:var(--text-muted);" onclick="RetoricaAudio.stop()">🛑</button>
+            </div>
+            <div class="btn-wrapper-3d">
+                <div class="btn-label-3d" id="lbl-tool-vmsg">Prod.\nAudio</div>
+                <button class="btn-round-3d" onclick="RetoricaAudio.produceVoiceMessage()">🎙️+ </button>
+            </div>
+            <div class="btn-wrapper-3d">
+                <div class="btn-label-3d" id="lbl-tool-tts">Texto\nA Voz</div>
+                <button class="btn-round-3d" onclick="RetoricaAudio.convertTextToVoiceFile()">💾🔊</button>
+            </div>
+            <div class="btn-wrapper-3d">
+                <div class="btn-label-3d">Importar\nArchivo</div>
+                <button class="btn-round-3d" onclick="document.getElementById('file-picker-local').click()">📂</button>
+            </div>
+            <div class="btn-wrapper-3d">
+                <div class="btn-label-3d">Guardar\nPDF</div>
+                <button class="btn-round-3d" onclick="RetoricaUI.expPDF()">🖨️</button>
+            </div>
+            <div class="btn-wrapper-3d">
+                <div class="btn-label-3d">PDF\nEditable</div>
+                <button class="btn-round-3d" onclick="RetoricaUI.expPDFEditable()">📝</button>
+            </div>
+            <div class="btn-wrapper-3d">
+                <div class="btn-label-3d">Guardar\nWord</div>
+                <button class="btn-round-3d" onclick="RetoricaUI.expDOC()">📝W</button>
+            </div>
+            <div class="btn-wrapper-3d">
+                <div class="btn-label-3d" id="lbl-tool-zoom">Zoom +</div>
+                <button class="btn-round-3d" onclick="RetoricaUI.adjustZoom(0.1)">➕</button>
+            </div>
+            <div class="btn-wrapper-3d">
+                <div class="btn-label-3d">Zoom -</div>
+                <button class="btn-round-3d" onclick="RetoricaUI.adjustZoom(-0.1)">➖</button>
+            </div>
+            <div class="btn-wrapper-3d">
+                <div class="btn-label-3d" id="lbl-tool-theme">Tema</div>
+                <button class="btn-round-3d" onclick="RetoricaUI.toggleTheme()">🌓</button>
+            </div>
+            <div class="btn-wrapper-3d">
+                <div class="btn-label-3d" id="lbl-tool-langapp">Idioma\nApp</div>
+                <button class="btn-round-3d" onclick="RetoricaI18n.toggleAppLang()">🌐</button>
+            </div>
+        </div>
+    </nav>
+
+    <input type="file" id="file-picker-local" class="file-input-hidden" accept=".pdf,.doc,.docx,.txt,.html" onchange="RetoricaStorage.importLocalFile(event)">
+
+    <div class="sidebar-panel" id="sidebar">
+        <div class="sidebar-header">
+            <span>BIBLIOTECA DE GUIONES (PLANTILLAS)</span>
+            <button class="btn-round-3d" style="width:36px; height:36px; font-size:0.8rem;" onclick="RetoricaUI.toggleSidebar()">❌</button>
+        </div>
         <div class="sidebar-content">
-            <div style="margin-bottom:20px;">
-                <button class="btn-3d" onclick="RetoricaUI.toggleTheme()" style="margin-bottom:8px;" id="lbl-tool-theme">MODIFICAR TEMA</button>
-                <button class="btn-3d" onclick="RetoricaUI.adjustZoom(0.1)" style="margin-bottom:8px;" id="lbl-tool-zoom">AUMENTAR ZOOM</button>
-                <button class="btn-3d" onclick="RetoricaUI.adjustZoom(-0.1)" style="margin-bottom:8px;">REDUCIR ZOOM</button>
-                <button class="btn-3d" onclick="RetoricaI18n.toggleAppLang()" style="margin-bottom:8px;" id="lbl-tool-langapp">IDIOMA APP</button>
-                <button class="btn-3d" onclick="RetoricaAudio.convertTextToVoiceFile()" style="margin-bottom:8px;" id="lbl-tool-tts">TEXTO A VOZ</button>
-                <button class="btn-3d" onclick="RetoricaStorage.exportToHTML()" style="margin-bottom:15px;" id="lbl-side-export">EXPORTAR HTML</button>
-            </div>
-            <div style="border-top:1px solid var(--border); padding-top:15px;">
-                <h4 style="font-size:0.75rem; color:var(--text-muted); margin-bottom:10px; letter-spacing:0.5px;">MIS PROYECTOS</h4>
-                <div id="local-library-container"></div>
-            </div>
-            <div id="god-mode-panel" style="border-top:1px solid var(--border); padding-top:15px; margin-top:15px; display:none;">
-                <h4 style="font-size:0.75rem; color:var(--royal-green); margin-bottom:10px; letter-spacing:0.5px;">MODO DIOS: GESTIÓN APPS</h4>
-                <div id="god-users-list"></div>
-            </div>
+            <div class="grid-templates" id="docs-list-render"></div>
         </div>
         <div class="sidebar-footer">
-            <div style="font-size:0.7rem; max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">User: <span id="display-user-name" style="color:var(--royal-green); font-weight:bold;">Anon</span></div>
-            <button onclick="RetoricaAuth.logout()" style="color:var(--danger); background:transparent; border:none; font-size:0.8rem; font-weight:bold; cursor:pointer; margin-left:auto;" id="lbl-side-logout">SALIR</button>
+            <button class="btn-auth-3d" style="width:auto; padding:8px 15px;" onclick="RetoricaStorage.exportToHTML()" id="lbl-side-export">EXPORTAR HTML</button>
+            <div style="font-size:0.7rem; color:var(--text-muted); font-weight:bold;"><span id="lbl-side-user">USER:</span> <span id="display-user-name" style="color:var(--text-main);">Anon</span></div>
+            <button onclick="RetoricaAuth.logout()" style="color:var(--text-muted); background:transparent; border:none; font-size:0.85rem; font-weight:bold; cursor:pointer;" id="lbl-side-logout">SALIR</button>
         </div>
     </div>
 
@@ -132,23 +205,30 @@
             <div id="zoom-wrapper">
                 <div class="unified-container" id="unified-sel-container">
                     <input type="text" id="editor-title" class="doc-title" placeholder="Título del Guion...">
-                    <div id="editor-body" class="rich-editor-body" contenteditable="true" placeholder="Escribe o dicta aquí tu retórica..."></div>
+                    <textarea id="editor-body" class="textarea-main" placeholder="Escribe o dicta aquí tu retórica..."></textarea>
                 </div>
             </div>
         </div>
     </main>
 
-    <footer>
+    <footer style="background:var(--bg-sidebar); padding:8px 15px; font-size:0.65rem; display:flex; gap:15px; border-top:1px solid var(--border); color:var(--text-muted); font-weight:bold; z-index:900;">
         <span id="count-chars">CHARS: 0</span><span id="count-words">WORDS: 0</span><span id="count-lines">LINES: 1</span>
-        <span style="margin-left:auto; color:var(--text-muted);">V.2026.MODULAR_PRO</span>
+        <span style="margin-left:auto; color:var(--text-muted);">V.2026.GOD_MODE</span>
     </footer>
 
     <div id="toast-notif" class="toast"></div>
 
-    <script src="./auth.js?v=GOD_MODE"></script>
-    <script src="./idiomas.js?v=GOD_MODE"></script>
-    <script src="./audio.js?v=GOD_MODE"></script>
-    <script src="./storage.js?v=GOD_MODE"></script>
-    <script src="./main.js?v=GOD_MODE"></script>
+    <script src="./auth.js?v=2026_GOD_MODE"></script>
+    <script src="./idiomas.js?v=2026_GOD_MODE"></script>
+    <script src="./audio.js?v=2026_GOD_MODE"></script>
+    <script src="./storage.js?v=2026_GOD_MODE"></script>
+    <script src="./main.js?v=2026_GOD_MODE"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('./sw.js?v=2026_GOD_MODE');
+            });
+        }
+    </script>
 </body>
 </html>
