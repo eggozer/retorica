@@ -1,3 +1,4 @@
+// --- RETÓRICA INTERNATIONALIZATION MODULE (idiomas.js) ---
 var RetoricaI18n = {
     currentLang: 'es',
     langsOrder: ['es', 'en', 'fr', 'pt'],
