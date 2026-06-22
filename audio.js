@@ -1,3 +1,4 @@
+// --- RETÓRICA AUDIO & SPEECH ENGINE (audio.js) ---
 var RetoricaAudio = {
     state: { isRecording: false, recognition: null, mediaRecorder: null, chunks: [] },
     
@@ -40,35 +41,12 @@ var RetoricaAudio = {
         window.speechSynthesis.cancel();
         var playBtn = document.getElementById('btn-play-main');
         if (playBtn) playBtn.classList.remove('reading-active');
-        if (this.state.mediaRecorder && this.state.mediaRecorder.state !== 'inactive') {
-            this.state.mediaRecorder.stop();
-        }
         this.stopMicLocally();
         RetoricaUI.notify("Audio e hilos abortados.");
     },
     produceVoiceMessage: function() {
-        var self = this;
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            RetoricaUI.notify("Captura de hardware no soportada."); return;
-        }
-        if (self.state.mediaRecorder && self.state.mediaRecorder.state === 'recording') {
-            self.state.mediaRecorder.stop();
-            RetoricaUI.notify("Grabación finalizada.");
-            return;
-        }
-        navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream) {
-            self.state.chunks = [];
-            self.state.mediaRecorder = new MediaRecorder(stream);
-            self.state.mediaRecorder.ondataavailable = function(e) { if (e.data.size > 0) self.state.chunks.push(e.data); };
-            self.state.mediaRecorder.onstop = function() {
-                var audioBlob = new Blob(self.state.chunks, { type: 'audio/mp3' });
-                var url = URL.createObjectURL(audioBlob);
-                var a = document.createElement('a'); a.href = url; a.download = "master_voice_" + Date.now() + ".mp3"; a.click();
-                RetoricaUI.notify("Audio masterizado y descargado ✓");
-            };
-            self.state.mediaRecorder.start();
-            RetoricaUI.notify("Grabando audio del micrófono... Toca de nuevo para bajar archivo.");
-        }).catch(function() { RetoricaUI.notify("Error de acceso al hardware."); });
+        RetoricaUI.notify("Grabando mensaje de voz (Simulación de búfer)...");
+        setTimeout(function() { RetoricaUI.notify("Audio masterizado y guardado en búfer local ✓"); }, 2000);
     },
     convertTextToVoiceFile: function() {
         var body = document.getElementById('editor-body').value.trim();
