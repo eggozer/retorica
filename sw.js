@@ -1,3 +1,4 @@
+// --- RETÓRICA SERVICE WORKER AUTOMATION (sw.js) ---
 var CACHE_NAME = 'retorica-modular-v2026_GOD_MODE';
 var ASSETS = [
   './',
@@ -35,6 +36,7 @@ self.addEventListener('activate', function(e) {
 
 self.addEventListener('fetch', function(e) {
   if (e.request.method !== 'GET') return;
+  
   e.respondWith(
     fetch(e.request).then(function(res) {
       if (res && res.status === 200) {
