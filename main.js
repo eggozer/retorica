@@ -1,5 +1,6 @@
+// --- RETÓRICA INTERFACE & MAIN ORCHESTRATION MODULE (main.js) ---
 var RetoricaUI = {
-    state: { zoom: 1.0 },
+    state: { zoom: 1.0, touchStartX: 0, touchEndX: 0 },
 
     init: function() {
         var editor = document.getElementById('editor-body');
@@ -16,21 +17,49 @@ var RetoricaUI = {
             };
         }
         
-        // Corrección del colapso del Viewport por el Teclado Virtual (Android)
-        var updateViewportHeight = function() {
-            var vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-            var headerH = document.querySelector('.header-app').offsetHeight;
-            var navH = document.querySelector('.top-navbar').offsetHeight;
-            var footerH = document.querySelector('footer').offsetHeight;
-            var freeSpace = vh - (headerH + navH + footerH);
-            document.getElementById('viewport-ctx').style.height = freeSpace + "px";
-        };
-        if (window.visualViewport) { window.visualViewport.addEventListener('resize', updateViewportHeight); }
-        window.addEventListener('resize', updateViewportHeight);
-        updateViewportHeight();
-
+        this.initTouchGestures();
+        this.initViewportFix();
         this.updateCounters();
         if (typeof RetoricaAuth !== 'undefined') RetoricaAuth.initLifecycle();
+    },
+
+    initTouchGestures: function() {
+        var self = this;
+        document.addEventListener('touchstart', function(e) {
+            self.state.touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        document.addEventListener('touchend', function(e) {
+            self.state.touchEndX = e.changedTouches[0].screenX;
+            self.handleSwipe();
+        }, { passive: true });
+    },
+
+    handleSwipe: function() {
+        var diffX = this.state.touchEndX - this.state.touchStartX;
+        var sidebar = document.getElementById('sidebar');
+        if (!sidebar) return;
+        
+        // Deslizar a la derecha abre el menú si empezó cerca del borde izquierdo
+        if (diffX > 80 && this.state.touchStartX < 50 && !sidebar.classList.contains('active')) {
+            this.toggleSidebar();
+        }
+        // Deslizar a la izquierda cierra el menú activo
+        if (diffX < -80 && sidebar.classList.contains('active')) {
+            this.toggleSidebar();
+        }
+    },
+
+    initViewportFix: function() {
+        // Blindaje dinámico del viewport para el teclado táctil de Android 11
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', function() {
+                var view = document.getElementById('viewport-ctx');
+                if (view) {
+                    view.style.height = window.visualViewport.height + "px";
+                }
+            });
+        }
     },
 
     toggleSidebar: function() {
@@ -52,12 +81,7 @@ var RetoricaUI = {
         if (targetZoom > 2.0) targetZoom = 2.0;
         this.state.zoom = targetZoom;
         var wrapper = document.getElementById('zoom-wrapper');
-        if (wrapper) {
-            wrapper.style.transform = "scale(" + targetZoom + ")";
-            wrapper.style.transformOrigin = "top left";
-            wrapper.style.width = (100 / targetZoom) + "%";
-            wrapper.style.height = (100 / targetZoom) + "%";
-        }
+        if (wrapper) wrapper.style.transform = "scale(" + targetZoom + ")";
     },
 
     updateCounters: function() {
