@@ -4,13 +4,13 @@
   "description": "Entorno avanzado de scriptwriting, dictado asistido y control de audio.",
   "icons": [
     {
-      "src": "./icon-192.png",
+      "src": "https://eggozer.github.io/retorica/icon-192.png",
       "type": "image/png",
       "sizes": "192x192",
       "purpose": "any maskable"
     },
     {
-      "src": "./icon-512.png",
+      "src": "https://eggozer.github.io/retorica/icon-512.png",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "any maskable"
