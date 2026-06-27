@@ -234,10 +234,10 @@
     <main class="main-view">
         <div class="editor-scroll-container" id="viewport-ctx">
             <div id="zoom-wrapper">
-                <div class="unified-container" id="unified-sel-container">
-                    <input type="text" id="editor-title" class="doc-title" placeholder="Título del Guion...">
-                    <textarea id="editor-body" class="textarea-main" placeholder="Escribe o dicta aquí tu retórica..."></textarea>
-                </div>
+                <div id="unified-container">
+  <input type="text" id="doc-title" placeholder="Título del documento..." onfocus="setDictationTarget('title')">
+  <textarea id="textarea-main" placeholder="Comienza a escribir aquí..." onfocus="setDictationTarget('body')"></textarea>
+</div>
             </div>
         </div>
     </main>
