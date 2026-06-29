@@ -36,12 +36,8 @@ var RetoricaAudio = {
             if (btn) btn.classList.add('recording-active'); RetoricaUI.notify("Dictado Activo...");
         } else { this.state.recognition.stop(); this.state.isRecording = false; this.stopMicLocally(); }
     },
-    stopMicLocally: function() {
-        var btn = document.getElementById('btn-mic-main');
-        if (btn) btn.classList.remove('recording-active'); this.state.isRecording = false;
-    },
     play: function() {
-        var editor = document.getElementById('editor-body');
+        var editor = document.getElementById('textarea-main');
         if (!editor || !editor.value.trim()) { RetoricaUI.notify("Lienzo vacío."); return; }
         window.speechSynthesis.cancel();
         var selectedText = editor.value.substring(editor.selectionStart, editor.selectionEnd);
@@ -62,6 +58,12 @@ var RetoricaAudio = {
     produceVoiceMessage: function() {
         RetoricaUI.notify("Grabando mensaje de voz (Simulación de búfer)...");
         setTimeout(function() { RetoricaUI.notify("Audio masterizado y guardado en búfer local ✓"); }, 2000);
+    },
+    convertTextToVoiceFile: function() {
+        var body = document.getElementById('textarea-main').value.trim();
+        if(!body) { RetoricaUI.notify("No hay texto para convertir."); return; }
+        RetoricaUI.notify("Procesando síntesis TTS de voz...");
+        var title = document.getElementById('doc-title').value.trim() || "audio";
     },
     convertTextToVoiceFile: function() {
         var body = document.getElementById('editor-body').value.trim();
