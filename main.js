@@ -1,37 +1,38 @@
 // --- RETÓRICA INTERFACE & MAIN ORCHESTRATION MODULE (main.js) ---
-var RetoricaUI = {
-    state: { let autoSaveTimeout = null;
+let autoSaveTimeout = null;
 let dictationTarget = 'body';
-        zoom: 1.0, touchStartX: 0, touchEndX: 0 },
+
+var RetoricaUI = {
+    state: { zoom: 1.0, touchStartX: 0, touchEndX: 0 },
 
     init: function() {
-        var editor = document.getElementById('editor-body');
+        var editor = document.getElementById('textarea-main');
         if (editor) { editor.oninput = function() { RetoricaUI.updateCounters(); }; }
         if (typeof RetoricaI18n !== 'undefined') RetoricaI18n.init();
 
-const titleInput = document.getElementById('doc-title');
-const mainTextarea = document.getElementById('textarea-main');
+        const titleInput = document.getElementById('doc-title');
+        const mainTextarea = document.getElementById('textarea-main');
 
-const triggerAutoSave = () => {
-    // Limpiamos el temporizador anterior para que no guarde mientras sigas escribiendo
-    clearTimeout(autoSaveTimeout);
-    
-    // Configuramos un retraso de 1500ms (1.5 segundos) de inactividad para guardar
-    autoSaveTimeout = setTimeout(() => {
-        guardarTexto(); // Tu función existente que guarda en localStorage
-        console.log("Cambios guardados automáticamente.");
-    }, 1500);
-};
+        const triggerAutoSave = () => {
+            clearTimeout(autoSaveTimeout);
+            autoSaveTimeout = setTimeout(() => {
+                if (typeof guardarTexto === 'function') {
+                    guardarTexto();
+                } else if (typeof RetoricaStorage !== 'undefined') {
+                    RetoricaStorage.save();
+                }
+                console.log("Cambios guardados automáticamente.");
+            }, 1500);
+        };
 
-// Escuchar cambios en ambos campos
-if (titleInput) titleInput.addEventListener('input', triggerAutoSave);
-if (mainTextarea) mainTextarea.addEventListener('input', triggerAutoSave);
+        if (titleInput) titleInput.addEventListener('input', triggerAutoSave);
+        if (mainTextarea) mainTextarea.addEventListener('input', triggerAutoSave);
         
-        var unifiedContainer = document.getElementById('unified-sel-container');
+        var unifiedContainer = document.getElementById('unified-container');
         if (unifiedContainer) {
             unifiedContainer.onclick = function(e) {
                 if (e.target === unifiedContainer) {
-                    var body = document.getElementById('editor-body');
+                    var body = document.getElementById('textarea-main');
                     if (body) body.focus();
                 }
             };
