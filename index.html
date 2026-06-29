@@ -153,6 +153,35 @@
   <div class="btn-label-3d" id="lbl-tool-export">Exportar</div>
   <button class="btn-round-3d" id="btn-export-file" onclick="exportarArchivo()">📥</button>
 </div>
+            <!-- Botón Selector de Fuentes -->
+      <div class="btn-content-3d">
+        <div class="btn-wrapper-3d">
+          <div class="btn-label-3d">Fuente</div>
+          <select id="font-selector" class="btn-round-3d" onchange="cambiarFuente(this.value)">
+            <option value="sans-serif">Sans-Serif</option>
+            <option value="serif">Serif</option>
+            <option value="monospace">Monospace</option>
+            <option value="'Courier New', Courier, monospace">Courier</option>
+            <option value="'Georgia', serif">Georgia</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Botón Insertar Tabla -->
+      <div class="btn-content-3d">
+        <div class="btn-wrapper-3d">
+          <div class="btn-label-3d">Tabla</div>
+          <button class="btn-round-3d" onclick="solicitarTabla()">📊</button>
+        </div>
+      </div>
+
+      <!-- Botón Pizarra de Dibujo -->
+      <div class="btn-content-3d">
+        <div class="btn-wrapper-3d">
+          <div class="btn-label-3d">Pizarra</div>
+          <button class="btn-round-3d" onclick="togglePizarra()">🎨</button>
+        </div>
+      </div>
             <div class="btn-wrapper-3d">
                 <div class="btn-label-3d" id="lbl-tool-new">Nuevo</div>
                 <button class="btn-round-3d" id="btn-icon-new" onclick="RetoricaStorage.clearCanvas()">+</button>
