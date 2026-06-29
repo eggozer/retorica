@@ -56,12 +56,12 @@ var RetoricaStorage = {
             
             card.innerHTML = htmlCard;
             (function(cDoc) {
-                card.onclick = function() {
-                    document.getElementById('editor-title').value = cDoc.title;
-                    document.getElementById('editor-body').value = cDoc.body;
-                    RetoricaStorage.activeDocId = cDoc.id;
-                    RetoricaUI.toggleSidebar(); RetoricaUI.updateCounters();
-                };
+ card.onclick = function() {
+        document.getElementById('doc-title').value = cDoc.title;
+        document.getElementById('textarea-main').value = cDoc.body;
+        RetoricaStorage.activeDocId = cDoc.id;
+        RetoricaUI.toggleSidebar(); RetoricaUI.updateCounters();
+    };               
             })(doc);
             container.appendChild(card);
         }
