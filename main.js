@@ -8,6 +8,24 @@ let dictationTarget = 'body';
         var editor = document.getElementById('editor-body');
         if (editor) { editor.oninput = function() { RetoricaUI.updateCounters(); }; }
         if (typeof RetoricaI18n !== 'undefined') RetoricaI18n.init();
+
+const titleInput = document.getElementById('doc-title');
+const mainTextarea = document.getElementById('textarea-main');
+
+const triggerAutoSave = () => {
+    // Limpiamos el temporizador anterior para que no guarde mientras sigas escribiendo
+    clearTimeout(autoSaveTimeout);
+    
+    // Configuramos un retraso de 1500ms (1.5 segundos) de inactividad para guardar
+    autoSaveTimeout = setTimeout(() => {
+        guardarTexto(); // Tu función existente que guarda en localStorage
+        console.log("Cambios guardados automáticamente.");
+    }, 1500);
+};
+
+// Escuchar cambios en ambos campos
+if (titleInput) titleInput.addEventListener('input', triggerAutoSave);
+if (mainTextarea) mainTextarea.addEventListener('input', triggerAutoSave);
         
         var unifiedContainer = document.getElementById('unified-sel-container');
         if (unifiedContainer) {
