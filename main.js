@@ -1,6 +1,8 @@
 // --- RETÓRICA INTERFACE & MAIN ORCHESTRATION MODULE (main.js) ---
 var RetoricaUI = {
-    state: { zoom: 1.0, touchStartX: 0, touchEndX: 0 },
+    state: { let autoSaveTimeout = null;
+let dictationTarget = 'body';
+        zoom: 1.0, touchStartX: 0, touchEndX: 0 },
 
     init: function() {
         var editor = document.getElementById('editor-body');
@@ -134,6 +136,9 @@ var RetoricaUI = {
         var a = document.createElement('a'); a.href = url; a.download = title + ".doc"; a.click();
         this.notify("Documento Word (.doc) generado ✓");
     }
+function setDictationTarget(target) {
+    dictationTarget = target;
+}
 };
 
 window.onload = function() { RetoricaUI.init(); };
