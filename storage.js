@@ -4,8 +4,8 @@ var RetoricaStorage = {
     
     save: function() {
         if (!window.retoricaActiveUser) { RetoricaUI.notify("Inicia sesión primero."); return; }
-        var titleInput = document.getElementById('editor-title');
-        var bodyInput = document.getElementById('editor-body');
+        var titleInput = document.getElementById('doc-title');
+        var bodyInput = document.getElementById('textarea-main');
         var title = (titleInput && titleInput.value.trim()) ? titleInput.value.trim() : "";
         var body = bodyInput ? bodyInput.value : "";
         
