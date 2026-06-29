@@ -10,11 +10,26 @@ var RetoricaAudio = {
             this.state.recognition = new Speech(); this.state.recognition.continuous = true;
             this.state.recognition.interimResults = false;
             this.state.recognition.lang = RetoricaI18n.currentLang === 'es' ? 'es-MX' : RetoricaI18n.currentLang;
-            this.state.recognition.onresult = function(event) {
-                var textChunk = event.results[event.results.length - 1][0].transcript;
-                var editor = document.getElementById('editor-body');
-                if (editor) { editor.value += (editor.value ? ' ' : '') + textChunk; RetoricaUI.updateCounters(); }
-            };
+            this.state.recognition.onresult = (event) => {
+    let textChunk = event.results[event.results.length - 1][0].transcript;
+    
+    // RECONOCIMIENTO INTELIGENTE DE DESTINO (Punto 3)
+    if (dictationTarget === 'title') {
+        const titleInput = document.getElementById('doc-title');
+        if (titleInput) {
+            titleInput.value += textChunk;
+            // Disparamos manualmente el evento input para que el auto-guardado se entere del cambio
+            titleInput.dispatchEvent(new Event('input'));
+        }
+    } else {
+        const editor = document.getElementById('textarea-main');
+        if (editor) {
+            editor.value += textChunk;
+            // Disparamos manualmente el evento input para el auto-guardado
+            editor.dispatchEvent(new Event('input'));
+        }
+    }
+};
             this.state.recognition.onerror = function() { RetoricaAudio.stopMicLocally(); };
             this.state.recognition.onend = function() { RetoricaAudio.stopMicLocally(); };
             this.state.recognition.start(); this.state.isRecording = true;
