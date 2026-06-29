@@ -106,7 +106,7 @@ var RetoricaUI = {
     },
 
     updateCounters: function() {
-        var body = document.getElementById('editor-body') ? document.getElementById('editor-body').value : "";
+        var body = document.getElementById('textarea-main') ? document.getElementById('textarea-main').value : "";
         var chars = body.length;
         var words = body.trim() === "" ? 0 : body.trim().split(/\s+/).length;
         var lines = body === "" ? 1 : body.split('\n').length;
@@ -129,8 +129,8 @@ var RetoricaUI = {
 
     expPDF: function() {
         this.notify("Generando PDF plano...");
-        var wrapper = document.getElementById('unified-sel-container');
-        var title = document.getElementById('editor-title').value.trim() || "guion";
+        var wrapper = document.getElementById('unified-container');
+        var title = document.getElementById('doc-title').value.trim() || "guion";
         if (wrapper && typeof html2pdf !== 'undefined') {
             var opt = { margin: 15, filename: title + '.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
             html2pdf().from(wrapper).set(opt).save();
@@ -139,22 +139,23 @@ var RetoricaUI = {
 
     expPDFEditable: function() {
         this.notify("Generando PDF Formulario Editable...");
-        var title = document.getElementById('editor-title').value.trim() || "guion_editable";
-        var bodyValue = document.getElementById('editor-body').value;
+        var title = document.getElementById('doc-title').value.trim() || "guion_editable";
+        var bodyValue = document.getElementById('textarea-main').value;
         var htmlForm = "<html><body><h2>" + title + "</h2><p>Formulario interactivo:</p><input type='text' value='" + title + "' style='width:100%; font-weight:bold; margin-bottom:10px;'><br><textarea style='width:100%; height:400px;'>" + bodyValue + "</textarea></body></html>";
         var worker = html2pdf().from(htmlForm).set({ margin: 15, filename: title + '_editable.pdf' }).save();
         this.notify("PDF Editable exportado ✓");
     },
 
     expDOC: function() {
-        var body = document.getElementById('editor-body').value;
-        var title = document.getElementById('editor-title').value.trim() || "guion";
+        var body = document.getElementById('textarea-main').value;
+        var title = document.getElementById('doc-title').value.trim() || "guion";
         var htmlContent = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><title>" + title + "</title><style>body{font-family:Arial;line-height:1.6;}</style></head><body><h2>" + title + "</h2>" + body.replace(/\n/g, "<br>") + "</body></html>";
         var blob = new Blob(['\ufeff' + htmlContent], { type: 'application/msword' });
         var url = URL.createObjectURL(blob);
         var a = document.createElement('a'); a.href = url; a.download = title + ".doc"; a.click();
         this.notify("Documento Word (.doc) generado ✓");
     }
+    
 function setDictationTarget(target) {
     dictationTarget = target;
 }
