@@ -11,30 +11,36 @@ var RetoricaAudio = {
             this.state.recognition.interimResults = false;
             this.state.recognition.lang = RetoricaI18n.currentLang === 'es' ? 'es-MX' : RetoricaI18n.currentLang;
             this.state.recognition.onresult = (event) => {
-    let textChunk = event.results[event.results.length - 1][0].transcript;
-    
-    // RECONOCIMIENTO INTELIGENTE DE DESTINO (Punto 3)
-    if (dictationTarget === 'title') {
-        const titleInput = document.getElementById('doc-title');
-        if (titleInput) {
-            titleInput.value += textChunk;
-            // Disparamos manualmente el evento input para que el auto-guardado se entere del cambio
-            titleInput.dispatchEvent(new Event('input'));
-        }
-    } else {
-        const editor = document.getElementById('textarea-main');
-        if (editor) {
-            editor.value += textChunk;
-            // Disparamos manualmente el evento input para el auto-guardado
-            editor.dispatchEvent(new Event('input'));
-        }
-    }
-};
+                let textChunk = event.results[event.results.length - 1][0].transcript;
+                
+                if (dictationTarget === 'title') {
+                    const titleInput = document.getElementById('doc-title');
+                    if (titleInput) {
+                        titleInput.value += textChunk;
+                        titleInput.dispatchEvent(new Event('input'));
+                    }
+                } else {
+                    const editor = document.getElementById('textarea-main');
+                    if (editor) {
+                        editor.value += textChunk;
+                        editor.dispatchEvent(new Event('input'));
+                    }
+                }
+            };
             this.state.recognition.onerror = function() { RetoricaAudio.stopMicLocally(); };
             this.state.recognition.onend = function() { RetoricaAudio.stopMicLocally(); };
             this.state.recognition.start(); this.state.isRecording = true;
             if (btn) btn.classList.add('recording-active'); RetoricaUI.notify("Dictado Activo...");
-        } else { this.state.recognition.stop(); this.state.isRecording = false; this.stopMicLocally(); }
+        } else { 
+            this.state.recognition.stop(); 
+            this.state.isRecording = false; 
+            this.stopMicLocally(); 
+        }
+    },
+    stopMicLocally: function() {
+        var btn = document.getElementById('btn-mic-main');
+        if (btn) btn.classList.remove('recording-active');
+        this.state.isRecording = false;
     },
     play: function() {
         var editor = document.getElementById('textarea-main');
@@ -64,12 +70,6 @@ var RetoricaAudio = {
         if(!body) { RetoricaUI.notify("No hay texto para convertir."); return; }
         RetoricaUI.notify("Procesando síntesis TTS de voz...");
         var title = document.getElementById('doc-title').value.trim() || "audio";
-    },
-    convertTextToVoiceFile: function() {
-        var body = document.getElementById('editor-body').value.trim();
-        if(!body) { RetoricaUI.notify("No hay texto para convertir."); return; }
-        RetoricaUI.notify("Procesando síntesis TTS de voz...");
-        var title = document.getElementById('editor-title').value.trim() || "audio";
         var dummyBlob = new Blob([body], { type: 'audio/mp3' });
         var url = URL.createObjectURL(dummyBlob);
         var a = document.createElement('a'); a.href = url; a.download = title + ".mp3"; a.click();
