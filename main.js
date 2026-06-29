@@ -157,6 +157,145 @@ if (mainTextarea) mainTextarea.addEventListener('input', triggerAutoSave);
 function setDictationTarget(target) {
     dictationTarget = target;
 }
+// ==========================================
+// 1. CONTROL DE TIPOGRAFÍAS (Punto 9)
+// ==========================================
+function cambiarFuente(fontName) {
+    const editor = document.getElementById('textarea-main');
+    if (editor) {
+        editor.style.fontFamily = fontName;
+        // Forzamos auto-guardado para recordar la preferencia estética si fuera necesario
+        if (typeof triggerAutoSave === 'function') triggerAutoSave();
+    }
+}
+
+// ==========================================
+// 2. INSERCIÓN DE TABLAS DINÁMICAS (Puntos 10 y 11)
+// ==========================================
+function solicitarTabla() {
+    const filas = prompt("¿Cuántas filas deseas?", "3");
+    const columnas = prompt("¿Cuántas columnas deseas?", "3");
+    
+    if (filas && columnas) {
+        const numFilas = parseInt(filas);
+        const numCols = parseInt(columnas);
+        const editor = document.getElementById('textarea-main');
+        
+        if (!editor) return;
+
+        let tablaMarkdown = "\n";
+        
+        // Crear Encabezado
+        for (let i = 0; i < numCols; i++) {
+            tablaMarkdown += `| Col ${i+1} `;
+        }
+        tablaMarkdown += "|\n";
+        
+        // Crear Separador
+        for (let i = 0; i < numCols; i++) {
+            tablaMarkdown += "| --- ";
+        }
+        tablaMarkdown += "|\n";
+        
+        // Crear Filas de datos vacías
+        for (let f = 0; f < numFilas; f++) {
+            for (let c = 0; c < numCols; c++) {
+                tablaMarkdown += "| Dato ";
+            }
+            tablaMarkdown += "|\n";
+        }
+        
+        // Insertar en la posición actual del cursor o al final
+        const startPos = editor.selectionStart;
+        const endPos = editor.selectionEnd;
+        const textAreaValue = editor.value;
+        
+        editor.value = textAreaValue.substring(0, startPos) + tablaMarkdown + textAreaValue.substring(endPos);
+        
+        // Notificar al sistema de autoguardado
+        editor.dispatchEvent(new Event('input'));
+    }
+}
+
+// ==========================================
+// 3. PIZARRA DE DIBUJO INTERACTIVA (Punto 12)
+// ==========================================
+let canvas, ctx, dibujando = false;
+
+function togglePizarra() {
+    const contenedor = document.getElementById('pizarra-container');
+    if (contenedor.style.display === 'none') {
+        contenedor.style.display = 'block';
+        inicializarPizarra();
+    } else {
+        contenedor.style.display = 'none';
+    }
+}
+
+function inicializarPizarra() {
+    canvas = document.getElementById('canvas-pizarra');
+    ctx = canvas.getContext('2d');
+    
+    // Ajustar resolución interna del canvas al tamaño visual real
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+    
+    // Configuración del trazo de dibujo
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    
+    // Eventos para Mouse
+    canvas.addEventListener('mousedown', (e) => { dibujando = true; dibujar(e); });
+    canvas.addEventListener('mousemove', dibujar);
+    canvas.addEventListener('mouseup', () => dibujando = false);
+    canvas.addEventListener('mouseleave', () => dibujando = false);
+    
+    // Eventos para Pantallas Táctiles (Móvil/Tablet)
+    canvas.addEventListener('touchstart', (e) => {
+        dibujando = true;
+        const touch = e.touches[0];
+        const mouseEvent = new MouseEvent("mousedown", {
+            clientX: touch.clientX,
+            clientY: touch.clientY
+        });
+        canvas.dispatchEvent(mouseEvent);
+    }, { passive: true });
+    
+    canvas.addEventListener('touchmove', (e) => {
+        const touch = e.touches[0];
+        const mouseEvent = new MouseEvent("mousemove", {
+            clientX: touch.clientX,
+            clientY: touch.clientY
+        });
+        canvas.dispatchEvent(mouseEvent);
+    }, { passive: true });
+    
+    canvas.addEventListener('touchend', () => dibujando = false);
+}
+
+function dibujar(e) {
+    if (!dibujando) return;
+    
+    // Obtener coordenadas relativas exactas dentro del lienzo
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX || e.touches?.[0].clientX) - rect.left;
+    const y = (e.clientY || e.touches?.[0].clientY) - rect.top;
+    
+    if (e.type === 'mousedown' || e.type === 'touchstart') {
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+    } else {
+        ctx.lineTo(x, y);
+        ctx.stroke();
+    }
+}
+
+function limpiarPizarra() {
+    if (canvas && ctx) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+                            }
 };
 
 window.onload = function() { RetoricaUI.init(); };
