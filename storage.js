@@ -92,18 +92,17 @@ var RetoricaStorage = {
         if (this.activeDocId === id) this.clearCanvas();
         this.refreshLibrary(); RetoricaUI.notify("Plantilla eliminada.");
     },
-    importLocalFile: function(event) {
+        importLocalFile: function(event) {
         var file = event.target.files[0]; if (!file) return;
         var reader = new FileReader();
         reader.onload = function(e) {
             var content = e.target.result;
-            document.getElementById('editor-title').value = file.name.split('.')[0];
-            // Conversión forzada hacia el estándar nativo HTML de Retórica
+            document.getElementById('doc-title').value = file.name.split('.')[0];
             if (file.type === "text/html" || file.name.endsWith('.html')) {
                 var tempDiv = document.createElement('div'); tempDiv.innerHTML = content;
-                document.getElementById('editor-body').value = tempDiv.innerText || tempDiv.textContent;
+                document.getElementById('textarea-main').value = tempDiv.innerText || tempDiv.textContent;
             } else {
-                document.getElementById('editor-body').value = content;
+                document.getElementById('textarea-main').value = content;
             }
             RetoricaStorage.activeDocId = null; RetoricaUI.updateCounters();
             RetoricaUI.notify("Archivo importado a HTML nativo ✓");
@@ -111,19 +110,19 @@ var RetoricaStorage = {
         if (file.type === "text/html" || file.name.endsWith('.html') || file.name.endsWith('.txt')) {
             reader.readAsText(file);
         } else {
-            reader.readAsBinaryString(file); // Simulación binaria para PDF/Word locales en WebView
+            reader.readAsBinaryString(file);
         }
     },
     exportToHTML: function() {
-        var title = document.getElementById('editor-title').value.trim() || "Guion Sin Título";
-        var body = document.getElementById('editor-body').value;
+        var title = document.getElementById('doc-title').value.trim() || "Guion Sin Título";
+        var body = document.getElementById('textarea-main').value;
         var htmlContent = "<!DOCTYPE html><html><head><meta charset='UTF-8'><title>" + title + "</title></head><body><h1>" + title + "</h1><p>" + body.replace(/\n/g, "<br>") + "</p></body></html>";
         var blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
         var link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = title + ".html"; link.click();
     },
     clearCanvas: function() {
-        if(document.getElementById('editor-title')) document.getElementById('editor-title').value = "";
-        if(document.getElementById('editor-body')) document.getElementById('editor-body').value = "";
+        if(document.getElementById('doc-title')) document.getElementById('doc-title').value = "";
+        if(document.getElementById('textarea-main')) document.getElementById('textarea-main').value = "";
         this.activeDocId = null; RetoricaUI.updateCounters();
     }
 };
