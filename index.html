@@ -258,6 +258,18 @@
             <button onclick="RetoricaAuth.logout()" style="color:var(--text-muted); background:transparent; border:none; font-size:0.85rem; font-weight:bold; cursor:pointer;" id="lbl-side-logout">SALIR</button>
         </div>
     </div>
+<!-- Contenedor flotante para la pizarra de dibujo -->
+<div id="pizarra-container" style="display: none; position: fixed; top: 15%; left: 5%; width: 90%; height: 70%; background: #fff; border: 2px solid var(--border); z-index: 1000; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+  <div style="background: var(--bg-sidebar); padding: 10px; display: flex; justify-content: space-between; align-items: center; border-top-left-radius: 6px; border-top-right-radius: 6px;">
+    <span style="font-weight: bold; color: var(--text-main);">Pizarra de Retórica</span>
+    <div>
+      <button onclick="limpiarPizarra()" style="margin-right: 10px; background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 4px;">Limpiar</button>
+      <button onclick="togglePizarra()" style="background: #2ecc71; color: white; border: none; padding: 5px 10px; border-radius: 4px;">Cerrar</button>
+    </div>
+  </div>
+  <canvas id="canvas-pizarra" style="width: 100%; height: calc(100% - 45px); cursor: crosshair;"></canvas>
+</div>
+    
 
     <!-- MODO DIOS: AREA DE EDICIÓN Y AJUSTE DE VIEWPORT -->
     <main class="main-view">
