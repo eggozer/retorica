@@ -203,7 +203,8 @@ let canvas, ctx, dibujando = false;
 function togglePizarra() {
     const contenedor = document.getElementById('pizarra-container');
     if (!contenedor) return;
-    if (contenedor.style.display === 'none') {
+    
+    if (contenedor.style.display === 'none' || contenedor.style.display === '') {
         contenedor.style.display = 'block';
         inicializarPizarra();
     } else {
