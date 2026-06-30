@@ -120,6 +120,25 @@
         .reading-active { border-color: #00d2ff !important; }
         @keyframes pulseMic { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
         .file-input-hidden { display: none; }
+
+#pizarra-container {
+    display: none; /* Se mantiene oculta hasta que presiones el botón */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10; /* Solo sube cuando vas a dibujar */
+    background: rgba(0, 0, 0, 0.85); /* Fondo oscuro para que veas dónde dibujas */
+}
+
+#canvas-pizarra {
+    width: 100%;
+    height: calc(100% - 45px);
+    cursor: crosshair;
+    background: #ffffff; /* Lienzo blanco para contrastar el dibujo */
+     }
+        
     </style>
 </head>
 <body>
