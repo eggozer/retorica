@@ -1,8 +1,7 @@
 // --- RETÓRICA INTERNATIONALIZATION MODULE (idiomas.js) ---
 var RetoricaI18n = {
     currentLang: 'es',
-    langsOrder: ['es', 'en', 'fr', 'pt'],
-    
+    langsOrder: ['es', 'en', 'fr', 'pt'],   
         db: {
         'es': { name: 'Español', save: 'Guardar', new: 'Nuevo', mic: 'Dictado', read: 'Lectura', stop: 'Abortar', vmsg: 'Prod.\nAudio', tts: 'Texto\nA Voz' },
         'en': { name: 'English', save: 'Save', new: 'New', mic: 'Dictate', read: 'Read', stop: 'Abort', vmsg: 'Voice\nProd', tts: 'Text\nTo Voice' },
@@ -41,7 +40,6 @@ var RetoricaI18n = {
             { code: 'th-TH', name: 'ไทย (ประเทศไทย)' },
             { code: 'ca-ES', name: 'Català (Espanya)' }
     ]
-};
     },
 
     init: function() {
