@@ -2,121 +2,142 @@
 var autoSaveTimeout = null;
 
 var RetoricaUI = {
-    state: { zoom: 1.0, touchStartX: 0, touchEndX: 0 },
+    state: { zoom: 1.0 },
 
     init: function() {
         var editor = document.getElementById('editor-body');
+        if (editor) {
+            // Monitoreo elástico instantáneo en el contenedor editable
+            editor.addEventListener('input', function() {
+                RetoricaUI.updateCounters();
+                RetoricaUI.triggerAutoSave();
+            });
+        }
         var titleInput = document.getElementById('editor-title');
-
-        // Inicializa el motor de lenguajes e internacionalización
-        if (typeof RetoricaI18n !== 'undefined') RetoricaI18n.init();
-
-        // Control antipérdida mediante monitoreo 'oninput' en tiempo real
-        if (editor) { 
-            editor.oninput = function() { 
-                RetoricaUI.updateCounters(); 
-                RetoricaUI.triggerAutoSave();
-            }; 
-        }
         if (titleInput) {
-            titleInput.oninput = function() {
+            titleInput.addEventListener('input', function() {
                 RetoricaUI.triggerAutoSave();
-            };
+            });
         }
         
-        // Enfoque elástico del contenedor unificado
-        var unifiedContainer = document.getElementById('unified-sel-container');
-        if (unifiedContainer) {
-            unifiedContainer.onclick = function(e) {
-                if (e.target === unifiedContainer && editor) {
-                    editor.focus();
-                }
-            };
-        }
-        
-        this.initTouchGestures();
-        this.initViewportFix();
+        if (typeof RetoricaI18n !== 'undefined') RetoricaI18n.init();
+        if (typeof RetoricaStorage !== 'undefined') RetoricaStorage.refreshLibrary();
         this.updateCounters();
-        
-        // Inicializa ciclo de vida de autenticación e interfaz
-        if (typeof RetoricaAuth !== 'undefined') RetoricaAuth.initLifecycle();
     },
 
-    // Orquestador del temporizador silencioso antipérdida (1.5 segundos de inactividad)
     triggerAutoSave: function() {
         clearTimeout(autoSaveTimeout);
         autoSaveTimeout = setTimeout(function() {
             if (typeof RetoricaStorage !== 'undefined') {
-                RetoricaStorage.autoSaveSilent();
-                console.log("Retorica: Cambios sincronizados automáticamente en segundo plano.");
+                RetoricaStorage.saveSilent();
+                console.log("Retorica DB: Resguardo antipérdida ejecutado.");
             }
         }, 1500);
     },
 
-    initTouchGestures: function() {
-        var self = this;
-        document.addEventListener('touchstart', function(e) {
-            self.state.touchStartX = e.changedTouches[0].screenX;
-        }, { passive: true });
-
-        document.addEventListener('touchend', function(e) {
-            self.state.touchEndX = e.changedTouches[0].screenX;
-            self.handleSwipe();
-        }, { passive: true });
+    execCmd: function(command, value) {
+        document.execCommand(command, false, value || null);
+        this.updateCounters();
     },
 
-    handleSwipe: function() {
-        var diffX = this.state.touchStartX - this.state.touchEndX;
-        // Swipe de izquierda a derecha (Abre Biblioteca)
-        if (diffX < -150) {
-            var sidebar = document.getElementById('sidebar');
-            if (sidebar && !sidebar.classList.contains('active')) this.toggleSidebar();
-        }
-        // Swipe de derecha a izquierda (Cierra Biblioteca)
-        if (diffX > 150) {
-            var sidebar = document.getElementById('sidebar');
-            if (sidebar && sidebar.classList.contains('active')) this.toggleSidebar();
-        }
-    },
-
-    initViewportFix: function() {
-        // Blindaje elástico para evitar saltos bruscos en teclados de Android/iOS
-        window.visualViewport.addEventListener('resize', function() {
-            var view = document.getElementById('viewport-ctx');
-            if (view) {
-                view.style.height = window.visualViewport.height + "px";
+    // FUNCIÓN SOLICITADA PUNTO 4: Inserción de matrices y tablas adaptables de forma limpia
+    insertTable: function(size) {
+        var parts = size.split('x');
+        var cols = parseInt(parts[0]);
+        var rows = parseInt(parts[1]);
+        
+        var tableHtml = "<table>";
+        for (var r = 0; r < rows; r++) {
+            tableHtml += "<tr>";
+            for (var c = 0; c < cols; c++) {
+                tableHtml += "<td>Dato</td>";
             }
-        });
+            tableHtml += "</tr>";
+        }
+        tableHtml += "</table><p>&nbsp;</p>";
+        document.execCommand('insertHTML', false, tableHtml);
+    },
+
+    styleTableBorders: function(color) {
+        var editor = document.getElementById('editor-body');
+        var tables = editor.getElementsByTagName('table');
+        for (var i = 0; i < tables.length; i++) {
+            var cells = tables[i].getElementsByTagName('td');
+            for (var j = 0; j < cells.length; j++) {
+                cells[j].style.borderColor = color;
+                cells[j].style.borderWidth = "2px";
+            }
+            var headers = tables[i].getElementsByTagName('th');
+            for (var k = 0; k < headers.length; k++) {
+                headers[k].style.borderColor = color;
+            }
+        }
+        RetoricaUI.notify("Color de bordes aplicado a las tablas ✓");
+    },
+
+    // FUNCIÓN SOLICITADA PUNTO 3: Carga e inserción de imágenes/fotos locales para Currículums
+    triggerImageInsert: function() {
+        document.getElementById('img-uploader-hidden').click();
+    },
+
+    insertImageEntity: function(event) {
+        var file = event.target.files[0];
+        if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var imgHtml = "<img src='" + e.target.result + "' style='max-width:200px; display:block; margin:10px 0;' alt='Foto Currículum'>";
+            document.execCommand('insertHTML', false, imgHtml);
+            RetoricaUI.notify("Imagen acoplada correctamente ✓");
+        };
+        reader.readAsDataURL(file);
+        event.target.value = "";
     },
 
     toggleSidebar: function() {
         var sidebar = document.getElementById('sidebar');
-        if (!sidebar) return;
-        sidebar.classList.toggle('active');
-        if (sidebar.classList.contains('active') && typeof RetoricaStorage !== 'undefined') {
-            RetoricaStorage.refreshLibrary();
-        }
+        if (sidebar) sidebar.classList.toggle('active');
     },
 
     adjustZoom: function(amount) {
         this.state.zoom += amount;
-        if (this.state.zoom < 0.7) this.state.zoom = 0.7;
-        if (this.state.zoom > 1.8) this.state.zoom = 1.8;
-        var el = document.getElementById('zoom-wrapper');
-        if (el) el.style.transform = "scale(" + this.state.zoom + ")";
+        if (this.state.zoom < 0.6) this.state.zoom = 0.6;
+        if (this.state.zoom > 1.6) this.state.zoom = 1.6;
+        document.getElementById('zoom-wrapper').style.transform = "scale(" + this.state.zoom + ")";
     },
 
     toggleTheme: function() {
         document.body.classList.toggle('light-theme');
-        var isLight = document.body.classList.contains('light-theme');
-        localStorage.setItem('retorica_theme_pref', isLight ? 'light' : 'dark');
-        this.notify(isLight ? "Tema Claro Activo" : "Tema Oscuro Activo");
+        this.notify("Esquema visual alternado");
+    },
+
+    // MANEJO DE EXPORTACIONES PROFESIONALES COMO ARCHIVOS RAW NATIVOS
+    runExport: function(type) {
+        var title = document.getElementById('editor-title').value.trim() || "Documento_Retorica";
+        var bodyHtml = document.getElementById('editor-body').innerHTML;
+        
+        if (type === 'doc') {
+            var htmlContent = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><title>" + title + "</title><style>table{border-collapse:collapse;width:100%;} td{border:1px solid #000;padding:5px;}</style></head><body><h2>" + title + "</h2>" + bodyHtml + "</body></html>";
+            var blob = new Blob(['\ufeff' + htmlContent], { type: 'application/msword' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a'); a.href = url; a.download = title + ".doc"; a.click();
+            this.notify("Word .doc exportado ✓");
+        } 
+        else if (type === 'pdf') {
+            this.notify("Generando PDF...");
+            var element = document.getElementById('unified-sel-container');
+            html2pdf().from(element).set({ margin: 12, filename: title + '.pdf', html2canvas: { scale: 2 } }).save();
+        } 
+        else if (type === 'pdf_edit') {
+            this.notify("Generando Formulario...");
+            var cleanText = document.getElementById('editor-body').innerText;
+            var htmlForm = "<html><body><h2>" + title + "</h2><textarea style='width:100%; height:400px; border:1px solid #333;'>" + cleanText + "</textarea></body></html>";
+            html2pdf().from(htmlForm).set({ margin: 15, filename: title + '_formulario.pdf' }).save();
+        }
     },
 
     updateCounters: function() {
-        var body = document.getElementById('editor-body');
-        var text = body ? body.value : "";
-        
+        var editor = document.getElementById('editor-body');
+        var text = editor ? editor.innerText : "";
         var chars = text.length;
         var words = text.trim() === "" ? 0 : text.trim().split(/\s+/).length;
         var lines = text === "" ? 1 : text.split('\n').length;
@@ -129,48 +150,17 @@ var RetoricaUI = {
     notify: function(msg) {
         var toast = document.getElementById('toast-notif');
         if (!toast) return;
-        toast.innerText = msg;
-        toast.classList.add('show');
+        toast.innerText = msg; toast.classList.add('show');
         setTimeout(function() { toast.classList.remove('show'); }, 2500);
     },
-
-    expPDF: function() {
-        this.notify("Exportando PDF...");
-        var element = document.getElementById('unified-sel-container');
-        var title = document.getElementById('editor-title').value.trim() || "guion";
-        html2pdf().from(element).set({ margin: 15, filename: title + '.pdf' }).save();
-    },
-
-    expPDFEditable: function() {
-        this.notify("Generando PDF Formulario...");
-        var title = document.getElementById('editor-title').value.trim() || "guion_editable";
-        var bodyValue = document.getElementById('editor-body').value;
-        var htmlForm = "<html><body><h2>" + title + "</h2><textarea style='width:100%; height:450px; font-family:Arial;'>" + bodyValue + "</textarea></body></html>";
-        html2pdf().from(htmlForm).set({ margin: 15, filename: title + '_editable.pdf' }).save();
-        this.notify("PDF Formulario listo ✓");
-    },
-
-    expDOC: function() {
-        var body = document.getElementById('editor-body').value;
-        var title = document.getElementById('editor-title').value.trim() || "guion";
-        var htmlContent = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><title>" + title + "</title></head><body><h2>" + title + "</h2>" + body.replace(/\n/g, "<br>") + "</body></html>";
-        var blob = new Blob(['\ufeff' + htmlContent], { type: 'application/msword' });
-        var url = URL.createObjectURL(blob);
-        var a = document.createElement('a'); 
-        a.href = url; 
-        a.download = title + ".doc"; 
-        a.click();
-        this.notify("Documento Word exportado ✓");
+    
+    logout: function() {
+        if(confirm("¿Deseas salir del sistema?")) {
+            location.reload();
+        }
     }
 };
 
-// Disparador del arranque de la App al cargar el DOM
 document.addEventListener('DOMContentLoaded', function() {
     RetoricaUI.init();
-    
-    // Carga de preferencia de tema guardada por el artista
-    var savedTheme = localStorage.getItem('retorica_theme_pref');
-    if (savedTheme === 'light') {
-        document.body.classList.add('light-theme');
-    }
 });
