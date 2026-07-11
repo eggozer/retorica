@@ -8,10 +8,8 @@ var RetoricaUI = {
         var editor = document.getElementById('editor-body');
         var titleInput = document.getElementById('editor-title');
 
-        // Inicializa el motor de lenguajes e internacionalización
         if (typeof RetoricaI18n !== 'undefined') RetoricaI18n.init();
 
-        // Control antipérdida mediante monitoreo 'oninput' en tiempo real
         if (editor) { 
             editor.oninput = function() { 
                 RetoricaUI.updateCounters(); 
@@ -24,7 +22,6 @@ var RetoricaUI = {
             };
         }
         
-        // Enfoque elástico del contenedor unificado
         var unifiedContainer = document.getElementById('unified-sel-container');
         if (unifiedContainer) {
             unifiedContainer.onclick = function(e) {
@@ -38,41 +35,36 @@ var RetoricaUI = {
         this.initViewportFix();
         this.updateCounters();
         
-        // Inicializa ciclo de vida de autenticación e interfaz
         if (typeof RetoricaAuth !== 'undefined') RetoricaAuth.initLifecycle();
+
+        // PUNTO 12: PREVENIR DUPLICACIÓN AL ACTUALIZAR. Carga el último documento editado
+        var lastEditedId = localStorage.getItem('retorica_last_doc_id');
+        if (lastEditedId && typeof RetoricaStorage !== 'undefined') {
+            RetoricaStorage.loadDoc(lastEditedId);
+        }
     },
 
-    // Orquestador del temporizador silencioso antipérdida (1.5 segundos de inactividad)
     triggerAutoSave: function() {
         clearTimeout(autoSaveTimeout);
         autoSaveTimeout = setTimeout(function() {
             if (typeof RetoricaStorage !== 'undefined') {
                 RetoricaStorage.autoSaveSilent();
-                console.log("Retorica: Cambios sincronizados automáticamente en segundo plano.");
             }
         }, 1500);
     },
 
     initTouchGestures: function() {
         var self = this;
-        document.addEventListener('touchstart', function(e) {
-            self.state.touchStartX = e.changedTouches[0].screenX;
-        }, { passive: true });
-
-        document.addEventListener('touchend', function(e) {
-            self.state.touchEndX = e.changedTouches[0].screenX;
-            self.handleSwipe();
-        }, { passive: true });
+        document.addEventListener('touchstart', function(e) { self.state.touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+        document.addEventListener('touchend', function(e) { self.state.touchEndX = e.changedTouches[0].screenX; self.handleSwipe(); }, { passive: true });
     },
 
     handleSwipe: function() {
         var diffX = this.state.touchStartX - this.state.touchEndX;
-        // Swipe de izquierda a derecha (Abre Biblioteca)
         if (diffX < -150) {
             var sidebar = document.getElementById('sidebar');
             if (sidebar && !sidebar.classList.contains('active')) this.toggleSidebar();
         }
-        // Swipe de derecha a izquierda (Cierra Biblioteca)
         if (diffX > 150) {
             var sidebar = document.getElementById('sidebar');
             if (sidebar && sidebar.classList.contains('active')) this.toggleSidebar();
@@ -80,12 +72,9 @@ var RetoricaUI = {
     },
 
     initViewportFix: function() {
-        // Blindaje elástico para evitar saltos bruscos en teclados de Android/iOS
         window.visualViewport.addEventListener('resize', function() {
             var view = document.getElementById('viewport-ctx');
-            if (view) {
-                view.style.height = window.visualViewport.height + "px";
-            }
+            if (view) { view.style.height = window.visualViewport.height + "px"; }
         });
     },
 
@@ -98,14 +87,6 @@ var RetoricaUI = {
         }
     },
 
-    adjustZoom: function(amount) {
-        this.state.zoom += amount;
-        if (this.state.zoom < 0.7) this.state.zoom = 0.7;
-        if (this.state.zoom > 1.8) this.state.zoom = 1.8;
-        var el = document.getElementById('zoom-wrapper');
-        if (el) el.style.transform = "scale(" + this.state.zoom + ")";
-    },
-
     toggleTheme: function() {
         document.body.classList.toggle('light-theme');
         var isLight = document.body.classList.contains('light-theme');
@@ -116,11 +97,9 @@ var RetoricaUI = {
     updateCounters: function() {
         var body = document.getElementById('editor-body');
         var text = body ? body.value : "";
-        
         var chars = text.length;
         var words = text.trim() === "" ? 0 : text.trim().split(/\s+/).length;
         var lines = text === "" ? 1 : text.split('\n').length;
-        
         if (document.getElementById('count-chars')) document.getElementById('count-chars').innerText = "CHARS: " + chars;
         if (document.getElementById('count-words')) document.getElementById('count-words').innerText = "WORDS: " + words;
         if (document.getElementById('count-lines')) document.getElementById('count-lines').innerText = "LINES: " + lines;
@@ -134,20 +113,61 @@ var RetoricaUI = {
         setTimeout(function() { toast.classList.remove('show'); }, 2500);
     },
 
+    // PUNTO 11: SELECCIONAR Y COPIAR TÍTULO Y CUERPO JUNTOS
+    copyAll: function() {
+        var title = document.getElementById('editor-title').value.trim();
+        var body = document.getElementById('editor-body').value;
+        if (!title && !body) { this.notify("El lienzo está vacío."); return; }
+        
+        var compiledText = (title ? title.toUpperCase() + "\n" + "=".repeat(title.length) + "\n\n" : "") + body;
+        var dummy = document.createElement("textarea");
+        document.body.appendChild(dummy);
+        dummy.value = compiledText;
+        dummy.select();
+        document.execCommand("copy");
+        document.body.removeChild(dummy);
+        this.notify("Texto completo copiado al portapapeles ✓");
+    },
+
+    // PUNTO 4: INSERTAR TABLAS AUTOAJUSTABLES (Formato Texto Estructurado)
+    insertTable: function() {
+        var rows = parseInt(prompt("Número de filas:", "3"), 10) || 3;
+        var cols = parseInt(prompt("Número de columnas:", "3"), 10) || 3;
+        var tableStr = "\n| ";
+        for (var i=0; i<cols; i++) { tableStr += "Columna " + (i+1) + " | "; }
+        tableStr += "\n|";
+        for (var j=0; j<cols; j++) { tableStr += "---|"; }
+        tableStr += "\n";
+        for (var r=0; r<rows; r++) {
+            tableStr += "| ";
+            for (var c=0; c<cols; c++) { tableStr += "Dato | "; }
+            tableStr += "\n";
+        }
+        var editor = document.getElementById('editor-body');
+        if (editor) {
+            editor.value += tableStr;
+            this.updateCounters();
+            this.notify("Tabla de texto insertada ✓");
+        }
+    },
+
+    // PUNTO 3: INSERTAR IMAGEN DE PERFIL (Vía URL o Base64 Tag)
+    insertImage: function() {
+        var url = prompt("Pega el link de tu foto o currículum aquí (ej. https://... o Base64):");
+        if (!url) return;
+        var editor = document.getElementById('editor-body');
+        if (editor) {
+            editor.value += "\n[IMAGEN_ADJUNTA: " + url + "]\n";
+            this.updateCounters();
+            this.notify("Etiqueta de imagen insertada ✓");
+        }
+    },
+
     expPDF: function() {
         this.notify("Exportando PDF...");
         var element = document.getElementById('unified-sel-container');
         var title = document.getElementById('editor-title').value.trim() || "guion";
         html2pdf().from(element).set({ margin: 15, filename: title + '.pdf' }).save();
-    },
-
-    expPDFEditable: function() {
-        this.notify("Generando PDF Formulario...");
-        var title = document.getElementById('editor-title').value.trim() || "guion_editable";
-        var bodyValue = document.getElementById('editor-body').value;
-        var htmlForm = "<html><body><h2>" + title + "</h2><textarea style='width:100%; height:450px; font-family:Arial;'>" + bodyValue + "</textarea></body></html>";
-        html2pdf().from(htmlForm).set({ margin: 15, filename: title + '_editable.pdf' }).save();
-        this.notify("PDF Formulario listo ✓");
     },
 
     expDOC: function() {
@@ -157,20 +177,14 @@ var RetoricaUI = {
         var blob = new Blob(['\ufeff' + htmlContent], { type: 'application/msword' });
         var url = URL.createObjectURL(blob);
         var a = document.createElement('a'); 
-        a.href = url; 
-        a.download = title + ".doc"; 
-        a.click();
+        a.href = url; a.download = title + ".doc"; a.click();
+        setTimeout(function() { URL.revokeObjectURL(url); }, 100);
         this.notify("Documento Word exportado ✓");
     }
 };
 
-// Disparador del arranque de la App al cargar el DOM
 document.addEventListener('DOMContentLoaded', function() {
     RetoricaUI.init();
-    
-    // Carga de preferencia de tema guardada por el artista
     var savedTheme = localStorage.getItem('retorica_theme_pref');
-    if (savedTheme === 'light') {
-        document.body.classList.add('light-theme');
-    }
+    if (savedTheme === 'light') { document.body.classList.add('light-theme'); }
 });
