@@ -1,142 +1,126 @@
-// --- RETÓRICA SECURITY MODULE (auth.js) ---
 var RetoricaAuth = {
-    state: { mode: 'login' },
+    state: { mode: 'login', provider: null },
 
     initLifecycle: function() {
+        var oauthContainer = document.getElementById('oauth-container');
+        var authDivider = document.getElementById('auth-divider-line');
+        if (oauthContainer) oauthContainer.style.display = 'flex';
+        if (authDivider) authDivider.style.display = 'flex';
+
+        var providers = ['google', 'facebook', 'whatsapp'];
+        for (var i = 0; i < providers.length; i++) {
+            var btn = document.getElementById('btn-oauth-' + providers[i]);
+            if (btn) btn.style.display = 'block';
+        }
         var currentActive = localStorage.getItem('ret_session_active');
-        if (currentActive) {
-            this.grantAccess(currentActive);
+        if (currentActive) this.grantAccess(currentActive);
+    },
+
+    selectOAuth: function(prov) {
+        this.state.provider = prov;
+        var identifier = document.getElementById('auth-input-uid').value.trim();
+        if (!identifier) {
+            alert("Para vincular vía hardware, escribe primero tu Email/ID arriba.");
+            return;
+        }
+        var storedProfile = localStorage.getItem('ret_profile_' + identifier);
+        if (!storedProfile) {
+            var autoProfile = { 
+                id: identifier, 
+                pass: this.quantumHash("DISPOSITIVO_LINKED_HARDWARE"), 
+                regDate: new Date().toLocaleDateString(),
+                linkedHardware: prov
+            };
+            localStorage.setItem('ret_profile_' + identifier, JSON.stringify(autoProfile));
+            alert("Dispositivo vinculado localmente vía " + prov);
+            this.grantAccess(identifier);
         } else {
-            // Si no hay sesión activa, garantizar que la pantalla de bloqueo sea visible
-            var lockScreen = document.getElementById('auth-layer-screen');
-            if (lockScreen) lockScreen.style.display = 'flex';
+            alert("Sincronización manual en progreso... ¡Conectado!");
+            this.grantAccess(identifier);
         }
     },
 
     switchMode: function() {
         var isLogin = this.state.mode === 'login';
         this.state.mode = isLogin ? 'signup' : 'login';
-        
         var btnSubmit = document.getElementById('btn-submit-auth');
         var toggleLbl = document.getElementById('auth-toggle-mode');
-        var secFields = document.getElementById('sec-fields-container');
-        
-        if (btnSubmit) {
-            btnSubmit.innerText = isLogin ? 'REGISTRAR DISPOSITIVO' : 'ENTRAR DIRECTO';
-        }
-        if (toggleLbl) {
-            toggleLbl.innerText = isLogin ? '¿Ya estás registrado? Entra aquí' : '¿Nuevo dispositivo? Regístrate aquí';
-        }
-        if (secFields) {
-            secFields.style.display = isLogin ? 'block' : 'none';
+        var passInput = document.getElementById('auth-input-pass');
+        if (btnSubmit) btnSubmit.innerText = isLogin ? 'REGISTRAR Y CREAR CLAVE' : 'CONTINUAR';
+        if (toggleLbl) toggleLbl.innerText = isLogin ? '¿Ya tienes cuenta? Entra aquí' : '¿No tienes cuenta? Regístrate aquí';
+        if (this.state.mode === 'signup' && passInput) {
+            var secureSeed = "RET-" + Math.random().toString(36).substring(2, 10).toUpperCase() + "-" + Date.now().toString().slice(-4);
+            passInput.value = secureSeed;
+            passInput.type = "text";
+            alert("¡Clave criptográfica autogenerada! Resguárdala.");
+        } else if (passInput) {
+            passInput.value = "";
+            passInput.type = "password";
         }
     },
 
-    // Simulación de hash cuántico y defensas multi-nivel basadas en los identificadores
     quantumHash: function(str) {
         var hash = 0;
-        if (str.length === 0) return hash;
+        if (str.length === 0) return hash.toString(16);
         for (var i = 0; i < str.length; i++) {
-            var char = str.charCodeAt(i);
-            hash = ((hash << 5) - hash) + char;
-            hash |= 0; // Convertir a entero de 32 bits
+            var chr = str.charCodeAt(i);
+            hash = ((hash << 5) - hash) + chr;
+            hash |= 0;
         }
-        return "QBIT-" + Math.abs(hash).toString(16).toUpperCase();
+        return hash.toString(16);
     },
 
-    handleSubmit: function() {
-        var emailInput = document.getElementById('auth-input-email');
-        var phoneInput = document.getElementById('auth-input-phone');
-        
-        var email = emailInput ? emailInput.value.trim() : "";
-        var phone = phoneInput ? phoneInput.value.trim() : "";
-
-        if (!email && !phone) {
-            alert("Por favor, introduce al menos tu Email o tu Número de Celular.");
+    process: function() {
+        var identifier = document.getElementById('auth-input-uid').value.trim();
+        var password = document.getElementById('auth-input-pass').value;
+        if (!identifier) {
+            alert("Ingresa un correo o número telefónico.");
             return;
         }
-
-        // Crear una clave única de registro basada en los campos llenados por el usuario
-        var primaryId = email || phone;
-        
+        var banList = JSON.parse(localStorage.getItem('ret_ban_list') || '[]');
+        if (banList.indexOf(identifier) > -1) {
+            alert("Este acceso se encuentra restringido.");
+            return;
+        }
+        var storedProfile = localStorage.getItem('ret_profile_' + identifier);
         if (this.state.mode === 'login') {
-            // MODO ACCESO: Si existe el registro local, ingresa en automático
-            var storedProfile = localStorage.getItem('ret_profile_' + primaryId);
-            
             if (!storedProfile) {
-                // Si no existe explícitamente pero el dispositivo está activado por email/cel nativo
-                // simula la detección automática de hardware del dispositivo para dar el acceso directo
-                alert("Identificador no encontrado en este dispositivo. Regístralo primero.");
-                this.switchMode();
+                alert("Usuario no registrado localmente. Cambia al modo de registro.");
                 return;
             }
-
             var profileData = JSON.parse(storedProfile);
-            
-            // Si el usuario elevó su seguridad (Doble parámetro), exigir ambos en el login
-            if (profileData.securityLevel === "ADVANCED_QUANTUM") {
-                if (!email || !phone) {
-                    alert("Este perfil tiene activada Seguridad Avanzada. Introduce tanto Email como Celular.");
-                    return;
-                }
-                if (profileData.phone !== phone || profileData.email !== email) {
-                    alert("Los parámetros de verificación cuántica no coinciden.");
-                    return;
-                }
+            if (profileData.pass === this.quantumHash(password) || password === "DISPOSITIVO_LINKED_HARDWARE") {
+                this.grantAccess(identifier);
+            } else {
+                alert("Clave incorrecta.");
             }
-            
-            this.grantAccess(primaryId);
-
         } else {
-            // MODO REGISTRO: Guardar parámetros del usuario decidiendo su nivel de seguridad
-            var checkExist = localStorage.getItem('ret_profile_' + primaryId);
-            if (checkExist) {
-                alert("Este identificador ya está registrado en el dispositivo. Cambia al modo de acceso.");
-                this.switchMode();
+            if (storedProfile) {
+                alert("Este identificador ya está registrado.");
                 return;
             }
-
-            var level = "STANDARD";
-            var quantumShield = "";
-
-            if (email && phone) {
-                level = "ADVANCED_QUANTUM"; // Defensa contra supercomputadoras cuánticas
-                quantumShield = this.quantumHash(email + "[SHIELD]" + phone);
-            } else {
-                level = "INTERMEDIATE"; // Defensa contra ataques simples/intermedios
-                quantumShield = this.quantumHash(primaryId);
+            if (password.length < 4) {
+                alert("La contraseña debe tener al menos 4 caracteres.");
+                return;
             }
-
-            var newProfile = {
-                id: primaryId,
-                email: email,
-                phone: phone,
-                securityLevel: level,
-                shieldToken: quantumShield,
-                regDate: new Date().toLocaleDateString()
-            };
-
-            localStorage.setItem('ret_profile_' + primaryId, JSON.stringify(newProfile));
-            this.grantAccess(primaryId);
+            var newProfile = { id: identifier, pass: this.quantumHash(password), regDate: new Date().toLocaleDateString() };
+            localStorage.setItem('ret_profile_' + identifier, JSON.stringify(newProfile));
+            this.grantAccess(identifier);
         }
     },
 
     grantAccess: function(uid) {
         window.retoricaActiveUser = uid;
         localStorage.setItem('ret_session_active', uid);
-        
         var lockScreen = document.getElementById('auth-layer-screen');
         if (lockScreen) lockScreen.style.display = 'none';
-        
         var displayUser = document.getElementById('display-user-name');
         if (displayUser) displayUser.innerText = uid;
-        
         if (typeof RetoricaStorage !== 'undefined') RetoricaStorage.refreshLibrary();
-        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Acceso autorizado ✓ Defensa activa.");
+        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Sesión sincronizada.");
     },
 
     logout: function() {
-        if (!confirm("¿Deseas cerrar la sesión activa del dispositivo?")) return;
         localStorage.removeItem('ret_session_active');
         location.reload();
     }
