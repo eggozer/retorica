@@ -1,44 +1,10 @@
 // --- RETÓRICA SECURITY MODULE (auth.js) ---
 var RetoricaAuth = {
-    state: { mode: 'login', provider: null },
+    state: { mode: 'login' },
 
     initLifecycle: function() {
-        var oauthContainer = document.getElementById('oauth-container');
-        var authDivider = document.getElementById('auth-divider-line');
-        if (oauthContainer) oauthContainer.style.display = 'flex';
-        if (authDivider) authDivider.style.display = 'flex';
-
-        var providers = ['google', 'facebook', 'whatsapp'];
-        for (var i = 0; i < providers.length; i++) {
-            var btn = document.getElementById('btn-oauth-' + providers[i]);
-            if (btn) btn.style.display = 'block';
-        }
         var currentActive = localStorage.getItem('ret_session_active');
         if (currentActive) this.grantAccess(currentActive);
-    },
-
-    selectOAuth: function(prov) {
-        this.state.provider = prov;
-        var identifier = document.getElementById('auth-input-uid').value.trim();
-        if (!identifier) {
-            alert("Para vincular vía hardware, escribe primero tu Email/ID arriba.");
-            return;
-        }
-        var storedProfile = localStorage.getItem('ret_profile_' + identifier);
-        if (!storedProfile) {
-            var autoProfile = { 
-                id: identifier, 
-                pass: this.quantumHash("DISPOSITIVO_LINKED_HARDWARE"), 
-                regDate: new Date().toLocaleDateString(),
-                linkedHardware: prov
-            };
-            localStorage.setItem('ret_profile_' + identifier, JSON.stringify(autoProfile));
-            alert("Dispositivo vinculado localmente vía " + prov);
-            this.grantAccess(identifier);
-        } else {
-            alert("Sincronización manual en progreso... ¡Conectado!");
-            this.grantAccess(identifier);
-        }
     },
 
     switchMode: function() {
@@ -47,13 +13,15 @@ var RetoricaAuth = {
         var btnSubmit = document.getElementById('btn-submit-auth');
         var toggleLbl = document.getElementById('auth-toggle-mode');
         var passInput = document.getElementById('auth-input-pass');
+        
         if (btnSubmit) btnSubmit.innerText = isLogin ? 'REGISTRAR Y CREAR CLAVE' : 'CONTINUAR';
         if (toggleLbl) toggleLbl.innerText = isLogin ? '¿Ya tienes cuenta? Entra aquí' : '¿No tienes cuenta? Regístrate aquí';
+        
         if (this.state.mode === 'signup' && passInput) {
-            var secureSeed = "RET-" + Math.random().toString(36).substring(2, 10).toUpperCase() + "-" + Date.now().toString().slice(-4);
+            var secureSeed = "RET-" + Math.random().toString(36).substring(2, 8).toUpperCase() + "-" + Date.now().toString().slice(-3);
             passInput.value = secureSeed;
             passInput.type = "text";
-            alert("¡Clave criptográfica autogenerada! Resguárdala.");
+            alert("¡Clave autogenerada!\nPuedes usar tu correo o tu número de celular (WhatsApp) como usuario único en todos tus dispositivos.");
         } else if (passInput) {
             passInput.value = "";
             passInput.type = "password";
@@ -71,29 +39,28 @@ var RetoricaAuth = {
         return hash.toString(16);
     },
 
+    // PUNTO 14: Inicio de Sesión / Sincronización lógica con Celular y/o Correo
     process: function() {
         var identifier = document.getElementById('auth-input-uid').value.trim();
         var password = document.getElementById('auth-input-pass').value;
+        
         if (!identifier) {
-            alert("Ingresa un correo o número telefónico.");
+            alert("Ingresa un Email o tu número de WhatsApp.");
             return;
         }
-        var banList = JSON.parse(localStorage.getItem('ret_ban_list') || '[]');
-        if (banList.indexOf(identifier) > -1) {
-            alert("Este acceso se encuentra restringido.");
-            return;
-        }
+
         var storedProfile = localStorage.getItem('ret_profile_' + identifier);
+        
         if (this.state.mode === 'login') {
             if (!storedProfile) {
-                alert("Usuario no registrado localmente. Cambia al modo de registro.");
+                alert("Usuario no registrado en este dispositivo. Cambia al modo de registro para enlazar este teléfono/email.");
                 return;
             }
             var profileData = JSON.parse(storedProfile);
-            if (profileData.pass === this.quantumHash(password) || password === "DISPOSITIVO_LINKED_HARDWARE") {
+            if (profileData.pass === this.quantumHash(password)) {
                 this.grantAccess(identifier);
             } else {
-                alert("Clave incorrecta.");
+                alert("Clave criptográfica incorrecta.");
             }
         } else {
             if (storedProfile) {
@@ -118,10 +85,11 @@ var RetoricaAuth = {
         var displayUser = document.getElementById('display-user-name');
         if (displayUser) displayUser.innerText = uid;
         if (typeof RetoricaStorage !== 'undefined') RetoricaStorage.refreshLibrary();
-        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Sesión sincronizada.");
+        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Sesión Local Iniciada.");
     },
 
     logout: function() {
+        if(!confirm("¿Deseas cerrar la sesión activa?")) return;
         localStorage.removeItem('ret_session_active');
         location.reload();
     }
