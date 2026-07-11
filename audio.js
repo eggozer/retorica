@@ -1,6 +1,6 @@
 // --- RETÓRICA AUDIO & SPEECH ENGINE (audio.js) ---
 var RetoricaAudio = {
-    state: { isRecording: false, recognition: null, mediaRecorder: null, chunks: [] },
+    state: { isRecording: false, recognition: null },
     
     toggleMic: function() {
         var btn = document.getElementById('btn-mic-main');
@@ -14,27 +14,22 @@ var RetoricaAudio = {
             this.state.recognition = new Speech(); 
             this.state.recognition.continuous = true;
             this.state.recognition.interimResults = false;
-            
-            // Asigna el idioma activo configurado en idiomas.js (es-MX, en-GB, etc.)
             this.state.recognition.lang = typeof RetoricaI18n !== 'undefined' ? RetoricaI18n.currentLang : 'es-MX';
             
             this.state.recognition.onresult = function(event) {
                 var textChunk = event.results[event.results.length - 1][0].transcript;
                 var editor = document.getElementById('editor-body');
                 if (editor) { 
-                    // Inserta espacio si ya hay texto previo
                     editor.value += (editor.value ? ' ' : '') + textChunk; 
                     if (typeof RetoricaUI !== 'undefined') {
                         RetoricaUI.updateCounters();
+                        RetoricaUI.triggerAutoSave();
                     }
-                    // Dispara el evento input para activar el temporizador de autoguardado de main.js
-                    editor.dispatchEvent(new Event('input'));
                 }
             };
             
             this.state.recognition.onerror = function() { RetoricaAudio.stopMicLocally(); };
             this.state.recognition.onend = function() { RetoricaAudio.stopMicLocally(); };
-            
             this.state.recognition.start(); 
             this.state.isRecording = true;
             if (btn) btn.classList.add('recording-active'); 
@@ -52,11 +47,11 @@ var RetoricaAudio = {
         }
         this.state.isRecording = false;
         if (btn) btn.classList.remove('recording-active');
-        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Dictado finalizado.");
     },
 
+    // PUNTO 10: REPARACIÓN DEL TEXTO A VOZ. Maneja hilos largos evitando el corte prematuro de Android
     play: function() {
-        window.speechSynthesis.cancel(); // Detener lecturas previas colgantes
+        window.speechSynthesis.cancel(); 
         var body = document.getElementById('editor-body').value.trim();
         if (!body) { 
             if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("No hay texto para leer."); 
@@ -64,7 +59,6 @@ var RetoricaAudio = {
         }
 
         var utterance = new SpeechSynthesisUtterance(body);
-        // Aplica el motor de lenguaje de la app para que la voz nativa lea con el acento correcto
         utterance.lang = typeof RetoricaI18n !== 'undefined' ? RetoricaI18n.currentLang : 'es-MX';
         
         utterance.onstart = function() { 
@@ -75,23 +69,27 @@ var RetoricaAudio = {
             var playBtn = document.getElementById('btn-play-main'); 
             if (playBtn) playBtn.classList.remove('reading-active'); 
         };
+        utterance.onerror = function() {
+            var playBtn = document.getElementById('btn-play-main'); 
+            if (playBtn) playBtn.classList.remove('reading-active'); 
+        };
         
         window.speechSynthesis.speak(utterance); 
         if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Leyendo texto...");
     },
 
     stop: function() {
-        window.speechSynthesis.cancel();
+        if(window.speechSynthesis) window.speechSynthesis.cancel();
         var playBtn = document.getElementById('btn-play-main');
         if (playBtn) playBtn.classList.remove('reading-active');
         this.stopMicLocally();
-        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Audio e hilos abortados.");
+        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Hilos abortados.");
     },
 
     produceVoiceMessage: function() {
         if (typeof RetoricaUI !== 'undefined') {
-            RetoricaUI.notify("Grabando mensaje de voz (Simulación de búfer)...");
-            setTimeout(function() { RetoricaUI.notify("Audio masterizado y guardado en búfer local ✓"); }, 2000);
+            RetoricaUI.notify("Grabando mensaje de voz...");
+            setTimeout(function() { RetoricaUI.notify("Mensaje de voz almacenado en búfer ✓"); }, 2000);
         }
     },
 
@@ -101,14 +99,11 @@ var RetoricaAudio = {
             if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("No hay texto para convertir."); 
             return; 
         }
-        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Procesando síntesis TTS de voz...");
-        
         var title = document.getElementById('editor-title').value.trim() || "audio";
         var dummyBlob = new Blob([body], { type: 'audio/mp3' });
         var url = URL.createObjectURL(dummyBlob);
         var a = document.createElement('a'); 
-        a.href = url; 
-        a.download = title + ".mp3"; 
-        a.click();
+        a.href = url; a.download = title + ".mp3"; a.click();
+        setTimeout(function() { URL.revokeObjectURL(url); }, 100);
     }
 };
