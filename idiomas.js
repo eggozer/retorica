@@ -1,24 +1,21 @@
 // --- RETÓRICA INTERNATIONALIZATION & TRANSLATION ENGINE (idiomas.js) ---
 var RetoricaI18n = {
     currentLang: 'es-MX',
-    langsOrder: ['es-MX', 'es-ES', 'en-GB', 'de-DE', 'ru-RU', 'fr-FR', 'zh-CN', 'ja-JP', 'zh-HK', 'ar-SA', 'hi-IN'],
+    langsOrder: ['es-MX', 'es-ES', 'en-GB', 'de-DE', 'ru-RU', 'fr-FR', 'zh-CN', 'ja-JP', 'ar-SA', 'hi-IN'],
     db: {
-        'es-MX': { name: 'Español (Latam)', save: '✓', new: '+', mic: '🎙️', read: '👁', stop: '🛑', vmsg: '▶', tts: '🔊', placeholderTitle: 'Título del Guion...', placeholderBody: 'Escribe o dicta aquí tu retórica...' },
-        'es-ES': { name: 'Español (España)', save: '✓', new: '+', mic: '🎙️', read: '👁', stop: '🛑', vmsg: '▶', tts: '🔊', placeholderTitle: 'Titular del Guion...', placeholderBody: 'Escribe o dicta aquí tu obra...' },
-        'en-GB': { name: 'English (UK)', save: '✓', new: '+', mic: '🎙️', read: '👁', stop: '🛑', vmsg: '▶', tts: '🔊', placeholderTitle: 'Script Title...', placeholderBody: 'Write or dictate your rhetoric here...' },
-        'de-DE': { name: 'Deutsch', save: '✓', new: '+', mic: '🎙️', read: '👁', stop: '🛑', vmsg: '▶', tts: '🔊', placeholderTitle: 'Skripttitel...', placeholderBody: 'Schreiben oder diktieren Sie hier...' },
-        'ru-RU': { name: 'Русский', save: '✓', new: '+', mic: '🎙️', read: '👁', stop: '🛑', vmsg: '▶', tts: '🔊', placeholderTitle: 'Название сценария...', placeholderBody: 'Пишите или диктуйте свою риторику здесь...' },
-        'fr-FR': { name: 'Français', save: '✓', new: '+', mic: '🎙️', read: '👁', stop: '🛑', vmsg: '▶', tts: '🔊', placeholderTitle: 'Titre du Scénario...', placeholderBody: 'Écrivez ou dictez votre rhétorique ici...' },
-        'zh-CN': { name: '中文 (简体)', save: '✓', new: '+', mic: '🎙️', read: '👁', stop: '🛑', vmsg: '▶', tts: '🔊', placeholderTitle: '剧本标题...', placeholderBody: '在此处编写或听写您的剧本...' },
-        'ja-JP': { name: '日本語', save: '✓', new: '+', mic: '🎙️', read: '👁', stop: '🛑', vmsg: '▶', tts: '🔊', placeholderTitle: '台本のタイトル...', placeholderBody: 'ここにレトリックを書き留めるか口述します...' },
-        'zh-HK': { name: '廣東話 (Cantonés)', save: '✓', new: '+', mic: '🎙️', read: '👁', stop: '🛑', vmsg: '▶', tts: '🔊', placeholderTitle: '劇本標題...', placeholderBody: '在此處編寫或聽寫您的劇本...' },
-        'ar-SA': { name: 'العربية', save: '✓', new: '+', mic: '🎙️', read: '👁', stop: '🛑', vmsg: '▶', tts: '🔊', placeholderTitle: 'عنوان النص...', placeholderBody: 'اكتب أو أملي نصوصك هنا...' },
-        'hi-IN': { name: 'हिन्दी', save: '✓', new: '+', mic: '🎙️', read: '👁', stop: '🛑', vmsg: '▶', tts: '🔊', placeholderTitle: 'पटकथा का शीर्षक...', placeholderBody: 'अपनी पटकथा यहाँ लिखें या बोलकर टाइप करें...' }
+        'es-MX': { name: 'Español (MX)', save: 'Guardar', new: 'Nuevo', mic: 'Dictado', read: 'Lectura', stop: 'Abortar', vmsg: 'Mensaje\nVoz', tts: 'Texto\nA Voz', pTitle: 'Título del Guion...', pBody: 'Escribe o dicta aquí tu retórica...' },
+        'es-ES': { name: 'Español (ES)', save: 'Guardar', new: 'Nuevo', mic: 'Dictado', read: 'Lectura', stop: 'Abortar', vmsg: 'Mensaje\nVoz', tts: 'Texto\nA Voz', pTitle: 'Titular de la Obra...', pBody: 'Escribe o dicta aquí tu obra...' },
+        'en-GB': { name: 'English', save: 'Save', new: 'New', mic: 'Dictate', read: 'Read', stop: 'Abort', vmsg: 'Voice\nMsg', tts: 'Text\nVoice', pTitle: 'Script Title...', pBody: 'Write or dictate your rhetoric here...' },
+        'de-DE': { name: 'Deutsch', save: 'Speichern', new: 'Neu', mic: 'Diktieren', read: 'Lesen', stop: 'Abbrechen', vmsg: 'Sprach\nNachr', tts: 'Text\nStimme', pTitle: 'Skripttitel...', pBody: 'Schreiben oder diktieren Sie hier...' },
+        'ru-RU': { name: 'Русский', save: 'Сохранить', new: 'Новый', mic: 'Диктовка', read: 'Читать', stop: 'Отмена', vmsg: 'Голос', tts: 'Текст\nГолос', pTitle: 'Название...', pBody: 'Пишите здесь...' },
+        'fr-FR': { name: 'Français', save: 'Sauver', new: 'Nouveau', mic: 'Dictée', read: 'Lire', stop: 'Avorter', vmsg: 'Message\nVocal', tts: 'Texte\nVoix', pTitle: 'Titre du Scénario...', pBody: 'Écrivez ou dictez votre rhétorique ici...' },
+        'zh-CN': { name: '中文', save: '保存', new: '新的', mic: '听写', read: '读', stop: '中止', vmsg: '语音', tts: '文字\n声音', pTitle: '剧本标题...', pBody: '在此处编写您的剧本...' },
+        'ja-JP': { name: '日本語', save: '保存', new: '新', mic: '口述', read: '読む', stop: '中止', vmsg: '音声', tts: '文字\n音声', pTitle: 'タイトル...', pBody: 'ここにレトリックを書きます...' },
+        'ar-SA': { name: 'العربية', save: 'حفظ', new: 'جديد', mic: 'إملاء', read: 'قراءة', stop: 'إحباط', vmsg: 'رسالة', tts: 'نص\nصوت', pTitle: 'عنوان النص...', pBody: 'اكتب أو أملي نصوصك هنا...' },
+        'hi-IN': { name: 'हिन्दी', save: 'बचाना', new: 'नया', mic: 'श्रुतलेख', read: 'पढ़ना', stop: 'रद्द', vmsg: 'आवाज़', tts: 'पाठ\nआवाज़', pTitle: 'शीर्षक...', pBody: 'अपनी पटकथा यहाँ लिखें...' }
     },
 
-    init: function() {
-        this.setAppLang(this.currentLang);
-    },
+    init: function() { this.setAppLang(this.currentLang); },
 
     toggleAppLang: function() {
         var idx = this.langsOrder.indexOf(this.currentLang);
@@ -30,45 +27,34 @@ var RetoricaI18n = {
         this.currentLang = lang;
         var p = this.db[lang] || this.db['es-MX'];
         
-        // Actualizar interfaz dinámica de botones superiores
-        if (document.getElementById('lbl-tool-save')) document.getElementById('lbl-tool-save').innerText = (lang.startsWith('es') ? 'Guardar' : 'Save');
-        if (document.getElementById('lbl-tool-new')) document.getElementById('lbl-tool-new').innerText = (lang.startsWith('es') ? 'Nuevo' : 'New');
-        if (document.getElementById('lbl-tool-mic')) document.getElementById('lbl-tool-mic').innerText = (lang.startsWith('es') ? 'Dictado' : 'Dictate');
-        if (document.getElementById('lbl-tool-read')) document.getElementById('lbl-tool-read').innerText = (lang.startsWith('es') ? 'Lectura' : 'Read');
-        if (document.getElementById('lbl-tool-stop')) document.getElementById('lbl-tool-stop').innerText = (lang.startsWith('es') ? 'Abortar' : 'Abort');
+        // PUNTO 9: Asignación dinámica completa sin omitir caracteres
+        var btnSave = document.getElementById('lbl-tool-save'); if(btnSave) btnSave.innerText = p.save;
+        var btnNew = document.getElementById('lbl-tool-new'); if(btnNew) btnNew.innerText = p.new;
+        var btnMic = document.getElementById('lbl-tool-mic'); if(btnMic) btnMic.innerText = p.mic;
+        var btnRead = document.getElementById('lbl-tool-read'); if(btnRead) btnRead.innerText = p.read;
+        var btnStop = document.getElementById('lbl-tool-stop'); if(btnStop) btnStop.innerText = p.stop;
+        var btnVmsg = document.getElementById('lbl-tool-vmsg'); if(btnVmsg) btnVmsg.innerText = p.vmsg;
+        var btnTts = document.getElementById('lbl-tool-tts'); if(btnTts) btnTts.innerText = p.tts;
         
-        // Cambiar Placeholders del área de trabajo integrada
-        var titleInput = document.getElementById('editor-title');
-        var bodyInput = document.getElementById('editor-body');
-        if (titleInput) titleInput.placeholder = p.placeholderTitle;
-        if (bodyInput) bodyInput.placeholder = p.placeholderBody;
+        var tInput = document.getElementById('editor-title'); if(tInput) tInput.placeholder = p.pTitle;
+        var bInput = document.getElementById('editor-body'); if(bInput) bInput.placeholder = p.pBody;
         
-        if (typeof RetoricaUI !== 'undefined') {
-            RetoricaUI.notify("Idioma Activo: " + p.name);
-        }
-
-        // FUNCIÓN CLAVE: Si el usuario seleccionó texto, procesar la traducción al cambiar de idioma
+        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Idioma Activo: " + p.name);
         this.checkAndTranslateSelection(lang);
     },
 
     checkAndTranslateSelection: function(targetLang) {
         var editor = document.getElementById('editor-body');
         if (!editor) return;
-
         var start = editor.selectionStart;
         var end = editor.selectionEnd;
-        if (start === end) return; // No hay texto seleccionado, no hace nada (aplica para escribir/dictar directo)
+        if (start === end) return; 
 
         var selectedText = editor.value.substring(start, end);
         if (!selectedText.trim()) return;
 
-        if (typeof RetoricaUI !== 'undefined') {
-            RetoricaUI.notify("Traduciendo selección a " + this.db[targetLang].name + "...");
-        }
-
-        // Consumo del motor de traducción libre e inteligente MyMemory API
-        var self = this;
-        var cleanLang = targetLang.split('-')[0]; // Extrae 'en', 'es', 'fr', etc.
+        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Traduciendo fragmento...");
+        var cleanLang = targetLang.split('-')[0];
         var url = "https://api.mymemory.translated.net/get?q=" + encodeURIComponent(selectedText) + "&langpair=auto|" + cleanLang;
 
         fetch(url)
@@ -77,19 +63,16 @@ var RetoricaI18n = {
                 if (data && data.responseData) {
                     var translatedText = data.responseData.translatedText;
                     var fullText = editor.value;
-                    // Reemplaza exactamente el fragmento seleccionado con la interpretación correcta
                     editor.value = fullText.substring(0, start) + translatedText + fullText.substring(end);
                     editor.setSelectionRange(start, start + translatedText.length);
                     if (typeof RetoricaUI !== 'undefined') {
                         RetoricaUI.updateCounters();
-                        RetoricaUI.notify("Texto interpretado con éxito ✓");
+                        RetoricaUI.triggerAutoSave();
+                        RetoricaUI.notify("Interpretación aplicada ✓");
                     }
                 }
-            })
-            .catch(function() {
-                if (typeof RetoricaUI !== 'undefined') {
-                    RetoricaUI.notify("Error de red en la interpretación.");
-                }
+            }).catch(function() {
+                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error de red en la interpretación.");
             });
     }
 };
