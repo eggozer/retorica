@@ -5,10 +5,13 @@ var RetoricaStorage = {
 
     getDocs: function() {
         var data = localStorage.getItem(this.dbKey);
+        // Respaldo preventivo anticaché si se borró el principal
+        if (!data) {
+            data = localStorage.getItem('retorica_backup_cloud_mirror');
+        }
         return data ? JSON.parse(data) : {};
     },
 
-    // Punto 1 y 7: Validación de lienzo vacío y Guardado Silencioso Local por defecto
     save: function() {
         var titleInput = document.getElementById('editor-title');
         var bodyInput = document.getElementById('editor-body');
@@ -17,7 +20,6 @@ var RetoricaStorage = {
         var title = titleInput.value.trim();
         var body = bodyInput.value.trim();
 
-        // Punto 1: Si ambos campos están vacíos, detener el flujo y avisar al usuario
         if (!title && !body) {
             if (typeof RetoricaUI !== 'undefined') {
                 RetoricaUI.notify("El archivo está vacío. Operación cancelada.");
@@ -25,30 +27,42 @@ var RetoricaStorage = {
             return;
         }
 
-        // Si no tiene título pero sí cuerpo, asignamos una marca temporal para no perderlo
         if (!title) title = "Sin Título (" + new Date().toLocaleDateString() + ")";
 
         var docs = this.getDocs();
+        
+        // Refacción Anti-duplicidad: Busca si ya existe un documento con este mismo título
         if (!this.currentDocId) {
-            this.currentDocId = 'doc_' + Date.now();
+            var existingId = null;
+            Object.keys(docs).forEach(function(key) {
+                if (docs[key].title.toLowerCase() === title.toLowerCase()) {
+                    existingId = key;
+                }
+            });
+            this.currentDocId = existingId ? existingId : 'doc_' + Date.now();
         }
+
+        var nowIso = new Date().toISOString();
+        var isNew = !docs[this.currentDocId];
 
         docs[this.currentDocId] = {
             id: this.currentDocId,
             title: title,
             body: body,
-            updatedAt: new Date().toISOString()
+            createdAt: isNew ? nowIso : (docs[this.currentDocId].createdAt || nowIso),
+            updatedAt: nowIso
         };
 
         localStorage.setItem(this.dbKey, JSON.stringify(docs));
+        // Refacción: Exportación automática transparente al guardar
+        this.exportToHTML();
         this.refreshLibrary();
 
         if (typeof RetoricaUI !== 'undefined') {
-            RetoricaUI.notify("Guardado local silencioso ✓");
+            RetoricaUI.notify("Guardado y Exportado HTML ✓");
         }
     },
 
-    // Punto 8: Función rápida de autoguardado silencioso (sin alertas intrusivas)
     autoSaveSilent: function() {
         var titleInput = document.getElementById('editor-title');
         var bodyInput = document.getElementById('editor-body');
@@ -57,20 +71,32 @@ var RetoricaStorage = {
         var title = titleInput.value.trim();
         var body = bodyInput.value.trim();
 
-        if (!title && !body) return; // Evita guardar lienzos completamente limpios
+        if (!title && !body) return; 
 
         if (!title) title = "Autoguardado (" + new Date().toLocaleDateString() + ")";
 
         var docs = this.getDocs();
+        
+        // Refacción Anti-duplicidad en segundo plano
         if (!this.currentDocId) {
-            this.currentDocId = 'doc_' + Date.now();
+            var existingId = null;
+            Object.keys(docs).forEach(function(key) {
+                if (docs[key].title.toLowerCase() === title.toLowerCase()) {
+                    existingId = key;
+                }
+            });
+            this.currentDocId = existingId ? existingId : 'doc_' + Date.now();
         }
+
+        var nowIso = new Date().toISOString();
+        var isNew = !docs[this.currentDocId];
 
         docs[this.currentDocId] = {
             id: this.currentDocId,
             title: title,
             body: body,
-            updatedAt: new Date().toISOString()
+            createdAt: isNew ? nowIso : (docs[this.currentDocId].createdAt || nowIso),
+            updatedAt: nowIso
         };
 
         localStorage.setItem(this.dbKey, JSON.stringify(docs));
@@ -93,7 +119,7 @@ var RetoricaStorage = {
     },
 
     deleteDoc: function(id, event) {
-        if (event) event.stopPropagation(); // Evita que se abra el documento al querer borrarlo
+        if (event) event.stopPropagation(); 
         if (!confirm("¿Seguro que deseas eliminar este guion de tu biblioteca?")) return;
 
         var docs = this.getDocs();
@@ -127,9 +153,9 @@ var RetoricaStorage = {
         }
     },
 
-    // Punto 9: Unificación de tarjetas mostrando obligatoriamente título y 3 líneas de vista previa limpias
     refreshLibrary: function() {
-        var container = document.getElementById('docs-list-render');
+        // Vinculación exacta con tu id del index.html de producción
+        var container = document.getElementById('library-container');
         if (!container) return;
         container.innerHTML = '';
 
@@ -139,25 +165,29 @@ var RetoricaStorage = {
         });
 
         if (sortedDocs.length === 0) {
-            container.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:20px; color:var(--text-muted); font-size:0.75rem; font-weight:bold;">BIBLIOTECA VACÍA</div>';
+            container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:0.75rem; font-weight:bold;">BIBLIOTECA VACÍA</div>';
             return;
         }
 
         sortedDocs.forEach(function(doc) {
             var card = document.createElement('div');
-            card.className = 'card-template';
+            card.className = 'doc-card'; // Mapeo de clase fiel a tu css production
             card.setAttribute('onclick', "RetoricaStorage.loadDoc('" + doc.id + "')");
 
-            // Forzar visualización del título y extracto limpio
             var titleText = doc.title || "Sin Título";
-            var bodySnippet = doc.body ? doc.body.substring(0, 90) + "..." : "Sin contenido adicional...";
+            var bodySnippet = doc.body ? doc.body.substring(0, 60) + "..." : "Sin contenido...";
+            
+            // Refacción: Formatear las marcas de tiempo para la tarjeta
+            var createdDate = doc.createdAt ? new Date(doc.createdAt).toLocaleDateString() : 'N/A';
+            var updatedTime = doc.updatedAt ? new Date(doc.updatedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'N/A';
 
             card.innerHTML = 
-                '<div class="card-template-title">' + titleText + '</div>' +
-                '<div class="card-template-body">' + bodySnippet + '</div>' +
-                '<div class="card-template-actions">' +
-                    '<button class="btn-action-tmpl" onclick="RetoricaStorage.deleteDoc(\'' + doc.id + '\', event)">Eliminar</button>' +
-                '</div>';
+                '<div>' +
+                    '<div style="font-weight:bold; font-size:0.9rem; color:var(--text-main);">' + titleText + '</div>' +
+                    '<div style="font-size:0.75rem; color:var(--text-muted); margin-top:3px;">' + bodySnippet + '</div>' +
+                    '<div style="font-size:0.65rem; color:var(--accent); margin-top:5px;">Creado: ' + createdDate + ' | Modif: ' + updatedTime + '</div>' +
+                '</div>' +
+                '<button class="btn-delete-doc" onclick="RetoricaStorage.deleteDoc(\'' + doc.id + '\', event)">×</button>';
 
             container.appendChild(card);
         });
@@ -181,7 +211,6 @@ var RetoricaStorage = {
         var reader = new FileReader();
         reader.onload = function(e) {
             var content = e.target.result;
-            // Si el archivo viene con estructura HTML básica, extraemos solo el texto interno plano
             if (file.name.endsWith('.html')) {
                 var tempDiv = document.createElement('div');
                 tempDiv.innerHTML = content;
@@ -190,7 +219,7 @@ var RetoricaStorage = {
             
             document.getElementById('editor-title').value = file.name.replace(/\.[^/.]+$/, "");
             document.getElementById('editor-body').value = content;
-            RetoricaStorage.currentDocId = null; // Lo trata como un archivo nuevo importado
+            RetoricaStorage.currentDocId = null; 
             
             if (typeof RetoricaUI !== 'undefined') {
                 RetoricaUI.updateCounters();
@@ -198,6 +227,6 @@ var RetoricaStorage = {
             }
         };
         reader.readAsText(file);
-        event.target.value = ''; // Reset selector
+        event.target.value = ''; 
     }
 };
