@@ -58,7 +58,7 @@
         .btn-wrapper-3d { display: inline-flex; flex-direction: column; align-items: center; position: relative; vertical-align: top; }
         .btn-label-3d { font-size: 0.6rem; font-weight: bold; color: var(--text-muted); text-align: center; line-height: 0.75rem; min-height: 1.5rem; display: flex; align-items: flex-end; justify-content: center; margin-bottom: 6px; text-transform: uppercase; white-space: pre-line; }
         
-        /* Botones 3D con Iconografía a 3/4 Monocromática */
+        /* Botones 3D */
         .btn-round-3d { width: 44px; height: 44px; border-radius: 50%; background: var(--btn-3d-bg); border: none; border-bottom: 4px solid var(--btn-shadow); color: var(--text-main); display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: all 0.1s; }
         .btn-round-3d:active { transform: translateY(2px); border-bottom-width: 1px; box-shadow: 0 2px 3px rgba(0,0,0,0.3); }
         .btn-round-3d svg, .btn-round-3d span.icon-raw { width: 75%; height: 75%; display: flex; align-items: center; justify-content: center; fill: currentColor; font-size: 1.25rem; font-style: normal; font-weight: bold; }
@@ -72,17 +72,16 @@
         
         .sidebar-footer { position: absolute; bottom: 0; left: 0; width: 100%; padding: 15px 20px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--bg-main); box-shadow: 0 -4px 10px rgba(0,0,0,0.3); padding-bottom: calc(15px + env(safe-area-inset-bottom)); }
         
-        /* Área de Trabajo Limpia Sin Imágenes Fantasma */
+        /* Área de Trabajo original intacta */
         .main-view { flex: 1; display: flex; flex-direction: column; position: relative; z-index: 10; background: transparent; }
         .editor-scroll-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; }
         #zoom-wrapper { width: 100%; display: flex; flex-direction: column; flex: 1; transform-origin: top left; }
         
-        /* Contenedor Unificado (Fusión total de Título y Cuerpo) */
+        /* Contenedor Unificado original */
         .unified-container { border: 1px solid transparent; width: 100%; display: flex; flex-direction: column; flex: 1; padding: 5px; user-select: text; -webkit-user-select: text; }
         .doc-title { background: transparent; border: none; color: var(--text-main); font-size: 1.4rem; font-weight: 800; margin-bottom: 15px; width: 100%; outline: none; padding: 5px 0; border-bottom: 1px dashed var(--border); }
         .textarea-main { background: transparent; border: none; color: var(--text-main); font-size: 1rem; line-height: 1.6; resize: none; flex: 1; width: 100%; min-height: 350px; outline: none; font-weight: 500; }
         
-        /* Notificaciones y Clases de Color */
         body.light-theme .doc-title, body.light-theme .textarea-main, body.light-theme .unified-container { color: #1a202c !important; }
         .toast { position: fixed; bottom: 65px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--text-main); color: var(--bg-main); padding: 10px 20px; border-radius: 30px; font-size: 0.75rem; font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.3); transition: transform 0.2s ease-out; z-index: 3000; pointer-events: none; }
         .toast.show { transform: translateX(-50%) translateY(0); }
@@ -135,7 +134,7 @@
         </div>
     </div>
 
-    <!-- BOTONERA COMPLETA ORIGINAL CON ICONOS NATIVOS -->
+    <!-- BOTONERA ORIGINAL CON ICONOS NATIVOS -->
     <nav class="top-navbar">
         <div class="btn-wrapper-3d">
             <div class="btn-label-3d">Menú</div>
@@ -231,7 +230,7 @@
         </div>
     </div>
 
-    <!-- ÁREA DE EDICIÓN TOTALMENTE UNIFICADA -->
+    <!-- ÁREA DE EDICIÓN ORIGINAL -->
     <main class="main-view">
         <div class="editor-scroll-container" id="viewport-ctx">
             <div id="zoom-wrapper">
