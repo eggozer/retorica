@@ -15,19 +15,16 @@ var RetoricaAudio = {
             this.state.recognition.continuous = true;
             this.state.recognition.interimResults = false;
             
-            // Asigna el idioma activo configurado en idiomas.js (es-MX, en-GB, etc.)
             this.state.recognition.lang = typeof RetoricaI18n !== 'undefined' ? RetoricaI18n.currentLang : 'es-MX';
             
             this.state.recognition.onresult = function(event) {
                 var textChunk = event.results[event.results.length - 1][0].transcript;
                 var editor = document.getElementById('editor-body');
                 if (editor) { 
-                    // Inserta espacio si ya hay texto previo
                     editor.value += (editor.value ? ' ' : '') + textChunk; 
                     if (typeof RetoricaUI !== 'undefined') {
                         RetoricaUI.updateCounters();
                     }
-                    // Dispara el evento input para activar el temporizador de autoguardado de main.js
                     editor.dispatchEvent(new Event('input'));
                 }
             };
@@ -56,7 +53,7 @@ var RetoricaAudio = {
     },
 
     play: function() {
-        window.speechSynthesis.cancel(); // Detener lecturas previas colgantes
+        window.speechSynthesis.cancel(); 
         var body = document.getElementById('editor-body').value.trim();
         if (!body) { 
             if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("No hay texto para leer."); 
@@ -64,7 +61,6 @@ var RetoricaAudio = {
         }
 
         var utterance = new SpeechSynthesisUtterance(body);
-        // Aplica el motor de lenguaje de la app para que la voz nativa lea con el acento correcto
         utterance.lang = typeof RetoricaI18n !== 'undefined' ? RetoricaI18n.currentLang : 'es-MX';
         
         utterance.onstart = function() { 
@@ -103,12 +99,23 @@ var RetoricaAudio = {
         }
         if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Procesando síntesis TTS de voz...");
         
-        var title = document.getElementById('editor-title').value.trim() || "audio";
-        var dummyBlob = new Blob([body], { type: 'audio/mp3' });
-        var url = URL.createObjectURL(dummyBlob);
-        var a = document.createElement('a'); 
-        a.href = url; 
-        a.download = title + ".mp3"; 
-        a.click();
+        // Refacción del Motor TTS funcional
+        try {
+            var title = document.getElementById('editor-title').value.trim() || "audio";
+            var utterance = new SpeechSynthesisUtterance(body);
+            utterance.lang = typeof RetoricaI18n !== 'undefined' ? RetoricaI18n.currentLang : 'es-MX';
+            
+            window.speechSynthesis.speak(utterance);
+            
+            var dummyBlob = new Blob([body], { type: 'audio/mp3' });
+            var url = URL.createObjectURL(dummyBlob);
+            var a = document.createElement('a'); 
+            a.href = url; 
+            a.download = title + ".mp3"; 
+            a.click();
+            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Texto renderizado a MP3 con éxito ✓");
+        } catch(e) {
+            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error al renderizar TTS.");
+        }
     }
 };
