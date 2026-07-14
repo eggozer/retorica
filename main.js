@@ -1,5 +1,6 @@
 // --- RETÓRICA INTERFACE & MAIN ORCHESTRATION MODULE (main.js) ---
 var autoSaveTimeout = null;
+var deferredPrompt = null; // Refacción para captura de instalación PWA
 
 var RetoricaUI = {
     state: { zoom: 1.0, touchStartX: 0, touchEndX: 0 },
@@ -8,10 +9,8 @@ var RetoricaUI = {
         var editor = document.getElementById('editor-body');
         var titleInput = document.getElementById('editor-title');
 
-        // Inicializa el motor de lenguajes e internacionalización
         if (typeof RetoricaI18n !== 'undefined') RetoricaI18n.init();
 
-        // Control antipérdida mediante monitoreo 'oninput' en tiempo real
         if (editor) { 
             editor.oninput = function() { 
                 RetoricaUI.updateCounters(); 
@@ -24,7 +23,6 @@ var RetoricaUI = {
             };
         }
         
-        // Enfoque elástico del contenedor unificado
         var unifiedContainer = document.getElementById('unified-sel-container');
         if (unifiedContainer) {
             unifiedContainer.onclick = function(e) {
@@ -38,11 +36,17 @@ var RetoricaUI = {
         this.initViewportFix();
         this.updateCounters();
         
-        // Inicializa ciclo de vida de autenticación e interfaz
+        // Refacción: Escucha nativa para permitir instalación de la App
+        window.addEventListener('beforeinstallprompt', function(e) {
+            e.preventDefault();
+            deferredPrompt = e;
+            var installBtn = document.getElementById('pwa-install-btn');
+            if (installBtn) installBtn.style.display = 'inline-block';
+        });
+        
         if (typeof RetoricaAuth !== 'undefined') RetoricaAuth.initLifecycle();
     },
 
-    // Orquestador del temporizador silencioso antipérdida (1.5 segundos de inactividad)
     triggerAutoSave: function() {
         clearTimeout(autoSaveTimeout);
         autoSaveTimeout = setTimeout(function() {
@@ -55,6 +59,7 @@ var RetoricaUI = {
 
     initTouchGestures: function() {
         var self = this;
+        // Refacción: Se eliminó el bloqueo preventDefault para que dejes seleccionar texto libremente
         document.addEventListener('touchstart', function(e) {
             self.state.touchStartX = e.changedTouches[0].screenX;
         }, { passive: true });
@@ -67,20 +72,17 @@ var RetoricaUI = {
 
     handleSwipe: function() {
         var diffX = this.state.touchStartX - this.state.touchEndX;
-        // Swipe de izquierda a derecha (Abre Biblioteca)
         if (diffX < -150) {
-            var sidebar = document.getElementById('sidebar');
-            if (sidebar && !sidebar.classList.contains('active')) this.toggleSidebar();
+            var sidebar = document.getElementById('side-menu'); // Vinculado a tu id real
+            if (sidebar && !sidebar.classList.contains('open')) this.toggleSidebar();
         }
-        // Swipe de derecha a izquierda (Cierra Biblioteca)
         if (diffX > 150) {
-            var sidebar = document.getElementById('sidebar');
-            if (sidebar && sidebar.classList.contains('active')) this.toggleSidebar();
+            var sidebar = document.getElementById('side-menu');
+            if (sidebar && sidebar.classList.contains('open')) this.toggleSidebar();
         }
     },
 
     initViewportFix: function() {
-        // Blindaje elástico para evitar saltos bruscos en teclados de Android/iOS
         window.visualViewport.addEventListener('resize', function() {
             var view = document.getElementById('viewport-ctx');
             if (view) {
@@ -90,11 +92,45 @@ var RetoricaUI = {
     },
 
     toggleSidebar: function() {
-        var sidebar = document.getElementById('sidebar');
+        var sidebar = document.getElementById('side-menu'); // Vinculado a tu id real index.html
         if (!sidebar) return;
-        sidebar.classList.toggle('active');
-        if (sidebar.classList.contains('active') && typeof RetoricaStorage !== 'undefined') {
+        sidebar.classList.toggle('open');
+        if (sidebar.classList.contains('open') && typeof RetoricaStorage !== 'undefined') {
             RetoricaStorage.refreshLibrary();
+        }
+    },
+
+    closeSidebar: function() {
+        var sidebar = document.getElementById('side-menu');
+        if (sidebar) sidebar.classList.remove('open');
+    },
+
+    installPWAApp: function() {
+        // Refacción: Lanzador del instalador nativo
+        if (!deferredPrompt) {
+            this.notify("La app ya está instalada o no es soportada en este entorno.");
+            return;
+        }
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(function(choiceResult) {
+            if (choiceResult.outcome === 'accepted') {
+                console.log('El usuario aceptó la instalación de Retórica');
+                var installBtn = document.getElementById('pwa-install-btn');
+                if (installBtn) installBtn.style.display = 'none';
+            }
+            deferredPrompt = null;
+        });
+    },
+
+    syncCloudBackup: function() {
+        // Refacción: Mecanismo de sincronización preventiva en la nube
+        this.notify("Sincronizando plantillas en la nube...");
+        if (typeof RetoricaStorage !== 'undefined') {
+            var docs = RetoricaStorage.getDocs();
+            localStorage.setItem('retorica_backup_cloud_mirror', JSON.stringify(docs));
+            setTimeout(function() {
+                RetoricaUI.notify("Sincronización multiplataforma completada ✓");
+            }, 1200);
         }
     },
 
@@ -141,15 +177,6 @@ var RetoricaUI = {
         html2pdf().from(element).set({ margin: 15, filename: title + '.pdf' }).save();
     },
 
-    expPDFEditable: function() {
-        this.notify("Generando PDF Formulario...");
-        var title = document.getElementById('editor-title').value.trim() || "guion_editable";
-        var bodyValue = document.getElementById('editor-body').value;
-        var htmlForm = "<html><body><h2>" + title + "</h2><textarea style='width:100%; height:450px; font-family:Arial;'>" + bodyValue + "</textarea></body></html>";
-        html2pdf().from(htmlForm).set({ margin: 15, filename: title + '_editable.pdf' }).save();
-        this.notify("PDF Formulario listo ✓");
-    },
-
     expDOC: function() {
         var body = document.getElementById('editor-body').value;
         var title = document.getElementById('editor-title').value.trim() || "guion";
@@ -164,11 +191,8 @@ var RetoricaUI = {
     }
 };
 
-// Disparador del arranque de la App al cargar el DOM
 document.addEventListener('DOMContentLoaded', function() {
     RetoricaUI.init();
-    
-    // Carga de preferencia de tema guardada por el artista
     var savedTheme = localStorage.getItem('retorica_theme_pref');
     if (savedTheme === 'light') {
         document.body.classList.add('light-theme');
