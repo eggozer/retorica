@@ -24,9 +24,23 @@ var RetoricaStorage = {
         if (!title) title = "Sin Título (" + new Date().toLocaleDateString() + ")";
 
         var docs = this.getDocs();
+
+        // --- CORRECCIÓN PUNTO 1: EVITAR DUPLICADOS POR TÍTULO ---
+        // Si no tenemos un ID actual en pantalla, buscamos si ya existe un documento con este mismo título
+        if (!this.currentDocId) {
+            for (var idKey in docs) {
+                if (docs[idKey].title.toLowerCase() === title.toLowerCase()) {
+                    this.currentDocId = idKey; // Vincula al documento existente para actualizarlo
+                    break;
+                }
+            }
+        }
+
+        // Si realmente es un documento nuevo y no existe el título, entonces creamos el ID nuevo
         if (!this.currentDocId) {
             this.currentDocId = 'doc_' + Date.now();
         }
+        // --------------------------------------------------------
 
         docs[this.currentDocId] = {
             id: this.currentDocId,
@@ -36,11 +50,12 @@ var RetoricaStorage = {
         };
 
         localStorage.setItem(this.dbKey, JSON.stringify(docs));
-        // PUNTO 12: Almacenar la referencia del último ID para sobrevivir al reinicio de la página
         localStorage.setItem('retorica_last_doc_id', this.currentDocId);
-        
+
+        if (typeof RetoricaUI !== 'undefined') {
+            RetoricaUI.updateCounters();
+        }
         this.refreshLibrary();
-        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Guardado local silencioso ✓");
     },
 
     autoSaveSilent: function() {
