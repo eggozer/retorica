@@ -62,17 +62,43 @@ var RetoricaStorage = {
         var titleInput = document.getElementById('editor-title');
         var bodyInput = document.getElementById('editor-body');
         if (!titleInput || !bodyInput) return;
+
         var title = titleInput.value.trim();
         var body = bodyInput.value.trim();
-        if (!title && !body) return; 
-        if (!title) title = "Autoguardado (" + new Date().toLocaleDateString() + ")";
-        var docs = this.getDocs();
-        if (!this.currentDocId) { this.currentDocId = 'doc_' + Date.now(); }
 
-        docs[this.currentDocId] = { id: this.currentDocId, title: title, body: body, updatedAt: new Date().toISOString() };
+        // Si no hay contenido real en absoluto, no hacemos nada para evitar guardar basura
+        if (!title && !body) return;
+
+        if (!title) title = "Sin Título (" + new Date().toLocaleDateString() + ")";
+
+        var docs = this.getDocs();
+
+        // --- VALIDACIÓN PUNTO 1 EN AUTOGUARDADO ---
+        // Si no hay ID en pantalla, validamos si ya existe el título en la base de datos
+        if (!this.currentDocId) {
+            for (var idKey in docs) {
+                if (docs[idKey].title.toLowerCase() === title.toLowerCase()) {
+                    this.currentDocId = idKey;
+                    break;
+                }
+            }
+        }
+
+        // Si es 100% nuevo y único, creamos el ID
+        if (!this.currentDocId) {
+            this.currentDocId = 'doc_' + Date.now();
+        }
+        // ------------------------------------------
+
+        docs[this.currentDocId] = {
+            id: this.currentDocId,
+            title: title,
+            body: body,
+            updatedAt: new Date().toISOString()
+        };
+
         localStorage.setItem(this.dbKey, JSON.stringify(docs));
         localStorage.setItem('retorica_last_doc_id', this.currentDocId);
-        this.refreshLibrary();
     },
 
     loadDoc: function(id) {
