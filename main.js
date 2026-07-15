@@ -68,6 +68,24 @@ var RetoricaUI = {
         }, 1500);
     },
 
+// --- CORRECCIÓN PUNTO 2: DETONAR INSTALACIÓN NATIVA ---
+    installPWA: function() {
+        var promptEvent = window.deferredInstallPrompt;
+        if (!promptEvent) {
+            this.notify("La app ya está instalada o no está lista para instalación en este navegador.");
+            return;
+        }
+        promptEvent.prompt();
+        promptEvent.userChoice.then(function(choiceResult) {
+            if (choiceResult.outcome === 'accepted') {
+                console.log('El usuario aceptó la instalación de Retórica');
+            } else {
+                console.log('El usuario rechazó la instalación');
+            }
+            window.deferredInstallPrompt = null;
+        });
+    },
+    
     initTouchGestures: function() {
         var self = this;
         document.addEventListener('touchstart', function(e) {
