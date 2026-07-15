@@ -233,16 +233,21 @@
     <input type="file" id="file-picker-local" class="file-input-hidden" accept=".pdf,.doc,.docx,.txt,.html" onchange="RetoricaStorage.importLocalFile(event)">
 
     <!-- MENÚ LATERAL -->
+    <!-- CORRECCIÓN PUNTO 3: MENÚ LATERAL ACTUALIZADO -->
     <div class="sidebar-panel" id="sidebar">
         <div class="sidebar-header">
-            <span>BIBLIOTECA DE GUIONES</span>
+            <!-- Título de marca integrado en el encabezado del menú -->
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <img src="./icon-192.png" style="width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--border);" alt="Logo">
+                <span style="letter-spacing: 2px; font-weight: 900;">RETÓRICA</span>
+            </div>
             <button class="btn-round-3d" style="width:36px; height:36px;" onclick="RetoricaUI.toggleSidebar()"><span class="icon-raw">✕</span></button>
         </div>
         <div class="sidebar-content">
             <div class="grid-templates" id="docs-list-render"></div>
         </div>
         <div class="sidebar-footer">
-            <button class="btn-auth-3d" style="width:auto; padding:8px 15px;" onclick="RetoricaStorage.exportToHTML()" id="lbl-side-export">EXPORTAR HTML</button>
+            <!-- Se removió el botón físico redundante 'EXPORTAR HTML' -->
             <div style="font-size:0.7rem; color:var(--text-muted); font-weight:bold;"><span id="lbl-side-user">USER:</span> <span id="display-user-name" style="color:var(--text-main);">Anon</span></div>
             <button onclick="RetoricaAuth.logout()" style="color:var(--text-muted); background:transparent; border:none; font-size:0.85rem; font-weight:bold; cursor:pointer;" id="lbl-side-logout">SALIR</button>
         </div>
