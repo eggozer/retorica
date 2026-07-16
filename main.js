@@ -18,6 +18,21 @@ var RetoricaUI = {
         if (titleInput) {
             titleInput.oninput = function() {
                 RetoricaUI.triggerAutoSave();
+           
+            // --- CORRECCIÓN PUNTO 1 (PARTE 2): ALMACENAMIENTO PERSISTENTE CONTRA BORRADO DE CACHÉ ---
+        if (navigator.storage && navigator.storage.persist) {
+            navigator.storage.persisted().then(function(persistent) {
+                if (!persistent) {
+                    navigator.storage.persist().then(function(granted) {
+                        if (granted) {
+                            console.log("Almacenamiento marcado como persistente protegido ✓");
+                        }
+                    });
+                } else {
+                    console.log("El almacenamiento ya estaba protegido ✓");
+                }
+            });
+        }
             };
         }
 
