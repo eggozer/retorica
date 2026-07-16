@@ -187,9 +187,18 @@
             </div>
             <div class="btn-wrapper-3d">
                 <div class="btn-label-3d" id="lbl-tool-tts">Texto\nA Voz</div>
-                <button class="btn-round-3d" onclick="RetoricaAudio.convertTextToVoiceFile()">
-                    <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9 11H7V9h2v2zm4 0h-2V9h2v2zm4 0h-2V9h2v2z"/></svg>
-                </button>
+                <!-- CORRECCIÓN PUNTO 7: BOTÓN RENDERIZAR (TEXTO A VOZ) -->
+            <button class="btn-round-3d" id="btn-icon-tts" onclick="RetoricaAudio.textToSpeech()">
+                <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;">
+                    <!-- Engrane central (renderizado) -->
+                    <circle cx="12" cy="12" r="3" />
+                    <path d="M12 7v2M12 15v2M7 12h2M15 12h2" />
+                    <!-- Flecha redonda envolvente -->
+                    <path d="M16.24 7.76A6 6 0 1 0 18 12" />
+                    <!-- Flecha de salida hacia la derecha -->
+                    <path d="M17 12h5M19 9l3 3-3 3" />
+                </svg>
+            </button>
             </div>
             <div class="btn-wrapper-3d">
                 <div class="btn-label-3d">Importar\nArchivo</div>
