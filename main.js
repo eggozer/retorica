@@ -35,6 +35,39 @@ var RetoricaUI = {
                 }
             });
         }
+
+        var unifiedContainer = document.getElementById('unified-sel-container');
+        if (unifiedContainer) {
+            unifiedContainer.onclick = function(e) {
+                if (e.target === unifiedContainer && editor) {
+                    editor.focus();
+                }
+            };
+        }
+        
+        this.initTouchGestures();
+        this.initViewportFix();
+        this.updateCounters();
+        
+        if (typeof RetoricaAuth !== 'undefined') RetoricaAuth.initLifecycle();
+        
+        // --- CORRECCIÓN PUNTO 2: INSTALACIÓN DE LA PWA (APP) ---
+        window.deferredInstallPrompt = null;
+        window.addEventListener('beforeinstallprompt', function(e) {
+            e.preventDefault();
+            window.deferredInstallPrompt = e;
+            console.log("Retorica: Instalación PWA lista para ser reclamada por el usuario.");
+            if (typeof RetoricaUI !== 'undefined') {
+                RetoricaUI.notify("¡Retórica lista para instalar en tu dispositivo! 📱");
+            }
+        });
+
+        window.addEventListener('appinstalled', function(evt) {
+            window.deferredInstallPrompt = null;
+            if (typeof RetoricaUI !== 'undefined') {
+                RetoricaUI.notify("¡Retórica instalada con éxito!");
+            }
+        });
     },
 
     // --- CORRECCIÓN PUNTO 8: FUNCIÓN PARA COPIAR TODO AL PORTAPAPELES ---
@@ -60,43 +93,6 @@ var RetoricaUI = {
             document.body.removeChild(dummy);
             RetoricaUI.notify("Plantilla copiada ✓");
         });
-    },
-        
-        var unifiedContainer = document.getElementById('unified-sel-container');
-        if (unifiedContainer) {
-            unifiedContainer.onclick = function(e) {
-                if (e.target === unifiedContainer && editor) {
-                    editor.focus();
-                }
-            };
-        }
-        
-        this.initTouchGestures();
-        this.initViewportFix();
-        this.updateCounters();
-        
-        if (typeof RetoricaAuth !== 'undefined') RetoricaAuth.initLifecycle();
-        
-        // --- CORRECCIÓN PUNTO 2: INSTALACIÓN DE LA PWA (APP) ---
-        window.deferredInstallPrompt = null;
-        window.addEventListener('beforeinstallprompt', function(e) {
-            // Previene que el navegador la lance automáticamente de forma invasiva
-            e.preventDefault();
-            // Guarda el evento para que lo podamos detonar cuando tú decidas
-            window.deferredInstallPrompt = e;
-            console.log("Retorica: Instalación PWA lista para ser reclamada por el usuario.");
-            if (typeof RetoricaUI !== 'undefined') {
-                RetoricaUI.notify("¡Retórica lista para instalar en tu dispositivo! 📱");
-            }
-        });
-
-        window.addEventListener('appinstalled', function(evt) {
-            window.deferredInstallPrompt = null;
-            if (typeof RetoricaUI !== 'undefined') {
-                RetoricaUI.notify("¡Retórica instalada con éxito!");
-            }
-        });
-        // -------------------------------------------------------
     },
 
     triggerAutoSave: function() {
