@@ -101,6 +101,14 @@
         .reading-active { border-color: #00d2ff !important; }
         @keyframes pulseMic { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
         .file-input-hidden { display: none; }
+  
+        /* CORRECCIÓN PUNTO 8: PERMITIR SELECCIÓN NATIVA EN EL EDITOR */
+.unified-container, .doc-title, .textarea-main {
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    -ms-user-select: text !important;
+    user-select: text !important;
+}
     </style>
 </head>
 <body>
@@ -200,6 +208,17 @@
                 <div class="btn-label-3d">Importar\nArchivo</div>
                 <button class="btn-round-3d" onclick="document.getElementById('file-picker-local').click()"><span class="icon-raw">📂</span></button>
             </div>
+
+<div class="btn-wrapper-3d">
+            <div class="btn-label-3d" id="lbl-tool-copyall">Copiar\nPlantilla</div>
+            <button class="btn-round-3d" onclick="RetoricaUI.copyFullTemplate()">
+                <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; display: block; margin: auto;">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+            </button>
+        </div>
+            
             <div class="btn-wrapper-3d">
                 <div class="btn-label-3d">Guardar\nPDF</div>
                 <button class="btn-round-3d" onclick="RetoricaUI.expPDF()"><span class="icon-raw">🖨️</span></button>
