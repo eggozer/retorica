@@ -186,20 +186,16 @@
                 <button class="btn-round-3d btn-play-style" id="btn-icon-vmsg" onclick="RetoricaAudio.produceVoiceMessage()">☉</button>
             </div>
             <div class="btn-wrapper-3d">
-                <div class="btn-label-3d" id="lbl-tool-tts">Texto\nA Voz</div>
-                <!-- CORRECCIÓN PUNTO 7: BOTÓN RENDERIZAR (TEXTO A VOZ) -->
-            <button class="btn-round-3d" id="btn-icon-tts" onclick="RetoricaAudio.textToSpeech()">
-                <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;">
-                    <!-- Engrane central (renderizado) -->
+            <div class="btn-label-3d" id="lbl-tool-tts">Texto\nA Voz</div>
+            <button class="btn-round-3d" onclick="RetoricaAudio.convertTextToVoiceFile()">
+                <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; display: block; margin: auto;">
                     <circle cx="12" cy="12" r="3" />
                     <path d="M12 7v2M12 15v2M7 12h2M15 12h2" />
-                    <!-- Flecha redonda envolvente -->
                     <path d="M16.24 7.76A6 6 0 1 0 18 12" />
-                    <!-- Flecha de salida hacia la derecha -->
                     <path d="M17 12h5M19 9l3 3-3 3" />
                 </svg>
             </button>
-            </div>
+        </div>
             <div class="btn-wrapper-3d">
                 <div class="btn-label-3d">Importar\nArchivo</div>
                 <button class="btn-round-3d" onclick="document.getElementById('file-picker-local').click()"><span class="icon-raw">📂</span></button>
