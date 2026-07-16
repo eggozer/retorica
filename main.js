@@ -18,8 +18,10 @@ var RetoricaUI = {
         if (titleInput) {
             titleInput.oninput = function() {
                 RetoricaUI.triggerAutoSave();
-           
-            // --- CORRECCIÓN PUNTO 1 (PARTE 2): ALMACENAMIENTO PERSISTENTE CONTRA BORRADO DE CACHÉ ---
+            };
+        }
+
+        // --- CORRECCIÓN PUNTO 1 (PARTE 2): ALMACENAMIENTO PERSISTENTE CONTRA BORRADO DE CACHÉ ---
         if (navigator.storage && navigator.storage.persist) {
             navigator.storage.persisted().then(function(persistent) {
                 if (!persistent) {
@@ -33,10 +35,9 @@ var RetoricaUI = {
                 }
             });
         }
-            };
-        }
+    },
 
-// CORRECCIÓN PUNTO 8: FUNCIÓN PARA COPIAR TODO AL PORTAPAPELES
+    // --- CORRECCIÓN PUNTO 8: FUNCIÓN PARA COPIAR TODO AL PORTAPAPELES ---
     copyFullTemplate: function() {
         var title = document.getElementById('editor-title').value.trim();
         var body = document.getElementById('editor-body').value.trim();
@@ -46,13 +47,11 @@ var RetoricaUI = {
             return;
         }
         
-        // Unimos el título y el cuerpo con un salto de línea intermedio
         var fullText = (title ? title + "\n\n" : "") + body;
         
         navigator.clipboard.writeText(fullText).then(function() {
             RetoricaUI.notify("¡Plantilla completa copiada! ✓");
         }).catch(function() {
-            // Alternativa por si falla en WebView antiguos
             var dummy = document.createElement("textarea");
             document.body.appendChild(dummy);
             dummy.value = fullText;
