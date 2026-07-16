@@ -99,6 +99,25 @@ var RetoricaAudio = {
             if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("No hay texto para convertir."); 
             return; 
         }
+        
+        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Renderizando texto a voz... ⚙️");
+
+        // Detenemos cualquier audio previo
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+
+        var utterance = new SpeechSynthesisUtterance(body);
+        utterance.lang = typeof RetoricaI18n !== 'undefined' ? RetoricaI18n.currentLang : 'es-MX';
+        
+        utterance.onstart = function() {
+            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Reproduciendo render final ✓");
+        };
+
+        utterance.onerror = function() {
+            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error en la síntesis de voz.");
+        };
+
+        window.speechSynthesis.speak(utterance);
+    }
         var title = document.getElementById('editor-title').value.trim() || "audio";
         var dummyBlob = new Blob([body], { type: 'audio/mp3' });
         var url = URL.createObjectURL(dummyBlob);
