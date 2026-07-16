@@ -20,6 +20,33 @@ var RetoricaUI = {
                 RetoricaUI.triggerAutoSave();
             };
         }
+
+// CORRECCIÓN PUNTO 8: FUNCIÓN PARA COPIAR TODO AL PORTAPAPELES
+    copyFullTemplate: function() {
+        var title = document.getElementById('editor-title').value.trim();
+        var body = document.getElementById('editor-body').value.trim();
+        
+        if (!title && !body) {
+            this.notify("No hay contenido para copiar.");
+            return;
+        }
+        
+        // Unimos el título y el cuerpo con un salto de línea intermedio
+        var fullText = (title ? title + "\n\n" : "") + body;
+        
+        navigator.clipboard.writeText(fullText).then(function() {
+            RetoricaUI.notify("¡Plantilla completa copiada! ✓");
+        }).catch(function() {
+            // Alternativa por si falla en WebView antiguos
+            var dummy = document.createElement("textarea");
+            document.body.appendChild(dummy);
+            dummy.value = fullText;
+            dummy.select();
+            document.execCommand("copy");
+            document.body.removeChild(dummy);
+            RetoricaUI.notify("Plantilla copiada ✓");
+        });
+    },
         
         var unifiedContainer = document.getElementById('unified-sel-container');
         if (unifiedContainer) {
