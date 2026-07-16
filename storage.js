@@ -8,6 +8,21 @@ var RetoricaStorage = {
         return data ? JSON.parse(data) : {};
     },
 
+    // --- CORRECCIÓN PUNTO 9: FUNCIÓN AUXILIAR PARA DAR FORMATO PROFESIONAL A LA FECHA/HORA ---
+    formatDate: function(isoString) {
+        if (!isoString) return '--/--/---- --:--';
+        var date = new Date(isoString);
+        if (isNaN(date.getTime())) return '--/--/---- --:--';
+        
+        var day = String(date.getDate()).padStart(2, '0');
+        var month = String(date.getMonth() + 1).padStart(2, '0');
+        var year = date.getFullYear();
+        var hours = String(date.getHours()).padStart(2, '0');
+        var minutes = String(date.getMinutes()).padStart(2, '0');
+        
+        return day + '/' + month + '/' + year + ' ' + hours + ':' + minutes;
+    },
+
     save: function() {
         var titleInput = document.getElementById('editor-title');
         var bodyInput = document.getElementById('editor-body');
@@ -26,27 +41,36 @@ var RetoricaStorage = {
         var docs = this.getDocs();
 
         // --- CORRECCIÓN PUNTO 1: EVITAR DUPLICADOS POR TÍTULO ---
-        // Si no tenemos un ID actual en pantalla, buscamos si ya existe un documento con este mismo título
         if (!this.currentDocId) {
             for (var idKey in docs) {
                 if (docs[idKey].title.toLowerCase() === title.toLowerCase()) {
-                    this.currentDocId = idKey; // Vincula al documento existente para actualizarlo
+                    this.currentDocId = idKey; // Vincula al documento existente
                     break;
                 }
             }
         }
 
-        // Si realmente es un documento nuevo y no existe el título, entonces creamos el ID nuevo
+        // Si realmente es un documento nuevo, creamos el ID nuevo
         if (!this.currentDocId) {
             this.currentDocId = 'doc_' + Date.now();
         }
-        // --------------------------------------------------------
+
+        // --- CORRECCIÓN PUNTO 9: CAPTURA DE FECHA DE CREACIÓN Y EDICIÓN ---
+        var nowStr = new Date().toISOString();
+        var createdAt = nowStr; // Por defecto si es nuevo
+
+        if (docs[this.currentDocId]) {
+            // Si el documento ya existía, conservamos su fecha de creación original
+            createdAt = docs[this.currentDocId].createdAt || docs[this.currentDocId].updatedAt || nowStr;
+        }
+        // ------------------------------------------------------------------
 
         docs[this.currentDocId] = {
             id: this.currentDocId,
             title: title,
             body: body,
-            updatedAt: new Date().toISOString()
+            createdAt: createdAt, // Se guarda creación
+            updatedAt: nowStr    // Se guarda última modificación
         };
 
         localStorage.setItem(this.dbKey, JSON.stringify(docs));
@@ -66,15 +90,12 @@ var RetoricaStorage = {
         var title = titleInput.value.trim();
         var body = bodyInput.value.trim();
 
-        // Si no hay contenido real en absoluto, no hacemos nada para evitar guardar basura
         if (!title && !body) return;
 
         if (!title) title = "Sin Título (" + new Date().toLocaleDateString() + ")";
 
         var docs = this.getDocs();
 
-        // --- VALIDACIÓN PUNTO 1 EN AUTOGUARDADO ---
-        // Si no hay ID en pantalla, validamos si ya existe el título en la base de datos
         if (!this.currentDocId) {
             for (var idKey in docs) {
                 if (docs[idKey].title.toLowerCase() === title.toLowerCase()) {
@@ -84,17 +105,25 @@ var RetoricaStorage = {
             }
         }
 
-        // Si es 100% nuevo y único, creamos el ID
         if (!this.currentDocId) {
             this.currentDocId = 'doc_' + Date.now();
         }
-        // ------------------------------------------
+
+        // --- CORRECCIÓN PUNTO 9: CAPTURA DE FECHA EN AUTOGUARDADO SILENCIOSO ---
+        var nowStr = new Date().toISOString();
+        var createdAt = nowStr;
+
+        if (docs[this.currentDocId]) {
+            createdAt = docs[this.currentDocId].createdAt || docs[this.currentDocId].updatedAt || nowStr;
+        }
+        // ------------------------------------------------------------------------
 
         docs[this.currentDocId] = {
             id: this.currentDocId,
             title: title,
             body: body,
-            updatedAt: new Date().toISOString()
+            createdAt: createdAt,
+            updatedAt: nowStr
         };
 
         localStorage.setItem(this.dbKey, JSON.stringify(docs));
@@ -133,7 +162,6 @@ var RetoricaStorage = {
         }
     },
 
-    // PUNTO 11 y 13: Funciones para Compartir y Copiar desde la Plantilla (Biblioteca)
     shareDoc: function(id, event) {
         if (event) event.stopPropagation();
         var docs = this.getDocs();
@@ -189,7 +217,8 @@ var RetoricaStorage = {
             return;
         }
 
-        // PUNTO 11 y 13: Tarjetas centradas con botones adicionales
+        var self = this;
+
         sortedDocs.forEach(function(doc) {
             var card = document.createElement('div');
             card.className = 'card-template';
@@ -198,9 +227,23 @@ var RetoricaStorage = {
             var titleText = doc.title || "Sin Título";
             var bodySnippet = doc.body ? doc.body.substring(0, 90) + "..." : "Sin contenido...";
 
+            // --- CORRECCIÓN PUNTO 9: GENERACIÓN DE FECHAS DE CREACIÓN Y EDICIÓN ---
+            // Si son documentos viejos que no tenían 'createdAt', usamos su 'updatedAt' como salvavidas
+            var creacion = self.formatDate(doc.createdAt || doc.updatedAt);
+            var edicion = self.formatDate(doc.updatedAt);
+            // ---------------------------------------------------------------------
+
             card.innerHTML = 
                 '<div class="card-template-title">' + titleText + '</div>' +
                 '<div class="card-template-body">' + bodySnippet + '</div>' +
+                
+                // --- CAPA VISUAL DE FECHAS EN LA TARJETA ---
+                '<div class="card-template-dates" style="font-size: 0.58rem; color: var(--text-muted); margin: 6px 10px 8px 10px; display: flex; flex-direction: column; gap: 2px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 5px; pointer-events: none; text-align: left;">' +
+                    '<div><b>Creado:</b> ' + creacion + '</div>' +
+                    '<div><b>Modificado:</b> ' + edicion + '</div>' +
+                '</div>' +
+                // ------------------------------------------
+
                 '<div class="card-template-actions">' +
                     '<button class="btn-action-tmpl" style="color:var(--danger);" onclick="RetoricaStorage.deleteDoc(\'' + doc.id + '\', event)">Borrar</button>' +
                     '<button class="btn-action-tmpl" onclick="RetoricaStorage.copyDocToClipboard(\'' + doc.id + '\', event)">Copiar</button>' +
@@ -210,7 +253,6 @@ var RetoricaStorage = {
         });
     },
 
-    // PUNTO 1: Filtro anti-cifrado, solo admite y procesa texto plano y HTML nativo.
     importLocalFile: function(event) {
         var file = event.target.files[0];
         if (!file) return;
