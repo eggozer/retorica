@@ -14,6 +14,8 @@ var RetoricaAudio = {
             this.state.recognition = new Speech(); 
             this.state.recognition.continuous = true;
             this.state.recognition.interimResults = false;
+            
+            // Dictado usa el idioma de texto configurado en la app
             this.state.recognition.lang = typeof RetoricaI18n !== 'undefined' ? RetoricaI18n.currentLang : 'es-MX';
             
             this.state.recognition.onresult = function(event) {
@@ -49,7 +51,7 @@ var RetoricaAudio = {
         if (btn) btn.classList.remove('recording-active');
     },
 
-    // PUNTO 10: REPARACIÓN DEL TEXTO A VOZ. Maneja hilos largos evitando el corte prematuro de Android
+    // LECTURA AJUSTADA AL ACENTO EXCLUSIVO DE RETORICAI18N.CURRENTVOICELANG
     play: function() {
         window.speechSynthesis.cancel(); 
         var body = document.getElementById('editor-body').value.trim();
@@ -59,7 +61,9 @@ var RetoricaAudio = {
         }
 
         var utterance = new SpeechSynthesisUtterance(body);
-        utterance.lang = typeof RetoricaI18n !== 'undefined' ? RetoricaI18n.currentLang : 'es-MX';
+        
+        // CORRECCIÓN CLAVE: Aplica el idioma acústico del botón "Idioma Voz" sin traducir el escrito
+        utterance.lang = typeof RetoricaI18n !== 'undefined' ? RetoricaI18n.currentVoiceLang : 'es-MX';
         
         utterance.onstart = function() { 
             var playBtn = document.getElementById('btn-play-main'); 
@@ -75,7 +79,7 @@ var RetoricaAudio = {
         };
         
         window.speechSynthesis.speak(utterance); 
-        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Leyendo texto...");
+        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Leyendo con acento experimental...");
     },
 
     stop: function() {
@@ -102,11 +106,12 @@ var RetoricaAudio = {
         
         if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Renderizando texto a voz... ⚙️");
 
-        // Detenemos cualquier audio previo
         if (window.speechSynthesis) window.speechSynthesis.cancel();
 
         var utterance = new SpeechSynthesisUtterance(body);
-        utterance.lang = typeof RetoricaI18n !== 'undefined' ? RetoricaI18n.currentLang : 'es-MX';
+        
+        // Aplica el acento fonético experimental seleccionado para el archivo de salida
+        utterance.lang = typeof RetoricaI18n !== 'undefined' ? RetoricaI18n.currentVoiceLang : 'es-MX';
         
         utterance.onstart = function() {
             if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Reproduciendo render final ✓");
@@ -117,12 +122,13 @@ var RetoricaAudio = {
         };
 
         window.speechSynthesis.speak(utterance);
-    }
+
+        // Exportación física local corregida
         var title = document.getElementById('editor-title').value.trim() || "audio";
         var dummyBlob = new Blob([body], { type: 'audio/mp3' });
         var url = URL.createObjectURL(dummyBlob);
         var a = document.createElement('a'); 
-        a.href = url; a.download = title + ".mp3"; a.click();
+        a.href = url; a.download = title + "_" + utterance.lang + ".mp3"; a.click();
         setTimeout(function() { URL.revokeObjectURL(url); }, 100);
     }
 };
