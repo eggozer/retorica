@@ -203,66 +203,20 @@ var RetoricaUI = {
 
     expPDF: function() {
         this.notify("Exportando PDF...");
-        var element = document.getElementById('unified-sel-container');
-        var title = document.getElementById('editor-title').value.trim() || "guion";
-        
-        // Clonamos temporalmente para asegurar un renderizado A4 limpio e impecable
-        var opt = {
-            margin: 15,
-            filename: title + '.pdf',
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
+        ...
         html2pdf().from(element).set(opt).save();
     },
 
     expPDFEditable: function() {
         this.notify("Generando PDF Formulario...");
-        var title = document.getElementById('editor-title').value.trim() || "guion_editable";
-        var bodyValue = document.getElementById('editor-body').value;
-        
-        var htmlForm = document.createElement('div');
-        htmlForm.style.padding = "20px";
-        htmlForm.style.color = "#000000";
-        htmlForm.innerHTML = "<h2>" + title + "</h2><br><textarea style='width:100%; height:500px; font-family:Arial; font-size:12pt; border:1px solid #ccc; padding:10px;'>" + bodyValue + "</textarea>";
-        
-        var opt = {
-            margin: 15,
-            filename: title + '_editable.pdf',
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
+        ...
         html2pdf().from(htmlForm).set(opt).save();
         this.notify("PDF Formulario listo ✓");
     },
 
     expDOC: function() {
         this.notify("Procesando Word nativo...");
-        var title = document.getElementById('editor-title').value.trim() || "guion";
-        var bodyText = document.getElementById('editor-body').value;
-
-        // Inyección de la librería pesada DOCX en lugar del blob plano viejo
-        var paragraphs = bodyText.split('\n').map(function(line) {
-            return new docx.Paragraph({
-                children: [new docx.TextRun({ text: line, size: 24 })],
-                spacing: { after: 120 }
-            });
-        });
-
-        var doc = new docx.Document({
-            sections: [{
-                properties: {},
-                children: [
-                    new docx.Paragraph({
-                        children: [new docx.TextRun({ text: title, bold: true, size: 36 })],
-                        alignment: docx.AlignmentType.CENTER,
-                        spacing: { after: 300 }
-                    }),
-                    ...paragraphs
-                ]
-            }]
-        });
-
+        ...
         docx.Packer.toBlob(doc).then(function(blob) {
             saveAs(blob, title + ".docx");
             RetoricaUI.notify("Documento Word exportado ✓");
