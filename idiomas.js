@@ -28,6 +28,7 @@ var RetoricaI18n = {
         this.currentLang = lang;
         var p = this.db[lang] || this.db['es-MX'];
         
+        // Botones de la barra inferior
         var btnSave = document.getElementById('lbl-tool-save'); if(btnSave) btnSave.innerText = p.save;
         var btnNew = document.getElementById('lbl-tool-new'); if(btnNew) btnNew.innerText = p.new;
         var btnMic = document.getElementById('lbl-tool-mic'); if(btnMic) btnMic.innerText = p.mic;
@@ -36,10 +37,18 @@ var RetoricaI18n = {
         var btnVmsg = document.getElementById('lbl-tool-vmsg'); if(btnVmsg) btnVmsg.innerText = p.vmsg;
         var btnTts = document.getElementById('lbl-tool-tts'); if(btnTts) btnTts.innerText = p.tts;
         
+        // Inputs principales
         var tInput = document.getElementById('editor-title'); if(tInput) tInput.placeholder = p.pTitle;
         var bInput = document.getElementById('editor-body'); if(bInput) bInput.placeholder = p.pBody;
         
-        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Idioma de la App: " + p.name);
+        // NUEVO: Vinculación de los elementos de la barra superior
+        var lblMenu = document.getElementById('lbl-nav-menu'); if(lblMenu) lblMenu.innerHTML = p.menu;
+        var lblInstall = document.getElementById('lbl-nav-install'); if(lblInstall) lblInstall.innerHTML = p.install;
+        var lblTheme = document.getElementById('lbl-nav-theme'); if(lblTheme) lblTheme.innerHTML = p.theme;
+        var lblLangTxt = document.getElementById('lbl-nav-langtxt'); if(lblLangTxt) lblLangTxt.innerHTML = p.langTxt;
+        var lblLangVoz = document.getElementById('lbl-nav-langvoz'); if(lblLangVoz) lblLangVoz.innerHTML = p.langVoz;
+        
+        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Idioma Activo: " + p.name);
         this.checkAndTranslateSelection(lang);
     },
 
