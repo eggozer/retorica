@@ -70,34 +70,41 @@ var RetoricaI18n = {
         var activeLang = (type === 'text') ? this.currentLang : this.currentVoiceLang;
         var activeIndex = this.langsOrder.indexOf(activeLang);
 
+        // Forzar contenedor ultra-deslizable y centrado sin recortes laterales
+        track.style.display = 'flex';
+        track.style.overflowX = 'auto';
+        track.style.justifyContent = 'flex-start'; // Permite que todos los elementos se alineen bien en orden
+        track.style.alignItems = 'center';
+        track.style.width = '100%';
+        track.style.padding = '5px 40px'; // Márgenes de seguridad a los lados
+        track.style.boxSizing = 'border-box';
+
         this.langsOrder.forEach(function(langKey, idx) {
             var item = self.db[langKey];
             var langDiv = document.createElement('div');
             
-            // Estilos del Carrusel Horizontal
             langDiv.style.flex = '0 0 auto';
             langDiv.style.scrollSnapAlign = 'center';
             langDiv.style.padding = '8px 16px';
+            langDiv.style.margin = '0 8px'; // Espaciado balanceado entre idiomas
             langDiv.style.borderRadius = '20px';
             langDiv.style.fontSize = '0.75rem';
             langDiv.style.fontWeight = 'bold';
             langDiv.style.cursor = 'pointer';
             langDiv.style.transition = 'all 0.2s';
 
-            // Resaltar visualmente el idioma central/activo frente a los laterales
             if (idx === activeIndex) {
                 langDiv.style.background = 'var(--text-main)';
                 langDiv.style.color = 'var(--bg-main)';
-                langDiv.style.transform = 'scale(1.15)';
+                langDiv.style.transform = 'scale(1.1)';
             } else {
                 langDiv.style.background = 'var(--btn-3d-bg)';
                 langDiv.style.color = 'var(--text-muted)';
-                langDiv.style.opacity = '0.6';
+                langDiv.style.opacity = '0.7';
             }
 
             langDiv.innerText = item.name;
 
-            // Al hacer clic o deslizar, se actualiza en tiempo real
             langDiv.onclick = function() {
                 if (type === 'text') {
                     self.setAppLang(langKey);
@@ -106,20 +113,19 @@ var RetoricaI18n = {
                     if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Acento de Lectura: " + item.name);
                 }
                 self.renderCarouselTracks(type);
-                // Centrado automático de scroll suave
                 langDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
             };
 
             track.appendChild(langDiv);
         });
 
-        // Auto-scroll inicial al elemento activo
+        // Asegura que no se pegue ni se pierda el foco inicial en móviles
         setTimeout(function() {
             var activeElement = track.children[activeIndex];
             if (activeElement) {
                 activeElement.scrollIntoView({ block: 'nearest', inline: 'center' });
             }
-        }, 100);
+        }, 150);
     },
 
     checkAndTranslateSelection: function(targetLang) {
