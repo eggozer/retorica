@@ -16,11 +16,20 @@ var RetoricaAuth = {
         if (currentActive) this.grantAccess(currentActive);
     },
 
+    // Función auxiliar para obtener textos dinámicos o usar fallback en inglés
+    getTxt: function(key, fallback) {
+        if (typeof RetoricaI18n !== 'undefined' && RetoricaI18n.db[RetoricaI18n.currentLang]) {
+            return RetoricaI18n.db[RetoricaI18n.currentLang][key] || fallback;
+        }
+        return fallback;
+    },
+
     selectOAuth: function(prov) {
         this.state.provider = prov;
         var identifier = document.getElementById('auth-input-uid').value.trim();
         if (!identifier) {
-            alert("Para vincular vía hardware, escribe primero tu Email/ID arriba.");
+            var m1 = this.getTxt('errUid', "Para vincular vía hardware, escribe primero tu Email/ID arriba.");
+            alert(m1);
             return;
         }
         var storedProfile = localStorage.getItem('ret_profile_' + identifier);
@@ -32,10 +41,12 @@ var RetoricaAuth = {
                 linkedHardware: prov
             };
             localStorage.setItem('ret_profile_' + identifier, JSON.stringify(autoProfile));
-            alert("Dispositivo vinculado localmente vía " + prov);
+            var m2 = this.getTxt('okHardware', "Dispositivo vinculado localmente vía ") + prov;
+            alert(m2);
             this.grantAccess(identifier);
         } else {
-            alert("Sincronización manual en progreso... ¡Conectado!");
+            var m3 = this.getTxt('syncHardware', "Sincronización manual en progreso... ¡Conectado!");
+            alert(m3);
             this.grantAccess(identifier);
         }
     },
@@ -46,16 +57,23 @@ var RetoricaAuth = {
         var btnSubmit = document.getElementById('btn-submit-auth');
         var toggleLbl = document.getElementById('auth-toggle-mode');
         var passInput = document.getElementById('auth-input-pass');
-        if (btnSubmit) btnSubmit.innerText = isLogin ? 'REGISTRAR Y CREAR CLAVE' : 'CONTINUAR';
-        if (toggleLbl) toggleLbl.innerText = isLogin ? '¿Ya tienes cuenta? Entra aquí' : '¿No tienes cuenta? Regístrate aquí';
-        if (this.state.mode === 'signup' && passInput) {
-            var secureSeed = "RET-" + Math.random().toString(36).substring(2, 10).toUpperCase() + "-" + Date.now().toString().slice(-4);
-            passInput.value = secureSeed;
-            passInput.type = "text";
-            alert("¡Clave criptográfica autogenerada! Resguárdala.");
-        } else if (passInput) {
-            passInput.value = "";
-            passInput.type = "password";
+
+        if (isLogin) {
+            if (btnSubmit) btnSubmit.innerText = this.getTxt('btnRegister', 'REGISTRAR Y CREAR CLAVE');
+            if (toggleLbl) toggleLbl.innerText = this.getTxt('toggleHasAccount', '¿Ya tienes cuenta? Entra aquí');
+            if (passInput) {
+                var secureSeed = "RET-" + Math.random().toString(36).substring(2, 10).toUpperCase() + "-" + Date.now().toString().slice(-4);
+                passInput.value = secureSeed;
+                passInput.type = "text";
+                alert(this.getTxt('alertSeed', "¡Clave criptográfica autogenerada! Resguárdala."));
+            }
+        } else {
+            if (btnSubmit) btnSubmit.innerText = this.getTxt('btnAuth', 'CONTINUAR');
+            if (toggleLbl) toggleLbl.innerText = this.getTxt('toggleAuth', '¿No tienes cuenta? Regístrate aquí');
+            if (passInput) {
+                passInput.value = "";
+                passInput.type = "password";
+            }
         }
     },
 
@@ -74,33 +92,33 @@ var RetoricaAuth = {
         var identifier = document.getElementById('auth-input-uid').value.trim();
         var password = document.getElementById('auth-input-pass').value;
         if (!identifier) {
-            alert("Ingresa un correo o número telefónico.");
+            alert(this.getTxt('errMissingUid', "Ingresa un correo o número telefónico."));
             return;
         }
         var banList = JSON.parse(localStorage.getItem('ret_ban_list') || '[]');
         if (banList.indexOf(identifier) > -1) {
-            alert("Este acceso se encuentra restringido.");
+            alert(this.getTxt('errBanned', "Este acceso se encuentra restringido."));
             return;
         }
         var storedProfile = localStorage.getItem('ret_profile_' + identifier);
         if (this.state.mode === 'login') {
             if (!storedProfile) {
-                alert("Usuario no registrado localmente. Cambia al modo de registro.");
+                alert(this.getTxt('errNoReg', "Usuario no registrado localmente. Cambia al modo de registro."));
                 return;
             }
             var profileData = JSON.parse(storedProfile);
             if (profileData.pass === this.quantumHash(password) || password === "DISPOSITIVO_LINKED_HARDWARE") {
                 this.grantAccess(identifier);
             } else {
-                alert("Clave incorrecta.");
+                alert(this.getTxt('errWrongPass', "Clave incorrecta."));
             }
         } else {
             if (storedProfile) {
-                alert("Este identificador ya está registrado.");
+                alert(this.getTxt('errAlreadyReg', "Este identificador ya está registrado."));
                 return;
             }
             if (password.length < 4) {
-                alert("La contraseña debe tener al menos 4 caracteres.");
+                alert(this.getTxt('errShortPass', "La contraseña debe tener al menos 4 caracteres."));
                 return;
             }
             var newProfile = { id: identifier, pass: this.quantumHash(password), regDate: new Date().toLocaleDateString() };
@@ -117,7 +135,7 @@ var RetoricaAuth = {
         var displayUser = document.getElementById('display-user-name');
         if (displayUser) displayUser.innerText = uid;
         if (typeof RetoricaStorage !== 'undefined') RetoricaStorage.refreshLibrary();
-        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Sesión sincronizada.");
+        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify(this.getTxt('notifSync', "Sesión sincronizada."));
     },
 
     logout: function() {
