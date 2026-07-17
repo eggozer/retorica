@@ -203,23 +203,126 @@ var RetoricaUI = {
 
     expPDF: function() {
         this.notify("Exportando PDF...");
-        ...
-        html2pdf().from(element).set(opt).save();
+        var element = document.getElementById('unified-sel-container');
+        var title = document.getElementById('editor-title').value.trim() || "guion";
+        
+        // Creamos un clon temporal para evitar distorsiones visuales en el editor activo
+        var clone = element.cloneNode(true);
+        clone.style.padding = "20px";
+        clone.style.background = "#ffffff";
+        clone.style.color = "#000000";
+        clone.style.width = "100%";
+        
+        // Forzar estilos limpios de impresión en el clon
+        var titleEl = clone.querySelector('#editor-title');
+        var bodyEl = clone.querySelector('#editor-body');
+        if (titleEl) {
+            titleEl.style.color = "#000000";
+            titleEl.style.borderBottom = "1px solid #000000";
+        }
+        if (bodyEl) {
+            bodyEl.style.color = "#000000";
+            bodyEl.style.whiteSpace = "pre-wrap"; // Respeta los saltos de línea en el PDF
+        }
+
+        var opt = {
+            margin: 15,
+            filename: title + '.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        
+        html2pdf().from(clone).set(opt).save().then(function() {
+            RetoricaUI.notify("PDF descargado con éxito ✓");
+        });
     },
 
     expPDFEditable: function() {
         this.notify("Generando PDF Formulario...");
-        ...
-        html2pdf().from(htmlForm).set(opt).save();
-        this.notify("PDF Formulario listo ✓");
+        var title = document.getElementById('editor-title').value.trim() || "guion_editable";
+        var bodyValue = document.getElementById('editor-body').value;
+        
+        var htmlForm = document.createElement('div');
+        htmlForm.style.padding = "25px";
+        htmlForm.style.color = "#000000";
+        htmlForm.style.background = "#ffffff";
+        htmlForm.style.fontFamily = "Arial, sans-serif";
+        
+        // Estructura visual simulando un documento editable real que html2pdf puede digerir
+        htmlForm.innerHTML = 
+            "<h2 style='border-bottom: 2px solid #333; padding-bottom: 8px; margin-bottom: 15px;'>" + title + "</h2>" +
+            "<p style='font-size: 0.8rem; color: #666; margin-bottom: 10px;'><i>* Este documento permite edición de texto directa en lectores PDF compatibles.</i></p>" +
+            "<div contenteditable='true' style='width:100%; min-height:500px; border:1px solid #999; padding:15px; border-radius:4px; font-size:11pt; line-height:1.6; white-space: pre-wrap; background:#fafafa; outline:none;'>" + 
+                bodyValue + 
+            "</div>";
+        
+        var opt = {
+            margin: 15,
+            filename: title + '_editable.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        
+        html2pdf().from(htmlForm).set(opt).save().then(function() {
+            RetoricaUI.notify("PDF Formulario listo ✓");
+        });
     },
 
     expDOC: function() {
         this.notify("Procesando Word nativo...");
-        ...
-        docx.Packer.toBlob(doc).then(function(blob) {
-            saveAs(blob, title + ".docx");
-            RetoricaUI.notify("Documento Word exportado ✓");
+        var title = document.getElementById('editor-title').value.trim() || "guion";
+        var bodyText = document.getElementById('editor-body').value;
+
+        // Validar si la librería docx está correctamente instanciada en el navegador
+        var docxInstance = window.docx;
+        if (!docxInstance) {
+            RetoricaUI.notify("Error: Librería Word no cargada. Revisa la conexión.");
+            return;
+        }
+
+        // Dividir el texto en párrafos de Word
+        var paragraphs = bodyText.split('\n').map(function(line) {
+            return new docxInstance.Paragraph({
+                children: [new docxInstance.TextRun({ text: line, size: 24 })],
+                spacing: { after: 120 }
+            });
+        });
+
+        // Crear el encabezado principal
+        var headerParagraph = new docxInstance.Paragraph({
+            children: [new docxInstance.TextRun({ text: title.toUpperCase(), bold: true, size: 36, color: "000000" })],
+            alignment: docxInstance.AlignmentType.CENTER,
+            spacing: { after: 300 }
+        });
+
+        // Concatenar de forma segura evitando problemas de compatibilidad del operador Spread (...)
+        var documentChildren = [headerParagraph].concat(paragraphs);
+
+        // Crear documento usando la instancia validada
+        var doc = new docxInstance.Document({
+            sections: [{
+                properties: {},
+                children: documentChildren
+            }]
+        });
+
+        docxInstance.Packer.toBlob(doc).then(function(blob) {
+            if (typeof saveAs !== 'undefined') {
+                saveAs(blob, title + ".docx");
+                RetoricaUI.notify("Documento Word exportado ✓");
+            } else {
+                // Fallback por si FileSaver no cargó a tiempo en celular
+                var link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = title + ".docx";
+                link.click();
+                RetoricaUI.notify("Word descargado vía fallback ✓");
+            }
+        }).catch(function(err) {
+            console.error("Error en DOCX Packer: ", err);
+            RetoricaUI.notify("Error al compilar el archivo Word.");
         });
     }
 };
