@@ -7,10 +7,15 @@
     <link rel="manifest" href="./manifest.json?v=2026_GOD_MODE">
     
     <!-- LIBRERÍAS PESADAS INYECTADAS (Para asegurar que todo funcione) -->
+    <!-- html2pdf estable para navegadores móviles -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.js"></script>
+    
+    <!-- DOCX Versión Web-Bundle Segura para evitar fallos de inicialización global -->
+    <script src="https://cdn.jsdelivr.net/npm/docx@7.1.1/build/index.umd.min.js"></script>
+    
+    <!-- FileSaver para descarga directa en celulares -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-
+   
     <style>
         :root {
             --bg-main: #0f111a; --bg-sidebar: #161925; --bg-card: #1f2335;
