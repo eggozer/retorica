@@ -133,25 +133,37 @@ var RetoricaI18n = {
         if (!selectedText.trim()) return;
 
         if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Traduciendo fragmento...");
-        var cleanLang = targetLang.split('-')[0];
-        var url = "https://api.mymemory.translated.net/get?q=" + encodeURIComponent(selectedText) + "&langpair=auto|" + cleanLang;
+        
+        var sourceClean = this.currentLang.split('-')[0];
+        var targetClean = targetLang.split('-')[0];
+        if (sourceClean === targetClean) return;
+
+        var url = "https://api.mymemory.translated.net/get?q=" + encodeURIComponent(selectedText) + "&langpair=" + sourceClean + "|" + targetClean;
 
         fetch(url)
             .then(function(res) { return res.json(); })
             .then(function(data) {
-                if (data && data.responseData) {
+                if (data && data.responseData && data.responseStatus === 200) {
                     var translatedText = data.responseData.translatedText;
+                    if (!translatedText || translatedText.includes("INVALID SOURCE LANGUAGE")) {
+                        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error: Respuesta inválida.");
+                        return;
+                    }
+
                     var fullText = editor.value;
                     editor.value = fullText.substring(0, start) + translatedText + fullText.substring(end);
                     editor.setSelectionRange(start, start + translatedText.length);
+                    
                     if (typeof RetoricaUI !== 'undefined') {
                         RetoricaUI.updateCounters();
                         RetoricaUI.triggerAutoSave();
                         RetoricaUI.notify("Interpretación aplicada ✓");
                     }
+                } else {
+                    if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Servidor ocupado. Intenta de nuevo.");
                 }
             }).catch(function() {
-                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error de red en la interpretación.");
+                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error de red. Texto protegido.");
             });
     }
 };
