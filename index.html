@@ -62,7 +62,7 @@
         .header-app h1 { font-size: 1.3rem; font-weight: 900; letter-spacing: 3px; color: var(--text-main); text-align: center; }
         
         /* Barra de Navegación */
-        .top-navbar { background: var(--bg-sidebar); border-bottom: 1px solid var(--border); padding: 10px; display: flex; align-items: center; gap: 15px; z-index: 1000; }
+
         .menu-slider-container { flex: 1; overflow-x: auto; white-space: nowrap; display: flex; gap: 18px; padding: 5px; -webkit-overflow-scrolling: touch; }
         .menu-slider-container::-webkit-scrollbar { height: 0px; }
         .btn-wrapper-3d { display: inline-flex; flex-direction: column; align-items: center; position: relative; vertical-align: top; }
@@ -106,7 +106,54 @@
         .reading-active { border-color: #00d2ff !important; }
         @keyframes pulseMic { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
         .file-input-hidden { display: none; }
-  
+
+/* 1. Forzar comportamiento scroll horizontal a la barra de herramientas principal */
+.top-navbar {
+    background: var(--bg-sidebar);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 15px;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    gap: 16px;
+    z-index: 1000;
+    -webkit-overflow-scrolling: touch;
+}
+.top-navbar::-webkit-scrollbar {
+    display: none; /* Oculta barra gris en móviles */
+}
+.top-navbar .btn-wrapper-3d {
+    flex-shrink: 0 !important; /* Impide que los botones superiores se aplasten */
+}
+
+/* 2. Reparación total del carrusel de idiomas inferior */
+#carousel-slider-track {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    gap: 12px !important; /* Separación perfecta de 12px */
+    padding: 10px 20px !important;
+    -webkit-overflow-scrolling: touch;
+}
+#carousel-slider-track::-webkit-scrollbar {
+    display: none;
+}
+
+/* 3. Estilos limpios delegados para los botones del carrusel */
+.btn-idioma-carousel {
+    flex: 0 0 auto !important;
+    flex-shrink: 0 !important; /* Bloqueo estricto anti-compresión */
+    scroll-snap-align: center;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    white-space: nowrap !important; /* Evita saltos de línea extraños */
+    cursor: pointer;
+    transition: all 0.2s;
+}
+/* ================================================== */
+        
         /* CORRECCIÓN PUNTO 8: PERMITIR SELECCIÓN NATIVA EN EL EDITOR */
 .unified-container, .doc-title, .textarea-main {
     -webkit-user-select: text !important;
