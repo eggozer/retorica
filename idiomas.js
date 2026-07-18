@@ -165,18 +165,7 @@ var RetoricaI18n = {
             var langDiv = document.createElement('div');
             
             // flex-shrink: 0 evita por completo que los botones se queden pegados comprimiéndose
-            langDiv.style.flex = '0 0 auto';
-            langDiv.style.flexShrink = '0';
-            langDiv.style.scrollSnapAlign = 'center';
-            langDiv.style.padding = '8px 16px';
-            langDiv.style.margin = '0 8px'; 
-            langDiv.style.borderRadius = '20px';
-            langDiv.style.fontSize = '0.75rem';
-            langDiv.style.fontWeight = 'bold';
-            langDiv.style.whiteSpace = 'nowrap';
-            langDiv.style.cursor = 'pointer';
-            langDiv.style.transition = 'all 0.2s';
-
+            langDiv.className = 'btn-idioma-carousel';
             if (idx === activeIndex) {
                 langDiv.style.background = 'var(--text-main)';
                 langDiv.style.color = 'var(--bg-main)';
