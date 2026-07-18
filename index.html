@@ -162,26 +162,34 @@
     user-select: text !important;
 }
 
-        /* Modificaciones para igualar los tamaños de los encabezados */
+        /* UNIFICACIÓN ESTRICTA DE ENCABEZADOS */
 .header-app {
-    padding: 20px 0 15px 0 !important; /* Aumentamos ligeramente el espacio del principal para mejor balance */
+    height: 64px !important;
+    padding: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
 }
 
 .sidebar-header {
-    /* Forzamos a que tenga exactamente la misma altura y espacio que el principal */
-    min-height: 64px !important; 
-    padding: 20px 20px 15px 20px !important; 
+    height: 64px !important; /* Forzamos exactamente la misma altura */
+    padding: 0 20px !important; /* Quitamos padding vertical sobrante */
     box-sizing: border-box !important;
     display: flex !important;
     align-items: center !important;
+    justify-content: space-between !important;
 }
 
-/* Ajuste fino al botón de regreso del menú lateral para que quede perfectamente alineado al centro */
+/* Alineación del botón de regreso dentro del menú */
 .sidebar-header .btn-round-3d {
-    margin-top: 0 !important;
+    width: 38px !important;
+    height: 38px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
+    margin: 0 !important;
 }
         
     </style>
