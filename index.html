@@ -240,13 +240,15 @@
     </div>
 
     <!-- ENCABEZADO PRINCIPAL -->
-    <div class="header-app" style="height: 65px !important; padding: 0 !important; display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: center !important; box-sizing: border-box !important;">
-        <div class="header-title-container">
-            <div class="header-icon-wrapper">
-                <img src="./icon-192.png" class="header-icon" alt="Icono Retórica">
+    <div class="header-app" style="height: 65px !important; padding: 0 20px !important; display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; box-sizing: border-box !important; background: var(--bg-sidebar); border-bottom: 1px solid var(--border); overflow: hidden !important;">
+        <div class="header-title-container" style="display: flex !important; align-items: center !important; gap: 12px !important;">
+            <div class="header-icon-wrapper" style="width: 34px !important; height: 34px !important; border-radius: 50% !important; overflow: hidden !important; display: flex !important; align-items: center !important; justify-content: center !important; background: transparent !important; border: 1px solid var(--border) !important;">
+                <img src="./icon-192.png" class="header-icon" style="width: 150% !important; height: 150% !important; object-fit: cover !important;" alt="Icono Retórica">
             </div>
-            <h1>RETÓRICA</h1>
+            <h1 style="font-size: 1.3rem !important; font-weight: 900 !important; letter-spacing: 3px !important; color: var(--text-main) !important; margin: 0 !important;">RETÓRICA</h1>
         </div>
+        <!-- Espaciador invisible a la derecha para equilibrar el espacio si es necesario -->
+        <div style="width: 36px; height: 36px;"></div>
     </div>
 
     <!-- BOTONERA -->
