@@ -1,7 +1,7 @@
 // --- RETÓRICA INTERNATIONALIZATION & TRANSLATION ENGINE (idiomas.js) ---
 var RetoricaI18n = {
-    currentLang: 'es-MX',
-    currentVoiceLang: 'es-MX', // Control independiente para acento de lectura
+    currentLang: 'en-GB', // <- Cambiado de 'es-MX' a 'en-GB'
+    currentVoiceLang: 'en-GB', // <- Cambiado de 'es-MX' a 'en-GB'
     
     // 13 Idiomas ordenados alfabéticamente de forma estricta por su nombre de visualización
     langsOrder: ['ar-SA', 'zh-CN', 'de-DE', 'en-GB', 'es-ES', 'es-MX', 'fr-FR', 'hi-IN', 'it-IT', 'ja-JP', 'pt-PT', 'ru-RU', 'uk-UA'],
