@@ -3,19 +3,14 @@ var RetoricaI18n = {
     currentLang: 'en-GB', // <- Cambiado de 'es-MX' a 'en-GB'
     currentVoiceLang: 'en-GB', // <- Cambiado de 'es-MX' a 'en-GB'
     
-    // 13 Idiomas ordenados alfabéticamente de forma estricta por su nombre de visualización
-    langsOrder: ['ar-SA', 'zh-CN', 'de-DE', 'en-GB', 'es-ES', 'es-MX', 'fr-FR', 'hi-IN', 'it-IT', 'ja-JP', 'pt-PT', 'ru-RU', 'uk-UA'],
+    // 13 Idiomas ordenados alfabéticamente de forma estricta por su clave ISO local (A-Z)
+    langsOrder: ['ar-SA', 'de-DE', 'en-GB', 'es-ES', 'es-MX', 'fr-FR', 'hi-IN', 'it-IT', 'ja-JP', 'pt-PT', 'ru-RU', 'uk-UA', 'zh-CN'],
     
     db: {
         'ar-SA': { 
             name: 'Al-Arabiya', save: 'حفظ', new: 'جديد', mic: 'إملاء', read: 'قراءة', stop: 'إحباط', vmsg: 'رسالة', tts: 'نص\nصوت', pTitle: 'عنوان النص...', pBody: 'اكتب أو أملي نصوصك هنا...', menu: 'قائمة', install: 'تثبيت\nالتطبيق', theme: 'سمة', langTxt: 'لغة\nالنص', langVoz: 'لغة\nالصوت',
-            uLabel: 'المستخدم الرقمي (البريد الإلكتروني / المعرف)', pLabel: 'مفتاح التشفير', btnAuth: 'استمر', toggleAuth: 'ليس لديك حساب؟ سجل هنا', hardware: 'أو الدخول عبر الأجهزة', gBtn: 'ربط جهاز جوجل', fBtn: 'ربط جهاز فيسبوك', wBtn: 'ربط جهاز واتساب',
-            btnRegister: 'تسجيل وإنشاء مفتاح', toggleHasAccount: 'هل لديك حساب بالفعل؟ ادخل هنا', alertSeed: 'تم إنشاء مفتاح تشفير تلقائي! احفظه.', errUid: 'لربط الجهاز، اكتب بريدك الإلكتروني/المعرف أولاً.', okHardware: 'تم ربط الجهاز محلياً عبر ', syncHardware: 'مزامنة يدوية جارية... متصل!', errMissingUid: 'أدخل بريدًا إلكترونيًا أو رقم هاتف.', errBanned: 'هذا الوصول مقيد.', errNoReg: 'المستخدم غير مسجل محلياً. انتقل لوضع التسجيل.', errWrongPass: 'كلمة المرور غير صحيحة.', errAlreadyReg: 'هذا المعرف مسجل بالفعل.', errShortPass: 'يجب أن تتكون كلمة المرور من 4 أحرف على الأقل.', notifSync: 'تمت مزامنة الجلسة.'
-        },
-        'zh-CN': { 
-            name: 'Chinese', save: '保存', new: '新的', mic: '听写', read: '读', stop: '中止', vmsg: '语音', tts: '文字\n声音', pTitle: '剧本标题...', pBody: '在此处编写您的剧本...', menu: '菜单', install: '安装\n应用', theme: '主题', langTxt: '文字\n语言', langVoz: '声音\n语言',
-            uLabel: '数字用户 (电子邮箱 / ID)', pLabel: '加密密钥', btnAuth: '继续', toggleAuth: '没有账户？注册', hardware: '或通过硬件访问', gBtn: '绑定谷歌设备', fBtn: '绑定脸书设备', wBtn: '绑定微信设备',
-            btnRegister: '注册并创建密钥', toggleHasAccount: '已有账户？在此登录', alertSeed: '自动生成的加密密钥！请妥善保管。', errUid: '要通过硬件绑定，请先在上方输入您的Email/ID。', okHardware: '本地设备已通过此方式绑定：', syncHardware: '手动同步中... 已连接！', errMissingUid: '请输入电子邮件或电话号码。', errBanned: '此访问已被限制。', errNoReg: '用户未在本地注册。请切换到注册模式。', errWrongPass: '密码错误。', errAlreadyReg: '此标识符已被注册。', errShortPass: '密码长度至少为 4 个字符。', notifSync: '会话已同步。'
+            uLabel: 'المستخدم الرقمي (البريد الإلكتروني / المعرف)', pLabel: 'مفتاح التشفير', btnAuth: 'استمر', toggleAuth: 'ليس لديك حساب？ سجل هنا', hardware: 'أو الدخول عبر الأجهزة', gBtn: 'ربط جهاز جوجل', fBtn: 'ربط جهاز فيسبوك', wBtn: 'ربط جهاز واتساب',
+            btnRegister: 'تسجيل وإنشاء مفتاح', toggleHasAccount: 'هل لديك حساب بالفعل؟ ادخل هنا', alertSeed: 'تم إنشاء مفتاح تشفير تلقائي! احفظه.', errUid: 'لربط Device، اكتب بريدك الإلكتروني/المعرف أولاً.', okHardware: 'تم ربط الجهاز محلياً عبر ', syncHardware: 'مزامنة يدوية جارية... متصل!', errMissingUid: 'أدخل بريدًا إلكترونيًا أو رقم هاتف.', errBanned: 'هذا الوصول مقيد.', errNoReg: 'المستخدم غير مسجل محلياً. انتقل لوضع التسجيل.', errWrongPass: 'كلمة المرور غير صحيحة.', errAlreadyReg: 'هذا المعرف مسجل بالفعل.', errShortPass: 'يجب أن تتكون كلمة المرور من 4 أحرف على الأقل.', notifSync: 'تمت مزامنة الجلسة.'
         },
         'de-DE': { 
             name: 'Deutsch', save: 'Speichern', new: 'Neu', mic: 'Diktieren', read: 'Lesen', stop: 'Abbrechen', vmsg: 'Sprach\nNachr', tts: 'Text\nStimme', pTitle: 'Skripttitel...', pBody: 'Schreiben oder diktieren Sie hier...', menu: 'Menü', install: 'App\nInstall', theme: 'Thema', langTxt: 'Text\nSprache', langVoz: 'Audio\nSprache',
@@ -44,7 +39,7 @@ var RetoricaI18n = {
         },
         'hi-IN': { 
             name: 'Hindi', save: 'बचाना', new: 'नया', mic: 'श्रुतलेख', read: 'पढ़ना', stop: 'रद्द', vmsg: 'आवाज़', tts: 'पाठ\nआवाज़', pTitle: 'शीर्षक...', pBody: 'अपनी पटकथा यहाँ लिखें...', menu: 'सूची', install: 'ऐप\nइंस्टॉल', theme: 'थीम', langTxt: 'पाठ\nभाषा', langVoz: 'आवाज़\nभाषा',
-            uLabel: 'डिजिटल उपयोगकर्ता (ईमेल / आईडी)', pLabel: 'क्रिप्टोग्राफिक कुंजी', btnAuth: 'जारी रखें', toggleAuth: 'खाता नहीं है? यहाँ पंजीकरण करें', hardware: 'या हार्डवेयर के माध्यम से पहुंचें', gBtn: 'गूगल डिवाइस लिंक करें', fBtn: 'फेसबुक डिवाइस लिंक करें', wBtn: 'व्हाट्सएप डिवाइस लिंक करें',
+            uLabel: 'डिजिटल उपयोगकर्ता (ईमेल / आईडी)', pLabel: 'क्रिप्टोग्राफिक कुंजी', btnAuth: 'जारी रखें', toggleAuth: 'खाता नहीं है? यहाँ पंजीकरण करें', hardware: 'या हार्डवेयर के माध्यम से पहुंचें', gBtn: 'गूगल डिवाइस लिंक करें', fBtn: 'फेसबुक डिवाइस link करें', wBtn: 'व्हाट्सएप डिवाइस लिंक करें',
             btnRegister: 'पंजीकरण करें और कुंजी बनाएं', toggleHasAccount: 'पहले से ही खाता है? यहाँ लॉग इन करें', alertSeed: 'क्रिप्टोग्राफिक कुंजी स्वतः उत्पन्न! कृपया इसे सुरक्षित करें।', errUid: 'हार्डवेयर के माध्यम से लिंक करने के लिए, पहले ऊपर अपना ईमेल/आईडी दर्ज करें।', okHardware: 'डिवाइस स्थानीय रूप से इसके माध्यम से लिंक किया गया: ', syncHardware: 'मैन्युअल सिंक्रनाइज़ेशन प्रगति पर है... कनेक्टेड!', errMissingUid: 'एक ईमेल या फ़ोन नंबर दर्ज करें।', errBanned: 'यह पहुंच प्रतिबंधित है।', errNoReg: 'उपयोगकर्ता स्थानीय रूप से पंजीकृत नहीं है। साइनअप मोड पर जाएं।', errWrongPass: 'गलत पासवर्ड।', errAlreadyReg: 'यह पहचानकर्ता पहले से ही पंजीकृत है।', errShortPass: 'पासवर्ड कम से कम 4 वर्णों का होना चाहिए।', notifSync: 'सत्र सिंक्रनाइज़ हो गया।'
         },
         'it-IT': { 
@@ -60,7 +55,7 @@ var RetoricaI18n = {
         'pt-PT': { 
             name: 'Português', save: 'Salvar', new: 'Novo', mic: 'Ditado', read: 'Leitura', stop: 'Abortar', vmsg: 'Mensagem\nVoz', tts: 'Texto\nVoz', pTitle: 'Título do Roteiro...', pBody: 'Escreva ou dite sua retórica aqui...', menu: 'Menu', install: 'Instalar\nApp', theme: 'Tema', langTxt: 'Idioma\nTexto', langVoz: 'Idioma\nVoz',
             uLabel: 'USUÁRIO DIGITAL (EMAIL / ID)', pLabel: 'CHAVE CRIPTOGRÁFICA', btnAuth: 'CONTINUAR', toggleAuth: 'Não tem conta? Registe-se aqui', hardware: 'OU ACEDER VIA HARDWARE', gBtn: 'VINCULAR DISPOSITIVO GOOGLE', fBtn: 'VINCULAR DISPOSITIVO FACEBOOK', wBtn: 'VINCULAR DISPOSITIVO WHATSAPP',
-            btnRegister: 'REGISTAR & CRIAR CHAVE', toggleHasAccount: 'Já tem uma conta? Entrar aqui', alertSeed: 'Chave criptográfica autogerada! Guarde-a em segurança.', errUid: 'Para vincular via hardware, escreva primeiro o seu Email/ID acima.', okHardware: 'Dispositivo vinculado localmente via ', syncHardware: 'Sincronização manual em progresso... Ligado!', errMissingUid: 'Introduza um e-mail ou número de telefone.', errBanned: 'Este acesso está restrito.', errNoReg: 'Usuário não registado localmente. Altere para o modo de registo.', errWrongPass: 'Chave incorreta.', errAlreadyReg: 'Este identificador já está registado.', errShortPass: 'A senha deve ter pelo menos 4 caracteres.', notifSync: 'Sessão sincronizada.'
+            btnRegister: 'REGISTAR & CRIAR CHAVE', toggleHasAccount: 'Já tem uma conta? Entrar aqui', alertSeed: 'Chave criptográfica autogerada! Guarde-a em segurança.', errUid: 'Para vincular via hardware, escreva primeiro o seu Email/ID acima.', okHardware: 'Dispositivo vinculado localmente via ', syncHardware: 'Sincronização manual em progresso... Ligado!', errMissingUid: 'Introduza um e-mail ou número de telefone.', errBanned: 'Este acesso está restrito.', errNoReg: 'Usuário não registado localmente. Altere para o modo de registo.', errWrongPass: 'Chave incorreta.', errAlreadyReg: 'Este identificador ya está registado.', errShortPass: 'A senha deve ter pelo menos 4 caracteres.', notifSync: 'Sessão sincronizada.'
         },
         'ru-RU': { 
             name: 'Русский', save: 'Сохранить', new: 'Новый', mic: 'Диктовка', read: 'Читать', stop: 'Отмена', vmsg: 'Голос', tts: 'Текст\nГолос', pTitle: 'Название...', pBody: 'Пишите здесь...', menu: 'Меню', install: 'Скачать\nApp', theme: 'Тема', langTxt: 'Язык\nТекст', langVoz: 'Язык\nГолос',
@@ -70,7 +65,12 @@ var RetoricaI18n = {
         'uk-UA': { 
             name: 'Ukrainian', save: 'Зберегти', new: 'Новий', mic: 'Диктувати', read: 'Читати', stop: 'Перервати', vmsg: 'Голос\nПовід', tts: 'Текст\nГолос', pTitle: 'Назва Сценарію...', pBody: 'Пишіть або диктуйте риторику тут...', menu: 'Menu', install: 'Встановити\nApp', theme: 'Тема', langTxt: 'Мова\nТекст', langVoz: 'Мова\nГолос',
             uLabel: 'ЦИФРОВИЙ КОРИСТУВАЧ (EMAIL / ID)', pLabel: 'КРИПТОГРАФІЧНИЙ КЛЮЧ', btnAuth: 'ПРОДОВЖИТИ', toggleAuth: 'Немає акаунту? Зареєструватися', hardware: 'АБО ВХІД ЧЕРЕЗ АПАРАТНЕ ЗАБЕЗПЕЧЕННЯ', gBtn: 'ПРИВ’ЯЗАТИ ПРИСТРІЙ GOOGLE', fBtn: 'ПРИВ’ЯЗАТИ ПРИСТРІЙ FACEBOOK', wBtn: 'ПРИВ’ЯЗАТИ ПРИСТРІЙ WHATSAPP',
-            btnRegister: 'ЗАРЕЄСТРУВАТИСЯ ТА СТВОРИТИ КЛЮЧ', toggleHasAccount: 'Вже є акаунт? Увійти сюди', alertSeed: 'Криптографічний ключ згенеровано автоматично! Будь ласка, збережіть його.', errUid: 'Для прив’язки апаратного забезпечення спочатку введіть ваш Email/ID вище.', okHardware: 'Пристрій прив’язано локально через ', syncHardware: 'Ручна синхронізація... Підключено!', errMissingUid: 'Введіть електронну пошту або номер телефону.', errBanned: 'Цей доступ обмежено.', errNoReg: 'Користувач не зареєстрований локально. Перейдіть у режим реєстрації.', errWrongPass: 'Невірний ключ.', errAlreadyReg: 'Цей ідентифікатор вже зареєстрований.', errShortPass: 'Пароль повинен містити принаймні 4 символи.', notifSync: 'Сесію синхронізовано.'
+            btnRegister: 'ЗАРЕЄСТРУВАТИСЯ ТА СТВОРИТИ КЛЮЧ', toggleHasAccount: 'Вже є акаунт? Увійти сюди', alertSeed: 'Криптографічний ключ згенеровано автоматически! Будь ласка, збережіть його.', errUid: 'Для прив’язки апаратного забезпечення спочатку введіть ваш Email/ID вище.', okHardware: 'Пристрій прив’язано локально через ', syncHardware: 'Ручна синхронізація... Підключено!', errMissingUid: 'Введіть електронну пошту або номер телефону.', errBanned: 'Цей доступ обмежено.', errNoReg: 'Користувач не зареєстрований локально. Перейдіть у режим реєстрації.', errWrongPass: 'Невірний ключ.', errAlreadyReg: 'Цей ідентифікатор вже зареєстрований.', errShortPass: 'Пароль повинен містити принаймні 4 символи.', notifSync: 'Сесію синхронізовано.'
+        },
+        'zh-CN': { 
+            name: 'Chinese', save: '保存', new: '新的', mic: '听写', read: '读', stop: '中止', vmsg: '语音', tts: '文字\n声音', pTitle: '剧本标题...', pBody: '在此处编写您的剧本...', menu: '菜单', install: '安装\n应用', theme: '主题', langTxt: '文字\n语言', langVoz: '声音\n语言',
+            uLabel: '数字用户 (电子邮箱 / ID)', pLabel: '加密密钥', btnAuth: '继续', toggleAuth: '没有账户？注册', hardware: '或通过硬件访问', gBtn: '绑定谷歌设备', fBtn: '绑定脸书设备', wBtn: '绑定微信设备',
+            btnRegister: '注册并创建密钥', toggleHasAccount: '已有账户？在此登录', alertSeed: '自动生成的加密密钥！请妥善保管。', errUid: '要通过硬件绑定，请先在上方输入您的Email/ID。', okHardware: '本地设备已通过此方式绑定：', syncHardware: '手动同步中... 已连接！', errMissingUid: '请输入电子邮件或电话号码。', errBanned: '此访问已被限制。', errNoReg: '用户未在本地注册。请切换到注册模式。', errWrongPass: '密码错误。', errAlreadyReg: '此标识符已被注册。', errShortPass: '密码长度至少为 4 个字符。', notifSync: '会话已同步。'
         }
     },
 
@@ -78,7 +78,7 @@ var RetoricaI18n = {
 
     setAppLang: function(lang) {
         this.currentLang = lang;
-        // Si el idioma solicitado no existe, el respaldo (fallback) ahora es inglés
+        // Si el idioma solicitado no existe, el respaldo (fallback) es inglés
         var p = this.db[lang] || this.db['en-GB']; 
         
         // Botones de la barra inferior
@@ -101,7 +101,7 @@ var RetoricaI18n = {
         var lblLangTxt = document.getElementById('lbl-nav-langtxt'); if(lblLangTxt) lblLangTxt.innerHTML = p.langTxt;
         var lblLangVoz = document.getElementById('lbl-nav-langvoz'); if(lblLangVoz) lblLangVoz.innerHTML = p.langVoz;
         
-        // NUEVO: Vinculación dinámica de la Capa de Autenticación (Auth)
+        // Vinculación dinámica de la Capa de Autenticación (Auth)
         var lUser = document.getElementById('lbl-auth-user'); if(lUser) lUser.innerText = p.uLabel;
         var lPass = document.getElementById('lbl-auth-pass'); if(lPass) lPass.innerText = p.pLabel;
         var bAuth = document.getElementById('btn-submit-auth'); if(bAuth && (typeof RetoricaAuth === 'undefined' || RetoricaAuth.state.mode === 'login')) bAuth.innerText = p.btnAuth;
@@ -123,7 +123,6 @@ var RetoricaI18n = {
         if (!panel || !track) return;
 
         var isVisible = panel.style.display === 'block';
-        // Si ya está abierto con el mismo tipo, lo cerramos; si es tipo diferente, lo actualizamos
         if (isVisible && panel.dataset.currentType === type) {
             panel.style.display = 'none';
             return;
@@ -143,13 +142,12 @@ var RetoricaI18n = {
         var activeLang = (type === 'text') ? this.currentLang : this.currentVoiceLang;
         var activeIndex = this.langsOrder.indexOf(activeLang);
 
-        // Forzar contenedor ultra-deslizable y centrado sin recortes laterales
         track.style.display = 'flex';
         track.style.overflowX = 'auto';
-        track.style.justifyContent = 'flex-start'; // Permite que todos los elementos se alineen bien en orden
+        track.style.justifyContent = 'flex-start'; 
         track.style.alignItems = 'center';
         track.style.width = '100%';
-        track.style.padding = '5px 40px'; // Márgenes de seguridad a los lados
+        track.style.padding = '5px 40px'; 
         track.style.boxSizing = 'border-box';
 
         this.langsOrder.forEach(function(langKey, idx) {
@@ -159,7 +157,7 @@ var RetoricaI18n = {
             langDiv.style.flex = '0 0 auto';
             langDiv.style.scrollSnapAlign = 'center';
             langDiv.style.padding = '8px 16px';
-            langDiv.style.margin = '0 8px'; // Espaciado balanceado entre idiomas
+            langDiv.style.margin = '0 8px'; 
             langDiv.style.borderRadius = '20px';
             langDiv.style.fontSize = '0.75rem';
             langDiv.style.fontWeight = 'bold';
@@ -192,7 +190,6 @@ var RetoricaI18n = {
             track.appendChild(langDiv);
         });
 
-        // Asegura que no se pegue ni se pierda el foco inicial en móviles
         setTimeout(function() {
             var activeElement = track.children[activeIndex];
             if (activeElement) {
