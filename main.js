@@ -126,10 +126,19 @@ var RetoricaUI = {
     initTouchGestures: function() {
         var self = this;
         document.addEventListener('touchstart', function(e) {
+            // SI EL CLIC O TOQUE VIENE DE LAS BOTONERAS HORIZONTALES, IGNORAR LA GESTIÓN DE SWIPE
+            if (e.target.closest('.top-navbar') || e.target.closest('#carousel-panel-languages')) {
+                self.state.touchStartX = 0; // Reseteamos para que no haga swipe
+                return;
+            }
             self.state.touchStartX = e.changedTouches[0].screenX;
         }, { passive: true });
 
         document.addEventListener('touchend', function(e) {
+            // IGUALMENTE IGNORAMOS EN EL TOCHEND
+            if (e.target.closest('.top-navbar') || e.target.closest('#carousel-panel-languages') || self.state.touchStartX === 0) {
+                return;
+            }
             self.state.touchEndX = e.changedTouches[0].screenX;
             self.handleSwipe();
         }, { passive: true });
