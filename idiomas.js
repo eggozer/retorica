@@ -178,7 +178,8 @@ var RetoricaI18n = {
 
             langDiv.innerText = item.name;
 
-            langDiv.onclick = function() {
+            langDiv.onclick = function(e) {
+        if (e) e.stopPropagation();
                 if (type === 'text') {
                     self.setAppLang(langKey);
                 } else {
