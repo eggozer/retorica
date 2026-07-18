@@ -78,7 +78,8 @@ var RetoricaI18n = {
 
     setAppLang: function(lang) {
         this.currentLang = lang;
-        var p = this.db[lang] || this.db['es-MX'];
+        // Si el idioma solicitado no existe, el respaldo (fallback) ahora es inglés
+        var p = this.db[lang] || this.db['en-GB']; 
         
         // Botones de la barra inferior
         var btnSave = document.getElementById('lbl-tool-save'); if(btnSave) btnSave.innerText = p.save;
