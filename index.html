@@ -367,13 +367,16 @@
     <!-- MENÚ LATERAL -->
     <!-- CORRECCIÓN PUNTO 3: MENÚ LATERAL ACTUALIZADO -->
     <div class="sidebar-panel" id="sidebar">
-        <div class="sidebar-header" style="height: 65px !important; padding: 0 20px !important; display: flex !important; align-items: center !important; justify-content: space-between !important; box-sizing: border-box !important; background: var(--bg-sidebar); border-bottom: 1px solid var(--border);">
+        <!-- ENCABEZADO DEL MENÚ LATERAL -->
+        <div class="sidebar-header" style="height: 65px !important; padding: 0 20px !important; display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; box-sizing: border-box !important; background: var(--bg-sidebar); border-bottom: 1px solid var(--border); overflow: hidden !important;">
             <!-- Título de marca integrado en el encabezado del menú -->
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <img src="./icon-192.png" style="width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--border);" alt="Logo">
-                <span style="letter-spacing: 2px; font-weight: 900;">RETÓRICA</span>
+            <div style="display: flex !important; align-items: center !important; gap: 12px !important;">
+                <div style="width: 34px !important; height: 34px !important; border-radius: 50% !important; overflow: hidden !important; display: flex !important; align-items: center !important; justify-content: center !important; background: transparent !important; border: 1px solid var(--border) !important;">
+                    <img src="./icon-192.png" style="width: 150% !important; height: 150% !important; object-fit: cover !important;" alt="Logo">
+                </div>
+                <span style="font-size: 1.3rem !important; font-weight: 900 !important; letter-spacing: 3px !important; color: var(--text-main) !important;">RETÓRICA</span>
             </div>
-            <button class="btn-round-3d" style="width:36px; height:36px; margin: 0 !important; display: flex !important; align-items: center !important; justify-content: center !important;" onclick="RetoricaUI.toggleSidebar()"><span class="icon-raw">⏮️</span></button>
+            <button class="btn-round-3d" style="width: 36px !important; height: 36px !important; margin: 0 !important; display: flex !important; align-items: center !important; justify-content: center !important; flex-shrink: 0 !important;" onclick="RetoricaUI.toggleSidebar()"><span class="icon-raw">⏮️</span></button>
         </div>
         <div class="sidebar-content">
             <div class="grid-templates" id="docs-list-render"></div>
