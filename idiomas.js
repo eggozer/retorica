@@ -1,9 +1,9 @@
 // --- RETÓRICA INTERNATIONALIZATION & TRANSLATION ENGINE (idiomas.js) ---
 var RetoricaI18n = {
-    currentLang: 'en-GB', // <- Cambiado de 'es-MX' a 'en-GB'
-    currentVoiceLang: 'en-GB', // <- Cambiado de 'es-MX' a 'en-GB'
+    currentLang: 'en-GB', 
+    currentVoiceLang: 'en-GB', 
     
-    // 13 Idiomas ordenados alfabéticamente de forma estricta por su clave ISO local (A-Z)
+    // 13 Idiomas ordenados alfabéticamente de forma estricta (A-Z)[cite: 4]
     langsOrder: ['ar-SA', 'de-DE', 'en-GB', 'es-ES', 'es-MX', 'fr-FR', 'hi-IN', 'it-IT', 'ja-JP', 'pt-PT', 'ru-RU', 'uk-UA', 'zh-CN'],
     
     db: {
@@ -38,9 +38,9 @@ var RetoricaI18n = {
             btnRegister: 'S’INSCRIRE & CRÉER UNE CLÉ', toggleHasAccount: 'Vous avez déjà un compte? Connectez-vous', alertSeed: 'Clé cryptographique générée automatiquement! Veuillez la sauvegarder.', errUid: 'Pour associer via un appareil, saisissez d’abord votre Email/ID ci-dessus.', okHardware: 'Appareil associé localement via ', syncHardware: 'Synchronisation manuelle en cours... Connecté!', errMissingUid: 'Entrez un e-mail ou un numéro de téléphone.', errBanned: 'Cet accès est restreint.', errNoReg: 'Utilisateur non enregistré localement. Passez en mode inscription.', errWrongPass: 'Clé incorrecte.', errAlreadyReg: 'Cet identifiant est déjà enregistré.', errShortPass: 'Le mot de passe doit contenir au moins 4 caractères.', notifSync: 'Session synchronisée.'
         },
         'hi-IN': { 
-            name: 'Hindi', save: 'बचाना', new: 'नया', mic: 'श्रुतलेख', read: 'पढ़ना', stop: 'रद्द', vmsg: 'आवाज़', tts: 'पाठ\nआवाज़', pTitle: 'शीर्षक...', pBody: 'अपनी पटकथा यहाँ लिखें...', menu: 'सूची', install: 'ऐप\nइंस्टॉल', theme: 'थीम', langTxt: 'पाठ\nभाषा', langVoz: 'आवाज़\nभाषा',
+            name: 'Hindi', save: 'बचाना', new: 'नया', mic: 'श्रुतलेख', read: 'पढ़ना', stop: 'रद्द', vmsg: 'आवाज़', tts: 'पाठ\nआवाज़', pTitle: 'शीर्षक...', pBody: 'अपनी पटकथा यहाँ लिखें...', menu: 'सूची', install: 'ऐप\ninstalls', theme: 'थीम', langTxt: 'पाठ\nभाषा', langVoz: 'आवाज़\nभाषा',
             uLabel: 'डिजिटल उपयोगकर्ता (ईमेल / आईडी)', pLabel: 'क्रिप्टोग्राफिक कुंजी', btnAuth: 'जारी रखें', toggleAuth: 'खाता नहीं है? यहाँ पंजीकरण करें', hardware: 'या हार्डवेयर के माध्यम से पहुंचें', gBtn: 'गूगल डिवाइस लिंक करें', fBtn: 'फेसबुक डिवाइस link करें', wBtn: 'व्हाट्सएप डिवाइस लिंक करें',
-            btnRegister: 'पंजीकरण करें और कुंजी बनाएं', toggleHasAccount: 'पहले से ही खाता है? यहाँ लॉग इन करें', alertSeed: 'क्रिप्टोग्राफिक कुंजी स्वतः उत्पन्न! कृपया इसे सुरक्षित करें।', errUid: 'हार्डवेयर के माध्यम से लिंक करने के लिए, पहले ऊपर अपना ईमेल/आईडी दर्ज करें।', okHardware: 'डिवाइस स्थानीय रूप से इसके माध्यम से लिंक किया गया: ', syncHardware: 'मैन्युअल सिंक्रनाइज़ेशन प्रगति पर है... कनेक्टेड!', errMissingUid: 'एक ईमेल या फ़ोन नंबर दर्ज करें।', errBanned: 'यह पहुंच प्रतिबंधित है।', errNoReg: 'उपयोगकर्ता स्थानीय रूप से पंजीकृत नहीं है। साइनअप मोड पर जाएं।', errWrongPass: 'गलत पासवर्ड।', errAlreadyReg: 'यह पहचानकर्ता पहले से ही पंजीकृत है।', errShortPass: 'पासवर्ड कम से कम 4 वर्णों का होना चाहिए।', notifSync: 'सत्र सिंक्रनाइज़ हो गया।'
+            btnRegister: 'पंजीकरण करें और कुंजी बनाएं', toggleHasAccount: 'पहले से ही खाता है? यहाँ लॉग इन करें', alertSeed: 'क्रिप्टोग्राफिक कुंजी स्वतः उत्पन्न! कृपया इसे सुरक्षित करें।', errUid: 'हार्डवेयर के माध्यम से लिंक करने के लिए, पहले ऊपर अपना ईमेल/आईडी दर्ज करें।', okHardware: 'डिवाइस स्थानीय रूप से इसके माध्यम से लिंक किया गया: ', syncHardware: 'मैन्युअल सिंक्रनाइज़ेशन प्रगति पर है... कनेक्टेड!', errMissingUid: 'एक ईमेल या फ़ोन नंबर दर्ज करें।', errBanned: 'यह पहुंच प्रतिबंधित है।', errNoReg: 'उपयोगकर्ता स्थानीय रूप से पंजीकृत नहीं है। साइनअप मोड पर जाएं。', errWrongPass: 'गलत पासवर्ड।', errAlreadyReg: 'यह पहचानकर्ता पहले से ही पंजीकृत है।', errShortPass: 'पासवर्ड कम से कम 4 वर्णों का होना चाहिए।', notifSync: 'सत्र सिंक्रนาइज़ हो गया।'
         },
         'it-IT': { 
             name: 'Italiano', save: 'Salva', new: 'Nuovo', mic: 'Dettato', read: 'Lettura', stop: 'Interrompi', vmsg: 'Mess\nVocal', tts: 'Testo\nVoce', pTitle: 'Titolo dello Script...', pBody: 'Scrivi o detta qui la tua retorica...', menu: 'Menu', install: 'Installa\nApp', theme: 'Tema', langTxt: 'Lingua\nTesto', langVoz: 'Lingua\nVoce',
@@ -78,10 +78,9 @@ var RetoricaI18n = {
 
     setAppLang: function(lang) {
         this.currentLang = lang;
-        // Si el idioma solicitado no existe, el respaldo (fallback) es inglés
         var p = this.db[lang] || this.db['en-GB']; 
         
-        // Botones de la barra inferior
+        // Botones de la barra de herramientas (Inyección segura de textos sin romper diseño)
         var btnSave = document.getElementById('lbl-tool-save'); if(btnSave) btnSave.innerText = p.save;
         var btnNew = document.getElementById('lbl-tool-new'); if(btnNew) btnNew.innerText = p.new;
         var btnMic = document.getElementById('lbl-tool-mic'); if(btnMic) btnMic.innerText = p.mic;
@@ -90,18 +89,18 @@ var RetoricaI18n = {
         var btnVmsg = document.getElementById('lbl-tool-vmsg'); if(btnVmsg) btnVmsg.innerText = p.vmsg;
         var btnTts = document.getElementById('lbl-tool-tts'); if(btnTts) btnTts.innerText = p.tts;
         
-        // Inputs principales
+        // Inputs
         var tInput = document.getElementById('editor-title'); if(tInput) tInput.placeholder = p.pTitle;
         var bInput = document.getElementById('editor-body'); if(bInput) bInput.placeholder = p.pBody;
         
-        // Vinculación de los elements de la barra superior
+        // Elementos de navegación superior
         var lblMenu = document.getElementById('lbl-nav-menu'); if(lblMenu) lblMenu.innerHTML = p.menu;
         var lblInstall = document.getElementById('lbl-nav-install'); if(lblInstall) lblInstall.innerHTML = p.install;
         var lblTheme = document.getElementById('lbl-nav-theme'); if(lblTheme) lblTheme.innerHTML = p.theme;
         var lblLangTxt = document.getElementById('lbl-nav-langtxt'); if(lblLangTxt) lblLangTxt.innerHTML = p.langTxt;
         var lblLangVoz = document.getElementById('lbl-nav-langvoz'); if(lblLangVoz) lblLangVoz.innerHTML = p.langVoz;
         
-        // Vinculación dinámica de la Capa de Autenticación (Auth)
+        // Capa Auth
         var lUser = document.getElementById('lbl-auth-user'); if(lUser) lUser.innerText = p.uLabel;
         var lPass = document.getElementById('lbl-auth-pass'); if(lPass) lPass.innerText = p.pLabel;
         var bAuth = document.getElementById('btn-submit-auth'); if(bAuth && (typeof RetoricaAuth === 'undefined' || RetoricaAuth.state.mode === 'login')) bAuth.innerText = p.btnAuth;
@@ -111,12 +110,20 @@ var RetoricaI18n = {
         var oG = document.getElementById('btn-oauth-google'); if(oG) oG.innerText = p.gBtn;
         var oF = document.getElementById('btn-oauth-facebook'); if(oF) oF.innerText = p.fBtn;
         var oW = document.getElementById('btn-oauth-whatsapp'); if(oW) oW.innerText = p.wBtn;
+
+        // **Ajuste de Seguridad de Layout**: Asegurar que el contenedor de la botonera principal nunca colapse sus elementos
+        var toolContainer = document.querySelector('.toolbar-buttons-container') || document.querySelector('.main-nav-container') || (btnSave ? btnSave.parentElement : null);
+        if (toolContainer) {
+            toolContainer.style.overflowX = 'auto';
+            toolContainer.style.whiteSpace = 'nowrap';
+            toolContainer.style.display = 'flex';
+            toolContainer.style.flexWrap = 'nowrap';
+        }
         
         if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Idioma Activo: " + p.name);
         this.checkAndTranslateSelection(lang);
     },
 
-    // ABRE EL PANEL Y CONSTRUIRE EL MENU DESLIZABLE EN TIEMPO REAL
     openCarousel: function(type) {
         var panel = document.getElementById('carousel-panel-languages');
         var track = document.getElementById('carousel-slider-track');
@@ -142,25 +149,31 @@ var RetoricaI18n = {
         var activeLang = (type === 'text') ? this.currentLang : this.currentVoiceLang;
         var activeIndex = this.langsOrder.indexOf(activeLang);
 
+        // Estilos ultra-estrictos para forzar el scroll horizontal y evitar compresión ("pegados")
         track.style.display = 'flex';
+        track.style.flexWrap = 'nowrap';
         track.style.overflowX = 'auto';
+        track.style.webkitOverflowScrolling = 'touch'; // Scroll suave en iOS
         track.style.justifyContent = 'flex-start'; 
         track.style.alignItems = 'center';
         track.style.width = '100%';
-        track.style.padding = '5px 40px'; 
+        track.style.padding = '10px 40px'; 
         track.style.boxSizing = 'border-box';
 
         this.langsOrder.forEach(function(langKey, idx) {
             var item = self.db[langKey];
             var langDiv = document.createElement('div');
             
+            // flex-shrink: 0 evita por completo que los botones se queden pegados comprimiéndose
             langDiv.style.flex = '0 0 auto';
+            langDiv.style.flexShrink = '0';
             langDiv.style.scrollSnapAlign = 'center';
             langDiv.style.padding = '8px 16px';
             langDiv.style.margin = '0 8px'; 
             langDiv.style.borderRadius = '20px';
             langDiv.style.fontSize = '0.75rem';
             langDiv.style.fontWeight = 'bold';
+            langDiv.style.whiteSpace = 'nowrap';
             langDiv.style.cursor = 'pointer';
             langDiv.style.transition = 'all 0.2s';
 
