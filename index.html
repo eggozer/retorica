@@ -162,35 +162,47 @@
     user-select: text !important;
 }
 
-        /* UNIFICACIÓN ESTRICTA DE ENCABEZADOS */
-        .header-app {
-            height: 56px !important;
-            padding: 0 !important;
-            display: flex !important;
-            flex-direction: row !important; /* Cambiado a fila para alinear igual que el menú */
-            align-items: center !important;
-            justify-content: center !important;
-            box-sizing: border-box !important;
-        }
+        /* ========================================== */
+/* REEMPLAZO DEFINITIVO PARA IGUALAR ENCABEZADOS */
+/* ========================================== */
 
-        .sidebar-header {
-            height: 56px !important; /* Forzamos la misma altura matemática exacta */
-            padding: 0 15px !important;
-            box-sizing: border-box !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: space-between !important;
-        }
+.header-app { 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; 
+    background: var(--bg-sidebar); 
+    border-bottom: 1px solid var(--border); 
+    gap: 4px;
+    height: 65px !important; /* Altura idéntica fija */
+    padding: 0 !important; /* Limpiamos márgenes que deforman */
+    box-sizing: border-box !important;
+}
 
-        /* Alineación del botón de regreso dentro del menú */
-        .sidebar-header .btn-round-3d {
-            width: 36px !important;
-            height: 36px !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            margin: 0 !important;
-        }
+.sidebar-header { 
+    background: var(--bg-sidebar);
+    border-bottom: 1px solid var(--border); 
+    font-size: 0.9rem; 
+    font-weight: bold; 
+    color: var(--text-main); 
+    letter-spacing: 1px; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    height: 65px !important; /* Forzamos exactamente la misma altura */
+    padding: 0 20px !important; /* Alineación horizontal limpia */
+    box-sizing: border-box !important;
+}
+
+/* Alineación exacta del botón de regreso del menú */
+.sidebar-header .btn-round-3d {
+    width: 36px !important;
+    height: 36px !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
         
     </style>
 </head>
