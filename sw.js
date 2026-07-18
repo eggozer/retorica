@@ -1,5 +1,5 @@
 // --- RETÓRICA AUTO-CLEANING SERVICE WORKER (sw.js) ---
-const CACHE_NAME = 'retorica-godmode-cache-v2026_0';
+const CACHE_NAME = 'retorica-godmode-cache-v2026_01';
 const ASSETS = [
   './',
   './index.html',
