@@ -353,12 +353,25 @@
     </nav>
 
     <!-- MENÚ DESPLEGABLE HORIZONTAL (CARRUSEL DE IDIOMAS) -->
-    <div id="carousel-panel-languages" style="display: none; background: var(--bg-sidebar); border-bottom: 1px solid var(--border); padding: 12px 0; overflow-hidden; position: relative;">
-        <div id="carousel-slider-track" style="display: flex; justify-content: center; align-items: center; width: 100%; height: 50px; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; gap: 20px; padding: 0 30px;">
-            <!-- Inyección dinámica: 3 idiomas visibles (Izquierda, Centro Activo, Derecha) -->
+    <div id="carousel-panel-languages" style="display: none; background: var(--bg-sidebar); border-bottom: 1px solid var(--border); padding: 12px 0; position: relative;">
+        <div style="display: flex; align-items: center; justify-content: space-between; max-width: 600px; margin: 0 auto; padding: 0 10px;">
+            <!-- Flecha Izquierda -->
+            <button class="btn-round-3d" style="width: 32px; height: 32px; flex-shrink: 0; box-shadow: none;" onclick="RetoricaI18n.moveCarousel(-1)">
+                <span class="icon-raw" style="font-size: 0.9rem;">◀</span>
+            </button>
+            
+            <!-- Contenedor del Track del Carrusel -->
+            <div id="carousel-slider-track" style="display: flex; flex-wrap: nowrap; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; gap: 12px; padding: 5px 10px; width: 100%;">
+                <!-- Inyección dinámica: Idiomas (Izquierda, Centro Activo, Derecha) -->
+            </div>
+            
+            <!-- Flecha Derecha -->
+            <button class="btn-round-3d" style="width: 32px; height: 32px; flex-shrink: 0; box-shadow: none;" onclick="RetoricaI18n.moveCarousel(1)">
+                <span class="icon-raw" style="font-size: 0.9rem;">▶</span>
+            </button>
         </div>
         <div style="text-align: center; font-size: 0.6rem; font-weight: bold; color: var(--text-muted); margin-top: 6px; letter-spacing: 1px; text-transform: uppercase;">
-            Desliza para cambiar en tiempo real ◄ ►
+            Selecciona o usa las flechas para desplazar
         </div>
     </div>
 
