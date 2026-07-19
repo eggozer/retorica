@@ -107,7 +107,7 @@
         @keyframes pulseMic { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
         .file-input-hidden { display: none; }
 
-/* 1. Forzar comportamiento scroll horizontal a la barra de herramientas principal */
+/* 1. Forzar comportamiento scroll horizontal y corregir cajas de botones */
 .top-navbar {
     background: var(--bg-sidebar);
     border-bottom: 1px solid var(--border);
@@ -122,8 +122,41 @@
 .top-navbar::-webkit-scrollbar {
     display: none; /* Oculta barra gris en móviles */
 }
+
+/* CORRECCIÓN DE ANCHO Y SOMBRAS EXTRAÑAS */
 .top-navbar .btn-wrapper-3d {
-    flex-shrink: 0 !important; /* Impide que los botones superiores se aplasten */
+    flex-shrink: 0 !important;   /* Impide que los botones superiores se aplasten */
+    width: 56px !important;      /* Forzamos un ancho idéntico para todos los contenedores */
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    vertical-align: top;
+}
+
+/* Forzar que las etiquetas no deformen el espaciado superior */
+.top-navbar .btn-label-3d {
+    font-size: 0.6rem;
+    font-weight: bold;
+    color: var(--text-muted);
+    text-align: center;
+    line-height: 0.75rem;
+    min-height: 1.5rem;          /* Espacio controlado para 2 líneas */
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    white-space: normal !important; /* Permitir quiebre seguro */
+    width: 100%;
+}
+
+/* Evitar deformaciones en los botones redondos */
+.top-navbar .btn-round-3d {
+    width: 44px !important;
+    height: 44px !important;
+    flex-shrink: 0 !important;
+    border-radius: 50% !important; /* Círculo perfecto estricto */
 }
 
 /* 2. Reparación total del carrusel de idiomas inferior */
