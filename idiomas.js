@@ -149,37 +149,46 @@ var RetoricaI18n = {
         var activeLang = (type === 'text') ? this.currentLang : this.currentVoiceLang;
         var activeIndex = this.langsOrder.indexOf(activeLang);
 
-        // Estilos ultra-estrictos para forzar el scroll horizontal y evitar compresión ("pegados")
+        // Estilos ultra-estrictos para garantizar visualización limpia y sin compresión de cajas
         track.style.display = 'flex';
         track.style.flexWrap = 'nowrap';
         track.style.overflowX = 'auto';
-        track.style.webkitOverflowScrolling = 'touch'; // Scroll suave en iOS
+        track.style.webkitOverflowScrolling = 'touch';
         track.style.justifyContent = 'flex-start'; 
         track.style.alignItems = 'center';
-        track.style.width = '100%';
-        track.style.padding = '10px 40px'; 
         track.style.boxSizing = 'border-box';
 
         this.langsOrder.forEach(function(langKey, idx) {
             var item = self.db[langKey];
             var langDiv = document.createElement('div');
             
-            // flex-shrink: 0 evita por completo que los botones se queden pegados comprimiéndose
             langDiv.className = 'btn-idioma-carousel';
+            // Sobrescribimos estilos limpios monocromáticos sin brillos fosforescentes
+            langDiv.style.flex = '0 0 auto';
+            langDiv.style.flexShrink = '0';
+            langDiv.style.padding = '6px 14px';
+            langDiv.style.borderRadius = '16px';
+            langDiv.style.fontSize = '0.75rem';
+            langDiv.style.fontWeight = 'bold';
+            langDiv.style.cursor = 'pointer';
+            langDiv.style.transition = 'all 0.15s ease';
+            langDiv.style.boxShadow = 'none';
+            langDiv.style.border = '1px solid var(--border)';
+
             if (idx === activeIndex) {
                 langDiv.style.background = 'var(--text-main)';
                 langDiv.style.color = 'var(--bg-main)';
-                langDiv.style.transform = 'scale(1.1)';
+                langDiv.style.transform = 'scale(1.05)';
             } else {
                 langDiv.style.background = 'var(--btn-3d-bg)';
                 langDiv.style.color = 'var(--text-muted)';
-                langDiv.style.opacity = '0.7';
+                langDiv.style.opacity = '0.8';
             }
 
             langDiv.innerText = item.name;
 
             langDiv.onclick = function(e) {
-        if (e) e.stopPropagation();
+                if (e) e.stopPropagation();
                 if (type === 'text') {
                     self.setAppLang(langKey);
                 } else {
@@ -199,6 +208,14 @@ var RetoricaI18n = {
                 activeElement.scrollIntoView({ block: 'nearest', inline: 'center' });
             }
         }, 150);
+    },
+
+    moveCarousel: function(direction) {
+        var track = document.getElementById('carousel-slider-track');
+        if (!track) return;
+        // Desplazamiento dinámico suave basado en el ancho promedio de un botón de idioma
+        var scrollAmount = 130 * direction;
+        track.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     },
 
     checkAndTranslateSelection: function(targetLang) {
@@ -235,7 +252,7 @@ var RetoricaI18n = {
                     
                     if (typeof RetoricaUI !== 'undefined') {
                         RetoricaUI.updateCounters();
-                        RetoricaUI.triggerAutoSave();
+                        if (typeof RetoricaUI.triggerAutoSave === 'function') RetoricaUI.triggerAutoSave();
                         RetoricaUI.notify("Interpretación aplicada ✓");
                     }
                 } else {
