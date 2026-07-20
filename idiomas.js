@@ -124,7 +124,7 @@ var RetoricaI18n = {
         this.checkAndTranslateSelection(lang);
     },
 
-    openCarousel: function(type) {
+        openCarousel: function(type) {
         var panel = document.getElementById('carousel-panel-languages');
         var track = document.getElementById('carousel-slider-track');
         if (!panel || !track) return;
@@ -163,7 +163,7 @@ var RetoricaI18n = {
             var langDiv = document.createElement('div');
             
             langDiv.className = 'btn-idioma-carousel';
-            // Sobrescribimos estilos limpios monocromáticos sin brillos fosforescentes
+            // Sobrescribimos estilos limpios monocromáticos sin marcas ni bordes verticales extraños
             langDiv.style.flex = '0 0 auto';
             langDiv.style.flexShrink = '0';
             langDiv.style.padding = '6px 14px';
@@ -173,7 +173,9 @@ var RetoricaI18n = {
             langDiv.style.cursor = 'pointer';
             langDiv.style.transition = 'all 0.15s ease';
             langDiv.style.boxShadow = 'none';
-            langDiv.style.border = '1px solid var(--border)';
+            
+            // CORRECCIÓN DE MARCA VERTICAL: eliminamos el border individual que generaba la línea
+            langDiv.style.border = 'none'; 
 
             if (idx === activeIndex) {
                 langDiv.style.background = 'var(--text-main)';
