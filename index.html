@@ -107,26 +107,35 @@
         @keyframes pulseMic { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
         .file-input-hidden { display: none; }
 
-/* 1. Forzar comportamiento scroll horizontal y corregir cajas de botones */
+/* 1. Forzar comportamiento fijo para la barra y evitar que todo se desplace */
 .top-navbar {
     background: var(--bg-sidebar);
     border-bottom: 1px solid var(--border);
     padding: 10px 15px;
     display: flex !important;
     flex-wrap: nowrap !important;
-    overflow-x: auto !important;
+    overflow: hidden !important; 
     gap: 16px;
     z-index: 1000;
+}
+
+/* NUEVO: Contenedor exclusivo para los botones con scroll (excluyendo al Menú) */
+.menu-scroll-area {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    gap: 16px;
+    flex: 1;
     -webkit-overflow-scrolling: touch;
 }
-.top-navbar::-webkit-scrollbar {
+.menu-scroll-area::-webkit-scrollbar {
     display: none; /* Oculta barra gris en móviles */
 }
 
-/* CORRECCIÓN DE ANCHO Y SOMBRAS EXTRAÑAS */
+/* CORRECCIÓN DE ANCHO FIJO DE BOTONES */
 .top-navbar .btn-wrapper-3d {
-    flex-shrink: 0 !important;   /* Impide que los botones superiores se aplasten */
-    width: 56px !important;      /* Forzamos un ancho idéntico para todos los contenedores */
+    flex-shrink: 0 !important;   
+    width: 60px !important;      /* Ajustado a 60px para dar un poco más de aire a las 2 líneas */
     display: inline-flex;
     flex-direction: column;
     align-items: center;
@@ -134,20 +143,22 @@
     vertical-align: top;
 }
 
-/* Forzar que las etiquetas no deformen el espaciado superior */
+/* Forzar que las etiquetas procesen \n y se dividan en 2 líneas */
 .top-navbar .btn-label-3d {
     font-size: 0.6rem;
     font-weight: bold;
     color: var(--text-muted);
     text-align: center;
     line-height: 0.75rem;
-    min-height: 1.5rem;          /* Espacio controlado para 2 líneas */
+    min-height: 1.5rem;          
     display: flex;
     align-items: flex-end;
     justify-content: center;
     margin-bottom: 6px;
     text-transform: uppercase;
-    white-space: normal !important; /* Permitir quiebre seguro */
+    
+    /* SOLUCIÓN AL PROBLEMA DEL \n (Reemplaza al 'normal !important' que tenías en la 150) */
+    white-space: pre-line !important; 
     width: 100%;
 }
 
@@ -156,7 +167,7 @@
     width: 44px !important;
     height: 44px !important;
     flex-shrink: 0 !important;
-    border-radius: 50% !important; /* Círculo perfecto estricto */
+    border-radius: 50% !important; 
 }
 
 /* 2. Reparación total del carrusel de idiomas inferior */
