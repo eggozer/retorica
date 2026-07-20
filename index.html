@@ -175,13 +175,13 @@
 
 /* 2. Reparación total del carrusel de idiomas inferior y fijación magnética */
 #carousel-panel-languages {
-    position: -webkit-sticky !important;
-    position: sticky !important;
-    top: 65px !important; /* Se pega exactamente debajo del header principal que mide 65px */
-    z-index: 999 !important;
-    background: var(--bg-sidebar) !important;
-    border-bottom: 1px solid var(--border) !important;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    position: relative !important;
+    width: 100% !important;
+    z-index: 990 !important;
+    background: var(--bg-sidebar);
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    margin: 0 !important;
 }
 
 #carousel-slider-track {
