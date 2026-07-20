@@ -170,30 +170,43 @@
     border-radius: 50% !important; 
 }
 
-/* 2. Reparación total del carrusel de idiomas inferior */
+/* 2. Reparación total del carrusel de idiomas inferior y fijación magnética */
+#carousel-panel-languages {
+    position: -webkit-sticky !important;
+    position: sticky !important;
+    top: 65px !important; /* Se pega exactamente debajo del header principal que mide 65px */
+    z-index: 999 !important;
+    background: var(--bg-sidebar) !important;
+    border-bottom: 1px solid var(--border) !important;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
 #carousel-slider-track {
     display: flex !important;
     flex-wrap: nowrap !important;
     overflow-x: auto !important;
-    gap: 12px !important; /* Separación perfecta de 12px */
+    gap: 12px !important; 
     padding: 10px 20px !important;
     -webkit-overflow-scrolling: touch;
 }
 #carousel-slider-track::-webkit-scrollbar {
-    display: none;
+    display: none !important;
 }
 
-/* 3. Estilos limpios delegados para los botones del carrusel */
+/* 3. Estilos limpios delegados para los botones del carrusel (Elimina marcas extrañas) */
 .btn-idioma-carousel {
     flex: 0 0 auto !important;
-    flex-shrink: 0 !important; /* Bloqueo estricto anti-compresión */
+    flex-shrink: 0 !important; 
     scroll-snap-align: center;
     padding: 8px 16px;
     border-radius: 20px;
     font-size: 0.75rem;
     font-weight: bold;
-    white-space: nowrap !important; /* Evita saltos de línea extraños */
+    white-space: nowrap !important; 
     cursor: pointer;
+    border: none !important; /* Elimina cualquier borde residual que cause marcas */
+    background: var(--btn-3d-bg);
+    color: var(--text-main);
     transition: all 0.2s;
 }
 /* ================================================== */
