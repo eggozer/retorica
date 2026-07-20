@@ -295,17 +295,20 @@
         <div style="width: 36px; height: 36px;"></div>
     </div>
 
-    <!-- BOTONERA -->
+        <!-- BOTONERA CORREGIDA -->
     <nav class="top-navbar">
+        <!-- El menú se queda fuera del contenedor de scroll: queda 100% fijo -->
         <div class="btn-wrapper-3d">
-    <div class="btn-label-3d" id="lbl-nav-menu">Menú</div>
-    <button class="btn-round-3d" onclick="RetoricaUI.toggleSidebar()"><span class="icon-raw">☰</span></button>
-</div>
+            <div class="btn-label-3d" id="lbl-nav-menu">Menú</div>
+            <button class="btn-round-3d" onclick="RetoricaUI.toggleSidebar()"><span class="icon-raw">☰</span></button>
+        </div>
 
-<div class="btn-wrapper-3d" id="pwa-install-wrapper">
-    <div class="btn-label-3d" id="lbl-nav-install">Instalar<br>Aplicación</div>
-    <button class="btn-round-3d" id="btn-pwa-install"><span class="icon-raw">📱</span></button>
-</div>
+        <!-- Área deslizable exclusiva para el resto de las funciones -->
+        <div class="menu-scroll-area">
+            <div class="btn-wrapper-3d" id="pwa-install-wrapper">
+                <div class="btn-label-3d" id="lbl-nav-install">Instalar Aplicación</div>
+                <button class="btn-round-3d" id="btn-pwa-install"><span class="icon-raw">📱</span></button>
+            </div>
             <div class="btn-wrapper-3d">
                 <div class="btn-label-3d" id="lbl-tool-save">Guardar</div>
                 <button class="btn-round-3d" id="btn-icon-save" onclick="RetoricaStorage.save()"><span class="icon-raw">✓</span></button>
@@ -331,45 +334,43 @@
                 <button class="btn-round-3d" id="btn-icon-stop" style="color:var(--text-muted);" onclick="RetoricaAudio.stop()">🟦</button>
             </div>
             <div class="btn-wrapper-3d">
-                <div class="btn-label-3d" id="lbl-tool-vmsg">Prod.\nAudio</div>
+                <div class="btn-label-3d" id="lbl-tool-vmsg">Prod. Audio</div>
                 <button class="btn-round-3d btn-play-style" id="btn-icon-vmsg" onclick="RetoricaAudio.produceVoiceMessage()">🔴</button>
             </div>
             <div class="btn-wrapper-3d">
-            <div class="btn-label-3d" id="lbl-tool-tts">Texto\nA Voz</div>
-            <button class="btn-round-3d" onclick="RetoricaAudio.convertTextToVoiceFile()">
-                <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; display: block; margin: auto;">
-                    <circle cx="12" cy="12" r="3" />
-                    <path d="M12 7v2M12 15v2M7 12h2M15 12h2" />
-                    <path d="M16.24 7.76A6 6 0 1 0 18 12" />
-                    <path d="M17 12h5M19 9l3 3-3 3" />
-                </svg>
-            </button>
-        </div>
+                <div class="btn-label-3d" id="lbl-tool-tts">Texto A Voz</div>
+                <button class="btn-round-3d" onclick="RetoricaAudio.convertTextToVoiceFile()">
+                    <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; display: block; margin: auto;">
+                        <circle cx="12" cy="12" r="3" />
+                        <path d="M12 7v2M12 15v2M7 12h2M15 12h2" />
+                        <path d="M16.24 7.76A6 6 0 1 0 18 12" />
+                        <path d="M17 12h5M19 9l3 3-3 3" />
+                    </svg>
+                </button>
+            </div>
             <div class="btn-wrapper-3d">
-                <div class="btn-label-3d">Importar\nArchivo</div>
+                <div class="btn-label-3d">Importar Archivo</div>
                 <button class="btn-round-3d" onclick="document.getElementById('file-picker-local').click()"><span class="icon-raw">📂</span></button>
             </div>
-
-<div class="btn-wrapper-3d">
-            <div class="btn-label-3d" id="lbl-tool-copyall">Copiar\nPlantilla</div>
-            <button class="btn-round-3d" onclick="RetoricaUI.copyFullTemplate()">
-                <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; display: block; margin: auto;">
-                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                </svg>
-            </button>
-        </div>
-            
             <div class="btn-wrapper-3d">
-                <div class="btn-label-3d">Guardar\nPDF</div>
+                <div class="btn-label-3d" id="lbl-tool-copyall">Copiar Plantilla</div>
+                <button class="btn-round-3d" onclick="RetoricaUI.copyFullTemplate()">
+                    <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; display: block; margin: auto;">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="btn-wrapper-3d">
+                <div class="btn-label-3d">Guardar PDF</div>
                 <button class="btn-round-3d" onclick="RetoricaUI.expPDF()"><span class="icon-raw">🖨️</span></button>
             </div>
             <div class="btn-wrapper-3d">
-                <div class="btn-label-3d">PDF\nEditable</div>
+                <div class="btn-label-3d">PDF Editable</div>
                 <button class="btn-round-3d" onclick="RetoricaUI.expPDFEditable()"><span class="icon-raw">📝</span></button>
             </div>
             <div class="btn-wrapper-3d">
-                <div class="btn-label-3d">Guardar\nWord</div>
+                <div class="btn-label-3d">Guardar Word</div>
                 <button class="btn-round-3d" onclick="RetoricaUI.expDOC()"><span class="icon-raw">ⓦ</span></button>
             </div>
             <div class="btn-wrapper-3d">
@@ -381,18 +382,17 @@
                 <button class="btn-round-3d" onclick="RetoricaUI.adjustZoom(-0.1)"><span class="icon-raw">－</span></button>
             </div>
             <div class="btn-wrapper-3d">
-    <div class="btn-label-3d" id="lbl-nav-theme">Tema</div>
-    <button class="btn-round-3d" onclick="RetoricaUI.toggleTheme()"><span class="icon-raw">🌓</span></button>
-</div>
+                <div class="btn-label-3d" id="lbl-nav-theme">Tema</div>
+                <button class="btn-round-3d" onclick="RetoricaUI.toggleTheme()"><span class="icon-raw">🌓</span></button>
+            </div>
             <div class="btn-wrapper-3d">
-    <div class="btn-label-3d" id="lbl-nav-langtxt">Idioma<br>Texto</div>
-    <button class="btn-round-3d" id="btn-lang-text" onclick="RetoricaI18n.openCarousel('text')"><span class="icon-raw">✍️</span></button>
-</div>
-
-<div class="btn-wrapper-3d">
-    <div class="btn-label-3d" id="lbl-nav-langvoz">Idioma<br>Voz</div>
-    <button class="btn-round-3d" id="btn-lang-voice" onclick="RetoricaI18n.openCarousel('voice')"><span class="icon-raw">🗣️</span></button>
-</div>
+                <div class="btn-label-3d" id="lbl-nav-langtxt">Idioma Texto</div>
+                <button class="btn-round-3d" id="btn-lang-text" onclick="RetoricaI18n.openCarousel('text')"><span class="icon-raw">✍️</span></button>
+            </div>
+            <div class="btn-wrapper-3d">
+                <div class="btn-label-3d" id="lbl-nav-langvoz">Idioma Voz</div>
+                <button class="btn-round-3d" id="btn-lang-voice" onclick="RetoricaI18n.openCarousel('voice')"><span class="icon-raw">🗣️</span></button>
+            </div>
         </div>
     </nav>
 
