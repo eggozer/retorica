@@ -335,25 +335,7 @@ var RetoricaUI = {
         });
     }, // <-- Se agregó la coma aquí
 
-    openCarousel: function(type) {
-        var panel = document.getElementById('carousel-panel-languages');
-        var track = document.getElementById('carousel-slider-track');
-        if (!panel || !track) return;
-
-        var isVisible = panel.style.display === 'block';
-        if (isVisible && panel.dataset.currentType === type) {
-            panel.style.display = 'none';
-            return;
-        }
-
-        // Posicionamiento dinámico relativo a la barra de navegación
-        var navBar = document.querySelector('.top-navbar');
-        if (navBar) {
-            panel.style.position = 'fixed';
-            panel.style.top = navBar.getBoundingClientRect().bottom + 'px';
-            panel.style.left = '0';
-            panel.style.width = '100%';
-        }
+    
 
         panel.style.display = 'block';
         panel.dataset.currentType = type;
