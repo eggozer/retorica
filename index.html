@@ -173,50 +173,78 @@
     border-radius: 50% !important; 
 }
 
-/* 2. Reparación total del carrusel de idiomas flotante */
-#carousel-panel-languages {
-    position: absolute !important;
-    top: 100% !important;
-    left: 0 !important;
-    width: 100% !important;
-    z-index: 9999 !important;
-    background: var(--bg-sidebar) !important;
-    border-bottom: 1px solid var(--border) !important;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.2) !important;
-    margin: 0 !important;
-    padding: 6px 0 !important;
+/* --- NUEVO ESTILO DE ACORDEÓN Y GLASSMORPHISM --- */
+.accordion-panel {
+    max-height: 250px;
+    overflow: hidden;
+    transition: max-height 0.35s ease-in-out, opacity 0.3s ease;
+    opacity: 1;
+    z-index: 1100;
+    position: relative;
+    width: 100%;
 }
 
-#carousel-slider-track {
-    display: flex !important;
-    flex-wrap: nowrap !important;
-    overflow-x: auto !important;
-    gap: 10px !important;
-    padding: 8px 45px !important;
+.accordion-panel.accordion-closed {
+    max-height: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.glass-panel {
+    background: rgba(22, 25, 37, 0.75) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 15px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+}
+
+.accordion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.65rem;
+    font-weight: bold;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+
+.accordion-body {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 4px 0;
     -webkit-overflow-scrolling: touch;
 }
+.accordion-body::-webkit-scrollbar { display: none; }
 
-#carousel-slider-track::-webkit-scrollbar {
-    display: none !important;
+/* Botón estilo fuego/azul */
+.btn-fire-blue {
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.5) !important;
+    border: 1px solid #38bdf8 !important;
 }
 
-/* 3. Estilos limpios delegados para los botones del carrusel (Elimina marcas extrañas) */
-.btn-idioma-carousel {
-    flex: 0 0 auto !important;
-    flex-shrink: 0 !important; 
-    scroll-snap-align: center;
-    padding: 8px 16px;
-    border-radius: 20px;
+/* Botones de idioma estilo Lava */
+.btn-lang-lava {
+    flex: 0 0 auto;
+    padding: 6px 14px;
+    border-radius: 12px;
     font-size: 0.75rem;
     font-weight: bold;
-    white-space: nowrap !important; 
-    cursor: pointer;
-    border: none !important; /* Elimina cualquier borde residual que cause marcas */
     background: var(--btn-3d-bg);
     color: var(--text-main);
-    transition: all 0.2s;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
-/* ================================================== */
+
+.btn-lang-lava.active {
+    background: #180808 !important;
+    color: #ff6b00 !important;
+    border: 1px solid #ff4500 !important;
+    box-shadow: 0 0 12px rgba(255, 69, 0, 0.6);
+}
         
         /* CORRECCIÓN PUNTO 8: PERMITIR SELECCIÓN NATIVA EN EL EDITOR */
 .unified-container, .doc-title, .textarea-main {
