@@ -21,7 +21,6 @@ var RetoricaUI = {
             };
         }
 
-        // --- CORRECCIÓN PUNTO 1 (PARTE 2): ALMACENAMIENTO PERSISTENTE CONTRA BORRADO DE CACHÉ ---
         if (navigator.storage && navigator.storage.persist) {
             navigator.storage.persisted().then(function(persistent) {
                 if (!persistent) {
@@ -51,7 +50,6 @@ var RetoricaUI = {
         
         if (typeof RetoricaAuth !== 'undefined') RetoricaAuth.initLifecycle();
         
-        // --- CORRECCIÓN PUNTO 2: INSTALACIÓN DE LA PWA (APP) ---
         window.deferredInstallPrompt = null;
         window.addEventListener('beforeinstallprompt', function(e) {
             e.preventDefault();
@@ -70,7 +68,6 @@ var RetoricaUI = {
         });
     },
 
-    // --- CORRECCIÓN PUNTO 8: FUNCIÓN PARA COPIAR TODO AL PORTAPAPELES ---
     copyFullTemplate: function() {
         var title = document.getElementById('editor-title').value.trim();
         var body = document.getElementById('editor-body').value.trim();
@@ -105,7 +102,6 @@ var RetoricaUI = {
         }, 1500);
     },
 
-// --- CORRECCIÓN PUNTO 2: DETONAR INSTALACIÓN NATIVA ---
     installPWA: function() {
         var promptEvent = window.deferredInstallPrompt;
         if (!promptEvent) {
@@ -126,17 +122,15 @@ var RetoricaUI = {
     initTouchGestures: function() {
         var self = this;
         document.addEventListener('touchstart', function(e) {
-            // SI EL CLIC O TOQUE VIENE DE LAS BOTONERAS HORIZONTALES, IGNORAR LA GESTIÓN DE SWIPE
-            if (e.target.closest('.top-navbar') || e.target.closest('#carousel-panel-languages')) {
-                self.state.touchStartX = 0; // Reseteamos para que no haga swipe
+            if (e.target.closest('.top-navbar') || e.target.closest('#accordion-languages')) {
+                self.state.touchStartX = 0;
                 return;
             }
             self.state.touchStartX = e.changedTouches[0].screenX;
         }, { passive: true });
 
         document.addEventListener('touchend', function(e) {
-            // IGUALMENTE IGNORAMOS EN EL TOCHEND
-            if (e.target.closest('.top-navbar') || e.target.closest('#carousel-panel-languages') || self.state.touchStartX === 0) {
+            if (e.target.closest('.top-navbar') || e.target.closest('#accordion-languages') || self.state.touchStartX === 0) {
                 return;
             }
             self.state.touchEndX = e.changedTouches[0].screenX;
@@ -215,14 +209,12 @@ var RetoricaUI = {
         var element = document.getElementById('unified-sel-container');
         var title = document.getElementById('editor-title').value.trim() || "guion";
         
-        // Creamos un clon temporal para evitar distorsiones visuales en el editor activo
         var clone = element.cloneNode(true);
         clone.style.padding = "20px";
         clone.style.background = "#ffffff";
         clone.style.color = "#000000";
         clone.style.width = "100%";
         
-        // Forzar estilos limpios de impresión en el clon
         var titleEl = clone.querySelector('#editor-title');
         var bodyEl = clone.querySelector('#editor-body');
         if (titleEl) {
@@ -231,7 +223,7 @@ var RetoricaUI = {
         }
         if (bodyEl) {
             bodyEl.style.color = "#000000";
-            bodyEl.style.whiteSpace = "pre-wrap"; // Respeta los saltos de línea en el PDF
+            bodyEl.style.whiteSpace = "pre-wrap";
         }
 
         var opt = {
@@ -258,7 +250,6 @@ var RetoricaUI = {
         htmlForm.style.background = "#ffffff";
         htmlForm.style.fontFamily = "Arial, sans-serif";
         
-        // Estructura visual simulando un documento editable real que html2pdf puede digerir
         htmlForm.innerHTML = 
             "<h2 style='border-bottom: 2px solid #333; padding-bottom: 8px; margin-bottom: 15px;'>" + title + "</h2>" +
             "<p style='font-size: 0.8rem; color: #666; margin-bottom: 10px;'><i>* Este documento permite edición de texto directa en lectores PDF compatibles.</i></p>" +
@@ -284,14 +275,12 @@ var RetoricaUI = {
         var title = document.getElementById('editor-title').value.trim() || "guion";
         var bodyText = document.getElementById('editor-body').value;
 
-        // Validar si la librería docx está correctamente instanciada en el navegador
         var docxInstance = window.docx;
         if (!docxInstance) {
             RetoricaUI.notify("Error: Librería Word no cargada. Revisa la conexión.");
             return;
         }
 
-        // Dividir el texto en párrafos de Word
         var paragraphs = bodyText.split('\n').map(function(line) {
             return new docxInstance.Paragraph({
                 children: [new docxInstance.TextRun({ text: line, size: 24 })],
@@ -299,17 +288,14 @@ var RetoricaUI = {
             });
         });
 
-        // Crear el encabezado principal
         var headerParagraph = new docxInstance.Paragraph({
             children: [new docxInstance.TextRun({ text: title.toUpperCase(), bold: true, size: 36, color: "000000" })],
             alignment: docxInstance.AlignmentType.CENTER,
             spacing: { after: 300 }
         });
 
-        // Concatenar de forma segura evitando problemas de compatibilidad del operador Spread (...)
         var documentChildren = [headerParagraph].concat(paragraphs);
 
-        // Crear documento usando la instancia validada
         var doc = new docxInstance.Document({
             sections: [{
                 properties: {},
@@ -322,7 +308,6 @@ var RetoricaUI = {
                 saveAs(blob, title + ".docx");
                 RetoricaUI.notify("Documento Word exportado ✓");
             } else {
-                // Fallback por si FileSaver no cargó a tiempo en celular
                 var link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
                 link.download = title + ".docx";
@@ -333,16 +318,7 @@ var RetoricaUI = {
             console.error("Error en DOCX Packer: ", err);
             RetoricaUI.notify("Error al compilar el archivo Word.");
         });
-    }, // <-- Se agregó la coma aquí
-
-    
-
-        panel.style.display = 'block';
-        panel.dataset.currentType = type;
-        if (typeof this.renderCarouselTracks === 'function') {
-            this.renderCarouselTracks(type);
-        }
-    } // <-- Se quitó la llave extra que sobraba aquí
+    }
 };
 
 document.addEventListener('DOMContentLoaded', function() {
