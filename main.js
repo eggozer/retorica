@@ -333,7 +333,9 @@ var RetoricaUI = {
             console.error("Error en DOCX Packer: ", err);
             RetoricaUI.notify("Error al compilar el archivo Word.");
         });
-      openCarousel: function(type) {
+    }, // <-- Se agregó la coma aquí
+
+    openCarousel: function(type) {
         var panel = document.getElementById('carousel-panel-languages');
         var track = document.getElementById('carousel-slider-track');
         if (!panel || !track) return;
@@ -358,8 +360,7 @@ var RetoricaUI = {
         if (typeof this.renderCarouselTracks === 'function') {
             this.renderCarouselTracks(type);
         }
-    },  
-    }
+    } // <-- Se quitó la llave extra que sobraba aquí
 };
 
 document.addEventListener('DOMContentLoaded', function() {
