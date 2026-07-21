@@ -88,6 +88,7 @@ var RetoricaI18n = {
         var btnStop = document.getElementById('lbl-tool-stop'); if(btnStop) btnStop.innerText = p.stop;
         var btnVmsg = document.getElementById('lbl-tool-vmsg'); if(btnVmsg) btnVmsg.innerText = p.vmsg;
         var btnTts = document.getElementById('lbl-tool-tts'); if(btnTts) btnTts.innerText = p.tts;
+                var btnCopy = document.getElementById('lbl-tool-copyall'); if(btnCopy) btnCopy.innerText = p.copy || 'COP';
         
         // Inputs
         var tInput = document.getElementById('editor-title'); if(tInput) tInput.placeholder = p.pTitle;
