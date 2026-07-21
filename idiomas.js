@@ -80,7 +80,7 @@ var RetoricaI18n = {
         this.currentLang = lang;
         var p = this.db[lang] || this.db['en-GB']; 
         
-        // Botones de la barra de herramientas (Inyección segura de textos sin romper diseño)
+        // Botones de la barra de herramientas
         var btnSave = document.getElementById('lbl-tool-save'); if(btnSave) btnSave.innerText = p.save;
         var btnNew = document.getElementById('lbl-tool-new'); if(btnNew) btnNew.innerText = p.new;
         var btnMic = document.getElementById('lbl-tool-mic'); if(btnMic) btnMic.innerText = p.mic;
@@ -88,7 +88,13 @@ var RetoricaI18n = {
         var btnStop = document.getElementById('lbl-tool-stop'); if(btnStop) btnStop.innerText = p.stop;
         var btnVmsg = document.getElementById('lbl-tool-vmsg'); if(btnVmsg) btnVmsg.innerText = p.vmsg;
         var btnTts = document.getElementById('lbl-tool-tts'); if(btnTts) btnTts.innerText = p.tts;
-                var btnCopy = document.getElementById('lbl-tool-copyall'); if(btnCopy) btnCopy.innerText = p.copy || 'COP';
+        var btnCopy = document.getElementById('lbl-tool-copyall'); if(btnCopy) btnCopy.innerText = p.copy || 'COP';
+        var btnImp = document.getElementById('lbl-tool-import'); if(btnImp) btnImp.innerText = p.import || 'IMP';
+        var btnPdf = document.getElementById('lbl-tool-pdf'); if(btnPdf) btnPdf.innerText = p.pdf || 'PDF';
+        var btnPdfE = document.getElementById('lbl-tool-pdfedit'); if(btnPdfE) btnPdfE.innerText = p.pdfedit || 'PDF EDIT';
+        var btnDoc = document.getElementById('lbl-tool-doc'); if(btnDoc) btnDoc.innerText = p.doc || 'WORD';
+        var btnZIn = document.getElementById('lbl-tool-zoomin'); if(btnZIn) btnZIn.innerText = p.zoomin || 'ZOOM +';
+        var btnZOut = document.getElementById('lbl-tool-zoomout'); if(btnZOut) btnZOut.innerText = p.zoomout || 'ZOOM -';
         
         // Inputs
         var tInput = document.getElementById('editor-title'); if(tInput) tInput.placeholder = p.pTitle;
