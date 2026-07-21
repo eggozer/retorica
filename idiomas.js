@@ -3,11 +3,11 @@ var RetoricaI18n = {
     currentLang: 'en-GB', 
     currentVoiceLang: 'en-GB', 
     
-    // 13 Idiomas ordenados alfabéticamente de forma estricta (A-Z)[cite: 4]
+    // 13 Idiomas ordenados alfabéticamente de forma estricta (A-Z)
     langsOrder: ['ar-SA', 'de-DE', 'en-GB', 'es-ES', 'es-MX', 'fr-FR', 'hi-IN', 'it-IT', 'ja-JP', 'pt-PT', 'ru-RU', 'uk-UA', 'zh-CN'],
     
     db: {
-                'ar-SA': { 
+        'ar-SA': { 
             name: 'Al-Arabiya', save: 'حفظ', new: 'جديد', mic: 'صوت', read: 'إقرأ', stop: 'إلغاء', vmsg: 'تسجيل', tts: 'صوت', copy: 'نسخ', pTitle: 'عنوان النص...', pBody: 'اكتب أو أملي نصوصك هنا...', menu: 'قائمة', install: 'تثبيت', theme: 'سمة', langTxt: 'لغة', langVoz: 'صوت',
             uLabel: 'المستخدم الرقمي (البريد الإلكتروني / المعرف)', pLabel: 'مفتاح التشفير', btnAuth: 'استمر', toggleAuth: 'ليس لديك حساب؟ سجل هنا', hardware: 'أو الدخول عبر الأجهزة', gBtn: 'ربط جهاز جوجل', fBtn: 'ربط جهاز فيسبوك', wBtn: 'ربط جهاز واتساب',
             btnRegister: 'تسجيل وإنشاء مفتاح', toggleHasAccount: 'هل لديك حساب بالفعل؟ ادخل هنا', alertSeed: 'تم إنشاء مفتاح تشفير تلقائي! احفظه.', errUid: 'لربط Device، اكتب بريدك الإلكتروني/المعرف أولاً.', okHardware: 'تم ربط الجهاز محلياً عبر ', syncHardware: 'مزامنة يدوية جارية... متصل!', errMissingUid: 'أدخل بريدًا إلكترونيًا أو رقم هاتف.', errBanned: 'هذا الوصول مقيد.', errNoReg: 'المستخدم غير مسجل محلياً. انتقل لوضع التسجيل.', errWrongPass: 'كلمة المرور غير صحيحة.', errAlreadyReg: 'هذا المعرف مسجل بالفعل.', errShortPass: 'يجب أن تتكون كلمة المرور من 4 أحرف على الأقل.', notifSync: 'تمت مزامنة الجلسة.'
@@ -65,7 +65,7 @@ var RetoricaI18n = {
         'uk-UA': { 
             name: 'Ukrainian', save: 'ЗБЕР', new: 'НОВ', mic: 'ГОЛ', read: 'ЧИТ', stop: 'СТОП', vmsg: 'ЗАП', tts: 'ЗВУК', copy: 'КОП', pTitle: 'Назва Сценарію...', pBody: 'Пишіть або диктуйте риторику тут...', menu: 'МЕНЮ', install: 'АПП', theme: 'ТЕМ', langTxt: 'ТЕКСТ', langVoz: 'ГОЛ',
             uLabel: 'ЦИФРОВИЙ КОРИСТУВАЧ (EMAIL / ID)', pLabel: 'КРИПТОГРАФІЧНИЙ КЛЮЧ', btnAuth: 'ПРОДОВЖИТИ', toggleAuth: 'Немає акаунту? Зареєструватися', hardware: 'АБО ВХІД ЧЕРЕЗ АПАРАТНЕ ЗАБЕЗПЕЧЕННЯ', gBtn: 'ПРИВ’ЯЗАТИ ПРИСТРІЙ GOOGLE', fBtn: 'ПРИВ’ЯЗАТИ ПРИСТРІЙ FACEBOOK', wBtn: 'ПРИВ’ЯЗАТИ ПРИСТРІЙ WHATSAPP',
-            btnRegister: 'ЗАРЕЄСТРУВАТИСЯ ТА СТВОРИТИ КЛЮЧ', toggleHasAccount: 'Вже є акаунт? Увійти сюди', alertSeed: 'Криптографічний ключ згенеровано автоматически! Будь ласка, збережіть його.', errUid: 'Для прив’язки апаратного забезпечення спочатку введіть ваш Email/ID вище.', okHardware: 'Пристрій прив’язано локально через ', syncHardware: 'Ручна синхронізація... Підключено!', errMissingUid: 'Введіть електронну пошту або номер телефону.', errBanned: 'Цей доступ обмежено.', errNoReg: 'Користувач не зареєстрований локально. Перейдіть у режим реєстрації.', errWrongPass: 'Невірний ключ.', errAlreadyReg: 'Цей ідентифікатор вже зареєстрований.', errShortPass: 'Пароль повинен містити принаймні 4 символи.', notifSync: 'Сесію синхронізовано.'
+            btnRegister: 'ЗАРЄЄСТРУВАТИСЯ ТА СТВОРИТИ КЛЮЧ', toggleHasAccount: 'Вже є акаунт? Увійти сюди', alertSeed: 'Криптографічний ключ згенеровано автоматически! Будь ласка, збережіть його.', errUid: 'Для прив’язки апаратного забезпечення спочатку введіть ваш Email/ID вище.', okHardware: 'Пристрій прив’язано локально через ', syncHardware: 'Ручна синхронізація... Підключено!', errMissingUid: 'Введіть електронну пошту або номер телефону.', errBanned: 'Цей доступ обмежено.', errNoReg: 'Користувач не зареєстрований локально. Перейдіть у режим реєстрації.', errWrongPass: 'Невірний ключ.', errAlreadyReg: 'Цей ідентифікатор вже зареєстрований.', errShortPass: 'Пароль повинен містити принаймні 4 символи.', notifSync: 'Сесію синхронізовано.'
         },
         'zh-CN': { 
             name: 'Chinese', save: '保存', new: '新建', mic: '语音', read: '朗读', stop: '停止', vmsg: '录音', tts: '音频', copy: '复制', pTitle: '剧本标题...', pBody: '在此处编写您的剧本...', menu: '菜单', install: '安装', theme: '主题', langTxt: '文字', langVoz: '语音',
@@ -118,7 +118,7 @@ var RetoricaI18n = {
         var oF = document.getElementById('btn-oauth-facebook'); if(oF) oF.innerText = p.fBtn;
         var oW = document.getElementById('btn-oauth-whatsapp'); if(oW) oW.innerText = p.wBtn;
 
-        // **Ajuste de Seguridad de Layout**: Asegurar que el contenedor de la botonera principal nunca colapse sus elementos
+        // Ajuste de Layout
         var toolContainer = document.querySelector('.toolbar-buttons-container') || document.querySelector('.main-nav-container') || (btnSave ? btnSave.parentElement : null);
         if (toolContainer) {
             toolContainer.style.overflowX = 'auto';
@@ -131,7 +131,7 @@ var RetoricaI18n = {
         this.checkAndTranslateSelection(lang);
     },
 
-        // Alternar apertura y cierre del acordeón
+    // Alternar apertura y cierre del acordeón
     toggleAccordion: function() {
         var panel = document.getElementById('accordion-languages');
         var arrow = document.getElementById('accordion-arrow');
@@ -171,11 +171,6 @@ var RetoricaI18n = {
         });
     },
 
-        panel.style.display = 'block';
-        panel.dataset.currentType = type;
-        this.renderCarouselTracks(type);
-    },
-
     renderCarouselTracks: function(type) {
         var track = document.getElementById('carousel-slider-track');
         if (!track) return;
@@ -185,7 +180,6 @@ var RetoricaI18n = {
         var activeLang = (type === 'text') ? this.currentLang : this.currentVoiceLang;
         var activeIndex = this.langsOrder.indexOf(activeLang);
 
-        // Estilos ultra-estrictos para garantizar visualización limpia y sin compresión de cajas
         track.style.display = 'flex';
         track.style.flexWrap = 'nowrap';
         track.style.overflowX = 'auto';
@@ -199,7 +193,6 @@ var RetoricaI18n = {
             var langDiv = document.createElement('div');
             
             langDiv.className = 'btn-idioma-carousel';
-            // Sobrescribimos estilos limpios monocromáticos sin marcas ni bordes verticales extraños
             langDiv.style.flex = '0 0 auto';
             langDiv.style.flexShrink = '0';
             langDiv.style.padding = '6px 14px';
@@ -209,8 +202,6 @@ var RetoricaI18n = {
             langDiv.style.cursor = 'pointer';
             langDiv.style.transition = 'all 0.15s ease';
             langDiv.style.boxShadow = 'none';
-            
-            // CORRECCIÓN DE MARCA VERTICAL: eliminamos el border individual que generaba la línea
             langDiv.style.border = 'none'; 
 
             if (idx === activeIndex) {
@@ -251,7 +242,6 @@ var RetoricaI18n = {
     moveCarousel: function(direction) {
         var track = document.getElementById('carousel-slider-track');
         if (!track) return;
-        // Desplazamiento dinámico suave basado en el ancho promedio de un botón de idioma
         var scrollAmount = 130 * direction;
         track.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     },
