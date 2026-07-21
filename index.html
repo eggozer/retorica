@@ -367,11 +367,11 @@
                 </button>
             </div>
             <div class="btn-wrapper-3d">
-                <div class="btn-label-3d">Importar Archivo</div>
+                <div class="btn-label-3d" id="lbl-tool-import">Importar</div>
                 <button class="btn-round-3d" onclick="document.getElementById('file-picker-local').click()"><span class="icon-raw">📂</span></button>
             </div>
-                        <div class="btn-wrapper-3d">
-                <div class="btn-label-3d" id="lbl-tool-copyall">COP</div>
+            <div class="btn-wrapper-3d">
+                <div class="btn-label-3d" id="lbl-tool-copyall">Copiar</div>
                 <button class="btn-round-3d" onclick="RetoricaUI.copyFullTemplate()">
                     <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; display: block; margin: auto;">
                         <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
@@ -380,23 +380,23 @@
                 </button>
             </div>
             <div class="btn-wrapper-3d">
-                <div class="btn-label-3d">Guardar PDF</div>
+                <div class="btn-label-3d" id="lbl-tool-pdf">PDF</div>
                 <button class="btn-round-3d" onclick="RetoricaUI.expPDF()"><span class="icon-raw">🖨️</span></button>
             </div>
             <div class="btn-wrapper-3d">
-                <div class="btn-label-3d">PDF Editable</div>
+                <div class="btn-label-3d" id="lbl-tool-pdfedit">PDF Edit</div>
                 <button class="btn-round-3d" onclick="RetoricaUI.expPDFEditable()"><span class="icon-raw">📝</span></button>
             </div>
             <div class="btn-wrapper-3d">
-                <div class="btn-label-3d">Guardar Word</div>
+                <div class="btn-label-3d" id="lbl-tool-doc">Word</div>
                 <button class="btn-round-3d" onclick="RetoricaUI.expDOC()"><span class="icon-raw">ⓦ</span></button>
             </div>
             <div class="btn-wrapper-3d">
-                <div class="btn-label-3d">Zoom +</div>
+                <div class="btn-label-3d" id="lbl-tool-zoomin">Zoom +</div>
                 <button class="btn-round-3d" onclick="RetoricaUI.adjustZoom(0.1)"><span class="icon-raw">＋</span></button>
             </div>
             <div class="btn-wrapper-3d">
-                <div class="btn-label-3d">Zoom -</div>
+                <div class="btn-label-3d" id="lbl-tool-zoomout">Zoom -</div>
                 <button class="btn-round-3d" onclick="RetoricaUI.adjustZoom(-0.1)"><span class="icon-raw">－</span></button>
             </div>
             <div class="btn-wrapper-3d">
