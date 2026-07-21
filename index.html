@@ -431,6 +431,12 @@
                 <div class="btn-label-3d" id="lbl-nav-theme">Tema</div>
                 <button class="btn-round-3d" onclick="RetoricaUI.toggleTheme()"><span class="icon-raw">🌓</span></button>
             </div>
+            <div class="btn-wrapper-3d">
+    <div class="btn-label-3d" id="lbl-nav-lang">Idiomas</div>
+    <button class="btn-round-3d btn-fire-blue" id="btn-toggle-accordion" onclick="RetoricaI18n.toggleAccordion()">
+        <span class="icon-raw">🌐</span>
+    </button>
+</div>
     </nav>
 
 <!-- PANEL ACORDEÓN DESPLEGABLE DE IDIOMAS -->
@@ -443,29 +449,6 @@
             <div id="accordion-slider-track" class="accordion-body">
                 <!-- Inyección dinámica de botones de idioma -->
             </div>
-        </div>
-    </div>
-    
-        <!-- MENÚ DESPLEGABLE HORIZONTAL (CARRUSEL DE IDIOMAS) MAGNETICO -->
-    <div id="carousel-panel-languages" style="display: none;">
-        <div style="display: flex; align-items: center; justify-content: space-between; max-width: 600px; margin: 0 auto; padding: 0 10px;">
-            <!-- Flecha Izquierda -->
-            <button class="btn-round-3d" style="width: 32px; height: 32px; flex-shrink: 0; box-shadow: none;" onclick="RetoricaI18n.moveCarousel(-1)">
-                <span class="icon-raw" style="font-size: 0.9rem;">◀</span>
-            </button>
-            
-            <!-- Contenedor del Track del Carrusel -->
-            <div id="carousel-slider-track">
-                <!-- Inyección dinámica: Idiomas -->
-            </div>
-            
-            <!-- Flecha Derecha -->
-            <button class="btn-round-3d" style="width: 32px; height: 32px; flex-shrink: 0; box-shadow: none;" onclick="RetoricaI18n.moveCarousel(1)">
-                <span class="icon-raw" style="font-size: 0.9rem;">▶</span>
-            </button>
-        </div>
-        <div style="text-align: center; font-size: 0.6rem; font-weight: bold; color: var(--text-muted); margin-top: 6px; padding-bottom: 6px; letter-spacing: 1px; text-transform: uppercase;">
-            Selecciona o usa las flechas para desplazar
         </div>
     </div>
 
