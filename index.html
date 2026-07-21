@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Retórica - Sistema Profesional</title>
+    <link rel="manifest" href="./manifest.json?v=2026_GOD_MODE">
+    
+    <!-- LIBRERÍAS PESADAS INYECTADAS (Para asegurar que todo funcione) -->
+    <!-- html2pdf estable para navegadores móviles -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <!-- DOCX Versión Web-Bundle Segura para evitar fallos de inicialización global -->
+    <script src="https://cdn.jsdelivr.net/npm/docx@7.1.1/build/index.umd.min.js"></script>
+    
+    <!-- FileSaver para descarga directa en celulares -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+   
+    <style>
+        :root {
+            --bg-main: #0f111a; --bg-sidebar: #161925; --bg-card: #1f2335;
+            --accent: #e2e8f0; --text-main: #f3f4f6; --text-muted: #a0aec0;
+            --border: #2d3748; --danger: #718096; --btn-3d-bg: #2d3244;
+            --btn-shadow: #11131c; --btn-play-green: #22c55e;
+        }
+        body.light-theme {
+            --bg-main: #f0f2f5; --bg-sidebar: #e4e7eb; --bg-card: #ffffff;
+            --accent: #2d3748; --text-main: #1a202c; --text-muted: #718096;
+            --border: #cbd5e0; --danger: #a0aec0; --btn-3d-bg: #e2e8f0;
+            --btn-shadow: #cbd5e0; --btn-play-green: #15803d;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body, html { width: 100%; height: 100%; background: var(--bg-main); color: var(--text-main); overflow: hidden; display: flex; flex-direction: column; }
+        
+        /* Capa de Autenticación */
+        .auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-main); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .auth-card { background: var(--bg-sidebar); border: 1px solid var(--border); border-radius: 16px; width: 100%; max-width: 400px; padding: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); text-align: center; }
+        .auth-logo-container { display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 25px; gap: 10px; }
+        .auth-icon-wrapper { width: 85px; height: 85px; background: transparent; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; margin: 0 auto; border: 2px solid var(--border); box-shadow: inset 0 0 15px rgba(0,0,0,0.6); }
+        .auth-icon { width: 150%; height: 150%; object-fit: cover; }
+        .auth-logo { font-size: 2rem; font-weight: 900; color: var(--text-main); letter-spacing: 2px; text-align: center; }
+        .auth-subtitle { font-size: 0.75rem; color: var(--text-muted); font-weight: bold; letter-spacing: 1px; text-align: center; }
+        .input-group { position: relative; margin-bottom: 15px; text-align: left; }
+        .input-group label { display: block; font-size: 0.65rem; color: var(--text-muted); font-weight: bold; margin-bottom: 5px; letter-spacing: 0.5px; }
+        .input-field { width: 100%; background: var(--bg-card); border: 1px solid var(--border); padding: 12px 15px; border-radius: 8px; color: var(--text-main); font-size: 0.9rem; font-weight: bold; }
+        .input-field:focus { border-color: var(--text-muted); outline: none; }
+        .btn-auth-3d { width: 100%; background: var(--btn-3d-bg); border: none; border-bottom: 4px solid var(--btn-shadow); padding: 12px; border-radius: 8px; color: var(--text-main); font-weight: bold; font-size: 0.85rem; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
+        .btn-auth-3d:active { transform: translateY(2px); border-bottom-width: 2px; }
+        .oauth-container { display: none; flex-direction: column; gap: 10px; margin-top: 15px; }
+        .btn-oauth { text-align: left; padding: 10px 15px; font-size: 0.8rem; display: none; background: var(--btn-3d-bg); border-bottom: 4px solid var(--btn-shadow); color: var(--text-main); border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .btn-oauth:active { transform: translateY(2px); border-bottom-width: 2px; }
+        .auth-divider { display: none; align-items: center; text-align: center; color: var(--text-muted); font-size: 0.65rem; font-weight: bold; margin: 20px 0; }
+        .auth-divider::before, .auth-divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--border); }
+        .auth-divider:not(:empty)::before { margin-right: .55em; }
+        .auth-divider:not(:empty)::after { margin-left: .55em; }
+        
+        /* Encabezado Principal */
+        .header-app { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 0 6px 0; background: var(--bg-sidebar); border-bottom: 1px solid var(--border); gap: 4px; }
+        .header-title-container { display: flex; align-items: center; justify-content: center; gap: 12px; }
+        .header-icon-wrapper { width: 34px; height: 34px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; background: transparent; border: 1px solid var(--border); }
+        .header-icon { width: 150%; height: 150%; object-fit: cover; }
+        .header-app h1 { font-size: 1.3rem; font-weight: 900; letter-spacing: 3px; color: var(--text-main); text-align: center; }
+        
+        /* Barra de Navegación */
+
+        .menu-slider-container { flex: 1; overflow-x: auto; white-space: nowrap; display: flex; gap: 18px; padding: 5px; -webkit-overflow-scrolling: touch; }
+        .menu-slider-container::-webkit-scrollbar { height: 0px; }
+        .btn-wrapper-3d { display: inline-flex; flex-direction: column; align-items: center; position: relative; vertical-align: top; }
+        .btn-label-3d { font-size: 0.6rem; font-weight: bold; color: var(--text-muted); text-align: center; line-height: 0.75rem; min-height: 1.5rem; display: flex; align-items: flex-end; justify-content: center; margin-bottom: 6px; text-transform: uppercase; white-space: pre-line; }
+        
+        /* Botones 3D */
+        .btn-round-3d { width: 44px; height: 44px; border-radius: 50%; background: var(--btn-3d-bg); border: none; border-bottom: 4px solid var(--btn-shadow); color: var(--text-main); display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: all 0.1s; }
+        .btn-round-3d:active { transform: translateY(2px); border-bottom-width: 1px; box-shadow: 0 2px 3px rgba(0,0,0,0.3); }
+        .btn-round-3d svg, .btn-round-3d span.icon-raw { width: 75%; height: 75%; display: flex; align-items: center; justify-content: center; fill: currentColor; font-size: 1.25rem; font-style: normal; font-weight: bold; }
+        .btn-round-3d.btn-play-style { background: var(--btn-play-green) !important; color: #ffffff !important; }
+        
+        /* Menú Lateral Deslizante */
+        .sidebar-panel { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-sidebar); transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1); z-index: 1500; display: flex; flex-direction: column; }
+        .sidebar-panel.active { transform: translateX(0); }
+        .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border); font-size: 0.9rem; font-weight: bold; color: var(--text-main); letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center; }
+        .sidebar-content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; }
+        .grid-templates { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .card-template { background: var(--bg-card); padding: 12px; border-radius: 8px; border: 1px solid var(--border); display: flex; flex-direction: column; justify-content: space-between; min-height: 110px; cursor: pointer; }
+        .card-template-title { font-size: 0.8rem; font-weight: bold; color: var(--text-main); margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .card-template-body { font-size: 0.7rem; color: var(--text-muted); line-height: 0.95rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 10px; flex: 1; }
+        .card-template-actions { display: flex; gap: 6px; border-top: 1px solid var(--border); padding-top: 8px; }
+        .btn-action-tmpl { flex: 1; background: var(--btn-3d-bg); border: none; border-bottom: 2px solid var(--btn-shadow); padding: 4px; font-size: 0.6------rem; font-weight: bold; color: var(--text-main); border-radius: 4px; cursor: pointer; text-align: center; }
+        .btn-action-tmpl:active { transform: translateY(1px); border-bottom-width: 1px; }
+        
+        .sidebar-footer { position: absolute; bottom: 0; left: 0; width: 100%; padding: 15px 20px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--bg-main); box-shadow: 0 -4px 10px rgba(0,0,0,0.3); padding-bottom: calc(15px + env(safe-area-inset-bottom)); }
+        
+        /* Área de Trabajo Limpia */
+        .main-view { flex: 1; display: flex; flex-direction: column; position: relative; z-index: 10; background: transparent; }
+        .editor-scroll-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; }
+        #zoom-wrapper { width: 100%; display: flex; flex-direction: column; flex: 1; transform-origin: top left; }
+        
+        /* Contenedor Unificado */
+        .unified-container { border: 1px solid transparent; width: 100%; display: flex; flex-direction: column; flex: 1; padding: 5px; user-select: text; -webkit-user-select: text; }
+        .doc-title { background: transparent; border: none; color: var(--text-main); font-size: 1.4rem; font-weight: 800; margin-bottom: 15px; width: 100%; outline: none; padding: 5px 0; border-bottom: 1px dashed var(--border); }
+        .textarea-main { background: transparent; border: none; color: var(--text-main); font-size: 1rem; line-height: 1.6; resize: none; flex: 1; width: 100%; min-height: 350px; outline: none; font-weight: 500; }
+        
+        body.light-theme .doc-title, body.light-theme .textarea-main, body.light-theme .unified-container { color: #1a202c !important; }
+        .toast { position: fixed; bottom: 65px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--text-main); color: var(--bg-main); padding: 10px 20px; border-radius: 30px; font-size: 0.75rem; font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.3); transition: transform 0.2s ease-out; z-index: 3000; pointer-events: none; }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        .recording-active { border-color: #ff3b30 !important; animation: pulseMic 1.5s infinite; }
+        .reading-active { border-color: #00d2ff !important; }
+        @keyframes pulseMic { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        .file-input-hidden { display: none; }
+
+/* 1. Forzar comportamiento fijo para la barra y evitar que todo se desplace */
+.top-navbar {
+    background: var(--bg-sidebar);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 15px;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow: hidden !important; 
+    gap: 16px;
+    z-index: 1000;
+    position: -webkit-sticky !important;
+    position: sticky !important;
+    top: 0 !important; /* Se alinea magnéticamente al borde superior de la pantalla de trabajo */
+}
+
+/* NUEVO: Contenedor exclusivo para los botones con scroll (excluyendo al Menú) */
+.menu-scroll-area {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    gap: 16px;
+    flex: 1;
+    -webkit-overflow-scrolling: touch;
+}
+.menu-scroll-area::-webkit-scrollbar {
+    display: none; /* Oculta barra gris en móviles */
+}
+
+/* CORRECCIÓN DE ANCHO FIJO DE BOTONES */
+.top-navbar .btn-wrapper-3d {
+    flex-shrink: 0 !important;   
+    width: 60px !important;      /* Ajustado a 60px para dar un poco más de aire a las 2 líneas */
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    vertical-align: top;
+}
+
+/* Forzar que las etiquetas procesen \n y se dividan en 2 líneas */
+.top-navbar .btn-label-3d {
+    font-size: 0.6rem;
+    font-weight: bold;
+    color: var(--text-muted);
+    text-align: center;
+    line-height: 0.75rem;
+    min-height: 1.5rem;          
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    
+    /* SOLUCIÓN AL PROBLEMA DEL \n (Reemplaza al 'normal !important' que tenías en la 150) */
+    white-space: pre-line !important; 
+    width: 100%;
+}
+
+/* Evitar deformaciones en los botones redondos */
+.top-navbar .btn-round-3d {
+    width: 44px !important;
+    height: 44px !important;
+    flex-shrink: 0 !important;
+    border-radius: 50% !important; 
+}
+
+/* 2. Reparación total del carrusel de idiomas flotante */
+#carousel-panel-languages {
+    position: absolute !important;
+    top: 100% !important;
+    left: 0 !important;
+    width: 100% !important;
+    z-index: 9999 !important;
+    background: var(--bg-sidebar) !important;
+    border-bottom: 1px solid var(--border) !important;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2) !important;
+    margin: 0 !important;
+    padding: 6px 0 !important;
+}
+
+#carousel-slider-track {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    gap: 10px !important;
+    padding: 8px 45px !important;
+    -webkit-overflow-scrolling: touch;
+}
+
+#carousel-slider-track::-webkit-scrollbar {
+    display: none !important;
+}
+
+/* 3. Estilos limpios delegados para los botones del carrusel (Elimina marcas extrañas) */
+.btn-idioma-carousel {
+    flex: 0 0 auto !important;
+    flex-shrink: 0 !important; 
+    scroll-snap-align: center;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    white-space: nowrap !important; 
+    cursor: pointer;
+    border: none !important; /* Elimina cualquier borde residual que cause marcas */
+    background: var(--btn-3d-bg);
+    color: var(--text-main);
+    transition: all 0.2s;
+}
+/* ================================================== */
+        
+        /* CORRECCIÓN PUNTO 8: PERMITIR SELECCIÓN NATIVA EN EL EDITOR */
+.unified-container, .doc-title, .textarea-main {
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    -ms-user-select: text !important;
+    user-select: text !important;
+}
+
+        /* ========================================== */
+/* REEMPLAZO DEFINITIVO PARA IGUALAR ENCABEZADOS */
+/* ========================================== */
+
+.header-app { 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; 
+    background: var(--bg-sidebar); 
+    border-bottom: 1px solid var(--border); 
+    gap: 4px;
+    height: 65px !important; /* Altura idéntica fija */
+    padding: 0 !important; /* Limpiamos márgenes que deforman */
+    box-sizing: border-box !important;
+}
+
+.sidebar-header { 
+    background: var(--bg-sidebar);
+    border-bottom: 1px solid var(--border); 
+    font-size: 0.9rem; 
+    font-weight: bold; 
+    color: var(--text-main); 
+    letter-spacing: 1px; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    height: 65px !important; /* Forzamos exactamente la misma altura */
+    padding: 0 20px !important; /* Alineación horizontal limpia */
+    box-sizing: border-box !important;
+}
+
+/* Alineación exacta del botón de regreso del menú */
+.sidebar-header .btn-round-3d {
+    width: 36px !important;
+    height: 36px !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+        
+    </style>
+</head>
+<body>
+
+    <!-- CAPA DE AUTENTICACIÓN -->
+    <div class="auth-overlay" id="auth-layer-screen">
+        <div class="auth-card">
+            <div class="auth-logo-container">
+                <div class="auth-icon-wrapper">
+                    <img src="./icon-192.png" class="auth-icon" alt="Retórica Logo">
+                </div>
+                <div class="auth-logo">RETÓRICA</div>
+                <div class="auth-subtitle">SISTEMA MODULAR PROFESIONAL</div>
+            </div>
+            <div class="input-group">
+                <label id="lbl-auth-user">USUARIO DIGITAL (EMAIL / ID)</label>
+                <input type="text" id="auth-input-uid" class="input-field" placeholder="ejemplo@retorica.com">
+            </div>
+            <div class="input-group">
+                <label id="lbl-auth-pass">CLAVE CRIPTOGRÁFICA</label>
+                <input type="password" id="auth-input-pass" class="input-field" placeholder="••••••••">
+            </div>
+            <button class="btn-auth-3d" id="btn-submit-auth" onclick="RetoricaAuth.process()">CONTINUAR</button>
+            <div style="margin-top:15px; font-size:0.7rem; font-weight:bold;">
+                <span id="auth-toggle-mode" style="color:var(--text-muted); cursor:pointer;" onclick="RetoricaAuth.switchMode()">¿No tienes cuenta? Regístrate aquí</span>
+            </div>
+            <div class="auth-divider" id="auth-divider-line">O ACCEDER VÍA HARDWARE</div>
+            <div class="oauth-container" id="oauth-container">
+                <button class="btn-oauth" id="btn-oauth-google" onclick="RetoricaAuth.selectOAuth('Google')">VINCULAR DISPOSITIVO GOOGLE</button>
+                <button class="btn-oauth" id="btn-oauth-facebook" onclick="RetoricaAuth.selectOAuth('Facebook')">VINCULAR DISPOSITIVO FACEBOOK</button>
+                <button class="btn-oauth" id="btn-oauth-whatsapp" onclick="RetoricaAuth.selectOAuth('WhatsApp')">VINCULAR DISPOSITIVO WHATSAPP</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ENCABEZADO PRINCIPAL -->
+    <div class="header-app" style="height: 65px !important; padding: 0 20px !important; display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; box-sizing: border-box !important; background: var(--bg-sidebar); border-bottom: 1px solid var(--border); overflow: hidden !important;">
+        <div class="header-title-container" style="display: flex !important; align-items: center !important; gap: 12px !important;">
+            <div class="header-icon-wrapper" style="width: 34px !important; height: 34px !important; border-radius: 50% !important; overflow: hidden !important; display: flex !important; align-items: center !important; justify-content: center !important; background: transparent !important; border: 1px solid var(--border) !important;">
+                <img src="./icon-192.png" class="header-icon" style="width: 150% !important; height: 150% !important; object-fit: cover !important;" alt="Icono Retórica">
+            </div>
+            <h1 style="font-size: 1.3rem !important; font-weight: 900 !important; letter-spacing: 3px !important; color: var(--text-main) !important; margin: 0 !important;">RETÓRICA</h1>
+        </div>
+        <!-- Espaciador invisible a la derecha para equilibrar el espacio si es necesario -->
+        <div style="width: 36px; height: 36px;"></div>
+    </div>
+
+        <!-- BOTONERA CORREGIDA -->
+    <nav class="top-navbar">
+        <!-- El menú se queda fuera del contenedor de scroll: queda 100% fijo -->
+        <div class="btn-wrapper-3d">
+            <div class="btn-label-3d" id="lbl-nav-menu">Menú</div>
+            <button class="btn-round-3d" onclick="RetoricaUI.toggleSidebar()"><span class="icon-raw">☰</span></button>
+        </div>
+
+        <!-- Área deslizable exclusiva para el resto de las funciones -->
+        <div class="menu-scroll-area">
+            <div class="btn-wrapper-3d" id="pwa-install-wrapper">
+                <div class="btn-label-3d" id="lbl-nav-install">Instalar Aplicación</div>
+                <button class="btn-round-3d" id="btn-pwa-install"><span class="icon-raw">📱</span></button>
+            </div>
+            <div class="btn-wrapper-3d">
+                <div class="btn-label-3d" id="lbl-tool-save">Guardar</div>
+                <button class="btn-round-3d" id="btn-icon-save" onclick="RetoricaStorage.save()"><span class="icon-raw">✓</span></button>
+            </div>
+            <div class="btn-wrapper-3d">
+                <div class="btn-label-3d" id="lbl-tool-new">Nuevo</div>
+                <button class="btn-round-3d" id="btn-icon-new" onclick="RetoricaStorage.clearCanvas()"><span class="icon-raw">＋</span></button>
+            </div>
+            <div class="btn-wrapper-3d">
+                <div class="btn-label-3d" id="lbl-tool-mic">Dictado</div>
+                <button class="btn-round-3d" id="btn-mic-main" onclick="RetoricaAudio.toggleMic()">
+                    <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
+                </button>
+            </div>
+            <div class="btn-wrapper-3d">
+                <div class="btn-label-3d" id="lbl-tool-read">Lectura</div>
+                <button class="btn-round-3d" id="btn-play-main" onclick="RetoricaAudio.play()">
+                    <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+                </button>
+            </div>
+            <div class="btn-wrapper-3d">
+                <div class="btn-label-3d" id="lbl-tool-stop">Abortar</div>
+                <button class="btn-round-3d" id="btn-icon-stop" style="color:var(--text-muted);" onclick="RetoricaAudio.stop()">🟦</button>
+            </div>
+            <div class="btn-wrapper-3d">
+                <div class="btn-label-3d" id="lbl-tool-vmsg">Prod. Audio</div>
+                <button class="btn-round-3d btn-play-style" id="btn-icon-vmsg" onclick="RetoricaAudio.produceVoiceMessage()">🔴</button>
+            </div>
+            <div class="btn-wrapper-3d">
+                <div class="btn-label-3d" id="lbl-tool-tts">Texto A Voz</div>
+                <button class="btn-round-3d" onclick="RetoricaAudio.convertTextToVoiceFile()">
+                    <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; display: block; margin: auto;">
+                        <circle cx="12" cy="12" r="3" />
+                        <path d="M12 7v2M12 15v2M7 12h2M15 12h2" />
+                        <path d="M16.24 7.76A6 6 0 1 0 18 12" />
+                        <path d="M17 12h5M19 9l3 3-3 3" />
+                    </svg>
+                </button>
+            </div>
+            <div class="btn-wrapper-3d">
+                <div class="btn-label-3d">Importar Archivo</div>
+                <button class="btn-round-3d" onclick="document.getElementById('file-picker-local').click()"><span class="icon-raw">📂</span></button>
+            </div>
+                        <div class="btn-wrapper-3d">
+                <div class="btn-label-3d" id="lbl-tool-copyall">COP</div>
+                <button class="btn-round-3d" onclick="RetoricaUI.copyFullTemplate()">
+                    <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; display: block; margin: auto;">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="btn-wrapper-3d">
+                <div class="btn-label-3d">Guardar PDF</div>
+                <button class="btn-round-3d" onclick="RetoricaUI.expPDF()"><span class="icon-raw">🖨️</span></button>
+            </div>
+            <div class="btn-wrapper-3d">
+                <div class="btn-label-3d">PDF Editable</div>
+                <button class="btn-round-3d" onclick="RetoricaUI.expPDFEditable()"><span class="icon-raw">📝</span></button>
+            </div>
+            <div class="btn-wrapper-3d">
+                <div class="btn-label-3d">Guardar Word</div>
+                <button class="btn-round-3d" onclick="RetoricaUI.expDOC()"><span class="icon-raw">ⓦ</span></button>
+            </div>
+            <div class="btn-wrapper-3d">
+                <div class="btn-label-3d">Zoom +</div>
+                <button class="btn-round-3d" onclick="RetoricaUI.adjustZoom(0.1)"><span class="icon-raw">＋</span></button>
+            </div>
+            <div class="btn-wrapper-3d">
+                <div class="btn-label-3d">Zoom -</div>
+                <button class="btn-round-3d" onclick="RetoricaUI.adjustZoom(-0.1)"><span class="icon-raw">－</span></button>
+            </div>
+            <div class="btn-wrapper-3d">
+                <div class="btn-label-3d" id="lbl-nav-theme">Tema</div>
+                <button class="btn-round-3d" onclick="RetoricaUI.toggleTheme()"><span class="icon-raw">🌓</span></button>
+            </div>
+            <div class="btn-wrapper-3d">
+                <div class="btn-label-3d" id="lbl-nav-langtxt">Idioma Texto</div>
+                <button class="btn-round-3d" id="btn-lang-text" onclick="RetoricaI18n.openCarousel('text')"><span class="icon-raw">✍️</span></button>
+            </div>
+            <div class="btn-wrapper-3d">
+                <div class="btn-label-3d" id="lbl-nav-langvoz">Idioma Voz</div>
+                <button class="btn-round-3d" id="btn-lang-voice" onclick="RetoricaI18n.openCarousel('voice')"><span class="icon-raw">🗣️</span></button>
+            </div>
+        </div>
+    </nav>
+
+        <!-- MENÚ DESPLEGABLE HORIZONTAL (CARRUSEL DE IDIOMAS) MAGNETICO -->
+    <div id="carousel-panel-languages" style="display: none;">
+        <div style="display: flex; align-items: center; justify-content: space-between; max-width: 600px; margin: 0 auto; padding: 0 10px;">
+            <!-- Flecha Izquierda -->
+            <button class="btn-round-3d" style="width: 32px; height: 32px; flex-shrink: 0; box-shadow: none;" onclick="RetoricaI18n.moveCarousel(-1)">
+                <span class="icon-raw" style="font-size: 0.9rem;">◀</span>
+            </button>
+            
+            <!-- Contenedor del Track del Carrusel -->
+            <div id="carousel-slider-track">
+                <!-- Inyección dinámica: Idiomas -->
+            </div>
+            
+            <!-- Flecha Derecha -->
+            <button class="btn-round-3d" style="width: 32px; height: 32px; flex-shrink: 0; box-shadow: none;" onclick="RetoricaI18n.moveCarousel(1)">
+                <span class="icon-raw" style="font-size: 0.9rem;">▶</span>
+            </button>
+        </div>
+        <div style="text-align: center; font-size: 0.6rem; font-weight: bold; color: var(--text-muted); margin-top: 6px; padding-bottom: 6px; letter-spacing: 1px; text-transform: uppercase;">
+            Selecciona o usa las flechas para desplazar
+        </div>
+    </div>
+
+    <input type="file" id="file-picker-local" class="file-input-hidden" accept=".pdf,.doc,.docx,.txt,.html" onchange="RetoricaStorage.importLocalFile(event)">
+
+    <!-- MENÚ LATERAL -->
+    <!-- CORRECCIÓN PUNTO 3: MENÚ LATERAL ACTUALIZADO -->
+    <div class="sidebar-panel" id="sidebar">
+        <!-- ENCABEZADO DEL MENÚ LATERAL -->
+        <div class="sidebar-header" style="height: 65px !important; padding: 0 20px !important; display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; box-sizing: border-box !important; background: var(--bg-sidebar); border-bottom: 1px solid var(--border); overflow: hidden !important;">
+            <!-- Título de marca integrado en el encabezado del menú -->
+            <div style="display: flex !important; align-items: center !important; gap: 12px !important;">
+                <div style="width: 34px !important; height: 34px !important; border-radius: 50% !important; overflow: hidden !important; display: flex !important; align-items: center !important; justify-content: center !important; background: transparent !important; border: 1px solid var(--border) !important;">
+                    <img src="./icon-192.png" style="width: 150% !important; height: 150% !important; object-fit: cover !important;" alt="Logo">
+                </div>
+                <span style="font-size: 1.3rem !important; font-weight: 900 !important; letter-spacing: 3px !important; color: var(--text-main) !important;">RETÓRICA</span>
+            </div>
+            <button class="btn-round-3d" style="width: 36px !important; height: 36px !important; margin: 0 !important; display: flex !important; align-items: center !important; justify-content: center !important; flex-shrink: 0 !important;" onclick="RetoricaUI.toggleSidebar()"><span class="icon-raw">⏮️</span></button>
+        </div>
+        <div class="sidebar-content">
+            <div class="grid-templates" id="docs-list-render"></div>
+        </div>
+        <div class="sidebar-footer">
+            <!-- Se removió el botón físico redundante 'EXPORTAR HTML' -->
+            <div style="font-size:0.7rem; color:var(--text-muted); font-weight:bold;"><span id="lbl-side-user">USER:</span> <span id="display-user-name" style="color:var(--text-main);">Anon</span></div>
+            <button onclick="RetoricaAuth.logout()" style="color:var(--text-muted); background:transparent; border:none; font-size:0.85rem; font-weight:bold; cursor:pointer;" id="lbl-side-logout">SALIR</button>
+        </div>
+    </div>
+
+    <!-- ÁREA DE EDICIÓN UNIFICADA -->
+    <main class="main-view">
+        <div class="editor-scroll-container" id="viewport-ctx">
+            <div id="zoom-wrapper">
+                <div class="unified-container" id="unified-sel-container">
+                    <input type="text" id="editor-title" class="doc-title" placeholder="Título del Guion...">
+                    <textarea id="editor-body" class="textarea-main" placeholder="Escribe o dicta aquí tu retórica..."></textarea>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer style="background:var(--bg-sidebar); padding:8px 15px; font-size:0.65rem; display:flex; gap:15px; border-top:1px solid var(--border); color:var(--text-muted); font-weight:bold; z-index:900;">
+        <span id="count-chars">CHARS: 0</span><span id="count-words">WORDS: 0</span><span id="count-lines">LINES: 1</span>
+        <span style="margin-left:auto; color:var(--text-muted);">V.2026.GOD_MODE</span>
+    </footer>
+
+    <div id="toast-notif" class="toast"></div>
+
+    <script src="./auth.js?v=2026_GOD_MODE"></script>
+    <script src="./idiomas.js?v=2026_GOD_MODE"></script>
+    <script src="./audio.js?v=2026_GOD_MODE"></script>
+    <script src="./storage.js?v=2026_GOD_MODE"></script>
+    <script src="./main.js?v=2026_GOD_MODE"></script>
+</body>
+</html>
