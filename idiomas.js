@@ -131,16 +131,45 @@ var RetoricaI18n = {
         this.checkAndTranslateSelection(lang);
     },
 
-        openCarousel: function(type) {
-        var panel = document.getElementById('carousel-panel-languages');
-        var track = document.getElementById('carousel-slider-track');
-        if (!panel || !track) return;
+        // Alternar apertura y cierre del acordeón
+    toggleAccordion: function() {
+        var panel = document.getElementById('accordion-languages');
+        var arrow = document.getElementById('accordion-arrow');
+        if (!panel) return;
 
-        var isVisible = panel.style.display === 'block';
-        if (isVisible && panel.dataset.currentType === type) {
-            panel.style.display = 'none';
-            return;
+        var isClosed = panel.classList.contains('accordion-closed');
+        if (isClosed) {
+            panel.classList.remove('accordion-closed');
+            if (arrow) arrow.style.transform = 'rotate(180deg)';
+            this.renderAccordionLanguages();
+        } else {
+            panel.classList.add('accordion-closed');
+            if (arrow) arrow.style.transform = 'rotate(0deg)';
         }
+    },
+
+    // Renderizar botones dentro del panel acordeón
+    renderAccordionLanguages: function() {
+        var track = document.getElementById('accordion-slider-track');
+        if (!track) return;
+        track.innerHTML = '';
+
+        var self = this;
+        this.langsOrder.forEach(function(langKey) {
+            var item = self.db[langKey];
+            var btn = document.createElement('button');
+            btn.className = 'btn-lang-lava' + (langKey === self.currentLang ? ' active' : '');
+            btn.innerText = item.name;
+
+            btn.onclick = function(e) {
+                if (e) e.stopPropagation();
+                self.setAppLang(langKey);
+                self.renderAccordionLanguages();
+            };
+
+            track.appendChild(btn);
+        });
+    },
 
         panel.style.display = 'block';
         panel.dataset.currentType = type;
