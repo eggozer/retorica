@@ -122,10 +122,10 @@ var RetoricaUI = {
     initTouchGestures: function() {
         var self = this;
         document.addEventListener('touchstart', function(e) {
-            if (e.target.closest('.top-navbar') || e.target.closest('#accordion-languages')) {
-                self.state.touchStartX = 0;
-                return;
-            }
+            if (e.target.closest('.top-navbar') || e.target.closest('#accordion-languages') || e.target.closest('.main-view')) {
+    self.state.touchStartX = 0;
+    return;
+}
             self.state.touchStartX = e.changedTouches[0].screenX;
         }, { passive: true });
 
