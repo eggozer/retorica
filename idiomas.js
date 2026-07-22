@@ -101,11 +101,10 @@ var RetoricaI18n = {
         var bInput = document.getElementById('editor-body'); if(bInput) bInput.placeholder = p.pBody;
         
         // Elementos de navegación superior
-        var lblMenu = document.getElementById('lbl-nav-menu'); if(lblMenu) lblMenu.innerHTML = p.menu;
-        var lblInstall = document.getElementById('lbl-nav-install'); if(lblInstall) lblInstall.innerHTML = p.install;
-        var lblTheme = document.getElementById('lbl-nav-theme'); if(lblTheme) lblTheme.innerHTML = p.theme;
-        var lblLangTxt = document.getElementById('lbl-nav-langtxt'); if(lblLangTxt) lblLangTxt.innerHTML = p.langTxt;
-        var lblLangVoz = document.getElementById('lbl-nav-langvoz'); if(lblLangVoz) lblLangVoz.innerHTML = p.langVoz;
+var lblMenu = document.getElementById('lbl-nav-menu'); if(lblMenu) lblMenu.innerHTML = p.menu;
+var lblInstall = document.getElementById('lbl-nav-install'); if(lblInstall) lblInstall.innerHTML = p.install;
+var lblTheme = document.getElementById('lbl-nav-theme'); if(lblTheme) lblTheme.innerHTML = p.theme;
+var lblLangTxt = document.getElementById('lbl-nav-langtxt'); if(lblLangTxt) lblLangTxt.innerHTML = p.langTxt;
         
         // Capa Auth
         var lUser = document.getElementById('lbl-auth-user'); if(lUser) lUser.innerText = p.uLabel;
