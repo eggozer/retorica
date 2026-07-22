@@ -370,16 +370,17 @@
                 <button class="btn-round-3d btn-play-style" id="btn-icon-vmsg" onclick="RetoricaAudio.produceVoiceMessage()">🔴</button>
             </div>
             <div class="btn-wrapper-3d">
-                <div class="btn-label-3d" id="lbl-tool-tts">Texto A Voz</div>
-                <button class="btn-round-3d" onclick="RetoricaAudio.convertTextToVoiceFile()">
-                    <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; display: block; margin: auto;">
-                        <circle cx="12" cy="12" r="3" />
-                        <path d="M12 7v2M12 15v2M7 12h2M15 12h2" />
-                        <path d="M16.24 7.76A6 6 0 1 0 18 12" />
-                        <path d="M17 12h5M19 9l3 3-3 3" />
-                    </svg>
-                </button>
-            </div>
+    <div class="btn-label-3d" id="lbl-tool-tts">AUD</div>
+    <button class="btn-round-3d" onclick="RetoricaAudio.convertTextToVoiceFile()">
+        <svg viewBox="0 0 100 100" style="width: 65%; height: 65%; display: block; margin: auto; fill: currentColor;">
+            <!-- Engrane central -->
+            <path d="M50 35a15 15 0 1 0 0 30 15 15 0 0 0 0-30zm0 6a9 9 0 1 1 0 18 9 9 0 0 1 0-18zm-3-10h6v5h-6zm0 28h6v5h-6zm-14-11h5v6h-5zm28 0h5v6h-5zm-11.8-10.2l4.2-4.2 4.2 4.2-4.2 4.2zm14.1 14.1l4.2-4.2 4.2 4.2-4.2 4.2zm-18.3 0l-4.2-4.2 4.2-4.2 4.2 4.2zm0-18.3l-4.2-4.2 4.2-4.2 4.2 4.2z"/>
+            
+            <!-- Flechas de flujo circular -->
+            <path d="M50 10A40 40 0 0 1 85 30l-7 4A32 32 0 0 0 50 18v8L32 14l18-12v10zm0 80A40 40 0 0 1 15 70l7-4a32 32 0 0 0 28 16v-8l18 12-18 12v-10z"/>
+        </svg>
+    </button>
+</div>
             <div class="btn-wrapper-3d">
                 <div class="btn-label-3d" id="lbl-tool-import">Importar</div>
                 <button class="btn-round-3d" onclick="document.getElementById('file-picker-local').click()"><span class="icon-raw">📂</span></button>
