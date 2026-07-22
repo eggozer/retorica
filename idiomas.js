@@ -132,19 +132,17 @@ var lblLangTxt = document.getElementById('lbl-nav-langtxt'); if(lblLangTxt) lblL
 
     // Alternar apertura y cierre del acordeón
     toggleAccordion: function() {
-        var panel = document.getElementById('accordion-languages');
-        var arrow = document.getElementById('accordion-arrow');
-        if (!panel) return;
+    var panel = document.getElementById('accordion-languages');
+    if (!panel) return;
 
-        var isClosed = panel.classList.contains('accordion-closed');
-        if (isClosed) {
-            panel.classList.remove('accordion-closed');
-            if (arrow) arrow.style.transform = 'rotate(180deg)';
-            this.renderAccordionLanguages();
-        } else {
-            panel.classList.add('accordion-closed');
-            if (arrow) arrow.style.transform = 'rotate(0deg)';
-        }
+    var isClosed = panel.classList.contains('accordion-closed');
+    if (isClosed) {
+        panel.classList.remove('accordion-closed');
+        this.renderAccordionLanguages();
+    } else {
+        panel.classList.add('accordion-closed');
+    }
+},
     },
 
     // Renderizar botones dentro del panel acordeón
