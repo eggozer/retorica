@@ -101,10 +101,10 @@ var RetoricaI18n = {
         var bInput = document.getElementById('editor-body'); if(bInput) bInput.placeholder = p.pBody;
         
         // Elementos de navegación superior
-var lblMenu = document.getElementById('lbl-nav-menu'); if(lblMenu) lblMenu.innerHTML = p.menu;
-var lblInstall = document.getElementById('lbl-nav-install'); if(lblInstall) lblInstall.innerHTML = p.install;
-var lblTheme = document.getElementById('lbl-nav-theme'); if(lblTheme) lblTheme.innerHTML = p.theme;
-var lblLangTxt = document.getElementById('lbl-nav-langtxt'); if(lblLangTxt) lblLangTxt.innerHTML = p.langTxt;
+        var lblMenu = document.getElementById('lbl-nav-menu'); if(lblMenu) lblMenu.innerHTML = p.menu;
+        var lblInstall = document.getElementById('lbl-nav-install'); if(lblInstall) lblInstall.innerHTML = p.install;
+        var lblTheme = document.getElementById('lbl-nav-theme'); if(lblTheme) lblTheme.innerHTML = p.theme;
+        var lblLangTxt = document.getElementById('lbl-nav-langtxt'); if(lblLangTxt) lblLangTxt.innerHTML = p.langTxt;
         
         // Capa Auth
         var lUser = document.getElementById('lbl-auth-user'); if(lUser) lUser.innerText = p.uLabel;
@@ -147,7 +147,7 @@ var lblLangTxt = document.getElementById('lbl-nav-langtxt'); if(lblLangTxt) lblL
         }
     },
 
-    // Renderizar botones dentro del panel acordeón
+    // Renderizar botones dentro del panel acordeón con el estándar 3D visual de Retórica
     renderAccordionLanguages: function() {
         var track = document.getElementById('accordion-slider-track');
         if (!track) return;
@@ -156,17 +156,41 @@ var lblLangTxt = document.getElementById('lbl-nav-langtxt'); if(lblLangTxt) lblL
         var self = this;
         this.langsOrder.forEach(function(langKey) {
             var item = self.db[langKey];
-            var btn = document.createElement('button');
-            btn.className = 'btn-lang-lava' + (langKey === self.currentLang ? ' active' : '');
-            btn.innerText = item.name;
+            
+            // Envoltorio principal que respeta la inversión 3D (Label Arriba / Botón Abajo)
+            var wrapper = document.createElement('div');
+            wrapper.className = 'btn-wrapper-3d';
+            wrapper.style.display = 'inline-flex';
+            wrapper.style.flexDirection = 'column-reverse';
+            wrapper.style.alignItems = 'center';
+            wrapper.style.flexShrink = '0';
+            wrapper.style.width = '60px';
 
-            btn.onclick = function(e) {
+            // Etiqueta superior
+            var label = document.createElement('div');
+            label.className = 'btn-label-3d';
+            label.innerText = langKey.split('-')[0].toUpperCase();
+
+            // Botón circular 3D
+            var btn = document.createElement('button');
+            btn.className = 'btn-round-3d' + (langKey === self.currentLang ? ' btn-fire-blue' : '');
+            
+            var iconSpan = document.createElement('span');
+            iconSpan.className = 'icon-raw';
+            // Obtener prefijo o dos primeras letras para mostrar como ícono dentro de la esfera
+            iconSpan.innerText = langKey.substring(0, 2).toUpperCase();
+            btn.appendChild(iconSpan);
+
+            wrapper.appendChild(label);
+            wrapper.appendChild(btn);
+
+            wrapper.onclick = function(e) {
                 if (e) e.stopPropagation();
                 self.setAppLang(langKey);
                 self.renderAccordionLanguages();
             };
 
-            track.appendChild(btn);
+            track.appendChild(wrapper);
         });
     },
 
