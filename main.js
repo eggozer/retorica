@@ -8,10 +8,8 @@ var RetoricaUI = {
         var titleInput = document.getElementById('editor-title');
 
         if (typeof RetoricaI18n !== 'undefined') {
-    RetoricaI18n.init();
-    // Ejecuta la traducción inmediata del texto presente si no está vacío
-    RetoricaI18n.checkAndTranslateSelection(RetoricaI18n.currentLang);
-}
+            RetoricaI18n.init();
+        }
 
         if (editor) { 
             editor.oninput = function() { 
@@ -127,9 +125,9 @@ var RetoricaUI = {
         var self = this;
         document.addEventListener('touchstart', function(e) {
             if (e.target.closest('.top-navbar') || e.target.closest('#accordion-languages') || e.target.closest('.main-view')) {
-    self.state.touchStartX = 0;
-    return;
-}
+                self.state.touchStartX = 0;
+                return;
+            }
             self.state.touchStartX = e.changedTouches[0].screenX;
         }, { passive: true });
 
