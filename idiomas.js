@@ -194,48 +194,52 @@ var RetoricaI18n = {
         });
     },
 
-    checkAndTranslateSelection: function(targetLang) {
-        var editor = document.getElementById('editor-body');
-        if (!editor) return;
-        var start = editor.selectionStart;
-        var end = editor.selectionEnd;
-        if (start === end) return; 
+checkAndTranslateSelection: function(targetLang) {
+    var editor = document.getElementById('editor-body');
+    if (!editor || !editor.value.trim()) return;
 
-        var selectedText = editor.value.substring(start, end);
-        if (!selectedText.trim()) return;
+    var start = editor.selectionStart;
+    var end = editor.selectionEnd;
+    var selectedText = (start !== end) ? editor.value.substring(start, end) : editor.value;
 
-        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Traduciendo fragmento...");
-        
-        var sourceClean = this.currentLang.split('-')[0];
-        var targetClean = targetLang.split('-')[0];
-        if (sourceClean === targetClean) return;
+    var sourceClean = this.currentLang.split('-')[0];
+    var targetClean = targetLang.split('-')[0];
+    if (sourceClean === targetClean) return;
 
-        var url = "https://api.mymemory.translated.net/get?q=" + encodeURIComponent(selectedText) + "&langpair=" + sourceClean + "|" + targetClean;
+    if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Traduciendo texto...");
 
-        fetch(url)
-            .then(function(res) { return res.json(); })
-            .then(function(data) {
-                if (data && data.responseData && data.responseStatus === 200) {
-                    var translatedText = data.responseData.translatedText;
-                    if (!translatedText || translatedText.includes("INVALID SOURCE LANGUAGE")) {
-                        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error: Respuesta inválida.");
-                        return;
-                    }
+    var url = "https://api.mymemory.translated.net/get?q=" + encodeURIComponent(selectedText) + "&langpair=" + sourceClean + "|" + targetClean;
 
+    var self = this;
+    fetch(url)
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            if (data && data.responseData && data.responseStatus === 200) {
+                var translatedText = data.responseData.translatedText;
+                if (!translatedText || translatedText.includes("INVALID SOURCE LANGUAGE")) {
+                    if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error en idioma de origen.");
+                    return;
+                }
+
+                if (start !== end) {
+                    // Si había texto seleccionado, reemplaza solo la selección
                     var fullText = editor.value;
                     editor.value = fullText.substring(0, start) + translatedText + fullText.substring(end);
-                    editor.setSelectionRange(start, start + translatedText.length);
-                    
-                    if (typeof RetoricaUI !== 'undefined') {
-                        RetoricaUI.updateCounters();
-                        if (typeof RetoricaUI.triggerAutoSave === 'function') RetoricaUI.triggerAutoSave();
-                        RetoricaUI.notify("Interpretación aplicada ✓");
-                    }
                 } else {
-                    if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Servidor ocupado. Intenta de nuevo.");
+                    // Si no había selección, traduce todo el cuerpo del texto
+                    editor.value = translatedText;
                 }
-            }).catch(function() {
-                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error de red. Texto protegido.");
-            });
-    }
+                
+                if (typeof RetoricaUI !== 'undefined') {
+                    RetoricaUI.updateCounters();
+                    if (typeof RetoricaUI.triggerAutoSave === 'function') RetoricaUI.triggerAutoSave();
+                    RetoricaUI.notify("Traducción completada ✓");
+                }
+            } else {
+                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Límite de API alcanzado o servidor ocupado.");
+            }
+        }).catch(function() {
+            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Sin conexión para traducir.");
+        });
+}
 };
