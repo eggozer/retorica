@@ -147,7 +147,7 @@ var RetoricaI18n = {
         }
     },
 
-    // Renderizar botones dentro del panel acordeón con el estándar 3D visual de Retórica:
+    // Renderizar botones dentro del panel acordeón con el estándar 3D visual de Retórica
 renderAccordionLanguages: function() {
     var track = document.getElementById('accordion-slider-track');
     if (!track) return;
