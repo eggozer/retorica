@@ -77,6 +77,7 @@ var RetoricaI18n = {
     init: function() { this.setAppLang(this.currentLang); },
 
     setAppLang: function(lang) {
+        var prevLang = this.currentLang;
         this.currentLang = lang;
         var p = this.db[lang] || this.db['en-GB']; 
         
@@ -127,7 +128,7 @@ var RetoricaI18n = {
         }
         
         if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Idioma Activo: " + p.name);
-        this.checkAndTranslateSelection(lang);
+        this.checkAndTranslateSelection(prevLang, lang);
     },
 
     // Alternar apertura y cierre del acordeón
@@ -148,93 +149,92 @@ var RetoricaI18n = {
     },
 
     // Renderizar botones dentro del panel acordeón con el estándar 3D visual de Retórica
-renderAccordionLanguages: function() {
-    var track = document.getElementById('accordion-slider-track');
-    if (!track) return;
-    track.innerHTML = '';
+    renderAccordionLanguages: function() {
+        var track = document.getElementById('accordion-slider-track');
+        if (!track) return;
+        track.innerHTML = '';
 
-    var self = this;
-    this.langsOrder.forEach(function(langKey) {
-        var item = self.db[langKey];
-        
-        // Envoltorio principal que respeta la inversión (Etiqueta abajo, Botón arriba)
-        var wrapper = document.createElement('div');
-        wrapper.className = 'btn-wrapper-3d';
+        var self = this;
+        this.langsOrder.forEach(function(langKey) {
+            var item = self.db[langKey];
+            
+            // Envoltorio principal que respeta la inversión (Etiqueta abajo, Botón arriba)
+            var wrapper = document.createElement('div');
+            wrapper.className = 'btn-wrapper-3d';
 
-        // Etiqueta (LENGUAJE)
-        var label = document.createElement('div');
-        label.className = 'btn-label-3d';
-        label.innerText = langKey.split('-')[0].toUpperCase();
+            // Etiqueta (LENGUAJE)
+            var label = document.createElement('div');
+            label.className = 'btn-label-3d';
+            label.innerText = langKey.split('-')[0].toUpperCase();
 
-        // Botón circular 3D limpia de textos indeseados en el fondo
-        var btn = document.createElement('button');
-        btn.className = 'btn-round-3d' + (langKey === self.currentLang ? ' btn-fire-blue' : '');
-        
-        var iconSpan = document.createElement('span');
-        iconSpan.className = 'icon-raw';
-        iconSpan.innerText = langKey.substring(0, 2).toUpperCase();
-        btn.appendChild(iconSpan);
+            // Botón circular 3D limpia de textos indeseados en el fondo
+            var btn = document.createElement('button');
+            btn.className = 'btn-round-3d' + (langKey === self.currentLang ? ' btn-fire-blue' : '');
+            
+            var iconSpan = document.createElement('span');
+            iconSpan.className = 'icon-raw';
+            iconSpan.innerText = langKey.substring(0, 2).toUpperCase();
+            btn.appendChild(iconSpan);
 
-        // Estructura limpia (Primero botón, luego label)
-        wrapper.appendChild(label);
-        wrapper.appendChild(btn);
+            // Estructura limpia (Primero botón, luego label)
+            wrapper.appendChild(label);
+            wrapper.appendChild(btn);
 
-        wrapper.onclick = function(e) {
-            if (e) e.stopPropagation();
-            self.setAppLang(langKey);
-            self.renderAccordionLanguages();
-        };
+            wrapper.onclick = function(e) {
+                if (e) e.stopPropagation();
+                self.setAppLang(langKey);
+                self.renderAccordionLanguages();
+            };
 
-        track.appendChild(wrapper);
-    });
-}
-
-checkAndTranslateSelection: function(targetLang) {
-    var editor = document.getElementById('editor-body');
-    if (!editor || !editor.value.trim()) return;
-
-    var start = editor.selectionStart;
-    var end = editor.selectionEnd;
-    var selectedText = (start !== end) ? editor.value.substring(start, end) : editor.value;
-
-    var sourceClean = this.currentLang.split('-')[0];
-    var targetClean = targetLang.split('-')[0];
-    if (sourceClean === targetClean) return;
-
-    if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Traduciendo texto...");
-
-    var url = "https://api.mymemory.translated.net/get?q=" + encodeURIComponent(selectedText) + "&langpair=" + sourceClean + "|" + targetClean;
-
-    var self = this;
-    fetch(url)
-        .then(function(res) { return res.json(); })
-        .then(function(data) {
-            if (data && data.responseData && data.responseStatus === 200) {
-                var translatedText = data.responseData.translatedText;
-                if (!translatedText || translatedText.includes("INVALID SOURCE LANGUAGE")) {
-                    if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error en idioma de origen.");
-                    return;
-                }
-
-                if (start !== end) {
-                    // Si había texto seleccionado, reemplaza solo la selección
-                    var fullText = editor.value;
-                    editor.value = fullText.substring(0, start) + translatedText + fullText.substring(end);
-                } else {
-                    // Si no había selección, traduce todo el cuerpo del texto
-                    editor.value = translatedText;
-                }
-                
-                if (typeof RetoricaUI !== 'undefined') {
-                    RetoricaUI.updateCounters();
-                    if (typeof RetoricaUI.triggerAutoSave === 'function') RetoricaUI.triggerAutoSave();
-                    RetoricaUI.notify("Traducción completada ✓");
-                }
-            } else {
-                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Límite de API alcanzado o servidor ocupado.");
-            }
-        }).catch(function() {
-            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Sin conexión para traducir.");
+            track.appendChild(wrapper);
         });
-}
+    }, // <-- LLAVE DE CIERRE AGREGADA (CORRECCIÓN DE SINTAXIS)
+
+    checkAndTranslateSelection: function(sourceLang, targetLang) {
+        var editor = document.getElementById('editor-body');
+        if (!editor || !editor.value.trim()) return;
+
+        var start = editor.selectionStart;
+        var end = editor.selectionEnd;
+        var selectedText = (start !== end) ? editor.value.substring(start, end) : editor.value;
+
+        var sourceClean = (sourceLang || this.currentLang).split('-')[0];
+        var targetClean = (targetLang || this.currentLang).split('-')[0];
+        if (sourceClean === targetClean) return;
+
+        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Traduciendo texto...");
+
+        var url = "https://api.mymemory.translated.net/get?q=" + encodeURIComponent(selectedText) + "&langpair=" + sourceClean + "|" + targetClean;
+
+        fetch(url)
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data && data.responseData && data.responseStatus === 200) {
+                    var translatedText = data.responseData.translatedText;
+                    if (!translatedText || translatedText.includes("INVALID SOURCE LANGUAGE")) {
+                        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error en idioma de origen.");
+                        return;
+                    }
+
+                    if (start !== end) {
+                        // Si había texto seleccionado, reemplaza solo la selección
+                        var fullText = editor.value;
+                        editor.value = fullText.substring(0, start) + translatedText + fullText.substring(end);
+                    } else {
+                        // Si no había selección, traduce todo el cuerpo del texto
+                        editor.value = translatedText;
+                    }
+                    
+                    if (typeof RetoricaUI !== 'undefined') {
+                        RetoricaUI.updateCounters();
+                        if (typeof RetoricaUI.triggerAutoSave === 'function') RetoricaUI.triggerAutoSave();
+                        RetoricaUI.notify("Traducción completada ✓");
+                    }
+                } else {
+                    if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Límite de API alcanzado o servidor ocupado.");
+                }
+            }).catch(function() {
+                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Sin conexión para traducir.");
+            });
+    }
 };
