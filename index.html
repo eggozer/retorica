@@ -134,32 +134,37 @@
             display: none;
         }
 
-        .top-navbar .btn-wrapper-3d {
-            flex-shrink: 0 !important;   
-            width: 60px !important;
-            display: inline-flex;
-            flex-direction: column-reverse !important; /* <--- Invierte el orden: botón arriba, label abajo */
-            align-items: center;
-            justify-content: flex-start;
-            vertical-align: top;
-        }
+.top-navbar .btn-wrapper-3d, .accordion-body .btn-wrapper-3d {
+    flex-shrink: 0 !important;   
+    width: 60px !important;
+    display: inline-flex;
+    flex-direction: column-reverse !important;
+    align-items: center;
+    justify-content: flex-start;
+    vertical-align: top;
+    position: relative;
+    overflow: hidden; /* Evita que el texto duplicado se asome por debajo en el tema oscuro */
+}
 
-        .top-navbar .btn-label-3d {
-            font-size: 0.6rem;
-            font-weight: bold;
-            color: var(--text-muted);
-            text-align: center;
-            line-height: 0.75rem;
-            min-height: 1.5rem;          
-            display: flex;
-            align-items: flex-start; /* <--- Alineación hacia arriba */
-            justify-content: center;
-            margin-top: 6px !important;   /* <--- Separación superior */
-            margin-bottom: 0px !important;
-            text-transform: uppercase;
-            white-space: pre-line !important; 
-            width: 100%;
-        }
+.top-navbar .btn-label-3d, .accordion-body .btn-label-3d {
+    font-size: 0.6rem;
+    font-weight: bold;
+    color: var(--text-muted);
+    text-align: center;
+    line-height: 0.75rem;
+    min-height: 1.2rem;
+    max-height: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 4px !important;
+    margin-bottom: 0px !important;
+    text-transform: uppercase;
+    white-space: nowrap !important;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    width: 100%;
+}
 
         .top-navbar .btn-round-3d {
             width: 44px !important;
