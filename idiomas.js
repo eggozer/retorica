@@ -217,11 +217,9 @@ var RetoricaI18n = {
                     }
 
                     if (start !== end) {
-                        // Si había texto seleccionado, reemplaza solo la selección
                         var fullText = editor.value;
                         editor.value = fullText.substring(0, start) + translatedText + fullText.substring(end);
                     } else {
-                        // Si no había selección, traduce todo el cuerpo del texto
                         editor.value = translatedText;
                     }
                     
@@ -231,10 +229,11 @@ var RetoricaI18n = {
                         RetoricaUI.notify("Traducción completada ✓");
                     }
                 } else {
-                    if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Límite de API alcanzado o servidor ocupado.");
+                    // Manejo directo cuando se alcanza la cuota de la API (Evita que la app se congelé)
+                    if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Límite de API / servidor ocupado. Idioma de interfaz cambiado.");
                 }
             }).catch(function() {
-                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Sin conexión para traducir.");
+                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Sin conexión para traducir texto, pero la app se actualizó.");
             });
     }
 };
