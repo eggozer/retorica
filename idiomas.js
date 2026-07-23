@@ -191,49 +191,50 @@ var RetoricaI18n = {
     }, // <-- LLAVE DE CIERRE AGREGADA (CORRECCIÓN DE SINTAXIS)
 
     checkAndTranslateSelection: function(sourceLang, targetLang) {
-        var editor = document.getElementById('editor-body');
-        if (!editor || !editor.value.trim()) return;
+    var editor = document.getElementById('editor-body');
+    if (!editor || !editor.value.trim()) return;
 
-        var start = editor.selectionStart;
-        var end = editor.selectionEnd;
-        var selectedText = (start !== end) ? editor.value.substring(start, end) : editor.value;
+    var start = editor.selectionStart;
+    var end = editor.selectionEnd;
+    var selectedText = (start !== end) ? editor.value.substring(start, end) : editor.value;
 
-        var sourceClean = (sourceLang || this.currentLang).split('-')[0];
-        var targetClean = (targetLang || this.currentLang).split('-')[0];
-        if (sourceClean === targetClean) return;
+    var targetClean = (targetLang || this.currentLang).split('-')[0];
 
-        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Traduciendo texto...");
+    if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Identificando y traduciendo...");
 
-        var url = "https://api.mymemory.translated.net/get?q=" + encodeURIComponent(selectedText) + "&langpair=" + sourceClean + "|" + targetClean;
+    // Usamos 'autodetect' como origen si no hay certeza del idioma del fragmento seleccionado
+    var sourceClean = (start !== end) ? "autodetect" : (sourceLang || this.currentLang).split('-')[0];
 
-        fetch(url)
-            .then(function(res) { return res.json(); })
-            .then(function(data) {
-                if (data && data.responseData && data.responseStatus === 200) {
-                    var translatedText = data.responseData.translatedText;
-                    if (!translatedText || translatedText.includes("INVALID SOURCE LANGUAGE")) {
-                        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error en idioma de origen.");
-                        return;
-                    }
+    var url = "https://api.mymemory.translated.net/get?q=" + encodeURIComponent(selectedText) + "&langpair=" + sourceClean + "|" + targetClean;
 
-                    if (start !== end) {
-                        var fullText = editor.value;
-                        editor.value = fullText.substring(0, start) + translatedText + fullText.substring(end);
-                    } else {
-                        editor.value = translatedText;
-                    }
-                    
-                    if (typeof RetoricaUI !== 'undefined') {
-                        RetoricaUI.updateCounters();
-                        if (typeof RetoricaUI.triggerAutoSave === 'function') RetoricaUI.triggerAutoSave();
-                        RetoricaUI.notify("Traducción completada ✓");
-                    }
-                } else {
-                    // Manejo directo cuando se alcanza la cuota de la API (Evita que la app se congelé)
-                    if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Límite de API / servidor ocupado. Idioma de interfaz cambiado.");
+    fetch(url)
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            if (data && data.responseData && data.responseStatus === 200) {
+                var translatedText = data.responseData.translatedText;
+                
+                if (!translatedText || translatedText.includes("INVALID SOURCE LANGUAGE") || translatedText.includes("PLEASE SELECT TWO DISTINCT LANGUAGES")) {
+                    if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Idioma origen ya coincide o es inválido.");
+                    return;
                 }
-            }).catch(function() {
-                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Sin conexión para traducir texto, pero la app se actualizó.");
-            });
-    }
+
+                if (start !== end) {
+                    var fullText = editor.value;
+                    editor.value = fullText.substring(0, start) + translatedText + fullText.substring(end);
+                } else {
+                    editor.value = translatedText;
+                }
+                
+                if (typeof RetoricaUI !== 'undefined') {
+                    RetoricaUI.updateCounters();
+                    if (typeof RetoricaUI.triggerAutoSave === 'function') RetoricaUI.triggerAutoSave();
+                    RetoricaUI.notify("Traducción completada ✓");
+                }
+            } else {
+                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Servidor de traducción ocupado.");
+            }
+        }).catch(function() {
+            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Sin red para traducir el fragmento.");
+        });
+}
 };
