@@ -148,51 +148,50 @@ var RetoricaI18n = {
     },
 
     // Renderizar botones dentro del panel acordeón con el estándar 3D visual de Retórica
-    renderAccordionLanguages: function() {
-        var track = document.getElementById('accordion-slider-track');
-        if (!track) return;
-        track.innerHTML = '';
+    // BUSCAR EN idiomas.js:
+renderAccordionLanguages: function() { ... }
 
-        var self = this;
-        this.langsOrder.forEach(function(langKey) {
-            var item = self.db[langKey];
-            
-            // Envoltorio principal que respeta la inversión 3D (Label Arriba / Botón Abajo)
-            var wrapper = document.createElement('div');
-            wrapper.className = 'btn-wrapper-3d';
-            wrapper.style.display = 'inline-flex';
-            wrapper.style.flexDirection = 'column-reverse';
-            wrapper.style.alignItems = 'center';
-            wrapper.style.flexShrink = '0';
-            wrapper.style.width = '60px';
+// REEMPLAZAR ENTRE LAS LÍNEAS ~115 Y ~155 POR:
+renderAccordionLanguages: function() {
+    var track = document.getElementById('accordion-slider-track');
+    if (!track) return;
+    track.innerHTML = '';
 
-            // Etiqueta superior
-            var label = document.createElement('div');
-            label.className = 'btn-label-3d';
-            label.innerText = langKey.split('-')[0].toUpperCase();
+    var self = this;
+    this.langsOrder.forEach(function(langKey) {
+        var item = self.db[langKey];
+        
+        // Envoltorio principal que respeta la inversión (Etiqueta abajo, Botón arriba)
+        var wrapper = document.createElement('div');
+        wrapper.className = 'btn-wrapper-3d';
 
-            // Botón circular 3D
-            var btn = document.createElement('button');
-            btn.className = 'btn-round-3d' + (langKey === self.currentLang ? ' btn-fire-blue' : '');
-            
-            var iconSpan = document.createElement('span');
-            iconSpan.className = 'icon-raw';
-            // Obtener prefijo o dos primeras letras para mostrar como ícono dentro de la esfera
-            iconSpan.innerText = langKey.substring(0, 2).toUpperCase();
-            btn.appendChild(iconSpan);
+        // Etiqueta (LENGUAJE)
+        var label = document.createElement('div');
+        label.className = 'btn-label-3d';
+        label.innerText = langKey.split('-')[0].toUpperCase();
 
-            wrapper.appendChild(label);
-            wrapper.appendChild(btn);
+        // Botón circular 3D limpia de textos indeseados en el fondo
+        var btn = document.createElement('button');
+        btn.className = 'btn-round-3d' + (langKey === self.currentLang ? ' btn-fire-blue' : '');
+        
+        var iconSpan = document.createElement('span');
+        iconSpan.className = 'icon-raw';
+        iconSpan.innerText = langKey.substring(0, 2).toUpperCase();
+        btn.appendChild(iconSpan);
 
-            wrapper.onclick = function(e) {
-                if (e) e.stopPropagation();
-                self.setAppLang(langKey);
-                self.renderAccordionLanguages();
-            };
+        // Estructura limpia (Primero botón, luego label)
+        wrapper.appendChild(label);
+        wrapper.appendChild(btn);
 
-            track.appendChild(wrapper);
-        });
-    },
+        wrapper.onclick = function(e) {
+            if (e) e.stopPropagation();
+            self.setAppLang(langKey);
+            self.renderAccordionLanguages();
+        };
+
+        track.appendChild(wrapper);
+    });
+}
 
 checkAndTranslateSelection: function(targetLang) {
     var editor = document.getElementById('editor-body');
