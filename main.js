@@ -7,7 +7,11 @@ var RetoricaUI = {
         var editor = document.getElementById('editor-body');
         var titleInput = document.getElementById('editor-title');
 
-        if (typeof RetoricaI18n !== 'undefined') RetoricaI18n.init();
+        if (typeof RetoricaI18n !== 'undefined') {
+    RetoricaI18n.init();
+    // Ejecuta la traducción inmediata del texto presente si no está vacío
+    RetoricaI18n.checkAndTranslateSelection(RetoricaI18n.currentLang);
+}
 
         if (editor) { 
             editor.oninput = function() { 
