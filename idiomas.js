@@ -147,11 +147,7 @@ var RetoricaI18n = {
         }
     },
 
-    // Renderizar botones dentro del panel acordeón con el estándar 3D visual de Retórica
-    // BUSCAR EN idiomas.js:
-renderAccordionLanguages: function() { ... }
-
-// REEMPLAZAR ENTRE LAS LÍNEAS ~115 Y ~155 POR:
+    // Renderizar botones dentro del panel acordeón con el estándar 3D visual de Retórica:
 renderAccordionLanguages: function() {
     var track = document.getElementById('accordion-slider-track');
     if (!track) return;
