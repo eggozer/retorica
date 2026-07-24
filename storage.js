@@ -39,7 +39,6 @@ var RetoricaStorage = {
 
         var docs = this.getDocs();
 
-        // Generar un ID único si no hay un documento activo
         if (!this.currentDocId) {
             this.currentDocId = 'doc_' + Date.now();
         }
@@ -55,17 +54,13 @@ var RetoricaStorage = {
             id: this.currentDocId,
             title: title,
             body: body,
-            lang: (typeof RetoricaI18n !== 'undefined') ? RetoricaI18n.currentLang : 'en-GB',
+            lang: (typeof RetoricaI18n !== 'undefined') ? RetoricaI18n.currentLang : 'es',
             createdAt: createdAt,
             updatedAt: nowStr
         };
 
         localStorage.setItem(this.dbKey, JSON.stringify(docs));
         localStorage.setItem('retorica_last_doc_id', this.currentDocId);
-
-        if (navigator.storage && navigator.storage.persist) {
-            navigator.storage.persist();
-        }
 
         if (typeof RetoricaUI !== 'undefined') {
             RetoricaUI.updateCounters();
@@ -88,7 +83,6 @@ var RetoricaStorage = {
 
         var docs = this.getDocs();
 
-        // Generar ID único automático para evitar sobreescritura indeseada
         if (!this.currentDocId) {
             this.currentDocId = 'doc_' + Date.now();
         }
@@ -104,7 +98,7 @@ var RetoricaStorage = {
             id: this.currentDocId,
             title: title,
             body: body,
-            lang: (typeof RetoricaI18n !== 'undefined') ? RetoricaI18n.currentLang : 'en-GB',
+            lang: (typeof RetoricaI18n !== 'undefined') ? RetoricaI18n.currentLang : 'es',
             createdAt: createdAt,
             updatedAt: nowStr
         };
@@ -146,7 +140,7 @@ var RetoricaStorage = {
             RetoricaUI.updateCounters();
             var sidebar = document.getElementById('sidebar');
             if (sidebar && sidebar.classList.contains('active')) { RetoricaUI.toggleSidebar(); }
-            RetoricaUI.notify("Guion cargado (" + (docs[id].lang || "Default") + ")");
+            RetoricaUI.notify("Guion cargado");
         }
     },
 
@@ -210,7 +204,16 @@ var RetoricaStorage = {
         container.innerHTML = '';
 
         var docs = this.getDocs();
-        var sortedDocs = Object.values(docs).sort(function(a, b) { return new Date(b.updatedAt) - new Date(a.updatedAt); });
+        var docKeys = Object.keys(docs);
+        var sortedDocs = [];
+        
+        for (var i = 0; i < docKeys.length; i++) {
+            sortedDocs.push(docs[docKeys[i]]);
+        }
+
+        sortedDocs.sort(function(a, b) { 
+            return new Date(b.updatedAt) - new Date(a.updatedAt); 
+        });
 
         if (sortedDocs.length === 0) {
             container.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:20px; color:var(--text-muted); font-size:0.75rem; font-weight:bold;">BIBLIOTECA VACÍA</div>';
@@ -250,23 +253,71 @@ var RetoricaStorage = {
         var file = event.target.files[0];
         if (!file) return;
 
-        var reader = new FileReader();
-        reader.onload = function(e) {
-            var content = e.target.result;
-            if (file.name.endsWith('.html')) {
-                var parser = new DOMParser();
-                var doc = parser.parseFromString(content, 'text/html');
-                content = doc.body.textContent || doc.body.innerText || "";
+        var fileName = file.name.replace(/\.[^/.]+$/, "");
+        var extension = file.name.split('.').pop().toLowerCase();
+
+        if (extension === 'docx') {
+            if (window.mammoth) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    window.mammoth.extractRawText({ arrayBuffer: e.target.result })
+                        .then(function(result) {
+                            document.getElementById('editor-title').value = fileName;
+                            document.getElementById('editor-body').value = result.value;
+                            RetoricaStorage.createNewDoc();
+                            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Word (.docx) importado ✓");
+                        })
+                        .catch(function(err) {
+                            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error leyendo archivo Word");
+                        });
+                };
+                reader.readAsArrayBuffer(file);
+            } else {
+                alert("La biblioteca de lectura de Word no está presente.");
             }
-            document.getElementById('editor-title').value = file.name.replace(/\.[^/.]+$/, "");
-            document.getElementById('editor-body').value = content;
-            RetoricaStorage.currentDocId = null; 
-            if (typeof RetoricaUI !== 'undefined') {
-                RetoricaUI.updateCounters();
-                RetoricaUI.notify("Texto importado con éxito");
+        } else if (extension === 'pdf') {
+            if (window.pdfjsLib) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var typedarray = new Uint8Array(e.target.result);
+                    window.pdfjsLib.getDocument(typedarray).promise.then(function(pdf) {
+                        var totalPages = pdf.numPages;
+                        var countPromises = [];
+                        for (var i = 1; i <= totalPages; i++) {
+                            countPromises.push(pdf.getPage(i).then(function(page) {
+                                return page.getTextContent().then(function(textContent) {
+                                    return textContent.items.map(function(s) { return s.str; }).join(' ');
+                                });
+                            }));
+                        }
+                        Promise.all(countPromises).then(function(pagesText) {
+                            document.getElementById('editor-title').value = fileName;
+                            document.getElementById('editor-body').value = pagesText.join('\n\n');
+                            RetoricaStorage.createNewDoc();
+                            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("PDF importado ✓");
+                        });
+                    });
+                };
+                reader.readAsArrayBuffer(file);
+            } else {
+                alert("La biblioteca de lectura PDF no está activa.");
             }
-        };
-        reader.readAsText(file, "UTF-8");
-        event.target.value = ''; 
+        } else {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var content = e.target.result;
+                if (extension === 'html') {
+                    var parser = new DOMParser();
+                    var doc = parser.parseFromString(content, 'text/html');
+                    content = doc.body.textContent || doc.body.innerText || "";
+                }
+                document.getElementById('editor-title').value = fileName;
+                document.getElementById('editor-body').value = content;
+                RetoricaStorage.createNewDoc();
+                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Texto importado ✓");
+            };
+            reader.readAsText(file, "UTF-8");
+        }
+        event.target.value = '';
     }
 };
