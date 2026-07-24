@@ -37,7 +37,6 @@ var RetoricaUI = {
             });
         }
 
-        // Restauración automática del último documento abierto
         var lastDocId = localStorage.getItem('retorica_last_doc_id');
         if (lastDocId && typeof RetoricaStorage !== 'undefined') {
             RetoricaStorage.loadDoc(lastDocId);
@@ -74,6 +73,12 @@ var RetoricaUI = {
                 RetoricaUI.notify("¡Retórica instalada con éxito!");
             }
         });
+    },
+
+    newDocumentAction: function() {
+        if (typeof RetoricaStorage !== 'undefined') {
+            RetoricaStorage.createNewDoc();
+        }
     },
 
     copyFullTemplate: function() {
