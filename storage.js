@@ -8,7 +8,6 @@ var RetoricaStorage = {
         return data ? JSON.parse(data) : {};
     },
 
-    // --- CORRECCIÓN PUNTO 9: FUNCIÓN AUXILIAR PARA DAR FORMATO PROFESIONAL A LA FECHA/HORA ---
     formatDate: function(isoString) {
         if (!isoString) return '--/--/---- --:--';
         var date = new Date(isoString);
@@ -40,42 +39,41 @@ var RetoricaStorage = {
 
         var docs = this.getDocs();
 
-        // --- CORRECCIÓN PUNTO 1: EVITAR DUPLICADOS POR TÍTULO ---
         if (!this.currentDocId) {
             for (var idKey in docs) {
                 if (docs[idKey].title.toLowerCase() === title.toLowerCase()) {
-                    this.currentDocId = idKey; // Vincula al documento existente
+                    this.currentDocId = idKey;
                     break;
                 }
             }
         }
 
-        // Si realmente es un documento nuevo, creamos el ID nuevo
         if (!this.currentDocId) {
             this.currentDocId = 'doc_' + Date.now();
         }
 
-        // --- CORRECCIÓN PUNTO 9: CAPTURA DE FECHA DE CREACIÓN Y EDICIÓN ---
         var nowStr = new Date().toISOString();
-        var createdAt = nowStr; // Por defecto si es nuevo
+        var createdAt = nowStr;
 
         if (docs[this.currentDocId]) {
-            // Si el documento ya existía, conservamos su fecha de creación original
             createdAt = docs[this.currentDocId].createdAt || docs[this.currentDocId].updatedAt || nowStr;
         }
-        // ------------------------------------------------------------------
 
         docs[this.currentDocId] = {
             id: this.currentDocId,
             title: title,
             body: body,
-            lang: (typeof RetoricaI18n !== 'undefined') ? RetoricaI18n.currentLang : 'en-GB', // IDIOMA GUARDADO
-            createdAt: createdAt, // Se guarda creación
-            updatedAt: nowStr    // Se guarda última modificación
+            lang: (typeof RetoricaI18n !== 'undefined') ? RetoricaI18n.currentLang : 'en-GB',
+            createdAt: createdAt,
+            updatedAt: nowStr
         };
 
         localStorage.setItem(this.dbKey, JSON.stringify(docs));
         localStorage.setItem('retorica_last_doc_id', this.currentDocId);
+
+        if (navigator.storage && navigator.storage.persist) {
+            navigator.storage.persist();
+        }
 
         if (typeof RetoricaUI !== 'undefined') {
             RetoricaUI.updateCounters();
@@ -110,20 +108,18 @@ var RetoricaStorage = {
             this.currentDocId = 'doc_' + Date.now();
         }
 
-        // --- CORRECCIÓN PUNTO 9: CAPTURA DE FECHA EN AUTOGUARDADO SILENCIOSO ---
         var nowStr = new Date().toISOString();
         var createdAt = nowStr;
 
         if (docs[this.currentDocId]) {
             createdAt = docs[this.currentDocId].createdAt || docs[this.currentDocId].updatedAt || nowStr;
         }
-        // ------------------------------------------------------------------------
 
         docs[this.currentDocId] = {
             id: this.currentDocId,
             title: title,
             body: body,
-            lang: (typeof RetoricaI18n !== 'undefined') ? RetoricaI18n.currentLang : 'en-GB', // IDIOMA GUARDADO
+            lang: (typeof RetoricaI18n !== 'undefined') ? RetoricaI18n.currentLang : 'en-GB',
             createdAt: createdAt,
             updatedAt: nowStr
         };
@@ -132,31 +128,28 @@ var RetoricaStorage = {
         localStorage.setItem('retorica_last_doc_id', this.currentDocId);
     },
 
-// Al cargar (en loadDoc):
-loadDoc: function(id) {
-    var docs = this.getDocs();
-    if (!docs[id]) return;
-    this.currentDocId = id;
-    localStorage.setItem('retorica_last_doc_id', id);
-    
-    var tInput = document.getElementById('editor-title');
-    var bInput = document.getElementById('editor-body');
-    if(tInput) tInput.value = docs[id].title;
-    if(bInput) bInput.value = docs[id].body;
+    loadDoc: function(id) {
+        var docs = this.getDocs();
+        if (!docs[id]) return;
+        this.currentDocId = id;
+        localStorage.setItem('retorica_last_doc_id', id);
+        
+        var tInput = document.getElementById('editor-title');
+        var bInput = document.getElementById('editor-body');
+        if(tInput) tInput.value = docs[id].title;
+        if(bInput) bInput.value = docs[id].body;
 
-    // RESTAURAR EL IDIOMA DEL DOCUMENTO SI EXISTE
-    if (docs[id].lang && typeof RetoricaI18n !== 'undefined') {
-        RetoricaI18n.currentLang = docs[id].lang;
-        RetoricaI18n.setAppLang(docs[id].lang);
-    }
+        if (docs[id].lang && typeof RetoricaI18n !== 'undefined') {
+            RetoricaI18n.currentLang = docs[id].lang;
+            RetoricaI18n.setAppLang(docs[id].lang);
+        }
 
-    if (typeof RetoricaUI !== 'undefined') {
-        RetoricaUI.updateCounters();
-        var sidebar = document.getElementById('sidebar');
-        if (sidebar && sidebar.classList.contains('active')) { RetoricaUI.toggleSidebar(); }
-        RetoricaUI.notify("Guion cargado (" + (docs[id].lang || "Default") + ")");
-    }
-}
+        if (typeof RetoricaUI !== 'undefined') {
+            RetoricaUI.updateCounters();
+            var sidebar = document.getElementById('sidebar');
+            if (sidebar && sidebar.classList.contains('active')) { RetoricaUI.toggleSidebar(); }
+            RetoricaUI.notify("Guion cargado (" + (docs[id].lang || "Default") + ")");
+        }
     },
 
     deleteDoc: function(id, event) {
@@ -237,23 +230,16 @@ loadDoc: function(id) {
             var titleText = doc.title || "Sin Título";
             var bodySnippet = doc.body ? doc.body.substring(0, 90) + "..." : "Sin contenido...";
 
-            // --- CORRECCIÓN PUNTO 9: GENERACIÓN DE FECHAS DE CREACIÓN Y EDICIÓN ---
-            // Si son documentos viejos que no tenían 'createdAt', usamos su 'updatedAt' como salvavidas
             var creacion = self.formatDate(doc.createdAt || doc.updatedAt);
             var edicion = self.formatDate(doc.updatedAt);
-            // ---------------------------------------------------------------------
 
             card.innerHTML = 
                 '<div class="card-template-title">' + titleText + '</div>' +
                 '<div class="card-template-body">' + bodySnippet + '</div>' +
-                
-                // --- CAPA VISUAL DE FECHAS EN LA TARJETA ---
                 '<div class="card-template-dates" style="font-size: 0.58rem; color: var(--text-muted); margin: 6px 10px 8px 10px; display: flex; flex-direction: column; gap: 2px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 5px; pointer-events: none; text-align: left;">' +
                     '<div><b>Creado:</b> ' + creacion + '</div>' +
                     '<div><b>Modificado:</b> ' + edicion + '</div>' +
                 '</div>' +
-                // ------------------------------------------
-
                 '<div class="card-template-actions">' +
                     '<button class="btn-action-tmpl" style="color:var(--danger);" onclick="RetoricaStorage.deleteDoc(\'' + doc.id + '\', event)">Borrar</button>' +
                     '<button class="btn-action-tmpl" onclick="RetoricaStorage.copyDocToClipboard(\'' + doc.id + '\', event)">Copiar</button>' +
