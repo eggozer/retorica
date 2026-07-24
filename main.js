@@ -37,6 +37,12 @@ var RetoricaUI = {
             });
         }
 
+        // Restauración automática del último documento abierto
+        var lastDocId = localStorage.getItem('retorica_last_doc_id');
+        if (lastDocId && typeof RetoricaStorage !== 'undefined') {
+            RetoricaStorage.loadDoc(lastDocId);
+        }
+
         var unifiedContainer = document.getElementById('unified-sel-container');
         if (unifiedContainer) {
             unifiedContainer.onclick = function(e) {
