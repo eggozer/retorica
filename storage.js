@@ -69,6 +69,7 @@ var RetoricaStorage = {
             id: this.currentDocId,
             title: title,
             body: body,
+            lang: (typeof RetoricaI18n !== 'undefined') ? RetoricaI18n.currentLang : 'en-GB', // IDIOMA GUARDADO
             createdAt: createdAt, // Se guarda creación
             updatedAt: nowStr    // Se guarda última modificación
         };
@@ -122,6 +123,7 @@ var RetoricaStorage = {
             id: this.currentDocId,
             title: title,
             body: body,
+            lang: (typeof RetoricaI18n !== 'undefined') ? RetoricaI18n.currentLang : 'en-GB', // IDIOMA GUARDADO
             createdAt: createdAt,
             updatedAt: nowStr
         };
@@ -130,23 +132,31 @@ var RetoricaStorage = {
         localStorage.setItem('retorica_last_doc_id', this.currentDocId);
     },
 
-    loadDoc: function(id) {
-        var docs = this.getDocs();
-        if (!docs[id]) return;
-        this.currentDocId = id;
-        localStorage.setItem('retorica_last_doc_id', id);
-        
-        var tInput = document.getElementById('editor-title');
-        var bInput = document.getElementById('editor-body');
-        if(tInput) tInput.value = docs[id].title;
-        if(bInput) bInput.value = docs[id].body;
+// Al cargar (en loadDoc):
+loadDoc: function(id) {
+    var docs = this.getDocs();
+    if (!docs[id]) return;
+    this.currentDocId = id;
+    localStorage.setItem('retorica_last_doc_id', id);
+    
+    var tInput = document.getElementById('editor-title');
+    var bInput = document.getElementById('editor-body');
+    if(tInput) tInput.value = docs[id].title;
+    if(bInput) bInput.value = docs[id].body;
 
-        if (typeof RetoricaUI !== 'undefined') {
-            RetoricaUI.updateCounters();
-            var sidebar = document.getElementById('sidebar');
-            if (sidebar && sidebar.classList.contains('active')) { RetoricaUI.toggleSidebar(); }
-            RetoricaUI.notify("Guion cargado");
-        }
+    // RESTAURAR EL IDIOMA DEL DOCUMENTO SI EXISTE
+    if (docs[id].lang && typeof RetoricaI18n !== 'undefined') {
+        RetoricaI18n.currentLang = docs[id].lang;
+        RetoricaI18n.setAppLang(docs[id].lang);
+    }
+
+    if (typeof RetoricaUI !== 'undefined') {
+        RetoricaUI.updateCounters();
+        var sidebar = document.getElementById('sidebar');
+        if (sidebar && sidebar.classList.contains('active')) { RetoricaUI.toggleSidebar(); }
+        RetoricaUI.notify("Guion cargado (" + (docs[id].lang || "Default") + ")");
+    }
+}
     },
 
     deleteDoc: function(id, event) {
