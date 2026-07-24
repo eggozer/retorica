@@ -289,6 +289,23 @@
             align-items: center !important;
             justify-content: center !important;
         }
+        /* Corrección de Fantasmas e Incompatibilidades en Tema Oscuro */
+body:not(.light-theme) .top-navbar,
+body:not(.light-theme) .accordion-panel,
+body:not(.light-theme) .glass-panel {
+    background: #161925 !important; /* Garantiza opacidad total sin traslapes */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+}
+
+body:not(.light-theme) .btn-wrapper-3d {
+    background: transparent !important;
+    mix-blend-mode: normal !important;
+}
+
+body:not(.light-theme) .btn-label-3d {
+    color: var(--text-muted) !important;
+    text-shadow: none !important;
+}
     </style>
 </head>
 <body>
