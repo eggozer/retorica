@@ -39,15 +39,7 @@ var RetoricaStorage = {
 
         var docs = this.getDocs();
 
-        if (!this.currentDocId) {
-            for (var idKey in docs) {
-                if (docs[idKey].title.toLowerCase() === title.toLowerCase()) {
-                    this.currentDocId = idKey;
-                    break;
-                }
-            }
-        }
-
+        // Generar un ID único si no hay un documento activo
         if (!this.currentDocId) {
             this.currentDocId = 'doc_' + Date.now();
         }
@@ -77,6 +69,7 @@ var RetoricaStorage = {
 
         if (typeof RetoricaUI !== 'undefined') {
             RetoricaUI.updateCounters();
+            RetoricaUI.notify("Documento guardado ✓");
         }
         this.refreshLibrary();
     },
@@ -95,15 +88,7 @@ var RetoricaStorage = {
 
         var docs = this.getDocs();
 
-        if (!this.currentDocId) {
-            for (var idKey in docs) {
-                if (docs[idKey].title.toLowerCase() === title.toLowerCase()) {
-                    this.currentDocId = idKey;
-                    break;
-                }
-            }
-        }
-
+        // Generar ID único automático para evitar sobreescritura indeseada
         if (!this.currentDocId) {
             this.currentDocId = 'doc_' + Date.now();
         }
@@ -126,6 +111,19 @@ var RetoricaStorage = {
 
         localStorage.setItem(this.dbKey, JSON.stringify(docs));
         localStorage.setItem('retorica_last_doc_id', this.currentDocId);
+    },
+
+    createNewDoc: function() {
+        this.currentDocId = null;
+        localStorage.removeItem('retorica_last_doc_id');
+        var t = document.getElementById('editor-title');
+        var b = document.getElementById('editor-body');
+        if(t) t.value = '';
+        if(b) b.value = '';
+        if (typeof RetoricaUI !== 'undefined') {
+            RetoricaUI.updateCounters();
+            RetoricaUI.notify("Nuevo lienzo listo");
+        }
     },
 
     loadDoc: function(id) {
@@ -193,8 +191,7 @@ var RetoricaStorage = {
     },
 
     clearCanvas: function() {
-        this.clearCanvasSilent();
-        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Lienzo limpio");
+        this.createNewDoc();
     },
 
     clearCanvasSilent: function() {
