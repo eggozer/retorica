@@ -30,13 +30,7 @@ var RetoricaStorage = {
         var title = titleInput.value.trim();
         var body = bodyInput.value.trim();
 
-        if (!title && !body) {
-            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Lienzo vacío. No se guardó.");
-            return;
-        }
-
-        if (!title) title = "Sin Título (" + new Date().toLocaleDateString() + ")";
-
+        // Se permite guardar siempre, incluso si no hay título ni cuerpo
         var docs = this.getDocs();
 
         if (!this.currentDocId) {
@@ -52,8 +46,8 @@ var RetoricaStorage = {
 
         docs[this.currentDocId] = {
             id: this.currentDocId,
-            title: title,
-            body: body,
+            title: title, // Puede ser string vacío
+            body: body,   // Puede ser string vacío
             lang: (typeof RetoricaI18n !== 'undefined') ? RetoricaI18n.currentLang : 'es',
             createdAt: createdAt,
             updatedAt: nowStr
@@ -76,10 +70,6 @@ var RetoricaStorage = {
 
         var title = titleInput.value.trim();
         var body = bodyInput.value.trim();
-
-        if (!title && !body) return;
-
-        if (!title) title = "Sin Título (" + new Date().toLocaleDateString() + ")";
 
         var docs = this.getDocs();
 
@@ -128,8 +118,8 @@ var RetoricaStorage = {
         
         var tInput = document.getElementById('editor-title');
         var bInput = document.getElementById('editor-body');
-        if(tInput) tInput.value = docs[id].title;
-        if(bInput) bInput.value = docs[id].body;
+        if(tInput) tInput.value = docs[id].title || '';
+        if(bInput) bInput.value = docs[id].body || '';
 
         if (docs[id].lang && typeof RetoricaI18n !== 'undefined') {
             RetoricaI18n.currentLang = docs[id].lang;
@@ -161,10 +151,11 @@ var RetoricaStorage = {
         if (event) event.stopPropagation();
         var docs = this.getDocs();
         if (!docs[id]) return;
-        var textToShare = docs[id].title.toUpperCase() + "\n\n" + docs[id].body;
+        var titleText = docs[id].title ? docs[id].title.toUpperCase() + "\n\n" : "";
+        var textToShare = titleText + (docs[id].body || "");
         
         if (navigator.share) {
-            navigator.share({ title: docs[id].title, text: textToShare }).catch(function(){});
+            navigator.share({ title: docs[id].title || "Documento Retórica", text: textToShare }).catch(function(){});
         } else {
             this.copyDocToClipboard(id, event);
         }
@@ -174,7 +165,8 @@ var RetoricaStorage = {
         if (event) event.stopPropagation();
         var docs = this.getDocs();
         if (!docs[id]) return;
-        var textToCopy = docs[id].title.toUpperCase() + "\n\n" + docs[id].body;
+        var titleText = docs[id].title ? docs[id].title.toUpperCase() + "\n\n" : "";
+        var textToCopy = titleText + (docs[id].body || "");
         var dummy = document.createElement("textarea");
         document.body.appendChild(dummy);
         dummy.value = textToCopy;
@@ -227,20 +219,33 @@ var RetoricaStorage = {
             card.className = 'card-template';
             card.setAttribute('onclick', "RetoricaStorage.loadDoc('" + doc.id + "')");
 
-            var titleText = doc.title || "Sin Título";
-            var bodySnippet = doc.body ? doc.body.substring(0, 90) + "..." : "Sin contenido...";
+            var hasTitle = doc.title && doc.title.trim().length > 0;
+            var hasBody = doc.body && doc.body.trim().length > 0;
+
+            var titleHTML = '';
+            var bodyHTML = '';
+
+            if (hasTitle) {
+                titleHTML = '<div class="card-template-title">' + doc.title + '</div>';
+                var bodySnippet = hasBody ? doc.body : '<i>Sin contenido adicional...</i>';
+                bodyHTML = '<div class="card-template-body" style="-webkit-line-clamp: 3;">' + bodySnippet + '</div>';
+            } else {
+                // Sin título: Muestra de 2 a 3 líneas del cuerpo directamente
+                var fallbackSnippet = hasBody ? doc.body : '<i>Documento sin título ni contenido</i>';
+                bodyHTML = '<div class="card-template-body" style="-webkit-line-clamp: 3; font-weight: 500; color: var(--text-main);">' + fallbackSnippet + '</div>';
+            }
 
             var creacion = self.formatDate(doc.createdAt || doc.updatedAt);
             var edicion = self.formatDate(doc.updatedAt);
 
             card.innerHTML = 
-                '<div class="card-template-title">' + titleText + '</div>' +
-                '<div class="card-template-body">' + bodySnippet + '</div>' +
-                '<div class="card-template-dates" style="font-size: 0.58rem; color: var(--text-muted); margin: 6px 10px 8px 10px; display: flex; flex-direction: column; gap: 2px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 5px; pointer-events: none; text-align: left;">' +
+                titleHTML +
+                bodyHTML +
+                '<div class="card-template-dates" style="font-size: 0.58rem; color: var(--text-muted); margin: 6px 0 8px 0; display: flex; flex-direction: column; gap: 2px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 5px; pointer-events: none; text-align: left;">' +
                     '<div><b>Creado:</b> ' + creacion + '</div>' +
                     '<div><b>Modificado:</b> ' + edicion + '</div>' +
                 '</div>' +
-                '<div class="card-template-actions">' +
+                '<div class="card-template-actions" style="display: flex; gap: 6px;">' +
                     '<button class="btn-action-tmpl" style="color:var(--danger);" onclick="RetoricaStorage.deleteDoc(\'' + doc.id + '\', event)">Borrar</button>' +
                     '<button class="btn-action-tmpl" onclick="RetoricaStorage.copyDocToClipboard(\'' + doc.id + '\', event)">Copiar</button>' +
                     '<button class="btn-action-tmpl" onclick="RetoricaStorage.shareDoc(\'' + doc.id + '\', event)">Compartir</button>' +
@@ -267,7 +272,7 @@ var RetoricaStorage = {
                             RetoricaStorage.createNewDoc();
                             if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Word (.docx) importado ✓");
                         })
-                        .catch(function(err) {
+                        .catch(function() {
                             if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error leyendo archivo Word");
                         });
                 };
