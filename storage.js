@@ -65,13 +65,15 @@ var RetoricaStorage = {
         }
         // ------------------------------------------------------------------
 
-        docs[this.currentDocId] = {
-            id: this.currentDocId,
-            title: title,
-            body: body,
-            createdAt: createdAt, // Se guarda creación
-            updatedAt: nowStr    // Se guarda última modificación
-        };
+        // Al guardar (tanto en save como en autoSaveSilent):
+docs[this.currentDocId] = {
+    id: this.currentDocId,
+    title: title,
+    body: body,
+    lang: (typeof RetoricaI18n !== 'undefined') ? RetoricaI18n.currentLang : 'en-GB', // IDIOMA GUARDADO
+    createdAt: createdAt,
+    updatedAt: nowStr
+};
 
         localStorage.setItem(this.dbKey, JSON.stringify(docs));
         localStorage.setItem('retorica_last_doc_id', this.currentDocId);
