@@ -1,145 +1,114 @@
+// --- RETÓRICA AUTHENTICATION & SYNC MANAGEMENT (auth.js) ---
 var RetoricaAuth = {
-    state: { mode: 'login', provider: null },
+    currentUser: null,
+    syncEnabled: false,
 
     initLifecycle: function() {
-        var oauthContainer = document.getElementById('oauth-container');
-        var authDivider = document.getElementById('auth-divider-line');
-        if (oauthContainer) oauthContainer.style.display = 'flex';
-        if (authDivider) authDivider.style.display = 'flex';
-
-        var providers = ['google', 'facebook', 'whatsapp'];
-        for (var i = 0; i < providers.length; i++) {
-            var btn = document.getElementById('btn-oauth-' + providers[i]);
-            if (btn) btn.style.display = 'block';
+        var savedUser = localStorage.getItem('retorica_user_session');
+        var savedSync = localStorage.getItem('retorica_sync_active');
+        
+        if (savedUser) {
+            this.currentUser = JSON.parse(savedUser);
+            this.syncEnabled = (savedSync === 'true');
         }
-        var currentActive = localStorage.getItem('ret_session_active');
-        if (currentActive) this.grantAccess(currentActive);
+        
+        this.renderAuthUI();
+        this.requestPersistentStorage();
     },
 
-    // Función auxiliar para obtener textos dinámicos o usar fallback en inglés
-    getTxt: function(key, fallback) {
-        if (typeof RetoricaI18n !== 'undefined' && RetoricaI18n.db[RetoricaI18n.currentLang]) {
-            return RetoricaI18n.db[RetoricaI18n.currentLang][key] || fallback;
+    requestPersistentStorage: function() {
+        if (navigator.storage && navigator.storage.persist) {
+            navigator.storage.persist().then(function(persistent) {
+                if (persistent && typeof RetoricaUI !== 'undefined') {
+                    console.log("Almacenamiento persistente activado ✓");
+                }
+            });
         }
-        return fallback;
     },
 
-    selectOAuth: function(prov) {
-        this.state.provider = prov;
-        var identifier = document.getElementById('auth-input-uid').value.trim();
-        if (!identifier) {
-            var m1 = this.getTxt('errUid', "Para vincular vía hardware, escribe primero tu Email/ID arriba.");
-            alert(m1);
+    loginWithEmailOrPhone: function(identifier, pass) {
+        if (!identifier || identifier.trim() === '') {
+            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Ingresa un email o teléfono válido");
             return;
         }
-        var storedProfile = localStorage.getItem('ret_profile_' + identifier);
-        if (!storedProfile) {
-            var autoProfile = { 
-                id: identifier, 
-                pass: this.quantumHash("DISPOSITIVO_LINKED_HARDWARE"), 
-                regDate: new Date().toLocaleDateString(),
-                linkedHardware: prov
-            };
-            localStorage.setItem('ret_profile_' + identifier, JSON.stringify(autoProfile));
-            var m2 = this.getTxt('okHardware', "Dispositivo vinculado localmente vía ") + prov;
-            alert(m2);
-            this.grantAccess(identifier);
-        } else {
-            var m3 = this.getTxt('syncHardware', "Sincronización manual en progreso... ¡Conectado!");
-            alert(m3);
-            this.grantAccess(identifier);
+
+        var userObj = {
+            id: 'usr_' + Date.now(),
+            identifier: identifier.trim(),
+            loginTime: new Date().toISOString()
+        };
+
+        this.currentUser = userObj;
+        this.syncEnabled = true;
+
+        localStorage.setItem('retorica_user_session', JSON.stringify(userObj));
+        localStorage.setItem('retorica_sync_active', 'true');
+
+        if (typeof RetoricaUI !== 'undefined') {
+            RetoricaUI.notify("Sesión iniciada: Sincronización activa ✓");
+        }
+
+        this.renderAuthUI();
+        if (typeof RetoricaStorage !== 'undefined') {
+            RetoricaStorage.syncWithCloud();
         }
     },
 
-    switchMode: function() {
-        var isLogin = this.state.mode === 'login';
-        this.state.mode = isLogin ? 'signup' : 'login';
-        var btnSubmit = document.getElementById('btn-submit-auth');
-        var toggleLbl = document.getElementById('auth-toggle-mode');
-        var passInput = document.getElementById('auth-input-pass');
-
-        if (isLogin) {
-            if (btnSubmit) btnSubmit.innerText = this.getTxt('btnRegister', 'REGISTRAR Y CREAR CLAVE');
-            if (toggleLbl) toggleLbl.innerText = this.getTxt('toggleHasAccount', '¿Ya tienes cuenta? Entra aquí');
-            if (passInput) {
-                var secureSeed = "RET-" + Math.random().toString(36).substring(2, 10).toUpperCase() + "-" + Date.now().toString().slice(-4);
-                passInput.value = secureSeed;
-                passInput.type = "text";
-                alert(this.getTxt('alertSeed', "¡Clave criptográfica autogenerada! Resguárdala."));
-            }
-        } else {
-            if (btnSubmit) btnSubmit.innerText = this.getTxt('btnAuth', 'CONTINUAR');
-            if (toggleLbl) toggleLbl.innerText = this.getTxt('toggleAuth', '¿No tienes cuenta? Regístrate aquí');
-            if (passInput) {
-                passInput.value = "";
-                passInput.type = "password";
-            }
-        }
-    },
-
-    quantumHash: function(str) {
-        var hash = 0;
-        if (str.length === 0) return hash.toString(16);
-        for (var i = 0; i < str.length; i++) {
-            var chr = str.charCodeAt(i);
-            hash = ((hash << 5) - hash) + chr;
-            hash |= 0;
-        }
-        return hash.toString(16);
-    },
-
-    process: function() {
-        var identifier = document.getElementById('auth-input-uid').value.trim();
-        var password = document.getElementById('auth-input-pass').value;
-        if (!identifier) {
-            alert(this.getTxt('errMissingUid', "Ingresa un correo o número telefónico."));
+    toggleCloudSync: function() {
+        if (!this.currentUser) {
+            alert("Debes iniciar sesión con tu email o teléfono para activar la nube.");
             return;
         }
-        var banList = JSON.parse(localStorage.getItem('ret_ban_list') || '[]');
-        if (banList.indexOf(identifier) > -1) {
-            alert(this.getTxt('errBanned', "Este acceso se encuentra restringido."));
-            return;
-        }
-        var storedProfile = localStorage.getItem('ret_profile_' + identifier);
-        if (this.state.mode === 'login') {
-            if (!storedProfile) {
-                alert(this.getTxt('errNoReg', "Usuario no registrado localmente. Cambia al modo de registro."));
-                return;
-            }
-            var profileData = JSON.parse(storedProfile);
-            if (profileData.pass === this.quantumHash(password) || password === "DISPOSITIVO_LINKED_HARDWARE") {
-                this.grantAccess(identifier);
-            } else {
-                alert(this.getTxt('errWrongPass', "Clave incorrecta."));
-            }
-        } else {
-            if (storedProfile) {
-                alert(this.getTxt('errAlreadyReg', "Este identificador ya está registrado."));
-                return;
-            }
-            if (password.length < 4) {
-                alert(this.getTxt('errShortPass', "La contraseña debe tener al menos 4 caracteres."));
-                return;
-            }
-            var newProfile = { id: identifier, pass: this.quantumHash(password), regDate: new Date().toLocaleDateString() };
-            localStorage.setItem('ret_profile_' + identifier, JSON.stringify(newProfile));
-            this.grantAccess(identifier);
-        }
-    },
 
-    grantAccess: function(uid) {
-        window.retoricaActiveUser = uid;
-        localStorage.setItem('ret_session_active', uid);
-        var lockScreen = document.getElementById('auth-layer-screen');
-        if (lockScreen) lockScreen.style.display = 'none';
-        var displayUser = document.getElementById('display-user-name');
-        if (displayUser) displayUser.innerText = uid;
-        if (typeof RetoricaStorage !== 'undefined') RetoricaStorage.refreshLibrary();
-        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify(this.getTxt('notifSync', "Sesión sincronizada."));
+        this.syncEnabled = !this.syncEnabled;
+        localStorage.setItem('retorica_sync_active', this.syncEnabled ? 'true' : 'false');
+
+        if (this.syncEnabled) {
+            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Nube ACTIVADA ✓ - Datos sincronizados");
+            if (typeof RetoricaStorage !== 'undefined') RetoricaStorage.syncWithCloud();
+        } else {
+            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Nube CANCELADA - Modos solo local activo");
+        }
+
+        this.renderAuthUI();
     },
 
     logout: function() {
-        localStorage.removeItem('ret_session_active');
-        location.reload();
+        if (!confirm("¿Cerrar sesión en este dispositivo? Los datos locales se conservarán.")) return;
+        
+        this.currentUser = null;
+        this.syncEnabled = false;
+        
+        localStorage.removeItem('retorica_user_session');
+        localStorage.removeItem('retorica_sync_active');
+
+        this.renderAuthUI();
+        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Sesión cerrada.");
+    },
+
+    renderAuthUI: function() {
+        var userContainer = document.getElementById('user-session-bar');
+        if (!userContainer) return;
+
+        if (this.currentUser) {
+            var syncStatusText = this.syncEnabled ? '<span style="color:#00e676;">[Nube Activa]</span>' : '<span style="color:#ff9100;">[Nube Cancelada - Solo Local]</span>';
+            userContainer.innerHTML = 
+                '<div style="font-size: 0.75rem; color: var(--text-main); display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 8px 12px; background: rgba(0,0,0,0.15); border-radius: 8px;">' +
+                    '<div><b>Usuario:</b> ' + this.currentUser.identifier + ' ' + syncStatusText + '</div>' +
+                    '<div style="display:flex; gap:8px;">' +
+                        '<button class="btn-action-tmpl" onclick="RetoricaAuth.toggleCloudSync()">' + (this.syncEnabled ? 'Desactivar Nube' : 'Activar Nube') + '</button>' +
+                        '<button class="btn-action-tmpl" style="color:var(--danger);" onclick="RetoricaAuth.logout()">Salir</button>' +
+                    '</div>' +
+                '</div>';
+        } else {
+            userContainer.innerHTML = 
+                '<div style="padding: 10px; display: flex; flex-direction: column; gap: 8px; background: rgba(0,0,0,0.1); border-radius: 8px;">' +
+                    '<div style="font-size: 0.72rem; color: var(--text-muted);">Sincronizar entre dispositivos (Privado):</div>' +
+                    '<div style="display: flex; gap: 6px;">' +
+                        '<input type="text" id="auth-input-id" placeholder="Email o Número de Teléfono" style="flex:1; padding:6px; font-size:0.75rem; border-radius:4px; border:1px solid #555; background:var(--bg-main); color:var(--text-main);">' +
+                        '<button class="btn-action-tmpl" onclick="RetoricaAuth.loginWithEmailOrPhone(document.getElementById(\'auth-input-id\').value)">Iniciar / Crear</button>' +
+                    '</div>' +
+                '</div>';
+        }
     }
 };
