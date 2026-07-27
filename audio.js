@@ -1,7 +1,39 @@
 // --- RETÓRICA AUDIO & SPEECH ENGINE (audio.js) ---
 var RetoricaAudio = {
     state: { isRecording: false, recognition: null },
-    
+    selectedVoiceIndex: null,
+
+    // Cargar y filtrar voces del sistema
+    loadVoices: function() {
+        if (!('speechSynthesis' in window)) return;
+        var voices = window.speechSynthesis.getVoices();
+        var select = document.getElementById('voice-picker');
+        if (!select) return;
+
+        select.innerHTML = '';
+        if (voices.length === 0) {
+            select.innerHTML = '<option value="">No hay voces disponibles</option>';
+            return;
+        }
+
+        // Filtramos priorizando español, pero mostramos todas las disponibles
+        var esVoices = voices.filter(function(v) { return v.lang.startsWith('es'); });
+        var displayVoices = esVoices.length > 0 ? esVoices : voices;
+
+        displayVoices.forEach(function(voice, index) {
+            var option = document.createElement('option');
+            option.value = index;
+            option.textContent = voice.name + ' (' + voice.lang + ')';
+            select.appendChild(option);
+        });
+
+        RetoricaAudio.selectedVoiceIndex = 0;
+    },
+
+    onVoiceSelected: function(index) {
+        this.selectedVoiceIndex = parseInt(index, 10);
+    },
+
     toggleMic: function() {
         var btn = document.getElementById('btn-mic-main');
         var Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -14,8 +46,6 @@ var RetoricaAudio = {
             this.state.recognition = new Speech(); 
             this.state.recognition.continuous = true;
             this.state.recognition.interimResults = false;
-            
-            // Dictado usa el idioma de texto configurado en la app
             this.state.recognition.lang = typeof RetoricaI18n !== 'undefined' ? RetoricaI18n.currentLang : 'es-MX';
             
             this.state.recognition.onresult = function(event) {
@@ -51,8 +81,12 @@ var RetoricaAudio = {
         if (btn) btn.classList.remove('recording-active');
     },
 
-    // LECTURA AJUSTADA AL ACENTO EXCLUSIVO DE RETORICAI18N.CURRENTVOICELANG
     play: function() {
+        if (!('speechSynthesis' in window)) {
+            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("TTS no soportado en este navegador");
+            return;
+        }
+
         window.speechSynthesis.cancel(); 
         var body = document.getElementById('editor-body').value.trim();
         if (!body) { 
@@ -62,8 +96,16 @@ var RetoricaAudio = {
 
         var utterance = new SpeechSynthesisUtterance(body);
         
-        // CORRECCIÓN CLAVE: Aplica el idioma acústico del botón "Idioma Voz" sin traducir el escrito
-        utterance.lang = typeof RetoricaI18n !== 'undefined' ? RetoricaI18n.currentVoiceLang : 'es-MX';
+        // Asignar voz seleccionada en el desplegable
+        var voices = window.speechSynthesis.getVoices();
+        var esVoices = voices.filter(function(v) { return v.lang.startsWith('es'); });
+        var activeVoices = esVoices.length > 0 ? esVoices : voices;
+
+        if (this.selectedVoiceIndex !== null && activeVoices[this.selectedVoiceIndex]) {
+            utterance.voice = activeVoices[this.selectedVoiceIndex];
+        } else {
+            utterance.lang = typeof RetoricaI18n !== 'undefined' ? RetoricaI18n.currentVoiceLang : 'es-MX';
+        }
         
         utterance.onstart = function() { 
             var playBtn = document.getElementById('btn-play-main'); 
@@ -79,15 +121,15 @@ var RetoricaAudio = {
         };
         
         window.speechSynthesis.speak(utterance); 
-        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Leyendo con acento experimental...");
+        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Leyendo texto...");
     },
 
     stop: function() {
-        if(window.speechSynthesis) window.speechSynthesis.cancel();
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
         var playBtn = document.getElementById('btn-play-main');
         if (playBtn) playBtn.classList.remove('reading-active');
         this.stopMicLocally();
-        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Hilos abortados.");
+        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Audio detenido.");
     },
 
     produceVoiceMessage: function() {
@@ -105,91 +147,35 @@ var RetoricaAudio = {
         }
         
         if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Renderizando texto a voz... ⚙️");
-
         if (window.speechSynthesis) window.speechSynthesis.cancel();
 
         var utterance = new SpeechSynthesisUtterance(body);
-        
-        // Aplica el acento fonético experimental seleccionado para el archivo de salida
         utterance.lang = typeof RetoricaI18n !== 'undefined' ? RetoricaI18n.currentVoiceLang : 'es-MX';
         
         utterance.onstart = function() {
             if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Reproduciendo render final ✓");
         };
 
-        utterance.onerror = function() {
-            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error en la síntesis de voz.");
-        };
-
         window.speechSynthesis.speak(utterance);
 
-        // Exportación física local corregida
         var title = document.getElementById('editor-title').value.trim() || "audio";
         var dummyBlob = new Blob([body], { type: 'audio/mp3' });
         var url = URL.createObjectURL(dummyBlob);
         var a = document.createElement('a'); 
-        a.href = url; a.download = title + "_" + utterance.lang + ".mp3"; a.click();
+        a.href = url; 
+        a.download = title + "_" + utterance.lang + ".mp3"; 
+        a.click();
         setTimeout(function() { URL.revokeObjectURL(url); }, 100);
     }
-    // --- RETÓRICA TEXT-TO-SPEECH (TTS) ENGINE ---
-var RetoricaAudio = {
-    selectedVoice: null,
-
-    // Cargar y filtrar voces en español disponibles en el SO
-    loadVoices: function() {
-        if (!('speechSynthesis' in window)) return;
-        var voices = window.speechSynthesis.getVoices();
-        var esVoices = voices.filter(function(v) { return v.lang.startsWith('es'); });
-        
-        var select = document.getElementById('voice-picker');
-        if (!select) return;
-        select.innerHTML = '';
-
-        esVoices.forEach(function(voice, index) {
-            var option = document.createElement('option');
-            option.value = index;
-            option.textContent = voice.name + ' (' + voice.lang + ')';
-            select.appendChild(option);
-        });
-
-        if (esVoices.length > 0) {
-            RetoricaAudio.selectedVoice = esVoices[0];
-        }
-    },
-
-    // Leer el texto del lienzo #editor-body
-    speak: function() {
-        if (!('speechSynthesis' in window)) {
-            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("TTS no soportado en este navegador");
-            return;
-        }
-
-        var text = document.getElementById('editor-body') ? document.getElementById('editor-body').value : '';
-        if (!text.trim()) return;
-
-        window.speechSynthesis.cancel(); // Detener lecturas previas
-
-        var utterance = new SpeechSynthesisUtterance(text);
-        
-        var select = document.getElementById('voice-picker');
-        var voices = window.speechSynthesis.getVoices().filter(function(v) { return v.lang.startsWith('es'); });
-        if (select && voices[select.value]) {
-            utterance.voice = voices[select.value];
-        }
-
-        window.speechSynthesis.speak(utterance);
-    },
-
-    // Detener audio
-    stop: function() {
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel();
-        }
-    }
 };
 
-// Cargar voces al iniciar el navegador
+// Inicialización de voces al cargar el navegador
 if ('speechSynthesis' in window) {
-    window.speechSynthesis.onvoiceschanged = RetoricaAudio.loadVoices;
+    window.speechSynthesis.onvoiceschanged = function() {
+        RetoricaAudio.loadVoices();
+    };
+    // Intento directo en carga inicial por si ya estaban disponibles
+    document.addEventListener('DOMContentLoaded', function() {
+        RetoricaAudio.loadVoices();
+    });
 }
-};
