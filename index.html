@@ -500,6 +500,14 @@ body:not(.light-theme) .btn-label-3d {
                     <span class="icon-raw">🌐</span>
                 </button>
             </div>
+            <!-- SELECTOR DE VOCES Y CONTROLES DE LECTURA -->
+<div class="tts-controls" style="display: flex; gap: 8px; align-items: center; margin: 8px 0;">
+    <select id="voice-picker" style="flex: 1; padding: 6px; border-radius: 6px; background: var(--bg-card); color: var(--text-main); border: 1px solid rgba(255,255,255,0.1); font-size: 0.8rem;">
+        <option>Cargando voces...</option>
+    </select>
+    <button onclick="RetoricaAudio.speak()" class="btn-action" style="padding: 6px 12px;">▶ Leer</button>
+    <button onclick="RetoricaAudio.stop()" class="btn-action" style="padding: 6px 12px; color: var(--danger);">⏹ Detener</button>
+</div>
         </div>
     </nav>
 
