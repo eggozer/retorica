@@ -314,4 +314,79 @@ var RetoricaStorage = {
         // Puente de sincronización privada background (Mantenimiento de copias redundantes)
         console.log("Sincronizando biblioteca con respaldo de cuenta para: " + RetoricaAuth.currentUser.identifier);
     }
+    
+        importLocalFile: function(event) {
+        var file = event.target.files[0];
+        if (!file) return;
+
+        var fileName = file.name;
+        var baseName = fileName.substring(0, fileName.lastIndexOf('.')) || fileName;
+        var ext = fileName.split('.').pop().toLowerCase();
+
+        var tInput = document.getElementById('editor-title');
+        var bInput = document.getElementById('editor-body');
+
+        // Reiniciar ID para crear una entrada nueva en la biblioteca al guardar
+        this.currentDocId = null;
+        localStorage.removeItem('retorica_last_doc_id');
+
+        if (tInput) tInput.value = baseName;
+
+        if (ext === 'docx') {
+            if (typeof mammoth === 'undefined') {
+                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error: Librería Word no cargada");
+                return;
+            }
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                mammoth.extractRawText({ arrayBuffer: e.target.result }).then(function(result) {
+                    if (bInput) bInput.value = result.value;
+                    if (typeof RetoricaUI !== 'undefined') {
+                        RetoricaUI.updateCounters();
+                        RetoricaUI.notify("Documento Word cargado ✓");
+                    }
+                });
+            };
+            reader.readAsArrayBuffer(file);
+        } else if (ext === 'pdf') {
+            if (typeof pdfjsLib === 'undefined') {
+                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error: Librería PDF no cargada");
+                return;
+            }
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var typedarray = new Uint8Array(e.target.result);
+                pdfjsLib.getDocument(typedarray).promise.then(function(pdf) {
+                    var maxPages = pdf.numPages;
+                    var countPromises = [];
+                    for (var j = 1; j <= maxPages; j++) {
+                        countPromises.push(pdf.getPage(j).then(function(page) {
+                            return page.getTextContent().then(function(textObj) {
+                                return textObj.items.map(function(item) { return item.str; }).join(' ');
+                            });
+                        }));
+                    }
+                    Promise.all(countPromises).then(function(texts) {
+                        if (bInput) bInput.value = texts.join('\n\n');
+                        if (typeof RetoricaUI !== 'undefined') {
+                            RetoricaUI.updateCounters();
+                            RetoricaUI.notify("PDF cargado en lienzo ✓");
+                        }
+                    });
+                });
+            };
+            reader.readAsArrayBuffer(file);
+        } else {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                if (bInput) bInput.value = e.target.result;
+                if (typeof RetoricaUI !== 'undefined') {
+                    RetoricaUI.updateCounters();
+                    RetoricaUI.notify("Archivo de texto cargado ✓");
+                }
+            };
+            reader.readAsText(file);
+        }
+        event.target.value = ''; // Limpiar selector
+    }
 };
