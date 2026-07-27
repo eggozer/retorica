@@ -131,4 +131,65 @@ var RetoricaAudio = {
         a.href = url; a.download = title + "_" + utterance.lang + ".mp3"; a.click();
         setTimeout(function() { URL.revokeObjectURL(url); }, 100);
     }
+    // --- RETÓRICA TEXT-TO-SPEECH (TTS) ENGINE ---
+var RetoricaAudio = {
+    selectedVoice: null,
+
+    // Cargar y filtrar voces en español disponibles en el SO
+    loadVoices: function() {
+        if (!('speechSynthesis' in window)) return;
+        var voices = window.speechSynthesis.getVoices();
+        var esVoices = voices.filter(function(v) { return v.lang.startsWith('es'); });
+        
+        var select = document.getElementById('voice-picker');
+        if (!select) return;
+        select.innerHTML = '';
+
+        esVoices.forEach(function(voice, index) {
+            var option = document.createElement('option');
+            option.value = index;
+            option.textContent = voice.name + ' (' + voice.lang + ')';
+            select.appendChild(option);
+        });
+
+        if (esVoices.length > 0) {
+            RetoricaAudio.selectedVoice = esVoices[0];
+        }
+    },
+
+    // Leer el texto del lienzo #editor-body
+    speak: function() {
+        if (!('speechSynthesis' in window)) {
+            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("TTS no soportado en este navegador");
+            return;
+        }
+
+        var text = document.getElementById('editor-body') ? document.getElementById('editor-body').value : '';
+        if (!text.trim()) return;
+
+        window.speechSynthesis.cancel(); // Detener lecturas previas
+
+        var utterance = new SpeechSynthesisUtterance(text);
+        
+        var select = document.getElementById('voice-picker');
+        var voices = window.speechSynthesis.getVoices().filter(function(v) { return v.lang.startsWith('es'); });
+        if (select && voices[select.value]) {
+            utterance.voice = voices[select.value];
+        }
+
+        window.speechSynthesis.speak(utterance);
+    },
+
+    // Detener audio
+    stop: function() {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+        }
+    }
+};
+
+// Cargar voces al iniciar el navegador
+if ('speechSynthesis' in window) {
+    window.speechSynthesis.onvoiceschanged = RetoricaAudio.loadVoices;
+}
 };
