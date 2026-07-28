@@ -74,7 +74,16 @@ var RetoricaI18n = {
         }
     },
 
-    init: function() { this.setAppLang(this.currentLang); },
+    init: function() {
+    var sysLang = (navigator.language || navigator.userLanguage || 'en-GB').toLowerCase();
+    var match = this.langsOrder.find(function(l) { return l.toLowerCase() === sysLang; });
+    if (!match) {
+        var sysCode = sysLang.split('-')[0];
+        match = this.langsOrder.find(function(l) { return l.toLowerCase().startsWith(sysCode); });
+    }
+    var finalLang = match || 'en-GB';
+    this.setAppLang(finalLang);
+},
 
     setAppLang: function(lang) {
         var prevLang = this.currentLang;
