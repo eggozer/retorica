@@ -136,8 +136,7 @@ var RetoricaI18n = {
             toolContainer.style.flexWrap = 'nowrap';
         }
         
-        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Idioma Activo: " + p.name);
-        this.checkAndTranslateSelection(prevLang, lang);
+                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Idioma Activo: " + p.name);
     },
 
     // Alternar apertura y cierre del acordeón
