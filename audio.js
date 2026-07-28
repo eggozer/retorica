@@ -52,34 +52,43 @@ var RetoricaAudio = {
     },
 
     // LECTURA AJUSTADA AL ACENTO EXCLUSIVO DE RETORICAI18N.CURRENTVOICELANG
-    play: function() {
-        window.speechSynthesis.cancel(); 
-        var body = document.getElementById('editor-body').value.trim();
-        if (!body) { 
-            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("No hay texto para leer."); 
-            return; 
+       play: function() {
+        if (!('speechSynthesis' in window)) {
+            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Lectura de voz no disponible.");
+            return;
         }
+        try {
+            window.speechSynthesis.cancel(); 
+            var bodyInput = document.getElementById('editor-body');
+            var body = bodyInput ? bodyInput.value.trim() : '';
+            if (!body) { 
+                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("No hay texto para leer."); 
+                return; 
+            }
 
-        var utterance = new SpeechSynthesisUtterance(body);
-        
-        // CORRECCIÓN CLAVE: Aplica el idioma acústico del botón "Idioma Voz" sin traducir el escrito
-        utterance.lang = typeof RetoricaI18n !== 'undefined' ? RetoricaI18n.currentVoiceLang : 'es-MX';
-        
-        utterance.onstart = function() { 
+            var utterance = new SpeechSynthesisUtterance(body);
+            utterance.lang = typeof RetoricaI18n !== 'undefined' ? RetoricaI18n.currentVoiceLang : 'es-MX';
+            
+            utterance.onstart = function() { 
+                var playBtn = document.getElementById('btn-play-main'); 
+                if (playBtn) playBtn.classList.add('reading-active'); 
+            };
+            utterance.onend = function() { 
+                var playBtn = document.getElementById('btn-play-main'); 
+                if (playBtn) playBtn.classList.remove('reading-active'); 
+            };
+            utterance.onerror = function() {
+                var playBtn = document.getElementById('btn-play-main'); 
+                if (playBtn) playBtn.classList.remove('reading-active'); 
+            };
+            
+            window.speechSynthesis.speak(utterance); 
+            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Leyendo con acento experimental...");
+        } catch (err) {
+            console.error("Error en síntesis de voz:", err);
             var playBtn = document.getElementById('btn-play-main'); 
-            if (playBtn) playBtn.classList.add('reading-active'); 
-        };
-        utterance.onend = function() { 
-            var playBtn = document.getElementById('btn-play-main'); 
-            if (playBtn) playBtn.classList.remove('reading-active'); 
-        };
-        utterance.onerror = function() {
-            var playBtn = document.getElementById('btn-play-main'); 
-            if (playBtn) playBtn.classList.remove('reading-active'); 
-        };
-        
-        window.speechSynthesis.speak(utterance); 
-        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Leyendo con acento experimental...");
+            if (playBtn) playBtn.classList.remove('reading-active');
+        }
     },
 
     stop: function() {
