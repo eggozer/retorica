@@ -217,8 +217,11 @@ var RetoricaI18n = {
 
     var url = "https://api.mymemory.translated.net/get?q=" + encodeURIComponent(selectedText) + "&langpair=" + sourceClean + "|" + targetClean;
 
-    fetch(url)
-        .then(function(res) { return res.json(); })
+        fetch(url)
+        .then(function(res) { 
+            if (!res.ok) throw new Error("Error HTTP " + res.status);
+            return res.json(); 
+        })
         .then(function(data) {
             if (data && data.responseData && data.responseStatus === 200) {
                 var translatedText = data.responseData.translatedText;
@@ -243,8 +246,8 @@ var RetoricaI18n = {
             } else {
                 if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Servidor de traducción ocupado.");
             }
-        }).catch(function() {
-            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Sin red para traducir el fragmento.");
+        }).catch(function(err) {
+            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Sin red o límite de traducción excedido.");
         });
 }
 };
