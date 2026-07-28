@@ -197,7 +197,9 @@ var RetoricaI18n = {
             track.appendChild(wrapper);
         });
     }, // <-- LLAVE DE CIERRE AGREGADA (CORRECCIÓN DE SINTAXIS)
-
+    translateWork: function() {
+        this.checkAndTranslateSelection(this.currentLang, this.currentLang);
+    },
     checkAndTranslateSelection: function(sourceLang, targetLang) {
     var editor = document.getElementById('editor-body');
     if (!editor || !editor.value.trim()) return;
