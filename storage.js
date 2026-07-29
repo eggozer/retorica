@@ -193,19 +193,34 @@ var RetoricaStorage = {
     },
 
     shareDoc: function(id, event) {
-        if (event) event.stopPropagation();
-        this.getDocById(id, function(doc) {
-            if (!doc) return;
-            var titleText = doc.title ? doc.title.toUpperCase() + "\n\n" : "";
-            var textToShare = titleText + (doc.body || "");
-            
-            if (navigator.share) {
-                navigator.share({ title: doc.title || "Documento Retórica", text: textToShare }).catch(function(){});
-            } else {
-                RetoricaStorage.copyDocToClipboard(id, event);
-            }
-        });
-    },
+    if (event) event.stopPropagation();
+    this.getDocById(id, function(doc) {
+        if (!doc) return;
+        
+        var titleText = doc.title ? doc.title.toUpperCase() + "\n\n" : "";
+        var textToShare = titleText + (doc.body || "");
+
+        // Verificación de soporte de Web Share API en dispositivos móviles
+        if (navigator.share) {
+            navigator.share({
+                title: doc.title || "Documento Retórica",
+                text: textToShare
+            })
+            .then(function() {
+                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Compartido con éxito");
+            })
+            .catch(function(err) {
+                // Si el usuario cancela la acción, evitamos errores en consola
+                if (err.name !== 'AbortError') {
+                    RetoricaStorage.copyDocToClipboard(id, event);
+                }
+            });
+        } else {
+            // Fallback para navegadores de escritorio o sin soporte de share nativo
+            RetoricaStorage.copyDocToClipboard(id, event);
+        }
+    });
+},
 
     copyDocToClipboard: function(id, event) {
         if (event) event.stopPropagation();
