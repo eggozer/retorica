@@ -539,7 +539,9 @@ body:not(.light-theme) .btn-label-3d {
             <div class="grid-templates" id="docs-list-render"></div>
         </div>
         <div class="sidebar-footer">
-            <div style="font-size:0.7rem; color:var(--text-muted); font-weight:bold;"><span id="lbl-side-user">USER:</span> <span id="display-user-name" style="color:var(--text-main);">Anon</span></div>
+            <div style="font-size:0.7rem; color:var(--text-muted); font-weight:bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 75%;">
+                <span id="lbl-side-user">USER:</span> <span id="display-user-name" style="color:var(--text-main);">Anon</span>
+            </div>
             <button onclick="RetoricaAuth.logout()" style="color:var(--text-muted); background:transparent; border:none; font-size:0.85rem; font-weight:bold; cursor:pointer;" id="lbl-side-logout">SALIR</button>
         </div>
     </div>
