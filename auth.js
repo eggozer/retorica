@@ -1,141 +1,110 @@
+// --- RETÓRICA AUTHENTICATION & DEFENSE ENGINE (auth.js - V2026) ---
 var RetoricaAuth = {
-    state: { mode: 'login', provider: null },
+    state: { mode: 'email' },
 
     initLifecycle: function() {
-        var oauthContainer = document.getElementById('oauth-container');
-        var authDivider = document.getElementById('auth-divider-line');
-        if (oauthContainer) oauthContainer.style.display = 'flex';
-        if (authDivider) authDivider.style.display = 'flex';
-
-        var providers = ['google', 'facebook', 'whatsapp'];
-        for (var i = 0; i < providers.length; i++) {
-            var btn = document.getElementById('btn-oauth-' + providers[i]);
-            if (btn) btn.style.display = 'block';
-        }
         var currentActive = localStorage.getItem('ret_session_active');
-        if (currentActive) this.grantAccess(currentActive);
+        if (currentActive) {
+            this.grantAccess(currentActive);
+        }
     },
 
-    // Función auxiliar para obtener textos dinámicos o usar fallback en inglés
     getTxt: function(key, fallback) {
-        if (typeof RetoricaI18n !== 'undefined' && RetoricaI18n.db[RetoricaI18n.currentLang]) {
+        if (typeof RetoricaI18n !== 'undefined' && RetoricaI18n.db && RetoricaI18n.db[RetoricaI18n.currentLang]) {
             return RetoricaI18n.db[RetoricaI18n.currentLang][key] || fallback;
         }
         return fallback;
     },
 
-    selectOAuth: function(prov) {
-        this.state.provider = prov;
-        var identifier = document.getElementById('auth-input-uid').value.trim();
-        if (!identifier) {
-            var m1 = this.getTxt('errUid', "Para vincular vía hardware, escribe primero tu Email/ID arriba.");
-            alert(m1);
-            return;
-        }
-        var storedProfile = localStorage.getItem('ret_profile_' + identifier);
-        if (!storedProfile) {
-            var autoProfile = { 
-                id: identifier, 
-                pass: this.quantumHash("DISPOSITIVO_LINKED_HARDWARE"), 
-                regDate: new Date().toLocaleDateString(),
-                linkedHardware: prov
-            };
-            localStorage.setItem('ret_profile_' + identifier, JSON.stringify(autoProfile));
-            var m2 = this.getTxt('okHardware', "Dispositivo vinculado localmente vía ") + prov;
-            alert(m2);
-            this.grantAccess(identifier);
-        } else {
-            var m3 = this.getTxt('syncHardware', "Sincronización manual en progreso... ¡Conectado!");
-            alert(m3);
-            this.grantAccess(identifier);
-        }
-    },
+    switchAccessMode: function(mode) {
+        this.state.mode = mode;
+        var containerEmail = document.getElementById('group-input-email');
+        var containerPhone = document.getElementById('group-input-phone');
+        
+        var btnGoogle = document.getElementById('btn-mode-google');
+        var btnPhone = document.getElementById('btn-mode-phone');
+        var btnDual = document.getElementById('btn-mode-dual');
 
-    switchMode: function() {
-        var isLogin = this.state.mode === 'login';
-        this.state.mode = isLogin ? 'signup' : 'login';
-        var btnSubmit = document.getElementById('btn-submit-auth');
-        var toggleLbl = document.getElementById('auth-toggle-mode');
-        var passInput = document.getElementById('auth-input-pass');
+        if (btnGoogle) btnGoogle.style.opacity = (mode === 'email') ? '1' : '0.5';
+        if (btnPhone) btnPhone.style.opacity = (mode === 'phone') ? '1' : '0.5';
+        if (btnDual) btnDual.style.opacity = (mode === 'dual') ? '1' : '0.5';
 
-        if (isLogin) {
-            if (btnSubmit) btnSubmit.innerText = this.getTxt('btnRegister', 'REGISTRAR Y CREAR CLAVE');
-            if (toggleLbl) toggleLbl.innerText = this.getTxt('toggleHasAccount', '¿Ya tienes cuenta? Entra aquí');
-            if (passInput) {
-                var secureSeed = "RET-" + Math.random().toString(36).substring(2, 10).toUpperCase() + "-" + Date.now().toString().slice(-4);
-                passInput.value = secureSeed;
-                passInput.type = "text";
-                alert(this.getTxt('alertSeed', "¡Clave criptográfica autogenerada! Resguárdala."));
-            }
-        } else {
-            if (btnSubmit) btnSubmit.innerText = this.getTxt('btnAuth', 'CONTINUAR');
-            if (toggleLbl) toggleLbl.innerText = this.getTxt('toggleAuth', '¿No tienes cuenta? Regístrate aquí');
-            if (passInput) {
-                passInput.value = "";
-                passInput.type = "password";
-            }
+        if (mode === 'email') {
+            if (containerEmail) containerEmail.style.display = 'block';
+            if (containerPhone) containerPhone.style.display = 'none';
+        } else if (mode === 'phone') {
+            if (containerEmail) containerEmail.style.display = 'none';
+            if (containerPhone) containerPhone.style.display = 'block';
+        } else if (mode === 'dual') {
+            if (containerEmail) containerEmail.style.display = 'block';
+            if (containerPhone) containerPhone.style.display = 'block';
         }
-    },
-
-    quantumHash: function(str) {
-        var hash = 0;
-        if (str.length === 0) return hash.toString(16);
-        for (var i = 0; i < str.length; i++) {
-            var chr = str.charCodeAt(i);
-            hash = ((hash << 5) - hash) + chr;
-            hash |= 0;
-        }
-        return hash.toString(16);
     },
 
     process: function() {
-        var identifier = document.getElementById('auth-input-uid').value.trim();
-        var password = document.getElementById('auth-input-pass').value;
-        if (!identifier) {
-            alert(this.getTxt('errMissingUid', "Ingresa un correo o número telefónico."));
-            return;
+        var emailVal = document.getElementById('auth-input-email') ? document.getElementById('auth-input-email').value.trim() : '';
+        var phoneVal = document.getElementById('auth-input-phone') ? document.getElementById('auth-input-phone').value.trim() : '';
+        
+        var finalUid = '';
+
+        if (this.state.mode === 'email') {
+            if (!emailVal || emailVal.indexOf('@') === -1) {
+                alert(this.getTxt('errInvalidEmail', "Ingresa un correo electrónico válido."));
+                return;
+            }
+            finalUid = emailVal;
+        } else if (this.state.mode === 'phone') {
+            // Limpieza y validación de dígitos telefónicos universales
+            var cleanPhone = phoneVal.replace(/\D/g, '');
+            if (cleanPhone.length < 7) {
+                alert(this.getTxt('errInvalidPhone', "Ingresa un número celular válido."));
+                return;
+            }
+            finalUid = "+" + cleanPhone;
+        } else if (this.state.mode === 'dual') {
+            var cleanPhoneDual = phoneVal.replace(/\D/g, '');
+            if (!emailVal || emailVal.indexOf('@') === -1 || cleanPhoneDual.length < 7) {
+                alert(this.getTxt('errInvalidDual', "Ingresa un email válido y un número de celular."));
+                return;
+            }
+            finalUid = emailVal + " | +" + cleanPhoneDual;
         }
+
+        // --- SISTEMA DE DEFENSA Y BAN LIST ---
         var banList = JSON.parse(localStorage.getItem('ret_ban_list') || '[]');
-        if (banList.indexOf(identifier) > -1) {
-            alert(this.getTxt('errBanned', "Este acceso se encuentra restringido."));
+        if (banList.indexOf(finalUid) > -1 || banList.indexOf(emailVal) > -1) {
+            alert(this.getTxt('errBanned', "Este acceso se encuentra restringido por seguridad."));
             return;
         }
-        var storedProfile = localStorage.getItem('ret_profile_' + identifier);
-        if (this.state.mode === 'login') {
-            if (!storedProfile) {
-                alert(this.getTxt('errNoReg', "Usuario no registrado localmente. Cambia al modo de registro."));
-                return;
-            }
-            var profileData = JSON.parse(storedProfile);
-            if (profileData.pass === this.quantumHash(password) || password === "DISPOSITIVO_LINKED_HARDWARE") {
-                this.grantAccess(identifier);
-            } else {
-                alert(this.getTxt('errWrongPass', "Clave incorrecta."));
-            }
-        } else {
-            if (storedProfile) {
-                alert(this.getTxt('errAlreadyReg', "Este identificador ya está registrado."));
-                return;
-            }
-            if (password.length < 4) {
-                alert(this.getTxt('errShortPass', "La contraseña debe tener al menos 4 caracteres."));
-                return;
-            }
-            var newProfile = { id: identifier, pass: this.quantumHash(password), regDate: new Date().toLocaleDateString() };
-            localStorage.setItem('ret_profile_' + identifier, JSON.stringify(newProfile));
-            this.grantAccess(identifier);
-        }
+
+        // Guardado local de perfil
+        var profile = {
+            id: finalUid,
+            loginType: this.state.mode,
+            lastAccess: new Date().toISOString()
+        };
+        localStorage.setItem('ret_profile_' + finalUid, JSON.stringify(profile));
+
+        this.grantAccess(finalUid);
     },
 
     grantAccess: function(uid) {
         window.retoricaActiveUser = uid;
         localStorage.setItem('ret_session_active', uid);
+        
         var lockScreen = document.getElementById('auth-layer-screen');
         if (lockScreen) lockScreen.style.display = 'none';
+
         var displayUser = document.getElementById('display-user-name');
         if (displayUser) displayUser.innerText = uid;
-        if (typeof RetoricaStorage !== 'undefined') RetoricaStorage.refreshLibrary();
-        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify(this.getTxt('notifSync', "Sesión sincronizada."));
+
+        if (typeof RetoricaStorage !== 'undefined') {
+            RetoricaStorage.refreshLibrary();
+        }
+        
+        if (typeof RetoricaUI !== 'undefined') {
+            RetoricaUI.notify("Sesión activada ✓");
+        }
     },
 
     logout: function() {
