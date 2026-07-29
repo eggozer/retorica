@@ -367,6 +367,7 @@ body:not(.light-theme) .btn-label-3d {
 <body>
 
     <!-- CAPA DE AUTENTICACIÓN -->
+    <!-- CAPA DE AUTENTICACIÓN -->
     <div class="auth-overlay" id="auth-layer-screen">
         <div class="auth-card">
             <div class="auth-logo-container">
@@ -376,25 +377,27 @@ body:not(.light-theme) .btn-label-3d {
                 <div class="auth-logo">RETÓRICA</div>
                 <div class="auth-subtitle">SISTEMA MODULAR PROFESIONAL</div>
             </div>
-            <div class="input-group">
-                <label id="lbl-auth-user">USUARIO DIGITAL (EMAIL / ID)</label>
-                <input type="text" id="auth-input-uid" class="input-field" placeholder="ejemplo@retorica.com">
+
+            <!-- MÉTODOS DE INGRESO DIRECTOS -->
+            <div class="oauth-container" style="display: flex; gap: 8px; margin-bottom: 20px;">
+                <button class="btn-oauth" id="btn-mode-google" style="display: block; flex: 1; text-align: center; font-size: 0.7rem;" onclick="RetoricaAuth.switchAccessMode('email')">EMAIL / GOOGLE</button>
+                <button class="btn-oauth" id="btn-mode-phone" style="display: block; flex: 1; text-align: center; font-size: 0.7rem; opacity: 0.5;" onclick="RetoricaAuth.switchAccessMode('phone')">NÚMERO CELULAR</button>
+                <button class="btn-oauth" id="btn-mode-dual" style="display: block; flex: 1; text-align: center; font-size: 0.7rem; opacity: 0.5;" onclick="RetoricaAuth.switchAccessMode('dual')">EMAIL + CELULAR</button>
             </div>
-            <div class="input-group">
-                <label id="lbl-auth-pass">CLAVE CRIPTOGRÁFICA</label>
-                <input type="password" id="auth-input-pass" class="input-field" placeholder="••••••••">
+
+            <div class="input-group" id="group-input-email">
+                <label id="lbl-auth-email">CORREO ELECTRÓNICO (GOOGLE / EMAIL)</label>
+                <input type="email" id="auth-input-email" class="input-field" placeholder="ejemplo@gmail.com">
             </div>
-            <button class="btn-auth-3d" id="btn-submit-auth" onclick="RetoricaAuth.process()">CONTINUAR</button>
-            <div style="margin-top:15px; font-size:0.7rem; font-weight:bold;">
-                <span id="auth-toggle-mode" style="color:var(--text-muted); cursor:pointer;" onclick="RetoricaAuth.switchMode()">¿No tienes cuenta? Regístrate aquí</span>
+
+            <div class="input-group" id="group-input-phone" style="display: none;">
+                <label id="lbl-auth-phone">NÚMERO TELEFÓNICO CELULAR</label>
+                <input type="tel" id="auth-input-phone" class="input-field" placeholder="Ingresa tu número celular">
             </div>
-            <div class="auth-divider" id="auth-divider-line">O ACCEDER VÍA HARDWARE</div>
-            <div class="oauth-container" id="oauth-container">
-                <button class="btn-oauth" id="btn-oauth-google" onclick="RetoricaAuth.selectOAuth('Google')">VINCULAR DISPOSITIVO GOOGLE</button>
-                <button class="btn-oauth" id="btn-oauth-facebook" onclick="RetoricaAuth.selectOAuth('Facebook')">VINCULAR DISPOSITIVO FACEBOOK</button>
-                <button class="btn-oauth" id="btn-oauth-whatsapp" onclick="RetoricaAuth.selectOAuth('WhatsApp')">VINCULAR DISPOSITIVO WHATSAPP</button>
-            </div>
+
+            <button class="btn-auth-3d" id="btn-submit-auth" style="margin-top: 10px;" onclick="RetoricaAuth.process()">CONTINUAR E INGRESAR</button>
         </div>
+    </div>
     </div>
 
     <!-- ENCABEZADO PRINCIPAL CENTRADO Y LIMPIO -->
