@@ -6,6 +6,15 @@ var RetoricaStorage = {
     currentDocId: null,
 
     initDB: function(callback) {
+        // Solicitar persistencia de almacenamiento nativa para prevenir borrado de caché
+        if (navigator.storage && navigator.storage.persist) {
+            navigator.storage.persist().then(function(persistent) {
+                console.log("Retórica - Almacenamiento persistente:", persistent ? "Garantizado" : "Temporal");
+            }).catch(function(e) {
+                console.warn("No se pudo solicitar persistencia:", e);
+            });
+        }
+
         if (this.dbInstance) {
             if (callback) callback();
             return;
@@ -14,8 +23,11 @@ var RetoricaStorage = {
         var self = this;
         var request = indexedDB.open(this.dbName, this.dbVersion);
 
-        request.onerror = function() {
-            console.error("Error abriendo IndexedDB. Fallback a almacenamiento local.");
+        request.onerror = function(e) {
+            console.error("Error abriendo IndexedDB:", e);
+            if (typeof RetoricaUI !== 'undefined') {
+                RetoricaUI.notify("Error de acceso a almacenamiento local");
+            }
             if (callback) callback();
         };
 
@@ -128,11 +140,18 @@ var RetoricaStorage = {
 
     getAllDocs: function(callback) {
         this.initDB(function() {
+            if (!RetoricaStorage.dbInstance) {
+                callback([]);
+                return;
+            }
             var transaction = RetoricaStorage.dbInstance.transaction(['documents'], 'readonly');
             var store = transaction.objectStore('documents');
             var request = store.getAll();
             request.onsuccess = function(e) {
                 callback(e.target.result || []);
+            };
+            request.onerror = function() {
+                callback([]);
             };
         });
     },
@@ -335,6 +354,8 @@ var RetoricaStorage = {
         var fileName = file.name.replace(/\.[^/.]+$/, "");
         var ext = file.name.split('.').pop().toLowerCase();
 
+        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Leyendo archivo...");
+
         if (ext === 'pdf') {
             this.readPdfFile(file, function(extractedText) {
                 self.injectAndSaveDoc(fileName, extractedText);
@@ -351,7 +372,6 @@ var RetoricaStorage = {
             reader.readAsText(file);
         }
 
-        // Reset del selector de archivo para permitir cargar el mismo archivo varias veces
         event.target.value = '';
     },
 
@@ -359,26 +379,41 @@ var RetoricaStorage = {
         var reader = new FileReader();
         reader.onload = function(e) {
             var typedarray = new Uint8Array(e.target.result);
-            if (typeof pdfjsLib === 'undefined') {
+            
+            // Detección de motor PDF
+            var pdfEngine = (typeof pdfjsLib !== 'undefined') ? pdfjsLib : window['pdfjs-dist/build/pdf'];
+            
+            if (!pdfEngine) {
                 if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error: Motor PDF no disponible");
                 return;
             }
-            pdfjsLib.getDocument(typedarray).promise.then(function(pdf) {
+
+            var loadingTask = pdfEngine.getDocument({ data: typedarray });
+            loadingTask.promise.then(function(pdf) {
                 var maxPages = pdf.numPages;
-                var countPromises = [];
+                var pagePromises = [];
+
                 for (var i = 1; i <= maxPages; i++) {
-                    countPromises.push(pdf.getPage(i).then(function(page) {
-                        return page.getTextContent().then(function(textContent) {
-                            return textContent.items.map(function(item) { return item.str; }).join(' ');
-                        });
-                    }));
+                    pagePromises.push(
+                        pdf.getPage(i).then(function(page) {
+                            return page.getTextContent().then(function(textContent) {
+                                return textContent.items.map(function(item) { return item.str; }).join(' ');
+                            });
+                        })
+                    );
                 }
-                Promise.all(countPromises).then(function(pagesText) {
-                    callback(pagesText.join('\n\n'));
+
+                Promise.all(pagePromises).then(function(pagesText) {
+                    var fullText = pagesText.join('\n\n').trim();
+                    if (!fullText) {
+                        fullText = "[PDF escaneado o sin texto seleccionable detectado]";
+                    }
+                    callback(fullText);
                 });
             }).catch(function(err) {
-                console.error("Error al leer PDF:", err);
+                console.error("Error al procesar PDF:", err);
                 if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error al leer el archivo PDF");
+                callback("[Error al extraer texto del archivo PDF]");
             });
         };
         reader.readAsArrayBuffer(file);
@@ -394,11 +429,16 @@ var RetoricaStorage = {
             }
             mammoth.extractRawText({ arrayBuffer: arrayBuffer })
                 .then(function(result) {
-                    callback(result.value);
+                    var text = (result && result.value) ? result.value.trim() : "";
+                    if (!text) {
+                        text = "[Documento Word sin texto detectable]";
+                    }
+                    callback(text);
                 })
                 .catch(function(err) {
                     console.error("Error al leer Word:", err);
                     if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error al procesar archivo Word");
+                    callback("[Error al extraer texto de Word]");
                 });
         };
         reader.readAsArrayBuffer(file);
