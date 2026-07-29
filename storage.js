@@ -193,34 +193,31 @@ var RetoricaStorage = {
     },
 
     shareDoc: function(id, event) {
-    if (event) event.stopPropagation();
-    this.getDocById(id, function(doc) {
-        if (!doc) return;
-        
-        var titleText = doc.title ? doc.title.toUpperCase() + "\n\n" : "";
-        var textToShare = titleText + (doc.body || "");
+        if (event) event.stopPropagation();
+        this.getDocById(id, function(doc) {
+            if (!doc) return;
+            
+            var titleText = doc.title ? doc.title.toUpperCase() + "\n\n" : "";
+            var textToShare = titleText + (doc.body || "");
 
-        // Verificación de soporte de Web Share API en dispositivos móviles
-        if (navigator.share) {
-            navigator.share({
-                title: doc.title || "Documento Retórica",
-                text: textToShare
-            })
-            .then(function() {
-                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Compartido con éxito");
-            })
-            .catch(function(err) {
-                // Si el usuario cancela la acción, evitamos errores en consola
-                if (err.name !== 'AbortError') {
-                    RetoricaStorage.copyDocToClipboard(id, event);
-                }
-            });
-        } else {
-            // Fallback para navegadores de escritorio o sin soporte de share nativo
-            RetoricaStorage.copyDocToClipboard(id, event);
-        }
-    });
-},
+            if (navigator.share) {
+                navigator.share({
+                    title: doc.title || "Documento Retórica",
+                    text: textToShare
+                })
+                .then(function() {
+                    if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Compartido con éxito");
+                })
+                .catch(function(err) {
+                    if (err.name !== 'AbortError') {
+                        RetoricaStorage.copyDocToClipboard(id, event);
+                    }
+                });
+            } else {
+                RetoricaStorage.copyDocToClipboard(id, event);
+            }
+        });
+    },
 
     copyDocToClipboard: function(id, event) {
         if (event) event.stopPropagation();
@@ -326,7 +323,96 @@ var RetoricaStorage = {
         if (typeof RetoricaAuth === 'undefined' || !RetoricaAuth.syncEnabled || !RetoricaAuth.currentUser) {
             return;
         }
-        // Puente de sincronización privada background (Mantenimiento de copias redundantes)
         console.log("Sincronizando biblioteca con respaldo de cuenta para: " + RetoricaAuth.currentUser.identifier);
+    },
+
+    // --- MÓDULO DE IMPORTACIÓN LOCAL DE DOCUMENTOS (PDF, WORD, TXT, HTML) ---
+    importLocalFile: function(event) {
+        var file = event.target.files[0];
+        if (!file) return;
+
+        var self = this;
+        var fileName = file.name.replace(/\.[^/.]+$/, "");
+        var ext = file.name.split('.').pop().toLowerCase();
+
+        if (ext === 'pdf') {
+            this.readPdfFile(file, function(extractedText) {
+                self.injectAndSaveDoc(fileName, extractedText);
+            });
+        } else if (ext === 'docx' || ext === 'doc') {
+            this.readWordFile(file, function(extractedText) {
+                self.injectAndSaveDoc(fileName, extractedText);
+            });
+        } else {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                self.injectAndSaveDoc(fileName, e.target.result);
+            };
+            reader.readAsText(file);
+        }
+
+        // Reset del selector de archivo para permitir cargar el mismo archivo varias veces
+        event.target.value = '';
+    },
+
+    readPdfFile: function(file, callback) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var typedarray = new Uint8Array(e.target.result);
+            if (typeof pdfjsLib === 'undefined') {
+                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error: Motor PDF no disponible");
+                return;
+            }
+            pdfjsLib.getDocument(typedarray).promise.then(function(pdf) {
+                var maxPages = pdf.numPages;
+                var countPromises = [];
+                for (var i = 1; i <= maxPages; i++) {
+                    countPromises.push(pdf.getPage(i).then(function(page) {
+                        return page.getTextContent().then(function(textContent) {
+                            return textContent.items.map(function(item) { return item.str; }).join(' ');
+                        });
+                    }));
+                }
+                Promise.all(countPromises).then(function(pagesText) {
+                    callback(pagesText.join('\n\n'));
+                });
+            }).catch(function(err) {
+                console.error("Error al leer PDF:", err);
+                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error al leer el archivo PDF");
+            });
+        };
+        reader.readAsArrayBuffer(file);
+    },
+
+    readWordFile: function(file, callback) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var arrayBuffer = e.target.result;
+            if (typeof mammoth === 'undefined') {
+                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error: Motor Word no disponible");
+                return;
+            }
+            mammoth.extractRawText({ arrayBuffer: arrayBuffer })
+                .then(function(result) {
+                    callback(result.value);
+                })
+                .catch(function(err) {
+                    console.error("Error al leer Word:", err);
+                    if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error al procesar archivo Word");
+                });
+        };
+        reader.readAsArrayBuffer(file);
+    },
+
+    injectAndSaveDoc: function(title, body) {
+        this.createNewDoc();
+        var tInput = document.getElementById('editor-title');
+        var bInput = document.getElementById('editor-body');
+
+        if (tInput) tInput.value = title || 'Documento Importado';
+        if (bInput) bInput.value = body || '';
+
+        this.save();
+        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Documento importado con éxito ✓");
     }
 };
