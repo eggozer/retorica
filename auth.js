@@ -167,7 +167,12 @@ var RetoricaCrypto = {
             combined.set(iv, 0);
             combined.set(cipherArray, iv.length);
             
-            return btoa(String.fromCharCode.apply(null, combined));
+            return // En lugar de: btoa(String.fromCharCode.apply(null, combined))
+// Usa esto (seguro para textos grandes):
+var binString = Array.from(combined, function(byte) {
+    return String.fromCharCode(byte);
+}).join('');
+return btoa(binString);
         } catch(e) {
             console.error("Error al cifrar:", e);
             return plainText; // Fallback
