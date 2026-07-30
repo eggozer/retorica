@@ -339,10 +339,77 @@ var RetoricaStorage = {
     },
 
     syncWithCloud: function() {
-        if (typeof RetoricaAuth === 'undefined' || !RetoricaAuth.syncEnabled || !RetoricaAuth.currentUser) {
+        if (typeof window.retoricaActiveUser === 'undefined' || !window.retoricaActiveUser) {
+            return; // No hay usuario activo para sincronizar
+        }
+        
+        var userId = encodeURIComponent(window.retoricaActiveUser);
+        var self = this;
+
+        this.getAllDocs(function(docs) {
+            if (docs.length === 0) return; // Nada que respaldar
+
+            // NOTA: Sustituye esta URL por tu endpoint REST real (Firebase/Supabase)
+            var cloudUrl = 'https://tu-backend-retorica.com/api/sync/' + userId;
+
+            fetch(cloudUrl, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ documents: docs, lastSync: new Date().toISOString() })
+            })
+            .then(function(response) {
+                if (response.ok) console.log("Retórica: Respaldo automático en la nube exitoso.");
+            })
+            .catch(function(error) {
+                console.error("Retórica: Error de red al sincronizar en segundo plano", error);
+            });
+        });
+    },
+
+    manualSync: function() {
+        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Sincronizando con la nube...");
+        
+        if (typeof window.retoricaActiveUser === 'undefined' || !window.retoricaActiveUser) {
+            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error: Inicia sesión primero");
             return;
         }
-        console.log("Sincronizando biblioteca con respaldo de cuenta para: " + RetoricaAuth.currentUser.identifier);
+        
+        var self = this;
+        var userId = encodeURIComponent(window.retoricaActiveUser);
+        
+        // NOTA: Misma URL de tu base de datos en la nube
+        var cloudUrl = 'https://tu-backend-retorica.com/api/sync/' + userId;
+
+        // 1. Descargar de la nube (Pull)
+        fetch(cloudUrl)
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            if (data && data.documents && data.documents.length > 0) {
+                self.initDB(function() {
+                    var transaction = self.dbInstance.transaction(['documents'], 'readwrite');
+                    var store = transaction.objectStore('documents');
+                    
+                    data.documents.forEach(function(doc) {
+                        store.put(doc); // Actualiza si existe, inserta si es nuevo
+                    });
+                    
+                    transaction.oncomplete = function() {
+                        self.refreshLibrary();
+                        // 2. Subir lo local a la nube para asegurar paridad (Push)
+                        self.syncWithCloud();
+                        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Sincronización completada ✓");
+                    };
+                });
+            } else {
+                // Si la nube está vacía, forzamos el respaldo local actual
+                self.syncWithCloud();
+                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Respaldado en la nube ✓");
+            }
+        })
+        .catch(function(err) {
+            console.error("Fallo de red en sync manual", err);
+            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error de red al sincronizar");
+        });
     },
 
     // --- MÓDULO DE IMPORTACIÓN LOCAL DE DOCUMENTOS (PDF, WORD, TXT, HTML) ---
