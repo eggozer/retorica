@@ -100,6 +100,18 @@ var RetoricaAuth = {
 
         if (typeof RetoricaStorage !== 'undefined') {
             RetoricaStorage.refreshLibrary();
+            
+            // --- NUEVO: SISTEMA DE AUTO-RECUPERACIÓN ---
+            setTimeout(function() {
+                RetoricaStorage.getAllDocs(function(docs) {
+                    if (docs.length === 0) {
+                        console.log("Base de datos local vacía. Intentando recuperar desde la nube...");
+                        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Recuperando archivos...");
+                        RetoricaStorage.manualSync();
+                    }
+                });
+            }, 800); // Pequeño retraso para asegurar que la DB está inicializada
+            // -------------------------------------------
         }
         
         if (typeof RetoricaUI !== 'undefined') {
