@@ -5,8 +5,14 @@ var RetoricaStorage = {
     dbInstance: null,
     currentDocId: null,
 
+    // Función de sanitización XSS
+    escapeHTML: function(str) {
+        return String(str || '').replace(/[&<>"']/g, function(m) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+        });
+    },
+
     initDB: function(callback) {
-        // Solicitar persistencia de almacenamiento nativa para prevenir borrado de caché
         if (navigator.storage && navigator.storage.persist) {
             navigator.storage.persist().then(function(persistent) {
                 console.log("Retórica - Almacenamiento persistente:", persistent ? "Garantizado" : "Temporal");
@@ -272,6 +278,8 @@ var RetoricaStorage = {
         var container = document.getElementById('docs-list-render');
         if (!container) return;
 
+        var self = this;
+
         this.getAllDocs(function(sortedDocs) {
             container.innerHTML = '';
 
@@ -289,6 +297,9 @@ var RetoricaStorage = {
                 card.className = 'card-template';
                 card.setAttribute('onclick', "RetoricaStorage.loadDoc('" + doc.id + "')");
 
+                var safeTitle = self.escapeHTML(doc.title);
+                var safeBody = self.escapeHTML(doc.body);
+
                 var hasTitle = doc.title && doc.title.trim().length > 0;
                 var hasBody = doc.body && doc.body.trim().length > 0;
 
@@ -296,22 +307,17 @@ var RetoricaStorage = {
                 var bodyHTML = '';
 
                 if (hasTitle) {
-                    titleHTML = '<div class="card-template-title">' + doc.title + '</div>';
-                    var bodySnippet = hasBody ? doc.body : '<i>Sin contenido adicional...</i>';
+                    titleHTML = '<div class="card-template-title">' + safeTitle + '</div>';
+                    var bodySnippet = hasBody ? safeBody : '<i>Sin contenido adicional...</i>';
                     bodyHTML = '<div class="card-template-body" style="-webkit-line-clamp: 3;">' + bodySnippet + '</div>';
                 } else {
-                    var fallbackSnippet = hasBody ? doc.body : '<i>Documento sin título ni contenido</i>';
+                    var fallbackSnippet = hasBody ? safeBody : '<i>Documento sin título ni contenido</i>';
                     bodyHTML = '<div class="card-template-body" style="-webkit-line-clamp: 3; font-weight: 500; color: var(--text-main);">' + fallbackSnippet + '</div>';
                 }
 
                 var creacion = RetoricaStorage.formatDate(doc.createdAt || doc.updatedAt);
                 var edicion = RetoricaStorage.formatDate(doc.updatedAt);
-     
-                escapeHTML: function(str) {
-    return String(str || '').replace(/[&<>"']/g, function(m) {
-        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
-    });
-     }
+
                 card.innerHTML = 
                     titleHTML +
                     bodyHTML +
@@ -353,7 +359,6 @@ var RetoricaStorage = {
         this.getAllDocs(async function(docs) {
             if (docs.length === 0) return;
 
-            // Cifrado E2EE local de cada documento antes de enviar
             var encryptedDocs = await Promise.all(docs.map(async function(doc) {
                 return {
                     id: doc.id,
@@ -366,7 +371,6 @@ var RetoricaStorage = {
                 };
             }));
 
-            // Endpoint del backend (ej. Firebase Realtime DB)
             var cloudUrl = 'https://tu-proyecto-firebase.firebaseio.com/users/' + encodedUid + '/docs.json';
 
             fetch(cloudUrl, {
@@ -400,7 +404,6 @@ var RetoricaStorage = {
             var response = await fetch(cloudUrl);
             var rawData = await response.json();
 
-            // Normalización para aceptar tanto Arrays como Objetos de Firebase
             var encryptedDocs = [];
             if (rawData) {
                 if (Array.isArray(rawData)) {
@@ -411,7 +414,6 @@ var RetoricaStorage = {
             }
 
             if (encryptedDocs.length > 0) {
-                // Descifrar cada documento localmente en el dispositivo
                 var decryptedDocs = await Promise.all(encryptedDocs.map(async function(doc) {
                     if (doc && doc.isEncrypted) {
                         return {
@@ -440,7 +442,6 @@ var RetoricaStorage = {
                     };
                 });
             } else {
-                // Si la nube está vacía, enviamos el respaldo cifrado local
                 self.syncWithCloud();
                 if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Respaldo local cifrado enviado ✓");
             }
@@ -450,7 +451,6 @@ var RetoricaStorage = {
         }
     },
 
-    // --- MÓDULO DE IMPORTACIÓN LOCAL DE DOCUMENTOS (PDF, WORD, TXT, HTML) ---
     importLocalFile: function(event) {
         var file = event.target.files[0];
         if (!file) return;
@@ -485,7 +485,6 @@ var RetoricaStorage = {
         reader.onload = function(e) {
             var typedarray = new Uint8Array(e.target.result);
             
-            // Detección de motor PDF
             var pdfEngine = (typeof pdfjsLib !== 'undefined') ? pdfjsLib : window['pdfjs-dist/build/pdf'];
             
             if (!pdfEngine) {
