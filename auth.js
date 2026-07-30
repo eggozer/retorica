@@ -123,4 +123,75 @@ var RetoricaAuth = {
         localStorage.removeItem('ret_session_active');
         location.reload();
     }
+// --- RETÓRICA E2EE CRYPTO ENGINE (Web Crypto API) ---
+var RetoricaCrypto = {
+    // Genera una clave AES-GCM derivada del UID del usuario
+    getKey: async function(rawUid) {
+        var enc = new TextEncoder();
+        var keyMaterial = await window.crypto.subtle.importKey(
+            "raw", 
+            enc.encode(rawUid + "_RETORICA_SALT_2026"), 
+            { name: "PBKDF2" }, 
+            false, 
+            ["deriveKey"]
+        );
+        return window.crypto.subtle.deriveKey(
+            {
+                name: "PBKDF2",
+                salt: enc.encode("RETORICA_SECURE_SALT"),
+                iterations: 100000,
+                hash: "SHA-256"
+            },
+            keyMaterial,
+            { name: "AES-GCM", length: 256 },
+            false,
+            ["encrypt", "decrypt"]
+        );
+    },
+
+    // Cifra texto plano y devuelve un texto codificado en Base64 con su Vector de Inicialización (IV)
+    encryptData: async function(plainText, rawUid) {
+        try {
+            var key = await this.getKey(rawUid);
+            var iv = window.crypto.getRandomValues(new Uint8Array(12));
+            var enc = new TextEncoder();
+            var encrypted = await window.crypto.subtle.encrypt(
+                { name: "AES-GCM", iv: iv },
+                key,
+                enc.encode(plainText)
+            );
+            
+            var cipherArray = new Uint8Array(encrypted);
+            var combined = new Uint8Array(iv.length + cipherArray.length);
+            combined.set(iv, 0);
+            combined.set(cipherArray, iv.length);
+            
+            return btoa(String.fromCharCode.apply(null, combined));
+        } catch(e) {
+            console.error("Error al cifrar:", e);
+            return plainText; // Fallback
+        }
+    },
+
+    // Descifra el texto Base64 usando la clave del usuario
+    decryptData: async function(cipherBase64, rawUid) {
+        try {
+            var key = await this.getKey(rawUid);
+            var combined = new Uint8Array(atob(cipherBase64).split("").map(c => c.charCodeAt(0)));
+            var iv = combined.slice(0, 12);
+            var cipherData = combined.slice(12);
+            
+            var decrypted = await window.crypto.subtle.decrypt(
+                { name: "AES-GCM", iv: iv },
+                key,
+                cipherData
+            );
+            
+            var dec = new TextDecoder();
+            return dec.decode(decrypted);
+        } catch(e) {
+            console.error("Error al descifrar:", e);
+            return cipherBase64; // Retorna tal cual si ya estaba descifrado o falla
+        }
+    }
 };
