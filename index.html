@@ -490,6 +490,14 @@
         <span class="icon-raw" style="filter: grayscale(100%);">🔄</span>
     </button>
 </div>
+            <!-- Botón de Exportar con tus clases CSS -->
+<button class="btn-3d" onclick="RetoricaStorage.exportBackup()">📥 Descargar Copia de Seguridad</button>
+
+<!-- Botón de Importar con tus clases CSS -->
+<button class="btn-3d" onclick="document.getElementById('importFileInput').click()">📤 Restaurar Copia de Seguridad</button>
+
+<!-- Input de archivo (sigue oculto, no afecta visualmente en nada) -->
+<input type="file" id="importFileInput" accept=".json" style="display: none;" onchange="RetoricaStorage.importBackup(event)">
             <div class="btn-wrapper-3d">
                 <div class="btn-label-3d" id="lbl-tool-zoomin">Zoom +</div>
                 <button class="btn-round-3d" onclick="RetoricaUI.adjustZoom(0.1)"><span class="icon-raw">＋</span></button>
