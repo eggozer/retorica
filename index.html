@@ -363,6 +363,60 @@
         .card-template {
             min-width: 0; /* Previene desbordamiento en rejilla de 2 columnas */
         }
+        /* ========================================================= */
+/* CORRECCIÓN PARA MODO HORIZONTAL (LANDSCAPE)               */
+/* ========================================================= */
+@media screen and (orientation: landscape) and (max-height: 500px) {
+    /* Permite scroll global si la pantalla es muy corta */
+    body, html {
+        overflow: auto !important;
+    }
+
+    /* Compacta el encabezado del título */
+    .header-app {
+        height: 40px !important;
+        min-height: 40px !important;
+    }
+
+    .header-app h1 {
+        font-size: 1rem !important;
+    }
+
+    .header-icon-wrapper {
+        width: 26px !important;
+        height: 26px !important;
+    }
+
+    /* Asegura que la botonera sea visible y no se recorte */
+    .top-navbar {
+        position: relative !important; /* Desactiva el sticky rígido en pantallas bajas */
+        top: 0 !important;
+        overflow: visible !important;
+        padding: 5px 10px !important;
+        align-items: center !important;
+    }
+
+    /* Reduce ligeramente los tamaños de los botones para optimizar espacio */
+    .top-navbar .btn-round-3d {
+        width: 36px !important;
+        height: 36px !important;
+    }
+
+    .top-navbar .btn-wrapper-3d {
+        width: 50px !important;
+    }
+
+    .top-navbar .btn-label-3d {
+        font-size: 0.55rem !important;
+        min-height: 1rem !important;
+        max-height: 1rem !important;
+    }
+
+    /* Garantiza que el editor se ajuste adecuadamente */
+    .textarea-main {
+        min-height: 180px !important;
+    }
+}
     </style>
 </head>
 <body>
