@@ -392,18 +392,29 @@ var RetoricaStorage = {
         var cloudUrl = 'https://tu-proyecto-firebase.firebaseio.com/users/' + encodedUid + '/docs.json';
 
         try {
+        try {
             var response = await fetch(cloudUrl);
-            var encryptedDocs = await response.json();
+            var rawData = await response.json();
 
-            if (encryptedDocs && Array.isArray(encryptedDocs) && encryptedDocs.length > 0) {
+            // Normalización para aceptar tanto Arrays como Objetos de Firebase
+            var encryptedDocs = [];
+            if (rawData) {
+                if (Array.isArray(rawData)) {
+                    encryptedDocs = rawData;
+                } else if (typeof rawData === 'object') {
+                    encryptedDocs = Object.values(rawData);
+                }
+            }
+
+            if (encryptedDocs.length > 0) {
                 // Descifrar cada documento localmente en el dispositivo
                 var decryptedDocs = await Promise.all(encryptedDocs.map(async function(doc) {
-                    if (doc.isEncrypted) {
+                    if (doc && doc.isEncrypted) {
                         return {
                             id: doc.id,
-                            title: await RetoricaCrypto.decryptData(doc.title, userId),
-                            body: await RetoricaCrypto.decryptData(doc.body, userId),
-                            lang: doc.lang,
+                            title: await RetoricaCrypto.decryptData(doc.title || '', userId),
+                            body: await RetoricaCrypto.decryptData(doc.body || '', userId),
+                            lang: doc.lang || 'es',
                             createdAt: doc.createdAt,
                             updatedAt: doc.updatedAt
                         };
@@ -416,7 +427,7 @@ var RetoricaStorage = {
                     var store = transaction.objectStore('documents');
                     
                     decryptedDocs.forEach(function(doc) {
-                        store.put(doc);
+                        if (doc && doc.id) store.put(doc);
                     });
                     
                     transaction.oncomplete = function() {
