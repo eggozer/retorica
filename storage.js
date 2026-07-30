@@ -558,5 +558,71 @@ var RetoricaStorage = {
 
         this.save();
         if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Documento importado con éxito ✓");
+    },
+    // --- EXPORTAR E IMPORTAR COPIA DE SEGURIDAD (.JSON) ---
+    exportBackup: function() {
+        var self = this;
+        this.getAllDocs(function(allDocs) {
+            if (!allDocs || allDocs.length === 0) {
+                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("No hay proyectos para exportar");
+                return;
+            }
+
+            var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allDocs, null, 2));
+            var downloadAnchor = document.createElement('a');
+            var date = new Date().toISOString().slice(0, 10);
+            
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "retorica_backup_" + date + ".json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+
+            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Copia de seguridad descargada ✓");
+        });
+    },
+
+    importBackup: function(event) {
+        var file = event.target.files[0];
+        if (!file) return;
+
+        var self = this;
+        var reader = new FileReader();
+
+        reader.onload = function(e) {
+            try {
+                var importedData = JSON.parse(e.target.result);
+
+                if (!Array.isArray(importedData)) {
+                    if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Formato de archivo no válido");
+                    return;
+                }
+
+                if (!confirm("¿Deseas restaurar " + importedData.length + " proyecto(s)? Los documentos existentes se actualizarán.")) return;
+
+                self.initDB(function() {
+                    var transaction = self.dbInstance.transaction(['documents'], 'readwrite');
+                    var store = transaction.objectStore('documents');
+
+                    importedData.forEach(function(doc) {
+                        if (doc && doc.id) {
+                            store.put(doc);
+                        }
+                    });
+
+                    transaction.oncomplete = function() {
+                        self.refreshLibrary();
+                        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Respaldo restaurado con éxito ✓");
+                    };
+                });
+
+            } catch (err) {
+                console.error("Error al importar archivo JSON:", err);
+                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error: El archivo JSON está dañado");
+            }
+        };
+
+        reader.readAsText(file);
+        event.target.value = '';
     }
 };
