@@ -392,7 +392,6 @@ var RetoricaStorage = {
         var cloudUrl = 'https://tu-proyecto-firebase.firebaseio.com/users/' + encodedUid + '/docs.json';
 
         try {
-        try {
             var response = await fetch(cloudUrl);
             var rawData = await response.json();
 
