@@ -306,7 +306,12 @@ var RetoricaStorage = {
 
                 var creacion = RetoricaStorage.formatDate(doc.createdAt || doc.updatedAt);
                 var edicion = RetoricaStorage.formatDate(doc.updatedAt);
-
+     
+                escapeHTML: function(str) {
+    return String(str || '').replace(/[&<>"']/g, function(m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+    });
+     }
                 card.innerHTML = 
                     titleHTML +
                     bodyHTML +
