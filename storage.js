@@ -338,36 +338,48 @@ var RetoricaStorage = {
         return day + '/' + month + '/' + year + ' ' + hours + ':' + minutes;
     },
 
-    syncWithCloud: function() {
-        if (typeof window.retoricaActiveUser === 'undefined' || !window.retoricaActiveUser) {
-            return; // No hay usuario activo para sincronizar
-        }
+    syncWithCloud: async function() {
+        if (typeof window.retoricaActiveUser === 'undefined' || !window.retoricaActiveUser) return;
         
-        var userId = encodeURIComponent(window.retoricaActiveUser);
+        var userId = window.retoricaActiveUser;
+        var encodedUid = encodeURIComponent(userId);
         var self = this;
 
-        this.getAllDocs(function(docs) {
-            if (docs.length === 0) return; // Nada que respaldar
+        this.getAllDocs(async function(docs) {
+            if (docs.length === 0) return;
 
-            // NOTA: Sustituye esta URL por tu endpoint REST real (Firebase/Supabase)
-            var cloudUrl = 'https://tu-backend-retorica.com/api/sync/' + userId;
+            // Cifrado E2EE local de cada documento antes de enviar
+            var encryptedDocs = await Promise.all(docs.map(async function(doc) {
+                return {
+                    id: doc.id,
+                    title: await RetoricaCrypto.encryptData(doc.title || '', userId),
+                    body: await RetoricaCrypto.encryptData(doc.body || '', userId),
+                    lang: doc.lang,
+                    createdAt: doc.createdAt,
+                    updatedAt: doc.updatedAt,
+                    isEncrypted: true
+                };
+            }));
+
+            // Endpoint del backend (ej. Firebase Realtime DB)
+            var cloudUrl = 'https://tu-proyecto-firebase.firebaseio.com/users/' + encodedUid + '/docs.json';
 
             fetch(cloudUrl, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ documents: docs, lastSync: new Date().toISOString() })
+                body: JSON.stringify(encryptedDocs)
             })
-            .then(function(response) {
-                if (response.ok) console.log("Retórica: Respaldo automático en la nube exitoso.");
+            .then(function(res) {
+                if (res.ok) console.log("Retórica: Respaldo cifrado E2EE guardado con éxito.");
             })
-            .catch(function(error) {
-                console.error("Retórica: Error de red al sincronizar en segundo plano", error);
+            .catch(function(err) {
+                console.error("Error de red en respaldo cifrado", err);
             });
         });
     },
 
-    manualSync: function() {
-        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Sincronizando con la nube...");
+    manualSync: async function() {
+        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Sincronizando de extremo a extremo...");
         
         if (typeof window.retoricaActiveUser === 'undefined' || !window.retoricaActiveUser) {
             if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error: Inicia sesión primero");
@@ -375,41 +387,52 @@ var RetoricaStorage = {
         }
         
         var self = this;
-        var userId = encodeURIComponent(window.retoricaActiveUser);
-        
-        // NOTA: Misma URL de tu base de datos en la nube
-        var cloudUrl = 'https://tu-backend-retorica.com/api/sync/' + userId;
+        var userId = window.retoricaActiveUser;
+        var encodedUid = encodeURIComponent(userId);
+        var cloudUrl = 'https://tu-proyecto-firebase.firebaseio.com/users/' + encodedUid + '/docs.json';
 
-        // 1. Descargar de la nube (Pull)
-        fetch(cloudUrl)
-        .then(function(res) { return res.json(); })
-        .then(function(data) {
-            if (data && data.documents && data.documents.length > 0) {
+        try {
+            var response = await fetch(cloudUrl);
+            var encryptedDocs = await response.json();
+
+            if (encryptedDocs && Array.isArray(encryptedDocs) && encryptedDocs.length > 0) {
+                // Descifrar cada documento localmente en el dispositivo
+                var decryptedDocs = await Promise.all(encryptedDocs.map(async function(doc) {
+                    if (doc.isEncrypted) {
+                        return {
+                            id: doc.id,
+                            title: await RetoricaCrypto.decryptData(doc.title, userId),
+                            body: await RetoricaCrypto.decryptData(doc.body, userId),
+                            lang: doc.lang,
+                            createdAt: doc.createdAt,
+                            updatedAt: doc.updatedAt
+                        };
+                    }
+                    return doc;
+                }));
+
                 self.initDB(function() {
                     var transaction = self.dbInstance.transaction(['documents'], 'readwrite');
                     var store = transaction.objectStore('documents');
                     
-                    data.documents.forEach(function(doc) {
-                        store.put(doc); // Actualiza si existe, inserta si es nuevo
+                    decryptedDocs.forEach(function(doc) {
+                        store.put(doc);
                     });
                     
                     transaction.oncomplete = function() {
                         self.refreshLibrary();
-                        // 2. Subir lo local a la nube para asegurar paridad (Push)
-                        self.syncWithCloud();
-                        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Sincronización completada ✓");
+                        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Información restaurada y descifrada ✓");
                     };
                 });
             } else {
-                // Si la nube está vacía, forzamos el respaldo local actual
+                // Si la nube está vacía, enviamos el respaldo cifrado local
                 self.syncWithCloud();
-                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Respaldado en la nube ✓");
+                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Respaldo local cifrado enviado ✓");
             }
-        })
-        .catch(function(err) {
-            console.error("Fallo de red en sync manual", err);
-            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error de red al sincronizar");
-        });
+        } catch(err) {
+            console.error("Error al sincronizar datos cifrados:", err);
+            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error al conectar con la nube");
+        }
     },
 
     // --- MÓDULO DE IMPORTACIÓN LOCAL DE DOCUMENTOS (PDF, WORD, TXT, HTML) ---
