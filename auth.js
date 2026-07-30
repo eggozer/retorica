@@ -123,6 +123,7 @@ var RetoricaAuth = {
         localStorage.removeItem('ret_session_active');
         location.reload();
     }
+};
 // --- RETÓRICA E2EE CRYPTO ENGINE (Web Crypto API) ---
 var RetoricaCrypto = {
     // Genera una clave AES-GCM derivada del UID del usuario
