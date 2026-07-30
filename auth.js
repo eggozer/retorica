@@ -150,7 +150,7 @@ var RetoricaCrypto = {
         );
     },
 
-    // Cifra texto plano y devuelve un texto codificado en Base64 con su Vector de Inicialización (IV)
+    // Cifra texto plano y devuelve un texto codificado en Base64 con su IV
     encryptData: async function(plainText, rawUid) {
         try {
             var key = await this.getKey(rawUid);
@@ -167,12 +167,12 @@ var RetoricaCrypto = {
             combined.set(iv, 0);
             combined.set(cipherArray, iv.length);
             
-            return // En lugar de: btoa(String.fromCharCode.apply(null, combined))
-// Usa esto (seguro para textos grandes):
-var binString = Array.from(combined, function(byte) {
-    return String.fromCharCode(byte);
-}).join('');
-return btoa(binString);
+            // --- CONVERSIÓN SEGURA A BASE64 (Apta para textos/archivos grandes) ---
+            var binString = Array.from(combined, function(byte) {
+                return String.fromCharCode(byte);
+            }).join('');
+            
+            return btoa(binString);
         } catch(e) {
             console.error("Error al cifrar:", e);
             return plainText; // Fallback
@@ -183,7 +183,14 @@ return btoa(binString);
     decryptData: async function(cipherBase64, rawUid) {
         try {
             var key = await this.getKey(rawUid);
-            var combined = new Uint8Array(atob(cipherBase64).split("").map(c => c.charCodeAt(0)));
+            
+            // --- DECODIFICACIÓN SEGURA DE BASE64 A UINT8ARRAY ---
+            var binaryString = atob(cipherBase64);
+            var combined = new Uint8Array(binaryString.length);
+            for (var i = 0; i < binaryString.length; i++) {
+                combined[i] = binaryString.charCodeAt(i);
+            }
+
             var iv = combined.slice(0, 12);
             var cipherData = combined.slice(12);
             
