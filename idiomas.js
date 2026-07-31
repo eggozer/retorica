@@ -3,7 +3,6 @@ var RetoricaI18n = {
     currentLang: 'en-GB', 
     currentVoiceLang: 'en-GB', 
     
-    // 13 Idiomas ordenados alfabéticamente de forma estricta (A-Z)
     langsOrder: ['ar-SA', 'de-DE', 'en-GB', 'es-ES', 'es-MX', 'fr-FR', 'hi-IN', 'it-IT', 'ja-JP', 'pt-PT', 'ru-RU', 'uk-UA', 'zh-CN'],
     
     db: {
@@ -40,7 +39,7 @@ var RetoricaI18n = {
         'hi-IN': { 
             name: 'Hindi', save: 'रखो', new: 'नया', mic: 'बोल', read: 'सुन', stop: 'रोक', vmsg: 'रिए', tts: 'ध्व', copy: 'प्रति', pTitle: 'शीर्षक...', pBody: 'अपनी पटकथा यहाँ लिखें...', menu: 'सूची', install: 'ऐप', theme: 'थीम', langTxt: 'पाठ', langVoz: 'आवाज़',
             uLabel: 'डिजिटल उपयोगकर्ता (ईमेल / आईडी)', pLabel: 'क्रिप्टोग्राफिक कुंजी', btnAuth: 'जारी रखें', toggleAuth: 'खाता नहीं है? यहाँ पंजीकरण करें', hardware: 'या हार्डवेयर के माध्यम से पहुंचें', gBtn: 'गूगल डिवाइस लिंक करें', fBtn: 'फेसबुक डिवाइस link करें', wBtn: 'व्हाट्सएप डिवाइस लिंक करें',
-            btnRegister: 'पंजीकरण करें और कुंजी बनाएं', toggleHasAccount: 'पहले से ही खाता है? यहाँ लॉग इन करें', alertSeed: 'क्रिप्टोग्राफिक कुंजी स्वतः उत्पन्न! कृपया इसे सुरक्षित करें।', errUid: 'हार्डवेयर के माध्यम से लिंक करने के लिए, पहले ऊपर अपना ईमेल/आईडी दर्ज करें।', okHardware: 'डिवाइस स्थानीय रूप से इसके माध्यम से लिंक किया गया: ', syncHardware: 'मैन्युअल सिंक्रनाइज़ेशन प्रगति पर है... कनेक्टेड!', errMissingUid: 'एक ईमेल या फ़ोन नंबर दर्ज करें।', errBanned: 'यह पहुंच प्रतिबंधित है।', errNoReg: 'उपयोगकर्ता स्थानीय रूप से पंजीकृत नहीं है। साइनअप मोड पर जाएं。', errWrongPass: 'गलत पासवर्ड।', errAlreadyReg: 'यह पहचानकर्ता पहले से ही पंजीकृत है।', errShortPass: 'पासवर्ड कम से कम 4 वर्णों का होना चाहिए।', notifSync: 'सत्र सिंक्रनाइज़ हो गया।'
+            btnRegister: 'पंजीकरण करें और कुंजी बनाएं', toggleHasAccount: 'पहले से ही खाता है? यहाँ लॉग इन करें', alertSeed: 'क्रिप्टोग्राफिक कुंजी स्वतः उत्पन्न! कृपया इसे सुरक्षित करें।', errUid: 'हार्डवेयर के माध्यम से लिंक करने के लिए, पहले ऊपर अपना ईमेल/आईडी दर्ज करें।', okHardware: 'डिवाイス स्थानीय रूप से इसके माध्यम से लिंक किया गया: ', syncHardware: 'मैन्युअल सिंक्रनाइज़ेशन प्रगति पर है... कनेक्टेड!', errMissingUid: 'एक ईमेल या फ़ोन नंबर दर्ज करें।', errBanned: 'यह पहुंच प्रतिबंधित है।', errNoReg: 'उपयोगकर्ता स्थानीय रूप से पंजीकृत नहीं है। साइनअप मोड पर जाएं。', errWrongPass: 'गलत पासवर्ड।', errAlreadyReg: 'यह पहचानकर्ता पहले से ही पंजीकृत है।', errShortPass: 'पासवर्ड कम से कम 4 वर्णों का होना चाहिए।', notifSync: 'सत्र सिंक्रनाइज़ हो गया।'
         },
         'it-IT': { 
             name: 'Italiano', save: 'SAL', new: 'NVO', mic: 'VOC', read: 'LEG', stop: 'ALT', vmsg: 'REC', tts: 'AUD', copy: 'COP', pTitle: 'Titolo dello Script...', pBody: 'Scrivi o detta qui la tua retorica...', menu: 'MENU', install: 'APP', theme: 'TEMA', langTxt: 'TXT', langVoz: 'VOC',
@@ -75,22 +74,21 @@ var RetoricaI18n = {
     },
 
     init: function() {
-    var sysLang = (navigator.language || navigator.userLanguage || 'en-GB').toLowerCase();
-    var match = this.langsOrder.find(function(l) { return l.toLowerCase() === sysLang; });
-    if (!match) {
-        var sysCode = sysLang.split('-')[0];
-        match = this.langsOrder.find(function(l) { return l.toLowerCase().startsWith(sysCode); });
-    }
-    var finalLang = match || 'en-GB';
-    this.setAppLang(finalLang);
-},
+        var sysLang = (navigator.language || navigator.userLanguage || 'en-GB').toLowerCase();
+        var match = this.langsOrder.find(function(l) { return l.toLowerCase() === sysLang; });
+        if (!match) {
+            var sysCode = sysLang.split('-')[0];
+            match = this.langsOrder.find(function(l) { return l.toLowerCase().startsWith(sysCode); });
+        }
+        var finalLang = match || 'en-GB';
+        this.setAppLang(finalLang);
+    },
 
     setAppLang: function(lang) {
-        var prevLang = this.currentLang;
         this.currentLang = lang;
+        this.currentVoiceLang = lang;
         var p = this.db[lang] || this.db['en-GB']; 
         
-        // Botones de la barra de herramientas
         var btnSave = document.getElementById('lbl-tool-save'); if(btnSave) btnSave.innerText = p.save;
         var btnNew = document.getElementById('lbl-tool-new'); if(btnNew) btnNew.innerText = p.new;
         var btnMic = document.getElementById('lbl-tool-mic'); if(btnMic) btnMic.innerText = p.mic;
@@ -106,17 +104,14 @@ var RetoricaI18n = {
         var btnZIn = document.getElementById('lbl-tool-zoomin'); if(btnZIn) btnZIn.innerText = p.zoomin || 'ZOOM +';
         var btnZOut = document.getElementById('lbl-tool-zoomout'); if(btnZOut) btnZOut.innerText = p.zoomout || 'ZOOM -';
         
-        // Inputs
         var tInput = document.getElementById('editor-title'); if(tInput) tInput.placeholder = p.pTitle;
         var bInput = document.getElementById('editor-body'); if(bInput) bInput.placeholder = p.pBody;
         
-        // Elementos de navegación superior
         var lblMenu = document.getElementById('lbl-nav-menu'); if(lblMenu) lblMenu.innerHTML = p.menu;
         var lblInstall = document.getElementById('lbl-nav-install'); if(lblInstall) lblInstall.innerHTML = p.install;
         var lblTheme = document.getElementById('lbl-nav-theme'); if(lblTheme) lblTheme.innerHTML = p.theme;
         var lblLangTxt = document.getElementById('lbl-nav-langtxt'); if(lblLangTxt) lblLangTxt.innerHTML = p.langTxt;
         
-        // Capa Auth
         var lUser = document.getElementById('lbl-auth-user'); if(lUser) lUser.innerText = p.uLabel;
         var lPass = document.getElementById('lbl-auth-pass'); if(lPass) lPass.innerText = p.pLabel;
         var bAuth = document.getElementById('btn-submit-auth'); if(bAuth && (typeof RetoricaAuth === 'undefined' || RetoricaAuth.state.mode === 'login')) bAuth.innerText = p.btnAuth;
@@ -127,19 +122,9 @@ var RetoricaI18n = {
         var oF = document.getElementById('btn-oauth-facebook'); if(oF) oF.innerText = p.fBtn;
         var oW = document.getElementById('btn-oauth-whatsapp'); if(oW) oW.innerText = p.wBtn;
 
-        // Ajuste de Layout
-        var toolContainer = document.querySelector('.toolbar-buttons-container') || document.querySelector('.main-nav-container') || (btnSave ? btnSave.parentElement : null);
-        if (toolContainer) {
-            toolContainer.style.overflowX = 'auto';
-            toolContainer.style.whiteSpace = 'nowrap';
-            toolContainer.style.display = 'flex';
-            toolContainer.style.flexWrap = 'nowrap';
-        }
-        
-                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Idioma Activo: " + p.name);
+        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Idioma Activo: " + p.name);
     },
 
-    // Alternar apertura y cierre del acordeón
     toggleAccordion: function() {
         var panel = document.getElementById('accordion-languages');
         var arrow = document.getElementById('accordion-arrow');
@@ -156,7 +141,6 @@ var RetoricaI18n = {
         }
     },
 
-    // Renderizar botones dentro del panel acordeón con el estándar 3D visual de Retórica
     renderAccordionLanguages: function() {
         var track = document.getElementById('accordion-slider-track');
         if (!track) return;
@@ -164,27 +148,21 @@ var RetoricaI18n = {
 
         var self = this;
         this.langsOrder.forEach(function(langKey) {
-            var item = self.db[langKey];
-            
-            // Envoltorio principal que respeta la inversión (Etiqueta abajo, Botón arriba)
             var wrapper = document.createElement('div');
             wrapper.className = 'btn-wrapper-3d';
 
-            // Etiqueta (LENGUAJE)
             var label = document.createElement('div');
             label.className = 'btn-label-3d';
             label.innerText = langKey.split('-')[0].toUpperCase();
 
-            // Botón circular 3D limpia de textos indeseados en el fondo
             var btn = document.createElement('button');
-            btn.className = 'btn-round-3d' + (langKey === self.currentLang ? ' btn-fire-blue' : '');
+            btn.className = 'btn-round-3d' + (langKey === self.currentLang ? ' active' : '');
             
             var iconSpan = document.createElement('span');
             iconSpan.className = 'icon-raw';
             iconSpan.innerText = langKey.substring(0, 2).toUpperCase();
             btn.appendChild(iconSpan);
 
-            // Estructura limpia (Primero botón, luego label)
             wrapper.appendChild(label);
             wrapper.appendChild(btn);
 
@@ -196,26 +174,26 @@ var RetoricaI18n = {
 
             track.appendChild(wrapper);
         });
-    }, // <-- LLAVE DE CIERRE AGREGADA (CORRECCIÓN DE SINTAXIS)
+    },
+
     translateWork: function() {
         this.checkAndTranslateSelection(this.currentLang, this.currentLang);
     },
+
     checkAndTranslateSelection: function(sourceLang, targetLang) {
-    var editor = document.getElementById('editor-body');
-    if (!editor || !editor.value.trim()) return;
+        var editor = document.getElementById('editor-body');
+        if (!editor || !editor.value.trim()) return;
 
-    var start = editor.selectionStart;
-    var end = editor.selectionEnd;
-    var selectedText = (start !== end) ? editor.value.substring(start, end) : editor.value;
+        var start = editor.selectionStart;
+        var end = editor.selectionEnd;
+        var selectedText = (start !== end) ? editor.value.substring(start, end) : editor.value;
 
-    var targetClean = (targetLang || this.currentLang).split('-')[0];
+        var targetClean = (targetLang || this.currentLang).split('-')[0];
 
-    if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Identificando y traduciendo...");
+        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Identificando y traduciendo...");
 
-    // Usamos 'autodetect' como origen si no hay certeza del idioma del fragmento seleccionado
-    var sourceClean = (start !== end) ? "autodetect" : (sourceLang || this.currentLang).split('-')[0];
-
-    var url = "https://api.mymemory.translated.net/get?q=" + encodeURIComponent(selectedText) + "&langpair=" + sourceClean + "|" + targetClean;
+        var sourceClean = (start !== end) ? "autodetect" : (sourceLang || this.currentLang).split('-')[0];
+        var url = "https://api.mymemory.translated.net/get?q=" + encodeURIComponent(selectedText) + "&langpair=" + sourceClean + "|" + targetClean;
 
         fetch(url)
         .then(function(res) { 
@@ -249,5 +227,5 @@ var RetoricaI18n = {
         }).catch(function(err) {
             if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Sin red o límite de traducción excedido.");
         });
-}
+    }
 };
