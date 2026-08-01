@@ -270,17 +270,23 @@
         }
 
         /* Ajustes Modo Horizontal (Landscape) */
-        @media screen and (orientation: landscape) and (max-height: 500px) {
-            body, html { overflow: auto !important; }
-            .header-app { height: 40px !important; min-height: 40px !important; }
-            .header-app h1 { font-size: 1rem !important; }
-            .header-icon-wrapper { width: 26px !important; height: 26px !important; }
-            .top-navbar { position: relative !important; top: 0 !important; overflow: visible !important; padding: 5px 10px !important; align-items: center !important; }
-            .top-navbar .btn-round-3d { width: 36px !important; height: 36px !important; }
-            .top-navbar .btn-wrapper-3d { width: 50px !important; }
-            .top-navbar .btn-label-3d { font-size: 0.55rem !important; min-height: 1rem !important; max-height: 1rem !important; }
-            .textarea-main { min-height: 180px !important; }
-        }
+@media screen and (orientation: landscape) and (max-height: 500px) {
+    body, html { overflow: auto !important; }
+    .header-app { height: 40px !important; min-height: 40px !important; }
+    .header-app h1 { font-size: 1rem !important; }
+    .header-icon-wrapper { width: 26px !important; height: 26px !important; }
+    .top-navbar { position: relative !important; top: 0 !important; overflow: visible !important; padding: 5px 10px !important; align-items: center !important; }
+    .top-navbar .btn-round-3d { width: 36px !important; height: 36px !important; }
+    .top-navbar .btn-wrapper-3d { width: 50px !important; }
+    .top-navbar .btn-label-3d { font-size: 0.55rem !important; min-height: 1rem !important; max-height: 1rem !important; }
+    .textarea-main { min-height: 180px !important; }
+
+    /* REGLA DEL ACORDEÓN EN HORIZONTAL */
+    .accordion-panel {
+        max-height: 70vh !important; /* Limita la altura al 70% de la pantalla útil */
+        overflow-y: auto !important;
+    }
+}
     </style>
 </head>
 <body>
