@@ -272,19 +272,31 @@
         /* Ajustes Modo Horizontal (Landscape) */
 @media screen and (orientation: landscape) and (max-height: 500px) {
     body, html { overflow: auto !important; }
-    .header-app { height: 40px !important; min-height: 40px !important; }
-    .header-app h1 { font-size: 1rem !important; }
-    .header-icon-wrapper { width: 26px !important; height: 26px !important; }
-    .top-navbar { position: relative !important; top: 0 !important; overflow: visible !important; padding: 5px 10px !important; align-items: center !important; }
-    .top-navbar .btn-round-3d { width: 36px !important; height: 36px !important; }
-    .top-navbar .btn-wrapper-3d { width: 50px !important; }
-    .top-navbar .btn-label-3d { font-size: 0.55rem !important; min-height: 1rem !important; max-height: 1rem !important; }
-    .textarea-main { min-height: 180px !important; }
-
-    /* REGLA DEL ACORDEÓN EN HORIZONTAL */
+    .header-app { display: none !important; } /* Oculta el encabezado grande para ganar espacio vertical */
+    
+    .top-navbar { 
+        position: relative !important; 
+        top: 0 !important; 
+        overflow: visible !important; 
+        padding: 4px 10px !important; 
+        align-items: center !important; 
+    }
+    
+    /* Panel de idiomas ajustado para landscape */
     .accordion-panel {
-        max-height: 70vh !important; /* Limita la altura al 70% de la pantalla útil */
-        overflow-y: auto !important;
+        max-height: 180px !important; /* Altura compacta para que quepa en la pantalla acostada */
+        position: absolute !important;
+        top: 50px !important;
+        left: 0;
+        right: 0;
+        z-index: 1200 !important;
+        overflow-y: hidden !important; /* El scroll debe ser horizontal en la barra de botones */
+    }
+
+    .accordion-body {
+        overflow-x: auto !important; /* Permite deslizar horizontalmente los botones de idiomas */
+        -webkit-overflow-scrolling: touch;
+        padding: 8px 5px !important;
     }
 }
     </style>
