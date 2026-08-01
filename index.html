@@ -184,16 +184,16 @@
 
         /* --- ESTILO DE ACORDEÓN DEPURA Y SIN LÍNEA FANTASMA --- */
         .accordion-panel {
-            max-height: 250px;
-            overflow: hidden;
-            transition: max-height 0.3s ease-in-out, opacity 0.25s ease;
-            opacity: 1;
-            z-index: 1100;
-            position: relative;
-            width: 100%;
-            background: var(--bg-sidebar);
-            border-bottom: 1px solid var(--border);
-        }
+    max-height: 250px;
+    overflow-y: auto; /* Permite scroll vertical si la pantalla es muy pequeña */
+    transition: max-height 0.3s ease-in-out, opacity 0.25s ease;
+    opacity: 1;
+    z-index: 1100;
+    position: relative;
+    width: 100%;
+    background: var(--bg-sidebar);
+    border-bottom: 1px solid var(--border);
+}
 
         .accordion-panel.accordion-closed {
             max-height: 0 !important;
