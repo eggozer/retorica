@@ -232,6 +232,50 @@ var RetoricaStorage = {
         });
     },
 
+copyDoc: function(id, event) {
+        if (event) event.stopPropagation();
+        this.getDocById(id, function(doc) {
+            if (!doc) return;
+            var textToCopy = (doc.title ? doc.title + "\n\n" : "") + (doc.body || "");
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(textToCopy).then(function() {
+                    if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Copiado al portapapeles ✓");
+                });
+            } else {
+                var dummy = document.createElement("textarea");
+                document.body.appendChild(dummy);
+                dummy.value = textToCopy;
+                dummy.select();
+                document.execCommand("copy");
+                document.body.removeChild(dummy);
+                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Copiado al portapapeles ✓");
+            }
+        });
+    },
+
+    shareDoc: function(id, event) {
+        if (event) event.stopPropagation();
+        this.getDocById(id, function(doc) {
+            if (!doc) return;
+            var shareData = {
+                title: doc.title || 'Documento Retórica',
+                text: (doc.title ? doc.title + "\n\n" : "") + (doc.body || "")
+            };
+
+            if (navigator.share) {
+                navigator.share(shareData).catch(function(err) {
+                    console.log("Compartir cancelado o no soportado:", err);
+                });
+            } else {
+                // Respaldo en caso de que la Web Share API no esté disponible en el navegador
+                RetoricaStorage.copyDoc(id, null);
+                if (typeof RetoricaUI !== 'undefined') {
+                    RetoricaUI.notify("Compartir no soportado: Copiado al portapapeles ✓");
+                }
+            }
+        });
+    },
+    
     refreshLibrary: function() {
         var self = this;
         this.getAllDocs(function(docs) {
