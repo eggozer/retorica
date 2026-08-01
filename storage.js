@@ -252,11 +252,14 @@ var RetoricaStorage = {
                 var title = self.escapeHTML(doc.title || 'Sin Título');
                 var body = self.escapeHTML(doc.body || 'Sin Contenido');
 
+                // --- INYECCIÓN DE LOS 3 BOTONES EN RESPETO AL DISEÑO ---
                 card.innerHTML = 
                     '<div class="card-template-title">' + title + '</div>' +
                     '<div class="card-template-body">' + body + '</div>' +
                     '<div class="card-template-actions">' +
-                        '<button class="btn-action-tmpl" onclick="RetoricaStorage.deleteDoc(\'' + doc.id + '\', event)">ELIMINAR</button>' +
+                        '<button class="btn-action-tmpl" onclick="RetoricaStorage.deleteDoc(\'' + doc.id + '\', event)" title="Borrar">BORRAR</button>' +
+                        '<button class="btn-action-tmpl" onclick="RetoricaStorage.copyDoc(\'' + doc.id + '\', event)" title="Copiar">COPIAR</button>' +
+                        '<button class="btn-action-tmpl" onclick="RetoricaStorage.shareDoc(\'' + doc.id + '\', event)" title="Compartir">COMPARTIR</button>' +
                     '</div>';
 
                 container.appendChild(card);
