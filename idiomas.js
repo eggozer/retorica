@@ -229,3 +229,11 @@ var RetoricaI18n = {
         });
     }
 };
+// Re-renderizar o ajustar acordeón de idiomas al girar la pantalla
+window.addEventListener("orientationchange", function() {
+    setTimeout(function() {
+        if (typeof RetoricaI18n !== 'undefined' && RetoricaI18n.renderAccordionLanguages) {
+            RetoricaI18n.renderAccordionLanguages();
+        }
+    }, 200); // Pequeña pausa para que el navegador reporte el nuevo ancho/alto
+});
