@@ -1,5 +1,15 @@
 var autoSaveTimeout = null;
 
+// Variable y listener global para PWA
+var deferredPWAPrompt = null;
+
+window.addEventListener('beforeinstallprompt', function(e) {
+    e.preventDefault();
+    deferredPWAPrompt = e;
+    var installBtn = document.getElementById('pwa-install-wrapper');
+    if (installBtn) installBtn.style.display = 'inline-flex';
+});
+
 var RetoricaUI = {
     state: { zoom: 1.0, touchStartX: 0, touchEndX: 0 },
 
