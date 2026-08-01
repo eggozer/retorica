@@ -229,11 +229,19 @@ var RetoricaI18n = {
         });
     }
 };
-// Re-renderizar o ajustar acordeón de idiomas al girar la pantalla
-window.addEventListener("orientationchange", function() {
+
+// Ajustar acordeón de idiomas al girar la pantalla o redimensionar ventana
+var handleLayoutResize = function() {
     setTimeout(function() {
         if (typeof RetoricaI18n !== 'undefined' && RetoricaI18n.renderAccordionLanguages) {
-            RetoricaI18n.renderAccordionLanguages();
+            var panel = document.getElementById('accordion-languages');
+            // Re-renderiza solo si el acordeón está abierto para ahorrar recursos
+            if (panel && !panel.classList.contains('accordion-closed')) {
+                RetoricaI18n.renderAccordionLanguages();
+            }
         }
-    }, 200); // Pequeña pausa para que el navegador reporte el nuevo ancho/alto
-});
+    }, 200); // Pausa para que el navegador reporte las dimensiones reales
+};
+
+window.addEventListener("orientationchange", handleLayoutResize);
+window.addEventListener("resize", handleLayoutResize);
