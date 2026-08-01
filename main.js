@@ -54,6 +54,20 @@ var RetoricaUI = {
         if (typeof RetoricaAuth !== 'undefined') RetoricaAuth.initLifecycle();
     },
 
+installPWA: function() {
+        if (deferredPWAPrompt) {
+            deferredPWAPrompt.prompt();
+            deferredPWAPrompt.userChoice.then(function(choiceResult) {
+                if (choiceResult.outcome === 'accepted') {
+                    RetoricaUI.notify("Aplicación instalada con éxito");
+                }
+                deferredPWAPrompt = null;
+            });
+        } else {
+            RetoricaUI.notify("Instalación PWA no disponible o ya realizada");
+        }
+    },
+    
     newDocumentAction: function() {
         if (typeof RetoricaStorage !== 'undefined') {
             RetoricaStorage.createNewDoc();
