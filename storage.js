@@ -207,6 +207,9 @@ var RetoricaStorage = {
                 if (typeof RetoricaUI !== 'undefined') {
                     RetoricaUI.updateCounters();
                     RetoricaUI.notify("Documento cargado ✓");
+                    if (typeof RetoricaUI !== 'undefined' && typeof RetoricaUI.toggleSidebar === 'function') {
+        RetoricaUI.toggleSidebar();
+    }
                 }
             }
         });
