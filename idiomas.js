@@ -7,67 +7,67 @@ var RetoricaI18n = {
     
     db: {
         'ar-SA': { 
-            name: 'Al-Arabiya', save: 'حفظ', new: 'جديد', mic: 'صوت', read: 'إقرأ', stop: 'إلغاء', vmsg: 'تسجيل', tts: 'صوت', copy: 'نسخ', sync: 'تزامن', backup: 'نسخ', restore: 'استعادة', pTitle: 'عنوان النص...', pBody: 'اكتب أو أملي نصوصك هنا...', menu: 'قائمة', install: 'تثبيت', theme: 'سمة', langTxt: 'لغة', langVoz: 'صوت',
+            name: 'Al-Arabiya', save: 'حفظ', new: 'جديد', mic: 'صوت', read: 'إقرأ', stop: 'إلغاء', vmsg: 'تسجيل', tts: 'صوت', copy: 'نسخ', import: 'استيراد', pdf: 'PDF', pdfedit: 'تعديل PDF', doc: 'WORD', sync: 'تزامن', backup: 'نسخ', restore: 'استعادة', zoomin: 'تكبير', zoomout: 'تصغير', pTitle: 'عنوان النص...', pBody: 'اكتب أو أملي نصوصك هنا...', menu: 'قائمة', install: 'تثبيت', theme: 'سمة', langTxt: 'لغة', langVoz: 'صوت', del: 'حذف', copyCard: 'نسخ', share: 'مشاركة',
             uLabel: 'المستخدم الرقمي (البريد الإلكتروني / المعرف)', pLabel: 'مفتاح التشفير', btnAuth: 'استمر', toggleAuth: 'ليس لديك حساب؟ سجل هنا', hardware: 'أو الدخول عبر الأجهزة', gBtn: 'ربط جهاز جوجل', fBtn: 'ربط جهاز فيسبوك', wBtn: 'ربط جهاز واتساب',
             btnRegister: 'تسجيل وإنشاء مفتاح', toggleHasAccount: 'هل لديك حساب بالفعل؟ ادخل هنا', alertSeed: 'تم إنشاء مفتاح تشفير تلقائي! احفظه.', errUid: 'لربط Device، اكتب بريدك الإلكتروني/المعرف أولاً.', okHardware: 'تم ربط الجهاز محلياً عبر ', syncHardware: 'مزامنة يدوية جارية... متصل!', errMissingUid: 'أدخل بريدًا إلكترونيًا أو رقم هاتف.', errBanned: 'هذا الوصول مقيد.', errNoReg: 'المستخدم غير مسجل محلياً. انتقل لوضع التسجيل.', errWrongPass: 'كلمة المرور غير صحيحة.', errAlreadyReg: 'هذا المعرف مسجل بالفعل.', errShortPass: 'يجب أن تتكون كلمة المرور من 4 أحرف على الأقل.', notifSync: 'تمت مزامنة الجلسة.'
         },
         'de-DE': { 
-            name: 'Deutsch', save: 'SPE', new: 'NEU', mic: 'DIK', read: 'LIES', stop: 'HALT', vmsg: 'REC', tts: 'TON', copy: 'KOP', sync: 'SYN', backup: 'SIC', restore: 'RÜC', pTitle: 'Skripttitel...', pBody: 'Schreiben oder diktieren Sie hier...', menu: 'MENÜ', install: 'APP', theme: 'THM', langTxt: 'TXT', langVoz: 'TON',
+            name: 'Deutsch', save: 'SPE', new: 'NEU', mic: 'DIK', read: 'LIES', stop: 'HALT', vmsg: 'REC', tts: 'TON', copy: 'KOP', import: 'IMP', pdf: 'PDF', pdfedit: 'PDF EDT', doc: 'DOC', sync: 'SYN', backup: 'SIC', restore: 'RÜC', zoomin: 'ZOO +', zoomout: 'ZOO -', pTitle: 'Skripttitel...', pBody: 'Schreiben oder diktieren Sie hier...', menu: 'MENÜ', install: 'APP', theme: 'THM', langTxt: 'TXT', langVoz: 'TON', del: 'LÖSCHEN', copyCard: 'KOPIEREN', share: 'TEILEN',
             uLabel: 'DIGITALER BENUTZER (EMAIL / ID)', pLabel: 'KRYPTOGRAFISCHER SCHLÜSSEL', btnAuth: 'WEITER', toggleAuth: 'Kein Konto? Registrieren', hardware: 'ODER ZUGRIFF ÜBER HARDWARE', gBtn: 'GOOGLE-GERÄT VERKNÜPFEN', fBtn: 'FACEBOOK-GERÄT VERKNÜPFEN', wBtn: 'WHATSAPP-GERÄT VERKNÜPFEN',
             btnRegister: 'REGISTRIEREN & SCHLÜSSEL ERSTELLEN', toggleHasAccount: 'Bereits ein Konto? Hier einloggen', alertSeed: 'Kryptografischer Schlüssel automatisch generiert! Bitte sichern.', errUid: 'Um Hardware zu verknüpfen, geben Sie bitte zuerst Ihre E-Mail/ID oben ein.', okHardware: 'Gerät lokal verknüpft über ', syncHardware: 'Manuelle Synchronisierung läuft... Verbunden!', errMissingUid: 'Geben Sie eine E-Mail oder Telefonnummer ein.', errBanned: 'Dieser Zugriff ist eingeschränkt.', errNoReg: 'Benutzer nicht lokal registriert. Wechseln Sie in den Registrierungsmodus.', errWrongPass: 'Falsches Passwort.', errAlreadyReg: 'Diese Kennung ist bereits registriert.', errShortPass: 'Das Passwort muss mindestens 4 Zeichen lang sein.', notifSync: 'Sitzung synchronisiert.'
         },
         'en-GB': { 
-            name: 'English', save: 'SAV', new: 'NEW', mic: 'MIC', read: 'SAY', stop: 'STOP', vmsg: 'REC', tts: 'AUD', copy: 'CPY', sync: 'SYNC', backup: 'BAK', restore: 'REST', pTitle: 'Script Title...', pBody: 'Write or dictate your rhetoric here...', menu: 'MENU', install: 'APP', theme: 'THM', langTxt: 'TXT', langVoz: 'VOI',
+            name: 'English', save: 'SAV', new: 'NEW', mic: 'MIC', read: 'SAY', stop: 'STOP', vmsg: 'REC', tts: 'AUD', copy: 'CPY', import: 'IMP', pdf: 'PDF', pdfedit: 'PDF EDIT', doc: 'DOC', sync: 'SYNC', backup: 'BAK', restore: 'REST', zoomin: 'ZOOM +', zoomout: 'ZOOM -', pTitle: 'Script Title...', pBody: 'Write or dictate your rhetoric here...', menu: 'MENU', install: 'APP', theme: 'THM', langTxt: 'TXT', langVoz: 'VOI', del: 'DELETE', copyCard: 'COPY', share: 'SHARE',
             uLabel: 'DIGITAL USER (EMAIL / ID)', pLabel: 'CRYPTOGRAPHIC KEY', btnAuth: 'CONTINUE', toggleAuth: 'No account? Sign up here', hardware: 'OR ACCESS VIA HARDWARE', gBtn: 'LINK GOOGLE DEVICE', fBtn: 'LINK FACEBOOK DEVICE', wBtn: 'LINK WHATSAPP DEVICE',
             btnRegister: 'REGISTER & CREATE KEY', toggleHasAccount: 'Already have an account? Log in here', alertSeed: 'Cryptographic key auto-generated! Please secure it.', errUid: 'To link via hardware, type your Email/ID above first.', okHardware: 'Device linked locally via ', syncHardware: 'Manual synchronization in progress... Connected!', errMissingUid: 'Enter an email or phone number.', errBanned: 'This access is restricted.', errNoReg: 'User not registered locally. Switch to signup mode.', errWrongPass: 'Incorrect key.', errAlreadyReg: 'This identifier is already registered.', errShortPass: 'Password must be at least 4 characters long.', notifSync: 'Session synchronized.'
         },
         'es-ES': { 
-            name: 'Español (ES)', save: 'GUA', new: 'NVO', mic: 'VOZ', read: 'LEE', stop: 'FIN', vmsg: 'REC', tts: 'AUD', copy: 'COP', sync: 'SINC', backup: 'RESP', restore: 'REST', pTitle: 'Titular de la Obra...', pBody: 'Escribe o dicta aquí tu obra...', menu: 'MENÚ', install: 'APP', theme: 'TEMA', langTxt: 'TXT', langVoz: 'VOZ',
+            name: 'Español (ES)', save: 'GUA', new: 'NVO', mic: 'VOZ', read: 'LEE', stop: 'FIN', vmsg: 'REC', tts: 'AUD', copy: 'COP', import: 'IMP', pdf: 'PDF', pdfedit: 'EDIT PDF', doc: 'DOC', sync: 'SINC', backup: 'RESP', restore: 'REST', zoomin: 'ZOOM +', zoomout: 'ZOOM -', pTitle: 'Titular de la Obra...', pBody: 'Escribe o dicta aquí tu obra...', menu: 'MENÚ', install: 'APP', theme: 'TEMA', langTxt: 'TXT', langVoz: 'VOZ', del: 'BORRAR', copyCard: 'COPIAR', share: 'COMPARTIR',
             uLabel: 'USUARIO DIGITAL (EMAIL / ID)', pLabel: 'CLAVE CRIPTOGRÁFICA', btnAuth: 'CONTINUAR', toggleAuth: '¿No tienes cuenta? Regístrate aquí', hardware: 'O ACCEDER VÍA HARDWARE', gBtn: 'VINCULAR DISPOSITIVO GOOGLE', fBtn: 'VINCULAR DISPOSITIVO FACEBOOK', wBtn: 'VINCULAR DISPOSITIVO WHATSAPP',
             btnRegister: 'REGISTRAR Y CREAR CLAVE', toggleHasAccount: '¿Ya tienes cuenta? Entra aquí', alertSeed: '¡Clave criptográfica autogenerada! Resguárdala.', errUid: 'Para vincular vía hardware, escribe primero tu Email/ID arriba.', okHardware: 'Dispositivo vinculado localmente vía ', syncHardware: 'Sincronización manual en progreso... ¡Conectado!', errMissingUid: 'Ingresa un correo o número telefónico.', errBanned: 'Este acceso se encuentra restringido.', errNoReg: 'Usuario no registrado localmente. Cambia al modo de registro.', errWrongPass: 'Clave incorrecta.', errAlreadyReg: 'Este identificador ya está registrado.', errShortPass: 'La contraseña debe tener al menos 4 caracteres.', notifSync: 'Sesión sincronizada.'
         },
         'es-MX': { 
-            name: 'Español (MX)', save: 'GUA', new: 'NVO', mic: 'VOZ', read: 'LEE', stop: 'FIN', vmsg: 'REC', tts: 'AUD', copy: 'COP', sync: 'SINC', backup: 'RESP', restore: 'REST', pTitle: 'Título del Guion...', pBody: 'Escribe o dicta aquí tu retórica...', menu: 'MENÚ', install: 'APP', theme: 'TEMA', langTxt: 'TXT', langVoz: 'VOZ',
+            name: 'Español (MX)', save: 'GUA', new: 'NVO', mic: 'VOZ', read: 'LEE', stop: 'FIN', vmsg: 'REC', tts: 'AUD', copy: 'COP', import: 'IMP', pdf: 'PDF', pdfedit: 'EDIT PDF', doc: 'DOC', sync: 'SINC', backup: 'RESP', restore: 'REST', zoomin: 'ZOOM +', zoomout: 'ZOOM -', pTitle: 'Título del Guion...', pBody: 'Escribe o dicta aquí tu retórica...', menu: 'MENÚ', install: 'APP', theme: 'TEMA', langTxt: 'TXT', langVoz: 'VOZ', del: 'BORRAR', copyCard: 'COPIAR', share: 'COMPARTIR',
             uLabel: 'USUARIO DIGITAL (EMAIL / ID)', pLabel: 'CLAVE CRIPTOGRÁFICA', btnAuth: 'CONTINUAR', toggleAuth: '¿No tienes cuenta? Regístrate aquí', hardware: 'O ACCEDER VÍA HARDWARE', gBtn: 'VINCULAR DISPOSITIVO GOOGLE', fBtn: 'VINCULAR DISPOSITIVO FACEBOOK', wBtn: 'VINCULAR DISPOSITIVO WHATSAPP',
             btnRegister: 'REGISTRAR Y CREAR CLAVE', toggleHasAccount: '¿Ya tienes cuenta? Entra aquí', alertSeed: '¡Clave criptográfica autogenerada! Resguárdala.', errUid: 'Para vincular vía hardware, escribe primero tu Email/ID arriba.', okHardware: 'Dispositivo vinculado localmente vía ', syncHardware: 'Sincronización manual en progreso... ¡Conectado!', errMissingUid: 'Ingresa un correo o número telefónico.', errBanned: 'Este acceso se encuentra restringido.', errNoReg: 'Usuario no registrado localmente. Cambia al modo de registro.', errWrongPass: 'Clave incorrecta.', errAlreadyReg: 'Este identificador ya está registrado.', errShortPass: 'La contraseña debe tener al menos 4 caracteres.', notifSync: 'Sesión sincronizada.'
         },
         'fr-FR': { 
-            name: 'Français', save: 'SAV', new: 'NOU', mic: 'MIC', read: 'LIS', stop: 'FIN', vmsg: 'REC', tts: 'AUD', copy: 'COP', sync: 'SYN', backup: 'SAUV', restore: 'REST', pTitle: 'Titre du Scénario...', pBody: 'Écrivez ou dictez votre rhétorique ici...', menu: 'MENU', install: 'APP', theme: 'THM', langTxt: 'TXT', langVoz: 'VOI',
+            name: 'Français', save: 'SAV', new: 'NOU', mic: 'MIC', read: 'LIS', stop: 'FIN', vmsg: 'REC', tts: 'AUD', copy: 'COP', import: 'IMP', pdf: 'PDF', pdfedit: 'ÉDIT PDF', doc: 'DOC', sync: 'SYN', backup: 'SAUV', restore: 'REST', zoomin: 'ZOOM +', zoomout: 'ZOOM -', pTitle: 'Titre du Scénario...', pBody: 'Écrivez ou dictez votre rhétorique ici...', menu: 'MENU', install: 'APP', theme: 'THM', langTxt: 'TXT', langVoz: 'VOI', del: 'SUPPRIMER', copyCard: 'COPIER', share: 'PARTAGER',
             uLabel: 'UTILISATEUR NUMÉRIQUE (EMAIL / ID)', pLabel: 'CLÉ CRYPTOGRAPHIQUE', btnAuth: 'CONTINUER', toggleAuth: 'Pas de compte? S’inscrire ici', hardware: 'OU ACCÈS VIA HARDWARE', gBtn: 'ASSOCCIER APPAREIL GOOGLE', fBtn: 'ASSOCCIER APPAREIL FACEBOOK', wBtn: 'ASSOCCIER APPAREIL WHATSAPP',
             btnRegister: 'S’INSCRIRE & CRÉER UNE CLÉ', toggleHasAccount: 'Vous avez déjà un compte? Connectez-vous', alertSeed: 'Clé cryptographique générée automatiquement! Veuillez la sauvegarder.', errUid: 'Pour associer via un appareil, saisissez d’abord votre Email/ID ci-dessus.', okHardware: 'Appareil associé localement via ', syncHardware: 'Synchronisation manuelle en cours... Connecté!', errMissingUid: 'Entrez un e-mail ou un numéro de téléphone.', errBanned: 'Cet accès est restreint.', errNoReg: 'Utilisateur non enregistré localement. Passez en mode inscription.', errWrongPass: 'Clé incorrecte.', errAlreadyReg: 'Cet identifiant est déjà enregistré.', errShortPass: 'Le mot de passe doit contenir au moins 4 caractères.', notifSync: 'Session synchronisée.'
         },
         'hi-IN': { 
-            name: 'Hindi', save: 'रखो', new: 'नया', mic: 'बोल', read: 'सुन', stop: 'रोक', vmsg: 'रिए', tts: 'ध्व', copy: 'प्रति', sync: 'सिंक', backup: 'बैक', restore: 'पुनः', pTitle: 'शीर्षक...', pBody: 'अपनी पटकथा यहाँ लिखें...', menu: 'सूची', install: 'ऐप', theme: 'थीम', langTxt: 'पाठ', langVoz: 'आवाज़',
+            name: 'Hindi', save: 'रखो', new: 'नया', mic: 'बोल', read: 'सुन', stop: 'रोक', vmsg: 'रिए', tts: 'ध्व', copy: 'प्रति', import: 'आयात', pdf: 'PDF', pdfedit: 'PDF संपा', doc: 'DOC', sync: 'सिंक', backup: 'बैक', restore: 'पुनः', zoomin: 'ज़ूम +', zoomout: 'ज़ूम -', pTitle: 'शीर्षक...', pBody: 'अपनी पटकथा यहाँ लिखें...', menu: 'सूची', install: 'ऐप', theme: 'थीम', langTxt: 'पाठ', langVoz: 'आवाज़', del: 'हटाएं', copyCard: 'कॉपी', share: 'साझा',
             uLabel: 'डिजिटल उपयोगकर्ता (ईमेल / आईडी)', pLabel: 'क्रिप्टोग्राफिक कुंजी', btnAuth: 'जारी रखें', toggleAuth: 'खाता नहीं है? यहाँ पंजीकरण करें', hardware: 'या हार्डवेयर के माध्यम से पहुंचें', gBtn: 'गूगल डिवाइस लिंक करें', fBtn: 'फेसबुक डिवाइस link करें', wBtn: 'व्हाट्सएप डिवाइस लिंक करें',
             btnRegister: 'पंजीकरण करें और कुंजी बनाएं', toggleHasAccount: 'पहले से ही खाता है? यहाँ लॉग इन करें', alertSeed: 'क्रिप्टोग्राफिक कुंजी स्वतः उत्पन्न! कृपया इसे सुरक्षित करें।', errUid: 'हार्डवेयर के माध्यम से लिंक करने के लिए, पहले ऊपर अपना ईमेल/आईडी दर्ज करें।', okHardware: 'डिवाイス स्थानीय रूप से इसके माध्यम से लिंक किया गया: ', syncHardware: 'मैन्युअल सिंक्रनाइज़ेशन प्रगति पर है... कनेक्टेड!', errMissingUid: 'एक ईमेल या फ़ोन नंबर दर्ज करें।', errBanned: 'यह पहुंच प्रतिबंधित है।', errNoReg: 'उपयोगकर्ता स्थानीय रूप से पंजीकृत नहीं है। साइनअप मोड पर जाएं。', errWrongPass: 'गलत पासवर्ड।', errAlreadyReg: 'यह पहचानकर्ता पहले से ही पंजीकृत है।', errShortPass: 'पासवर्ड कम से कम 4 वर्णों का होना चाहिए।', notifSync: 'सत्र सिंक्रनाइज़ हो गया।'
         },
         'it-IT': { 
-            name: 'Italiano', save: 'SAL', new: 'NVO', mic: 'VOC', read: 'LEG', stop: 'ALT', vmsg: 'REC', tts: 'AUD', copy: 'COP', sync: 'SINC', backup: 'BAC', restore: 'RIP', pTitle: 'Titolo dello Script...', pBody: 'Scrivi o detta qui la tua retorica...', menu: 'MENU', install: 'APP', theme: 'TEMA', langTxt: 'TXT', langVoz: 'VOC',
+            name: 'Italiano', save: 'SAL', new: 'NVO', mic: 'VOC', read: 'LEG', stop: 'ALT', vmsg: 'REC', tts: 'AUD', copy: 'COP', import: 'IMP', pdf: 'PDF', pdfedit: 'MOD PDF', doc: 'DOC', sync: 'SINC', backup: 'BAC', restore: 'RIP', zoomin: 'ZOOM +', zoomout: 'ZOOM -', pTitle: 'Titolo dello Script...', pBody: 'Scrivi o detta qui la tua retorica...', menu: 'MENU', install: 'APP', theme: 'TEMA', langTxt: 'TXT', langVoz: 'VOC', del: 'ELIMINA', copyCard: 'COPIA', share: 'CONDIVIDI',
             uLabel: 'UTENTE DIGITALE (EMAIL / ID)', pLabel: 'CHIAVE CRITTOGRAFICA', btnAuth: 'CONTINUA', toggleAuth: 'Non hai un account? Registrati qui', hardware: 'O ACCEDI VIA HARDWARE', gBtn: 'COLLEGA DISPOSITIVO GOOGLE', fBtn: 'COLLEGA DISPOSITIVO FACEBOOK', wBtn: 'COLLEGA DISPOSITIVO WHATSAPP',
             btnRegister: 'REGISTRATI & CREA CHIAVE', toggleHasAccount: 'Hai già un account? Accedi qui', alertSeed: 'Chiave crittografica autogenerata! Si prega di conservarla.', errUid: 'Per collegare l’hardware, inserisci prima il tuo Email/ID in alto.', okHardware: 'Dispositivo collegato localmente tramite ', syncHardware: 'Sincronizzazione manuale in corso... Connesso!', errMissingUid: 'Inserisci un’e-mail o un numero di telefono.', errBanned: 'Questo accesso è limitato.', errNoReg: 'Utente non registrato localmente. Passa alla modalità di registrazione.', errWrongPass: 'Chiave errata.', errAlreadyReg: 'Questo identificatore è già registrato.', errShortPass: 'La password deve contenere almeno 4 caratteri.', notifSync: 'Sessione sincronizzata.'
         },
         'ja-JP': { 
-            name: 'Japanese', save: '保存', new: '新規', mic: '音声', read: '再生', stop: '停止', vmsg: '録音', tts: '音源', copy: '複写', sync: '同期', backup: '退避', restore: '復元', pTitle: 'タイトル...', pBody: 'ここにレトリックを書きます...', menu: '献立', install: '追加', theme: '配色', langTxt: '文字', langVoz: '音声',
+            name: 'Japanese', save: '保存', new: '新規', mic: '音声', read: '再生', stop: '停止', vmsg: '録音', tts: '音源', copy: '複写', import: '取込', pdf: 'PDF', pdfedit: 'PDF編集', doc: 'DOC', sync: '同期', backup: '退避', restore: '復元', zoomin: '拡大', zoomout: '縮小', pTitle: 'タイトル...', pBody: 'ここにレトリックを書きます...', menu: '献立', install: '追加', theme: '配色', langTxt: '文字', langVoz: '音声', del: '削除', copyCard: '複製', share: '共有',
             uLabel: 'デジタルユーザー (メール / ID)', pLabel: '暗号化キー', btnAuth: '続行', toggleAuth: 'アカウントをお持ちでない方、登録', hardware: 'またはハードウェア経由でアクセス', gBtn: 'GOOGLE デバイスを連携', fBtn: 'FACEBOOK デバイスを連携', wBtn: 'WHATSAPP デバイスを連携',
             btnRegister: '登録してキーを生成', toggleHasAccount: '既にアカウントをお持ちの方はこちら', alertSeed: '暗号化キーが自動生成されました！大切に保管してください。', errUid: 'ハードウェアを連携するには、まず上に Email/ID を入力してください。', okHardware: 'デバイスがローカルに連携されました：', syncHardware: '手動同期中... 接続完了！', errMissingUid: 'メールアドレスまたは電話番号を入力してください。', errBanned: 'このアクセスは制限されています。', errNoReg: 'ユーザーはローカルに登録されていません。登録モードに切り替えてください。', errWrongPass: 'キーが正しくありません。', errAlreadyReg: '此の識別子は既に登録されています。', errShortPass: 'パスワードは4文字以上である必要があります。', notifSync: 'セッションが同期されました。'
         },
         'pt-PT': { 
-            name: 'Português', save: 'GUA', new: 'NVO', mic: 'VOZ', read: 'LEI', stop: 'FIM', vmsg: 'REC', tts: 'AUD', copy: 'COP', sync: 'SINC', backup: 'CÓP', restore: 'REST', pTitle: 'Título do Roteiro...', pBody: 'Escreva ou dite sua retórica aqui...', menu: 'MENU', install: 'APP', theme: 'TEMA', langTxt: 'TXT', langVoz: 'VOZ',
+            name: 'Português', save: 'GUA', new: 'NVO', mic: 'VOZ', read: 'LEI', stop: 'FIM', vmsg: 'REC', tts: 'AUD', copy: 'COP', import: 'IMP', pdf: 'PDF', pdfedit: 'EDIT PDF', doc: 'DOC', sync: 'SINC', backup: 'CÓP', restore: 'REST', zoomin: 'ZOOM +', zoomout: 'ZOOM -', pTitle: 'Título do Roteiro...', pBody: 'Escreva ou dite sua retórica aqui...', menu: 'MENU', install: 'APP', theme: 'TEMA', langTxt: 'TXT', langVoz: 'VOZ', del: 'APAGAR', copyCard: 'COPIAR', share: 'PARTILHAR',
             uLabel: 'USUÁRIO DIGITAL (EMAIL / ID)', pLabel: 'CHAVE CRIPTOGRÁFICA', btnAuth: 'CONTINUAR', toggleAuth: 'Não tem conta? Registe-se aqui', hardware: 'OU ACEDER VIA HARDWARE', gBtn: 'VINCULAR DISPOSITIVO GOOGLE', fBtn: 'VINCULAR DISPOSITIVO FACEBOOK', wBtn: 'VINCULAR DISPOSITIVO WHATSAPP',
             btnRegister: 'REGISTAR & CRIAR CHAVE', toggleHasAccount: 'Já tem uma conta? Entrar aqui', alertSeed: 'Chave criptográfica autogerada! Guarde-a em segurança.', errUid: 'Para vincular via hardware, escreva primeiro o seu Email/ID acima.', okHardware: 'Dispositivo vinculado localmente via ', syncHardware: 'Sincronização manual em progresso... Ligado!', errMissingUid: 'Introduza um e-mail ou número de telefone.', errBanned: 'Este acesso está restrito.', errNoReg: 'Usuário não registado localmente. Altere para o modo de registo.', errWrongPass: 'Chave incorreta.', errAlreadyReg: 'Este identificador ya está registado.', errShortPass: 'A senha deve ter pelo menos 4 caracteres.', notifSync: 'Sessão sincronizada.'
         },
         'ru-RU': { 
-            name: 'Русский', save: 'СОХ', new: 'НОВ', mic: 'ГОЛ', read: 'ЧИТ', stop: 'СТОП', vmsg: 'ЗАП', tts: 'ЗВУК', copy: 'КОП', sync: 'СИНК', backup: 'РЕЗ', restore: 'ВОС', pTitle: 'Название...', pBody: 'Пишите здесь...', menu: 'МЕНЮ', install: 'АПП', theme: 'ТЕМ', langTxt: 'ТКСТ', langVoz: 'ГОЛ',
+            name: 'Русский', save: 'СОХ', new: 'НОВ', mic: 'ГОЛ', read: 'ЧИТ', stop: 'СТОП', vmsg: 'ЗАП', tts: 'ЗВУК', copy: 'КОП', import: 'ИМП', pdf: 'PDF', pdfedit: 'РЕД PDF', doc: 'DOC', sync: 'СИНК', backup: 'РЕЗ', restore: 'ВОС', zoomin: 'МАС +', zoomout: 'МАС -', pTitle: 'Название...', pBody: 'Пишите здесь...', menu: 'МЕНЮ', install: 'АПП', theme: 'ТЕМ', langTxt: 'ТКСТ', langVoz: 'ГОЛ', del: 'УДАЛИТЬ', copyCard: 'КОПИРОВАТЬ', share: 'ПОДЕЛИТЬСЯ',
             uLabel: 'ЦИФРОВОЙ ПОЛЬЗОВАТЕЛЬ (EMAIL / ID)', pLabel: 'КРИПТОГРАФИЧЕСКИЙ КЛЮЧ', btnAuth: 'ПРОДОЛЖИТЬ', toggleAuth: 'Нет аккаунта? Зарегистрироваться', hardware: 'ИЛИ ВХОД ЧЕРЕЗ АППАРАТНОЕ ОБЕСПЕЧЕНИЕ', gBtn: 'ПРИВЯЗАТЬ УСТРОЙСТВО GOOGLE', fBtn: 'ПРИВЯЗАТЬ УСТРОЙСТВО FACEBOOK', wBtn: 'ПРИВЯЗАТЬ УСТРОЙСТВО WHATSAPP',
             btnRegister: 'ЗАРЕГИСТРИРОВАТЬСЯ И СОЗДАТЬ КЛЮЧ', toggleHasAccount: 'Уже есть аккаунт? Войти', alertSeed: 'Криптографический ключ сгенерирован автоматически! Пожалуйста, сохраните его.', errUid: 'Для привязки устройства сначала введите ваш Email/ID выше.', okHardware: 'Устройство привязано локально через ', syncHardware: 'Ручная синхронизация... Подключено!', errMissingUid: 'Введите адрес электронной почты или номер телефона.', errBanned: 'Этот доступ ограничен.', errNoReg: 'Пользователь не зарегистрирован локально. Переключитесь в режим регистрации.', errWrongPass: 'Неверный ключ.', errAlreadyReg: 'Этот идентификатор уже зарегистрирован.', errShortPass: 'Пароль должен быть не менее 4 символов.', notifSync: 'Сессия синхронизирован.'
         },
         'uk-UA': { 
-            name: 'Ukrainian', save: 'ЗБЕР', new: 'НОВ', mic: 'ГОЛ', read: 'ЧИТ', stop: 'СТОП', vmsg: 'ЗАП', tts: 'ЗВУК', copy: 'КОП', sync: 'СИНХ', backup: 'КОП', restore: 'VOS', pTitle: 'Назва Сценарію...', pBody: 'Пишіть або диктуйте риторику тут...', menu: 'МЕНЮ', install: 'АПП', theme: 'ТЕМ', langTxt: 'ТЕКСТ', langVoz: 'ГОЛ',
+            name: 'Ukrainian', save: 'ЗБЕР', new: 'НОВ', mic: 'ГОЛ', read: 'ЧИТ', stop: 'СТОП', vmsg: 'ЗАП', tts: 'ЗВУК', copy: 'КОП', import: 'ІМП', pdf: 'PDF', pdfedit: 'РЕД PDF', doc: 'DOC', sync: 'СИНХ', backup: 'КОП', restore: 'VOS', zoomin: 'ЗУМ +', zoomout: 'ЗУМ -', pTitle: 'Назва Сценарію...', pBody: 'Пишіть або диктуйте риторику тут...', menu: 'МЕНЮ', install: 'АПП', theme: 'ТЕМ', langTxt: 'ТЕКСТ', langVoz: 'ГОЛ', del: 'ВИДАЛИТИ', copyCard: 'КОПІЮВАТИ', share: 'ПОДІЛИТИСЯ',
             uLabel: 'ЦИФРОВИЙ КОРИСТУВАЧ (EMAIL / ID)', pLabel: 'КРИПТОГРАФІЧНИЙ КЛЮЧ', btnAuth: 'ПРОДОВЖИТИ', toggleAuth: 'Немає акаунту? Зареєструватися', hardware: 'АБО ВХІД ЧЕРЕЗ АПАРАТНЕ ЗАБЕЗПЕЧЕННЯ', gBtn: 'ПРИВ’ЯЗАТИ ПРИСТРІЙ GOOGLE', fBtn: 'ПРИВ’ЯЗАТИ ПРИСТРІЙ FACEBOOK', wBtn: 'ПРИВ’ЯЗАТИ ПРИСТРІЙ WHATSAPP',
             btnRegister: 'ЗАРЄЄСТРУВАТИСЯ ТА СТВОРИТИ КЛЮЧ', toggleHasAccount: 'Вже є акаунт? Увійти сюди', alertSeed: 'Криптографічний ключ згенеровано автоматически! Будь ласка, збережіть його.', errUid: 'Для прив’язки апаратного забезпечення спочатку введіть ваш Email/ID вище.', okHardware: 'Пристрій прив’язано локально через ', syncHardware: 'Ручна синхронізація... Підключено!', errMissingUid: 'Введіть електронну пошту або номер телефону.', errBanned: 'Цей доступ обмежено.', errNoReg: 'Користувач не зареєстрований локально. Перейдіть у режим реєстрації.', errWrongPass: 'Невірний ключ.', errAlreadyReg: 'Цей ідентифікатор вже зареєстрований.', errShortPass: 'Пароль повинен містити принаймні 4 символи.', notifSync: 'Сесію синхронізовано.'
         },
         'zh-CN': { 
-            name: 'Chinese', save: '保存', new: '新建', mic: '语音', read: '朗读', stop: '停止', vmsg: '录音', tts: '音频', copy: '复制', sync: '同步', backup: '备份', restore: '恢复', pTitle: '剧本标题...', pBody: '在此处编写您的剧本...', menu: '菜单', install: '安装', theme: '主题', langTxt: '文字', langVoz: '语音',
+            name: 'Chinese', save: '保存', new: '新建', mic: '语音', read: '朗读', stop: '停止', vmsg: '录音', tts: '音频', copy: '复制', import: '导入', pdf: 'PDF', pdfedit: '编辑PDF', doc: 'DOC', sync: '同步', backup: '备份', restore: '恢复', zoomin: '放大', zoomout: '缩小', pTitle: '剧本标题...', pBody: '在此处编写您的剧本...', menu: '菜单', install: '安装', theme: '主题', langTxt: '文字', langVoz: '语音', del: '删除', copyCard: '复制', share: '分享',
             uLabel: '数字用户 (电子邮箱 / ID)', pLabel: '加密密钥', btnAuth: '继续', toggleAuth: '没有账户？注册', hardware: '或通过硬件访问', gBtn: '绑定谷歌设备', fBtn: '绑定脸书设备', wBtn: '绑定微信设备',
             btnRegister: '注册并创建密钥', toggleHasAccount: '已有账户？在此登录', alertSeed: '自动生成的加密密钥！请妥善保管。', errUid: '要通过硬件绑定，请先在上方输入您的Email/ID。', okHardware: '本地设备已通过此方式绑定：', syncHardware: '手动同步中... 已连接！', errMissingUid: '请输入电子邮件或电话号码。', errBanned: '此访问已被限制。', errNoReg: '用户未在本地注册。请切换到注册模式。', errWrongPass: '密码错误。', errAlreadyReg: '此标识符已被注册。', errShortPass: '密码长度至少为 4 个字符。', notifSync: '会话已同步。'
         }
@@ -89,18 +89,18 @@ var RetoricaI18n = {
         this.currentVoiceLang = lang;
         var p = this.db[lang] || this.db['en-GB']; 
         
-        var btnSave = document.getElementById('lbl-tool-save'); if(btnSave) btnSave.innerText = p.save;
-        var btnNew = document.getElementById('lbl-tool-new'); if(btnNew) btnNew.innerText = p.new;
-        var btnMic = document.getElementById('lbl-tool-mic'); if(btnMic) btnMic.innerText = p.mic;
-        var btnRead = document.getElementById('lbl-tool-read'); if(btnRead) btnRead.innerText = p.read;
-        var btnStop = document.getElementById('lbl-tool-stop'); if(btnStop) btnStop.innerText = p.stop;
-        var btnVmsg = document.getElementById('lbl-tool-vmsg'); if(btnVmsg) btnVmsg.innerText = p.vmsg;
-        var btnTts = document.getElementById('lbl-tool-tts'); if(btnTts) btnTts.innerText = p.tts;
+        var btnSave = document.getElementById('lbl-tool-save'); if(btnSave) btnSave.innerText = p.save || 'GUA';
+        var btnNew = document.getElementById('lbl-tool-new'); if(btnNew) btnNew.innerText = p.new || 'NVO';
+        var btnMic = document.getElementById('lbl-tool-mic'); if(btnMic) btnMic.innerText = p.mic || 'VOZ';
+        var btnRead = document.getElementById('lbl-tool-read'); if(btnRead) btnRead.innerText = p.read || 'LEE';
+        var btnStop = document.getElementById('lbl-tool-stop'); if(btnStop) btnStop.innerText = p.stop || 'FIN';
+        var btnVmsg = document.getElementById('lbl-tool-vmsg'); if(btnVmsg) btnVmsg.innerText = p.vmsg || 'REC';
+        var btnTts = document.getElementById('lbl-tool-tts'); if(btnTts) btnTts.innerText = p.tts || 'AUD';
         var btnCopy = document.getElementById('lbl-tool-copyall'); if(btnCopy) btnCopy.innerText = p.copy || 'COP';
         var btnImp = document.getElementById('lbl-tool-import'); if(btnImp) btnImp.innerText = p.import || 'IMP';
         var btnPdf = document.getElementById('lbl-tool-pdf'); if(btnPdf) btnPdf.innerText = p.pdf || 'PDF';
-        var btnPdfE = document.getElementById('lbl-tool-pdfedit'); if(btnPdfE) btnPdfE.innerText = p.pdfedit || 'PDF EDIT';
-        var btnDoc = document.getElementById('lbl-tool-doc'); if(btnDoc) btnDoc.innerText = p.doc || 'WORD';
+        var btnPdfE = document.getElementById('lbl-tool-pdfedit'); if(btnPdfE) btnPdfE.innerText = p.pdfedit || 'EDIT PDF';
+        var btnDoc = document.getElementById('lbl-tool-doc'); if(btnDoc) btnDoc.innerText = p.doc || 'DOC';
         var btnSync = document.getElementById('lbl-tool-sync'); if(btnSync) btnSync.innerText = p.sync || 'SYNC';
         var btnBak = document.getElementById('lbl-tool-backup'); if(btnBak) btnBak.innerText = p.backup || 'BAK';
         var btnRest = document.getElementById('lbl-tool-restore'); if(btnRest) btnRest.innerText = p.restore || 'REST';
@@ -124,6 +124,11 @@ var RetoricaI18n = {
         var oG = document.getElementById('btn-oauth-google'); if(oG) oG.innerText = p.gBtn;
         var oF = document.getElementById('btn-oauth-facebook'); if(oF) oF.innerText = p.fBtn;
         var oW = document.getElementById('btn-oauth-whatsapp'); if(oW) oW.innerText = p.wBtn;
+
+        // Traducción de tarjetas dinámicas en la biblioteca (Panel Lateral)
+        document.querySelectorAll('.card-btn-delete').forEach(function(el) { el.innerText = p.del || 'BORRAR'; });
+        document.querySelectorAll('.card-btn-copy').forEach(function(el) { el.innerText = p.copyCard || 'COPIAR'; });
+        document.querySelectorAll('.card-btn-share').forEach(function(el) { el.innerText = p.share || 'COMPARTIR'; });
 
         if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Idioma Activo: " + p.name);
     },
@@ -233,17 +238,15 @@ var RetoricaI18n = {
     }
 };
 
-// Ajustar acordeón de idiomas al girar la pantalla o redimensionar ventana
 var handleLayoutResize = function() {
     setTimeout(function() {
         if (typeof RetoricaI18n !== 'undefined' && RetoricaI18n.renderAccordionLanguages) {
             var panel = document.getElementById('accordion-languages');
-            // Re-renderiza solo si el acordeón está abierto para ahorrar recursos
             if (panel && !panel.classList.contains('accordion-closed')) {
                 RetoricaI18n.renderAccordionLanguages();
             }
         }
-    }, 200); // Pausa para que el navegador reporte las dimensiones reales
+    }, 200);
 };
 
 window.addEventListener("orientationchange", handleLayoutResize);
