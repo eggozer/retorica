@@ -14,19 +14,53 @@ var RetoricaUI = {
     state: { zoom: 1.0, touchStartX: 0, touchEndX: 0 },
 
     init: function() {
-        var editor = document.getElementById('editor-body');
-        var titleInput = document.getElementById('editor-title');
+    var editor = document.getElementById('editor-body');
+    var titleInput = document.getElementById('editor-title');
 
-        if (typeof RetoricaI18n !== 'undefined') {
-            RetoricaI18n.init();
-        }
+    if (typeof RetoricaI18n !== 'undefined') {
+        RetoricaI18n.init();
+    }
 
-        if (editor) { 
-            editor.oninput = function() { 
-                RetoricaUI.updateCounters(); 
-                RetoricaUI.triggerAutoSave();
-            }; 
-        }
+    if (editor) { 
+        editor.oninput = function() { 
+            RetoricaUI.updateCounters(); 
+            RetoricaUI.triggerAutoSave();
+        }; 
+    }
+    if (titleInput) {
+        titleInput.oninput = function() {
+            RetoricaUI.triggerAutoSave();
+        };
+    }
+
+    var lastDocId = localStorage.getItem('retorica_last_doc_id');
+    if (lastDocId && typeof RetoricaStorage !== 'undefined') {
+        RetoricaStorage.loadDoc(lastDocId);
+    }
+
+    this.initTouchGestures();
+    this.initViewportFix();
+    this.updateCounters();
+
+    if (typeof RetoricaAuth !== 'undefined') RetoricaAuth.initLifecycle();
+},
+
+// --- FUNCIONES DE FORMATO, FUENTES Y TABLAS ---
+setFontSize: function(size) {
+    document.execCommand('fontSize', false, size);
+},
+
+setFontColor: function(color) {
+    document.execCommand('foreColor', false, color);
+},
+
+insertTable: function() {
+    var tableHTML = '<table style="width:100%; border-collapse:collapse; border:1px solid var(--border); margin:10px 0;">' +
+                    '<tr><td style="border:1px solid var(--border); padding:8px;">&nbsp;</td><td style="border:1px solid var(--border); padding:8px;">&nbsp;</td></tr>' +
+                    '<tr><td style="border:1px solid var(--border); padding:8px;">&nbsp;</td><td style="border:1px solid var(--border); padding:8px;">&nbsp;</td></tr>' +
+                    '</table><br>';
+    document.execCommand('insertHTML', false, tableHTML);
+},
         if (titleInput) {
             titleInput.oninput = function() {
                 RetoricaUI.triggerAutoSave();
