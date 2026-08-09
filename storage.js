@@ -58,8 +58,8 @@ var RetoricaStorage = {
             if (!titleInput || !bodyInput) return;
 
             var title = titleInput.value.trim();
-            var body = bodyInput.value.trim();
-        var body = bodyInput.innerHTML; // En lugar de bodyInput.value
+            var body = bodyInput.innerHTML;
+
             if (!self.currentDocId) {
                 self.currentDocId = 'doc_' + Date.now();
             }
@@ -103,8 +103,8 @@ var RetoricaStorage = {
             if (!titleInput || !bodyInput) return;
 
             var title = titleInput.value.trim();
-            var body = bodyInput.value.trim();
-       var body = bodyInput.innerHTML; // En lugar de bodyInput.value
+            var body = bodyInput.innerHTML;
+
             if (!title && !body) return;
 
             if (!self.currentDocId) {
@@ -177,7 +177,7 @@ var RetoricaStorage = {
         var bodyInput = document.getElementById('editor-body');
 
         if (titleInput) titleInput.value = '';
-        if (bodyInput) bodyInput.value = '';
+        if (bodyInput) bodyInput.innerHTML = '';
 
         localStorage.removeItem('retorica_last_doc_id');
 
@@ -198,9 +198,9 @@ var RetoricaStorage = {
                 self.currentDocId = doc.id;
                 var titleInput = document.getElementById('editor-title');
                 var bodyInput = document.getElementById('editor-body');
-                
+
                 if (titleInput) titleInput.value = doc.title || '';
-                if (bodyInput) bodyInput.innerHTML = doc.body || ''; // En lugar de bodyInput.value
+                if (bodyInput) bodyInput.innerHTML = doc.body || '';
 
                 localStorage.setItem('retorica_last_doc_id', doc.id);
 
@@ -208,7 +208,6 @@ var RetoricaStorage = {
                     RetoricaUI.updateCounters();
                     RetoricaUI.notify("Documento cargado ✓");
                     
-                    // 🟢 Cierre automático del menú lateral al seleccionar la plantilla
                     if (typeof RetoricaUI.toggleSidebar === 'function') {
                         RetoricaUI.toggleSidebar();
                     }
@@ -237,7 +236,7 @@ var RetoricaStorage = {
         });
     },
 
-copyDoc: function(id, event) {
+    copyDoc: function(id, event) {
         if (event) event.stopPropagation();
         this.getDocById(id, function(doc) {
             if (!doc) return;
@@ -272,7 +271,6 @@ copyDoc: function(id, event) {
                     console.log("Compartir cancelado o no soportado:", err);
                 });
             } else {
-                // Respaldo en caso de que la Web Share API no esté disponible en el navegador
                 RetoricaStorage.copyDoc(id, null);
                 if (typeof RetoricaUI !== 'undefined') {
                     RetoricaUI.notify("Compartir no soportado: Copiado al portapapeles ✓");
@@ -301,7 +299,6 @@ copyDoc: function(id, event) {
                 var title = self.escapeHTML(doc.title || 'Sin Título');
                 var body = self.escapeHTML(doc.body || 'Sin Contenido');
 
-                // --- INYECCIÓN DE LOS 3 BOTONES EN RESPETO AL DISEÑO ---
                 card.innerHTML = 
                     '<div class="card-template-title">' + title + '</div>' +
                     '<div class="card-template-body">' + body + '</div>' +
@@ -316,7 +313,6 @@ copyDoc: function(id, event) {
         });
     },
 
-    // Sincronización local / remota cifrada E2EE
     syncWithCloud: function() {
         if (typeof window.retoricaActiveUser === 'undefined' || !window.retoricaActiveUser) return;
         var activeUid = window.retoricaActiveUser;
@@ -424,30 +420,39 @@ copyDoc: function(id, event) {
         if (ext === 'txt' || ext === 'html') {
             var reader = new FileReader();
             reader.onload = function(e) {
-                if (bodyInput) bodyInput.value = e.target.result;
+                if (bodyInput) bodyInput.innerHTML = e.target.result;
                 if (typeof RetoricaUI !== 'undefined') RetoricaUI.updateCounters();
             };
             reader.readAsText(file);
-        } else if (ext === 'docx' || ext === 'doc') {
-    var readerDoc = new FileReader();
-    readerDoc.onload = function(e) {
-        if (typeof mammoth !== 'undefined') {
-            // mammoth.convertToHtml conserva tablas y estructura visual del .doc / .docx
-            mammoth.convertToHtml({ arrayBuffer: e.target.result }).then(function(result) {
-                if (bodyInput) bodyInput.innerHTML = result.value;
-                if (typeof RetoricaUI !== 'undefined') RetoricaUI.updateCounters();
-            });
-        }
-    };
-    readerDoc.readAsArrayBuffer(file);
-}
+        } else if (ext === 'pdf') {
+            var fileReader = new FileReader();
+            fileReader.onload = function() {
+                var typedarray = new Uint8Array(this.result);
+                if (window['pdfjs-dist/build/pdf']) {
+                    window['pdfjs-dist/build/pdf'].getDocument(typedarray).promise.then(function(pdf) {
+                        var maxPages = pdf.numPages;
+                        var countPromises = [];
+                        for (var i = 1; i <= maxPages; i++) {
+                            countPromises.push(pdf.getPage(i).then(function(page) {
+                                return page.getTextContent().then(function(textContent) {
+                                    return textContent.items.map(function(item) { return item.str; }).join(' ');
+                                });
+                            }));
+                        }
+                        Promise.all(countPromises).then(function(texts) {
+                            if (bodyInput) bodyInput.innerHTML = texts.join('<br><br>');
+                            if (typeof RetoricaUI !== 'undefined') RetoricaUI.updateCounters();
+                        });
+                    });
+                }
+            };
             fileReader.readAsArrayBuffer(file);
         } else if (ext === 'docx' || ext === 'doc') {
             var readerDoc = new FileReader();
             readerDoc.onload = function(e) {
                 if (typeof mammoth !== 'undefined') {
-                    mammoth.extractRawText({ arrayBuffer: e.target.result }).then(function(result) {
-                        if (bodyInput) bodyInput.value = result.value;
+                    mammoth.convertToHtml({ arrayBuffer: e.target.result }).then(function(result) {
+                        if (bodyInput) bodyInput.innerHTML = result.value;
                         if (typeof RetoricaUI !== 'undefined') RetoricaUI.updateCounters();
                     });
                 }
