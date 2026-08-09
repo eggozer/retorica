@@ -59,7 +59,7 @@ var RetoricaStorage = {
 
             var title = titleInput.value.trim();
             var body = bodyInput.value.trim();
-
+        var body = bodyInput.innerHTML; // En lugar de bodyInput.value
             if (!self.currentDocId) {
                 self.currentDocId = 'doc_' + Date.now();
             }
@@ -104,7 +104,7 @@ var RetoricaStorage = {
 
             var title = titleInput.value.trim();
             var body = bodyInput.value.trim();
-
+       var body = bodyInput.innerHTML; // En lugar de bodyInput.value
             if (!title && !body) return;
 
             if (!self.currentDocId) {
@@ -198,7 +198,7 @@ var RetoricaStorage = {
                 self.currentDocId = doc.id;
                 var titleInput = document.getElementById('editor-title');
                 var bodyInput = document.getElementById('editor-body');
-
+              var body = bodyInput.innerHTML; // En lugar de bodyInput.value
                 if (titleInput) titleInput.value = doc.title || '';
                 if (bodyInput) bodyInput.value = doc.body || '';
 
