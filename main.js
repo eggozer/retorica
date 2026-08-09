@@ -205,7 +205,7 @@ installPWA: function() {
 
     updateCounters: function() {
         var body = document.getElementById('editor-body');
-        var text = body ? body.value : "";
+        var text = body ? (body.innerText || body.textContent || "") : "";
         
         var chars = text.length;
         var words = text.trim() === "" ? 0 : text.trim().split(/\s+/).length;
