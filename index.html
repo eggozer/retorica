@@ -255,11 +255,11 @@
             background: var(--bg-card); 
             border: 1px solid var(--border); 
             border-radius: 12px; 
-            padding: 10px 8px; /* Reducido levemente para ganar espacio interno */
+            padding: 10px 8px;
             word-break: break-word; 
             overflow: hidden; 
             height: auto; 
-            text-align: center; /* Garantiza centrado general */
+            text-align: center;
         }
 
         .card-template:last-child:nth-child(odd) { 
@@ -276,7 +276,7 @@
             white-space: nowrap; 
             overflow: hidden; 
             text-overflow: ellipsis; 
-            text-align: center; /* Centrado estricto del título */
+            text-align: center;
             width: 100%;
         }
 
@@ -290,25 +290,24 @@
             overflow: hidden; 
             text-overflow: ellipsis; 
             margin-bottom: 8px; 
-            text-align: center; /* Centrado del texto previo */
+            text-align: center;
             width: 100%;
         }
 
         .card-template-actions { 
             display: flex !important; 
             width: 100% !important; 
-            gap: 3px !important; /* Espaciado ajustado para evitar empujar letras */
+            gap: 3px !important;
             border-top: 1px solid var(--border); 
             padding-top: 8px; 
             margin-top: auto; 
             flex-direction: row !important; 
             flex-wrap: nowrap !important; 
             align-items: center; 
-            justify-content: center; /* Centra los 3 botones en el contenedor */
+            justify-content: center;
             box-sizing: border-box; 
         }
 
-        /* Botones y Leyendas perfectamente centrados vertical y horizontalmente */
         .btn-action-tmpl { 
             flex: 1 1 0% !important; 
             min-width: 0 !important; 
@@ -317,7 +316,7 @@
             border: none; 
             border-bottom: 2px solid var(--btn-shadow); 
             padding: 5px 1px !important; 
-            font-size: 0.55rem !important; /* Calibración para que "COMPARTIR" quepa y se centre sin trancar */
+            font-size: 0.55rem !important;
             font-weight: 800; 
             color: var(--text-main); 
             border-radius: 6px; 
@@ -329,7 +328,7 @@
             white-space: nowrap; 
             box-sizing: border-box; 
             overflow: hidden;
-            letter-spacing: -0.2px; /* Micro-ajuste para optimizar ancho de texto */
+            letter-spacing: -0.2px;
         }
 
         .btn-action-tmpl:active { 
@@ -354,6 +353,21 @@
         .reading-active { border-color: var(--cyan-active) !important; }
         @keyframes pulseMic { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
         .file-input-hidden { display: none; }
+
+        /* Estilos para tablas dentro del editor visual */
+        #editor-body table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        #editor-body table, #editor-body th, #editor-body td {
+            border: 1px solid var(--border);
+        }
+        #editor-body th, #editor-body td {
+            padding: 8px;
+            text-align: left;
+            min-width: 30px;
+        }
 
         /* Correcciones Modo Tema Oscuro */
         body:not(.light-theme) .top-navbar,
@@ -390,20 +404,6 @@
                 -webkit-overflow-scrolling: touch;
                 padding: 8px 5px !important;
             }
-            /* Estilos para tablas dentro del editor visual */
-#editor-body table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 10px 0;
-}
-#editor-body table, #editor-body th, #editor-body td {
-    border: 1px solid var(--border);
-}
-#editor-body th, #editor-body td {
-    padding: 8px;
-    text-align: left;
-    min-width: 30px;
-}
         }
     </style>
 </head>
@@ -619,12 +619,11 @@
                 <span class="icon-raw" aria-hidden="true">⏮️</span>
             </button>
         </div>
-       <div class="sidebar-content">
-    <div id="user-session-bar" style="margin-bottom: 12px;"></div>
-    <!-- LEYENDA RESTAURADA -->
-    <div style="font-size: 0.75rem; font-weight: bold; color: var(--text-muted); margin-bottom: 10px; letter-spacing: 1px;">BIBLIOTECA DE DOCUMENTOS</div>
-    <div class="grid-templates" id="docs-list-render"></div>
-       </div>
+        <div class="sidebar-content">
+            <div id="user-session-bar" style="margin-bottom: 12px;"></div>
+            <div style="font-size: 0.75rem; font-weight: bold; color: var(--text-muted); margin-bottom: 10px; letter-spacing: 1px;">BIBLIOTECA DE DOCUMENTOS</div>
+            <div class="grid-templates" id="docs-list-render"></div>
+        </div>
         <div class="sidebar-footer">
             <div style="font-size:0.7rem; color:var(--text-muted); font-weight:bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 75%;">
                 <span id="lbl-side-user">USER:</span> <span id="display-user-name" style="color:var(--text-main);">Anon</span>
@@ -639,22 +638,22 @@
             <div id="zoom-wrapper">
                 <div class="unified-container" id="unified-sel-container">
                     <input type="text" id="editor-title" class="doc-title" placeholder="Título del Guion..." aria-label="Título del Guion">
+                    
+                    <!-- BARRA DE HERRAMIENTAS DE FORMATO Y TABLAS -->
+                    <div id="format-toolbar" style="display: flex; gap: 8px; align-items: center; margin-bottom: 10px; flex-wrap: wrap;">
+                        <select id="font-size-select" class="input-field" style="width: auto; padding: 4px 8px; font-size: 0.75rem;" onchange="RetoricaUI.setFontSize(this.value)">
+                            <option value="3">Tamaño: Normal</option>
+                            <option value="1">Pequeño</option>
+                            <option value="4">Mediano</option>
+                            <option value="5">Grande</option>
+                            <option value="6">Muy Grande</option>
+                        </select>
+                        <input type="color" id="font-color-picker" style="width: 30px; height: 30px; border: none; background: transparent; cursor: pointer;" onchange="RetoricaUI.setFontColor(this.value)" title="Color de Fuente">
+                        <button type="button" class="btn-auth-3d" style="width: auto; padding: 4px 10px; font-size: 0.7rem;" onclick="RetoricaUI.insertTable()">+ Tabla (2x2)</button>
+                    </div>
 
-<!-- BARRA DE HERRAMIENTAS DE FORMATO Y TABLAS -->
-<div id="format-toolbar" style="display: flex; gap: 8px; align-items: center; margin-bottom: 10px; flex-wrap: wrap;">
-    <select id="font-size-select" class="input-field" style="width: auto; padding: 4px 8px; font-size: 0.75rem;" onchange="RetoricaUI.setFontSize(this.value)">
-        <option value="3">Tamaño: Normal</option>
-        <option value="1">Pequeño</option>
-        <option value="4">Mediano</option>
-        <option value="5">Grande</option>
-        <option value="6">Muy Grande</option>
-    </select>
-    <input type="color" id="font-color-picker" style="width: 30px; height: 30px; border: none; background: transparent; cursor: pointer;" onchange="RetoricaUI.setFontColor(this.value)" title="Color de Fuente">
-    <button type="button" class="btn-auth-3d" style="width: auto; padding: 4px 10px; font-size: 0.7rem;" onclick="RetoricaUI.insertTable()">+ Tabla (2x2)</button>
-</div>
-
-<!-- CONTENEDOR EDITABLE (Sustituye al textarea para soportar HTML, tablas y estilos) -->
-<div id="editor-body" class="textarea-main" contenteditable="true" style="min-height: 350px; outline: none; overflow-y: auto; border: 1px dashed var(--border); padding: 10px; border-radius: 8px;" aria-label="Cuerpo del texto del guion"></div>
+                    <!-- CONTENEDOR EDITABLE (Sustituye al textarea para soportar HTML, tablas y estilos) -->
+                    <div id="editor-body" class="textarea-main" contenteditable="true" style="min-height: 350px; outline: none; overflow-y: auto; border: 1px dashed var(--border); padding: 10px; border-radius: 8px;" aria-label="Cuerpo del texto del guion"></div>
                 </div>
             </div>
         </div>
