@@ -14,53 +14,19 @@ var RetoricaUI = {
     state: { zoom: 1.0, touchStartX: 0, touchEndX: 0 },
 
     init: function() {
-    var editor = document.getElementById('editor-body');
-    var titleInput = document.getElementById('editor-title');
+        var editor = document.getElementById('editor-body');
+        var titleInput = document.getElementById('editor-title');
 
-    if (typeof RetoricaI18n !== 'undefined') {
-        RetoricaI18n.init();
-    }
+        if (typeof RetoricaI18n !== 'undefined') {
+            RetoricaI18n.init();
+        }
 
-    if (editor) { 
-        editor.oninput = function() { 
-            RetoricaUI.updateCounters(); 
-            RetoricaUI.triggerAutoSave();
-        }; 
-    }
-    if (titleInput) {
-        titleInput.oninput = function() {
-            RetoricaUI.triggerAutoSave();
-        };
-    }
-
-    var lastDocId = localStorage.getItem('retorica_last_doc_id');
-    if (lastDocId && typeof RetoricaStorage !== 'undefined') {
-        RetoricaStorage.loadDoc(lastDocId);
-    }
-
-    this.initTouchGestures();
-    this.initViewportFix();
-    this.updateCounters();
-
-    if (typeof RetoricaAuth !== 'undefined') RetoricaAuth.initLifecycle();
-},
-
-// --- FUNCIONES DE FORMATO, FUENTES Y TABLAS ---
-setFontSize: function(size) {
-    document.execCommand('fontSize', false, size);
-},
-
-setFontColor: function(color) {
-    document.execCommand('foreColor', false, color);
-},
-
-insertTable: function() {
-    var tableHTML = '<table style="width:100%; border-collapse:collapse; border:1px solid var(--border); margin:10px 0;">' +
-                    '<tr><td style="border:1px solid var(--border); padding:8px;">&nbsp;</td><td style="border:1px solid var(--border); padding:8px;">&nbsp;</td></tr>' +
-                    '<tr><td style="border:1px solid var(--border); padding:8px;">&nbsp;</td><td style="border:1px solid var(--border); padding:8px;">&nbsp;</td></tr>' +
-                    '</table><br>';
-    document.execCommand('insertHTML', false, tableHTML);
-},
+        if (editor) { 
+            editor.oninput = function() { 
+                RetoricaUI.updateCounters(); 
+                RetoricaUI.triggerAutoSave();
+            }; 
+        }
         if (titleInput) {
             titleInput.oninput = function() {
                 RetoricaUI.triggerAutoSave();
@@ -88,7 +54,24 @@ insertTable: function() {
         if (typeof RetoricaAuth !== 'undefined') RetoricaAuth.initLifecycle();
     },
 
-installPWA: function() {
+    // --- FUNCIONES DE FORMATO, FUENTES Y TABLAS ---
+    setFontSize: function(size) {
+        document.execCommand('fontSize', false, size);
+    },
+
+    setFontColor: function(color) {
+        document.execCommand('foreColor', false, color);
+    },
+
+    insertTable: function() {
+        var tableHTML = '<table style="width:100%; border-collapse:collapse; border:1px solid var(--border); margin:10px 0;">' +
+                        '<tr><td style="border:1px solid var(--border); padding:8px;">&nbsp;</td><td style="border:1px solid var(--border); padding:8px;">&nbsp;</td></tr>' +
+                        '<tr><td style="border:1px solid var(--border); padding:8px;">&nbsp;</td><td style="border:1px solid var(--border); padding:8px;">&nbsp;</td></tr>' +
+                        '</table><br>';
+        document.execCommand('insertHTML', false, tableHTML);
+    },
+
+    installPWA: function() {
         if (deferredPWAPrompt) {
             deferredPWAPrompt.prompt();
             deferredPWAPrompt.userChoice.then(function(choiceResult) {
@@ -110,14 +93,15 @@ installPWA: function() {
 
     copyFullTemplate: function() {
         var title = document.getElementById('editor-title').value.trim();
-        var body = document.getElementById('editor-body').value.trim();
+        var bodyElem = document.getElementById('editor-body');
+        var bodyText = bodyElem ? (bodyElem.innerText || bodyElem.textContent || "").trim() : "";
         
-        if (!title && !body) {
+        if (!title && !bodyText) {
             this.notify("No hay contenido para copiar.");
             return;
         }
         
-        var fullText = (title ? title + "\n\n" : "") + body;
+        var fullText = (title ? title + "\n\n" : "") + bodyText;
         
         var dummy = document.createElement("textarea");
         document.body.appendChild(dummy);
@@ -227,7 +211,8 @@ installPWA: function() {
     expPDF: function() {
         this.notify("Exportando PDF completo...");
         var title = document.getElementById('editor-title').value.trim() || "Promociones Mega";
-        var bodyText = document.getElementById('editor-body').value;
+        var bodyElem = document.getElementById('editor-body');
+        var bodyHTML = bodyElem ? bodyElem.innerHTML : "";
 
         var pdfContainer = document.createElement('div');
         pdfContainer.style.padding = "30px";
@@ -238,7 +223,7 @@ installPWA: function() {
 
         pdfContainer.innerHTML = 
             "<h1 style='font-size:20pt; border-bottom:2px solid #000; padding-bottom:8px; margin-bottom:20px; text-transform:uppercase;'>" + title + "</h1>" +
-            "<div style='font-size:12pt; line-height:1.6; white-space: pre-wrap; word-wrap: break-word;'>" + bodyText + "</div>";
+            "<div style='font-size:12pt; line-height:1.6; word-wrap: break-word;'>" + bodyHTML + "</div>";
 
         document.body.appendChild(pdfContainer);
 
@@ -259,7 +244,8 @@ installPWA: function() {
     expPDFEditable: function() {
         this.notify("Generando PDF Formulario...");
         var title = document.getElementById('editor-title').value.trim() || "Promociones Mega Editable";
-        var bodyValue = document.getElementById('editor-body').value;
+        var bodyElem = document.getElementById('editor-body');
+        var bodyHTML = bodyElem ? bodyElem.innerHTML : "";
         
         var htmlForm = document.createElement('div');
         htmlForm.style.padding = "30px";
@@ -271,8 +257,8 @@ installPWA: function() {
         htmlForm.innerHTML = 
             "<h1 style='border-bottom: 2px solid #333; padding-bottom: 8px; margin-bottom: 15px; font-size:18pt;'>" + title + "</h1>" +
             "<p style='font-size: 0.8rem; color: #666; margin-bottom: 10px;'><i>* Este documento permite edición de texto directa en lectores PDF compatibles.</i></p>" +
-            "<div contenteditable='true' style='width:100%; min-height:600px; border:1px solid #999; padding:15px; border-radius:4px; font-size:11pt; line-height:1.6; white-space: pre-wrap; word-wrap: break-word; background:#fafafa; outline:none;'>" + 
-                bodyValue + 
+            "<div contenteditable='true' style='width:100%; min-height:600px; border:1px solid #999; padding:15px; border-radius:4px; font-size:11pt; line-height:1.6; word-wrap: break-word; background:#fafafa; outline:none;'>" + 
+                bodyHTML + 
             "</div>";
         
         document.body.appendChild(htmlForm);
@@ -294,7 +280,8 @@ installPWA: function() {
     expDOC: function() {
         this.notify("Procesando Word nativo...");
         var title = document.getElementById('editor-title').value.trim() || "guion";
-        var bodyText = document.getElementById('editor-body').value;
+        var bodyElem = document.getElementById('editor-body');
+        var bodyText = bodyElem ? (bodyElem.innerText || bodyElem.textContent || "") : "";
 
         var docxInstance = window.docx;
         if (!docxInstance) {
