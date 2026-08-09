@@ -198,9 +198,9 @@ var RetoricaStorage = {
                 self.currentDocId = doc.id;
                 var titleInput = document.getElementById('editor-title');
                 var bodyInput = document.getElementById('editor-body');
-              var body = bodyInput.innerHTML; // En lugar de bodyInput.value
+                
                 if (titleInput) titleInput.value = doc.title || '';
-                if (bodyInput) bodyInput.value = doc.body || '';
+                if (bodyInput) bodyInput.innerHTML = doc.body || ''; // En lugar de bodyInput.value
 
                 localStorage.setItem('retorica_last_doc_id', doc.id);
 
