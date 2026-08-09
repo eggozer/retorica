@@ -625,7 +625,22 @@
             <div id="zoom-wrapper">
                 <div class="unified-container" id="unified-sel-container">
                     <input type="text" id="editor-title" class="doc-title" placeholder="Título del Guion..." aria-label="Título del Guion">
-                    <textarea id="editor-body" class="textarea-main" placeholder="Escribe o dicta aquí tu retórica..." aria-label="Cuerpo del texto del guion"></textarea>
+
+<!-- BARRA DE HERRAMIENTAS DE FORMATO Y TABLAS -->
+<div id="format-toolbar" style="display: flex; gap: 8px; align-items: center; margin-bottom: 10px; flex-wrap: wrap;">
+    <select id="font-size-select" class="input-field" style="width: auto; padding: 4px 8px; font-size: 0.75rem;" onchange="RetoricaUI.setFontSize(this.value)">
+        <option value="3">Tamaño: Normal</option>
+        <option value="1">Pequeño</option>
+        <option value="4">Mediano</option>
+        <option value="5">Grande</option>
+        <option value="6">Muy Grande</option>
+    </select>
+    <input type="color" id="font-color-picker" style="width: 30px; height: 30px; border: none; background: transparent; cursor: pointer;" onchange="RetoricaUI.setFontColor(this.value)" title="Color de Fuente">
+    <button type="button" class="btn-auth-3d" style="width: auto; padding: 4px 10px; font-size: 0.7rem;" onclick="RetoricaUI.insertTable()">+ Tabla (2x2)</button>
+</div>
+
+<!-- CONTENEDOR EDITABLE (Sustituye al textarea para soportar HTML, tablas y estilos) -->
+<div id="editor-body" class="textarea-main" contenteditable="true" style="min-height: 350px; outline: none; overflow-y: auto; border: 1px dashed var(--border); padding: 10px; border-radius: 8px;" aria-label="Cuerpo del texto del guion"></div>
                 </div>
             </div>
         </div>
