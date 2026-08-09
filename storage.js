@@ -428,28 +428,19 @@ copyDoc: function(id, event) {
                 if (typeof RetoricaUI !== 'undefined') RetoricaUI.updateCounters();
             };
             reader.readAsText(file);
-        } else if (ext === 'pdf') {
-            var fileReader = new FileReader();
-            fileReader.onload = function() {
-                var typedarray = new Uint8Array(this.result);
-                if (window['pdfjs-dist/build/pdf']) {
-                    window['pdfjs-dist/build/pdf'].getDocument(typedarray).promise.then(function(pdf) {
-                        var maxPages = pdf.numPages;
-                        var countPromises = [];
-                        for (var i = 1; i <= maxPages; i++) {
-                            countPromises.push(pdf.getPage(i).then(function(page) {
-                                return page.getTextContent().then(function(textContent) {
-                                    return textContent.items.map(function(item) { return item.str; }).join(' ');
-                                });
-                            }));
-                        }
-                        Promise.all(countPromises).then(function(texts) {
-                            if (bodyInput) bodyInput.value = texts.join('\n\n');
-                            if (typeof RetoricaUI !== 'undefined') RetoricaUI.updateCounters();
-                        });
-                    });
-                }
-            };
+        } else if (ext === 'docx' || ext === 'doc') {
+    var readerDoc = new FileReader();
+    readerDoc.onload = function(e) {
+        if (typeof mammoth !== 'undefined') {
+            // mammoth.convertToHtml conserva tablas y estructura visual del .doc / .docx
+            mammoth.convertToHtml({ arrayBuffer: e.target.result }).then(function(result) {
+                if (bodyInput) bodyInput.innerHTML = result.value;
+                if (typeof RetoricaUI !== 'undefined') RetoricaUI.updateCounters();
+            });
+        }
+    };
+    readerDoc.readAsArrayBuffer(file);
+}
             fileReader.readAsArrayBuffer(file);
         } else if (ext === 'docx' || ext === 'doc') {
             var readerDoc = new FileReader();
