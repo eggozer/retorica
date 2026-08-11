@@ -54,9 +54,14 @@ var RetoricaUI = {
         if (typeof RetoricaAuth !== 'undefined') RetoricaAuth.initLifecycle();
     },
 
-    // --- FUNCIONES DE FORMATO, FUENTES Y TABLAS ---
+    // --- FUNCIONES DE FORMATO, FUENTES Y TABLAS INTEGRADAS EN BOTONERA ---
     setFontSize: function(size) {
         document.execCommand('fontSize', false, size);
+    },
+
+    triggerColorPicker: function() {
+        var picker = document.getElementById('font-color-picker');
+        if (picker) picker.click();
     },
 
     setFontColor: function(color) {
