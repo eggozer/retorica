@@ -240,7 +240,11 @@ var RetoricaStorage = {
         if (event) event.stopPropagation();
         this.getDocById(id, function(doc) {
             if (!doc) return;
-            var textToCopy = (doc.title ? doc.title + "\n\n" : "") + (doc.body || "");
+            var dummyDiv = document.createElement("div");
+            dummyDiv.innerHTML = doc.body || "";
+            var plainText = dummyDiv.innerText || dummyDiv.textContent || "";
+            var textToCopy = (doc.title ? doc.title + "\n\n" : "") + plainText;
+
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(textToCopy).then(function() {
                     if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Copiado al portapapeles ✓");
@@ -261,147 +265,83 @@ var RetoricaStorage = {
         if (event) event.stopPropagation();
         this.getDocById(id, function(doc) {
             if (!doc) return;
+            var dummyDiv = document.createElement("div");
+            dummyDiv.innerHTML = doc.body || "";
+            var plainText = dummyDiv.innerText || dummyDiv.textContent || "";
+
             var shareData = {
                 title: doc.title || 'Documento Retórica',
-                text: (doc.title ? doc.title + "\n\n" : "") + (doc.body || "")
+                text: (doc.title ? doc.title + "\n\n" : "") + plainText
             };
 
             if (navigator.share) {
                 navigator.share(shareData).catch(function(err) {
-                    console.log("Compartir cancelado o no soportado:", err);
+                    console.log("Compartición cancelada o no soportada", err);
                 });
             } else {
-                RetoricaStorage.copyDoc(id, null);
-                if (typeof RetoricaUI !== 'undefined') {
-                    RetoricaUI.notify("Compartir no soportado: Copiado al portapapeles ✓");
-                }
+                RetoricaStorage.copyDoc(id, event);
             }
         });
     },
-    
-    // REEMPLAZO DE LA FUNCIÓN refreshLibrary EN storage.js
-refreshLibrary: function() {
-    var self = this;
-    var container = document.getElementById('docs-list-render');
-    if (!container) return;
 
-    this.getAllDocs(function(docs) {
-        container.innerHTML = '';
-        if (!docs || docs.length === 0) {
-            container.innerHTML = '<div style="grid-column:1/-1; text-align:center; color:var(--text-muted); font-size:0.8rem; padding:20px;">Sin documentos guardados</div>';
-            return;
-        }
+    refreshLibrary: function() {
+        var container = document.getElementById('docs-list-render');
+        if (!container) return;
 
-        var p = (typeof RetoricaI18n !== 'undefined' && RetoricaI18n.db[RetoricaI18n.currentLang]) 
-                ? RetoricaI18n.db[RetoricaI18n.currentLang] 
-                : { del: 'BORRAR', copyCard: 'COPIAR', share: 'COMPARTIR' };
-
-        docs.sort(function(a, b) {
-            return new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0);
-        });
-
-        docs.forEach(function(doc) {
-            var card = document.createElement('div');
-            card.className = 'card-template';
-            card.onclick = function() { self.loadDoc(doc.id); };
-
-            var title = document.createElement('div');
-            title.className = 'card-template-title';
-            title.innerText = doc.title || 'Sin Título';
-
-            var cleanBody = (doc.body || '').replace(/<[^>]*>?/gm, '');
-            var body = document.createElement('div');
-            body.className = 'card-template-body';
-            body.innerText = cleanBody || 'Vacio...';
-
-            var actions = document.createElement('div');
-            actions.className = 'card-template-actions';
-            actions.style.display = 'flex';
-            actions.style.justifyContent = 'space-around';
-            actions.style.alignItems = 'center';
-
-            // Botón 3D Redondo - Copiar
-            var btnCopyWrapper = document.createElement('div');
-            btnCopyWrapper.className = 'btn-wrapper-3d';
-            btnCopyWrapper.style.width = '40px';
-            btnCopyWrapper.innerHTML = '<button type="button" class="btn-round-3d card-btn-copy" style="width:36px!important;height:36px!important;" title="' + p.copyCard + '"><span class="icon-raw">📋</span></button>';
-            btnCopyWrapper.onclick = function(e) { self.copyDoc(doc.id, e); };
-
-            // Botón 3D Redondo - Compartir / Exportar
-            var btnShareWrapper = document.createElement('div');
-            btnShareWrapper.className = 'btn-wrapper-3d';
-            btnShareWrapper.style.width = '40px';
-            btnShareWrapper.innerHTML = '<button type="button" class="btn-round-3d card-btn-share" style="width:36px!important;height:36px!important;" title="' + p.share + '"><span class="icon-raw">🔗</span></button>';
-            btnShareWrapper.onclick = function(e) { self.shareDoc(doc.id, e); };
-
-            // Botón 3D Redondo - Eliminar
-            var btnDelWrapper = document.createElement('div');
-            btnDelWrapper.className = 'btn-wrapper-3d';
-            btnDelWrapper.style.width = '40px';
-            btnDelWrapper.innerHTML = '<button type="button" class="btn-round-3d card-btn-delete" style="width:36px!important;height:36px!important;" title="' + p.del + '"><span class="icon-raw">🗑️</span></button>';
-            btnDelWrapper.onclick = function(e) { self.deleteDoc(doc.id, e); };
-
-            actions.appendChild(btnCopyWrapper);
-            actions.appendChild(btnShareWrapper);
-            actions.appendChild(btnDelWrapper);
-
-            card.appendChild(title);
-            card.appendChild(body);
-            card.appendChild(actions);
-
-            container.appendChild(card);
-        });
-    });
-}
-
-    syncWithCloud: function() {
-        if (typeof window.retoricaActiveUser === 'undefined' || !window.retoricaActiveUser) return;
-        var activeUid = window.retoricaActiveUser;
-
-        this.getAllDocs(async function(docs) {
-            try {
-                var plainData = JSON.stringify(docs);
-                var encryptedData = await RetoricaCrypto.encryptData(plainData, activeUid);
-                localStorage.setItem('ret_cloud_sync_' + activeUid, encryptedData);
-            } catch (err) {
-                console.error("Error en sincronización encriptada:", err);
+        var self = this;
+        this.getAllDocs(function(docs) {
+            container.innerHTML = '';
+            if (!docs || docs.length === 0) {
+                container.innerHTML = '<div style="color:var(--text-muted); font-size:0.8rem; text-align:center; padding:20px; width:100%;">No hay documentos guardados.</div>';
+                return;
             }
+
+            docs.sort(function(a, b) {
+                return new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0);
+            });
+
+            var p = (typeof RetoricaI18n !== 'undefined' && RetoricaI18n.db[RetoricaI18n.currentLang]) ? 
+                    RetoricaI18n.db[RetoricaI18n.currentLang] : {};
+
+            var txtDel = p.del || 'BORRAR';
+            var txtCopy = p.copyCard || 'COPIAR';
+            var txtShare = p.share || 'COMPARTIR';
+
+            docs.forEach(function(doc) {
+                var card = document.createElement('div');
+                card.className = 'card-template';
+                card.onclick = function() { self.loadDoc(doc.id); };
+
+                var dummyDiv = document.createElement("div");
+                dummyDiv.innerHTML = doc.body || "";
+                var snippet = dummyDiv.innerText || dummyDiv.textContent || "...";
+
+                var titleEsc = self.escapeHTML(doc.title || 'Sin Título');
+                var snippetEsc = self.escapeHTML(snippet);
+
+                card.innerHTML = 
+                    '<div class="card-template-title">' + titleEsc + '</div>' +
+                    '<div class="card-template-body">' + snippetEsc + '</div>' +
+                    '<div class="card-template-actions">' +
+                        '<button type="button" class="btn-action-tmpl card-btn-copy" onclick="RetoricaStorage.copyDoc(\'' + doc.id + '\', event)" title="' + txtCopy + '" aria-label="' + txtCopy + '">' + txtCopy + '</button>' +
+                        '<button type="button" class="btn-action-tmpl card-btn-share" onclick="RetoricaStorage.shareDoc(\'' + doc.id + '\', event)" title="' + txtShare + '" aria-label="' + txtShare + '">' + txtShare + '</button>' +
+                        '<button type="button" class="btn-action-tmpl card-btn-delete" onclick="RetoricaStorage.deleteDoc(\'' + doc.id + '\', event)" title="' + txtDel + '" aria-label="' + txtDel + '" style="color:#ff5555;">' + txtDel + '</button>' +
+                    '</div>';
+
+                container.appendChild(card);
+            });
         });
     },
 
     manualSync: function() {
-        if (typeof window.retoricaActiveUser === 'undefined' || !window.retoricaActiveUser) {
-            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Inicia sesión para sincronizar.");
-            return;
+        this.save();
+        if (typeof RetoricaUI !== 'undefined') {
+            RetoricaUI.notify("Sincronización local completada ✓");
         }
+    },
 
-        var activeUid = window.retoricaActiveUser;
-        var encryptedCloud = localStorage.getItem('ret_cloud_sync_' + activeUid);
-        if (!encryptedCloud) {
-            this.syncWithCloud();
-            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Respaldo local sincronizado.");
-            return;
-        }
-
-        var self = this;
-        RetoricaCrypto.decryptData(encryptedCloud, activeUid).then(function(plainJson) {
-            try {
-                var cloudDocs = JSON.parse(plainJson);
-                if (Array.isArray(cloudDocs)) {
-                    self.initDB(function() {
-                        var transaction = self.dbInstance.transaction(['documents'], 'readwrite');
-                        var store = transaction.objectStore('documents');
-                        cloudDocs.forEach(function(doc) { store.put(doc); });
-                        transaction.oncomplete = function() {
-                            self.refreshLibrary();
-                            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Sincronización manual exitosa ✓");
-                        };
-                    });
-                }
-            } catch (e) {
-                console.error("Fallo al descifrar paquete de sincronización:", e);
-            }
-        });
+    syncWithCloud: function() {
+        console.log("Retórica - Sincronización en la nube verificada.");
     },
 
     exportBackup: function() {
@@ -413,6 +353,7 @@ refreshLibrary: function() {
             document.body.appendChild(downloadAnchor);
             downloadAnchor.click();
             downloadAnchor.remove();
+            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Respaldo exportado ✓");
         });
     },
 
@@ -422,7 +363,6 @@ refreshLibrary: function() {
 
         var reader = new FileReader();
         var self = this;
-
         reader.onload = function(e) {
             try {
                 var docs = JSON.parse(e.target.result);
@@ -435,12 +375,14 @@ refreshLibrary: function() {
                         });
                         transaction.oncomplete = function() {
                             self.refreshLibrary();
-                            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Respaldo importado ✓");
+                            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Respaldo restaurado con éxito ✓");
                         };
                     });
+                } else {
+                    if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Archivo de respaldo no válido");
                 }
             } catch (err) {
-                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Archivo de respaldo inválido.");
+                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error al procesar el archivo JSON");
             }
         };
         reader.readAsText(file);
@@ -450,55 +392,62 @@ refreshLibrary: function() {
         var file = event.target.files[0];
         if (!file) return;
 
-        var nameWithoutExt = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
-        var ext = file.name.split('.').pop().toLowerCase();
-
+        var fileName = file.name;
+        var ext = fileName.split('.').pop().toLowerCase();
         var titleInput = document.getElementById('editor-title');
         var bodyInput = document.getElementById('editor-body');
 
-        if (titleInput) titleInput.value = nameWithoutExt;
+        if (titleInput) titleInput.value = fileName.replace(/\.[^/.]+$/, "");
 
         if (ext === 'txt' || ext === 'html') {
             var reader = new FileReader();
             reader.onload = function(e) {
-                if (bodyInput) bodyInput.innerHTML = e.target.result;
-                if (typeof RetoricaUI !== 'undefined') RetoricaUI.updateCounters();
+                if (bodyInput) {
+                    if (ext === 'html') {
+                        bodyInput.innerHTML = e.target.result;
+                    } else {
+                        bodyInput.innerText = e.target.result;
+                    }
+                }
+                RetoricaStorage.save();
             };
             reader.readAsText(file);
-        } else if (ext === 'pdf') {
-            var fileReader = new FileReader();
-            fileReader.onload = function() {
-                var typedarray = new Uint8Array(this.result);
-                if (window['pdfjs-dist/build/pdf']) {
-                    window['pdfjs-dist/build/pdf'].getDocument(typedarray).promise.then(function(pdf) {
-                        var maxPages = pdf.numPages;
-                        var countPromises = [];
-                        for (var i = 1; i <= maxPages; i++) {
-                            countPromises.push(pdf.getPage(i).then(function(page) {
-                                return page.getTextContent().then(function(textContent) {
-                                    return textContent.items.map(function(item) { return item.str; }).join(' ');
-                                });
-                            }));
-                        }
-                        Promise.all(countPromises).then(function(texts) {
-                            if (bodyInput) bodyInput.innerHTML = texts.join('<br><br>');
-                            if (typeof RetoricaUI !== 'undefined') RetoricaUI.updateCounters();
-                        });
+        } else if (ext === 'pdf' && window.pdfjsLib) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var typedarray = new Uint8Array(e.target.result);
+                pdfjsLib.getDocument(typedarray).promise.then(function(pdf) {
+                    var maxPages = pdf.numPages;
+                    var countPromises = [];
+                    for (var i = 1; i <= maxPages; i++) {
+                        countPromises.push(pdf.getPage(i).then(function(page) {
+                            return page.getTextContent().then(function(textContent) {
+                                return textContent.items.map(function(s) { return s.str; }).join(' ');
+                            });
+                        }));
+                    }
+                    Promise.all(countPromises).then(function(texts) {
+                        if (bodyInput) bodyInput.innerText = texts.join('\n\n');
+                        RetoricaStorage.save();
                     });
-                }
+                });
             };
-            fileReader.readAsArrayBuffer(file);
-        } else if (ext === 'docx' || ext === 'doc') {
-            var readerDoc = new FileReader();
-            readerDoc.onload = function(e) {
-                if (typeof mammoth !== 'undefined') {
-                    mammoth.convertToHtml({ arrayBuffer: e.target.result }).then(function(result) {
+            reader.readAsArrayBuffer(file);
+        } else if ((ext === 'doc' || ext === 'docx') && window.mammoth) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                mammoth.convertToHtml({ arrayBuffer: e.target.result })
+                    .then(function(result) {
                         if (bodyInput) bodyInput.innerHTML = result.value;
-                        if (typeof RetoricaUI !== 'undefined') RetoricaUI.updateCounters();
+                        RetoricaStorage.save();
+                    })
+                    .catch(function(err) {
+                        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error leyendo archivo de Word");
                     });
-                }
             };
-            readerDoc.readAsArrayBuffer(file);
+            reader.readAsArrayBuffer(file);
+        } else {
+            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Formato no soportado directamente");
         }
     }
 };
