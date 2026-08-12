@@ -133,9 +133,20 @@ var RetoricaI18n = {
     updateLabelWithMarquee('lbl-nav-langtxt', p.langTxt || 'TEXTO');
     
     // Tarjetas de plantillas
-    document.querySelectorAll('.card-btn-delete').forEach(function(el) { el.innerText = p.del || 'BORRAR'; });
-    document.querySelectorAll('.card-btn-copy').forEach(function(el) { el.innerText = p.copyCard || 'COPIAR'; });
-    document.querySelectorAll('.card-btn-share').forEach(function(el) { el.innerText = p.share || 'COMPARTIR'; });
+    // CORRECCIÓN DENTRO DE setAppLang EN idiomas.js (Aproximadamente Línea 140)
+// Traducción de etiquetas aria-label y títulos de tarjetas dinámicas
+document.querySelectorAll('.card-btn-delete').forEach(function(el) { 
+    el.setAttribute('title', p.del || 'BORRAR'); 
+    el.setAttribute('aria-label', p.del || 'BORRAR'); 
+});
+document.querySelectorAll('.card-btn-copy').forEach(function(el) { 
+    el.setAttribute('title', p.copyCard || 'COPIAR'); 
+    el.setAttribute('aria-label', p.copyCard || 'COPIAR'); 
+});
+document.querySelectorAll('.card-btn-share').forEach(function(el) { 
+    el.setAttribute('title', p.share || 'COMPARTIR'); 
+    el.setAttribute('aria-label', p.share || 'COMPARTIR'); 
+});
 
     if (typeof RetoricaUI !== 'undefined' && RetoricaUI.notify) {
         RetoricaUI.notify("Idioma Activo: " + p.name);
