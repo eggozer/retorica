@@ -68,119 +68,125 @@
         .header-app h1 { font-size: 1.3rem; font-weight: 900; letter-spacing: 3px; color: var(--text-main); text-align: center; margin: 0; }
         
         /* Barra de Navegación */
-        .top-navbar {
-            background: var(--bg-sidebar);
-            border-bottom: 1px solid var(--border);
-            padding: 10px 15px;
-            display: flex !important;
-            flex-wrap: nowrap !important;
-            overflow: hidden !important; 
-            gap: 16px;
-            z-index: 1000;
-            position: sticky !important;
-            top: 0 !important;
-            align-items: flex-start;
-        }
+/* --- INICIO DE PARCHE PARA ANDROID 5 / WEBVIEW --- */
 
-        .menu-scroll-area {
-            display: flex !important;
-            flex-wrap: nowrap !important;
-            overflow-x: auto !important;
-            gap: 16px;
-            flex: 1;
-            -webkit-overflow-scrolling: touch;
-        }
-        .menu-scroll-area::-webkit-scrollbar { display: none; }
+.top-navbar {
+    background: var(--bg-sidebar);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 15px;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow: hidden !important; 
+    gap: 16px;
+    z-index: 1000;
+    position: sticky !important;
+    top: 0 !important;
+    align-items: flex-start;
+}
 
-        /* Botones 3D */
-        .top-navbar .btn-wrapper-3d, .accordion-body .btn-wrapper-3d {
-            flex-shrink: 0 !important;   
-            width: 60px !important;
-            display: inline-flex;
-            flex-direction: column-reverse !important;
-            align-items: center;
-            justify-content: flex-start;
-            vertical-align: top;
-            position: relative;
-            overflow: hidden !important;
-            pointer-events: auto;
-        }
+.menu-scroll-area {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    gap: 16px;
+    flex: 1;
+    -webkit-overflow-scrolling: touch;
+}
+.menu-scroll-area::-webkit-scrollbar { display: none; }
 
-        .top-navbar .btn-label-3d, .accordion-body .btn-label-3d {
-            font-size: 0.6rem;
-            font-weight: bold;
-            color: var(--text-muted);
-            text-align: center;
-            line-height: 0.75rem;
-            min-height: 1.2rem;
-            max-height: 1.2rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-top: 4px !important;
-            margin-bottom: 0px !important;
-            text-transform: uppercase;
-            white-space: nowrap !important;
-            text-overflow: ellipsis;
-            overflow: hidden !important;
-            width: 100%;
-            pointer-events: none;
-        }
+/* Wrapper de botón */
+.top-navbar .btn-wrapper-3d, .accordion-body .btn-wrapper-3d {
+    flex-shrink: 0 !important;   
+    width: 60px !important;
+    display: inline-flex;
+    flex-direction: column-reverse !important;
+    align-items: center;
+    justify-content: flex-start;
+    vertical-align: top;
+    position: relative;
+    overflow: hidden !important;
+    pointer-events: auto;
+}
 
-        .btn-round-3d { 
-            width: 44px !important; 
-            height: 44px !important; 
-            border-radius: 50% !important; 
-            background: var(--btn-3d-bg); 
-            border: none; 
-            border-bottom: 4px solid var(--btn-shadow); 
-            color: var(--text-main); 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            cursor: pointer; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3); 
-            transition: all 0.1s; 
-            flex-shrink: 0 !important;
-        }
-        .btn-round-3d:active { transform: translateY(2px); border-bottom-width: 1px; box-shadow: 0 2px 3px rgba(0,0,0,0.3); }
-        .btn-round-3d svg, .btn-round-3d span.icon-raw { width: 75%; height: 75%; display: flex; align-items: center; justify-content: center; fill: currentColor; font-size: 1.25rem; font-style: normal; font-weight: bold; }
-        .btn-round-3d.btn-play-style { background: var(--btn-play-green) !important; color: #ffffff !important; }
-        .btn-fire-blue { box-shadow: 0 0 10px rgba(0, 210, 255, 0.4) !important; border: 1px solid var(--cyan-active) !important; }
+/* Leyendas cortas (1-2 palabras) con desplazamiento Marquee si desborda */
+.top-navbar .btn-label-3d, .accordion-body .btn-label-3d {
+    font-size: 0.6rem;
+    font-weight: bold;
+    color: var(--text-muted);
+    text-align: center;
+    line-height: 0.75rem;
+    min-height: 1.2rem;
+    max-height: 1.2rem;
+    display: block;
+    margin-top: 4px !important;
+    margin-bottom: 0px !important;
+    text-transform: uppercase;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    width: 100%;
+    pointer-events: none;
+}
 
-        /* Botón de Idiomas Monocromático / Cyan Activo */
-        .btn-lang-item {
-            flex: 0 0 auto;
-            padding: 8px 14px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            background: var(--btn-3d-bg);
-            color: var(--text-main);
-            border: 1px solid var(--border);
-            border-bottom: 3px solid var(--btn-shadow);
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .btn-lang-item.active {
-            background: var(--bg-card) !important;
-            color: var(--cyan-active) !important;
-            border: 1px solid var(--cyan-active) !important;
-            box-shadow: 0 0 10px rgba(0, 210, 255, 0.3);
-        }
+.top-navbar .btn-label-3d span.scroll-text, .accordion-body .btn-label-3d span.scroll-text {
+    display: inline-block;
+    padding-left: 100%;
+    animation: marquee 5s linear infinite;
+}
 
-        /* Resaltado para el botón redondo activo en el acordeón de idiomas */
-        .btn-round-3d.active {
-            background: var(--bg-card) !important;
-            color: var(--cyan-active) !important;
-            border: 1px solid var(--cyan-active) !important;
-            border-bottom: 4px solid var(--cyan-active) !important;
-            box-shadow: 0 0 12px rgba(0, 210, 255, 0.4) !important;
-        }
-        .btn-wrapper-3d:has(.btn-round-3d.active) .btn-label-3d {
-            color: var(--cyan-active) !important;
-            font-weight: 900;
-        }
+@keyframes marquee {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(-100%, 0); }
+}
+
+/* Botón 3D Monocromático */
+.btn-round-3d { 
+    width: 44px !important; 
+    height: 44px !important; 
+    border-radius: 50% !important; 
+    background: var(--btn-3d-bg) !important; 
+    border: none; 
+    border-bottom: 4px solid var(--btn-shadow); 
+    color: var(--text-main) !important; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    cursor: pointer; 
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3); 
+    transition: all 0.1s; 
+    flex-shrink: 0 !important;
+}
+.btn-round-3d:active { 
+    transform: translateY(2px); 
+    border-bottom-width: 1px; 
+    box-shadow: 0 2px 3px rgba(0,0,0,0.3); 
+}
+.btn-round-3d svg, .btn-round-3d span.icon-raw { 
+    width: 75%; 
+    height: 75%; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    fill: currentColor; 
+    font-size: 1.25rem; 
+    font-style: normal; 
+    font-weight: bold; 
+}
+
+/* Resaltado sin usar :has() para compatibilidad Android 5 */
+.btn-round-3d.active {
+    background: var(--bg-card) !important;
+    color: var(--text-main) !important;
+    border: 1px solid var(--text-muted) !important;
+    border-bottom: 4px solid var(--text-muted) !important;
+}
+.btn-wrapper-3d.active-wrapper .btn-label-3d {
+    color: var(--text-main) !important;
+    font-weight: 900;
+}
+
+/* --- FIN DE PARCHE --- */
+            
+            
 
         /* --- ESTILO DE ACORDEÓN DEPURA Y SIN LÍNEA FANTASMA --- */
         .accordion-panel {
