@@ -85,53 +85,62 @@ var RetoricaI18n = {
     },
 
     setAppLang: function(lang) {
-        this.currentLang = lang;
-        this.currentVoiceLang = lang;
-        var p = this.db[lang] || this.db['en-GB']; 
-        
-        var btnSave = document.getElementById('lbl-tool-save'); if(btnSave) btnSave.innerText = p.save || 'GUA';
-        var btnNew = document.getElementById('lbl-tool-new'); if(btnNew) btnNew.innerText = p.new || 'NVO';
-        var btnMic = document.getElementById('lbl-tool-mic'); if(btnMic) btnMic.innerText = p.mic || 'VOZ';
-        var btnRead = document.getElementById('lbl-tool-read'); if(btnRead) btnRead.innerText = p.read || 'LEE';
-        var btnStop = document.getElementById('lbl-tool-stop'); if(btnStop) btnStop.innerText = p.stop || 'FIN';
-        var btnVmsg = document.getElementById('lbl-tool-vmsg'); if(btnVmsg) btnVmsg.innerText = p.vmsg || 'REC';
-        var btnTts = document.getElementById('lbl-tool-tts'); if(btnTts) btnTts.innerText = p.tts || 'AUD';
-        var btnCopy = document.getElementById('lbl-tool-copyall'); if(btnCopy) btnCopy.innerText = p.copy || 'COP';
-        var btnImp = document.getElementById('lbl-tool-import'); if(btnImp) btnImp.innerText = p.import || 'IMP';
-        var btnPdf = document.getElementById('lbl-tool-pdf'); if(btnPdf) btnPdf.innerText = p.pdf || 'PDF';
-        var btnPdfE = document.getElementById('lbl-tool-pdfedit'); if(btnPdfE) btnPdfE.innerText = p.pdfedit || 'EDIT PDF';
-        var btnDoc = document.getElementById('lbl-tool-doc'); if(btnDoc) btnDoc.innerText = p.doc || 'DOC';
-        var btnSync = document.getElementById('lbl-tool-sync'); if(btnSync) btnSync.innerText = p.sync || 'SYNC';
-        var btnBak = document.getElementById('lbl-tool-backup'); if(btnBak) btnBak.innerText = p.backup || 'BAK';
-        var btnRest = document.getElementById('lbl-tool-restore'); if(btnRest) btnRest.innerText = p.restore || 'REST';
-        var btnZIn = document.getElementById('lbl-tool-zoomin'); if(btnZIn) btnZIn.innerText = p.zoomin || 'ZOOM +';
-        var btnZOut = document.getElementById('lbl-tool-zoomout'); if(btnZOut) btnZOut.innerText = p.zoomout || 'ZOOM -';
-        
-        var tInput = document.getElementById('editor-title'); if(tInput) tInput.placeholder = p.pTitle;
-        var bInput = document.getElementById('editor-body'); if(bInput) bInput.placeholder = p.pBody;
-        
-        var lblMenu = document.getElementById('lbl-nav-menu'); if(lblMenu) lblMenu.innerHTML = p.menu;
-        var lblInstall = document.getElementById('lbl-nav-install'); if(lblInstall) lblInstall.innerHTML = p.install;
-        var lblTheme = document.getElementById('lbl-nav-theme'); if(lblTheme) lblTheme.innerHTML = p.theme;
-        var lblLangTxt = document.getElementById('lbl-nav-langtxt'); if(lblLangTxt) lblLangTxt.innerHTML = p.langTxt;
-        
-        var lUser = document.getElementById('lbl-auth-user'); if(lUser) lUser.innerText = p.uLabel;
-        var lPass = document.getElementById('lbl-auth-pass'); if(lPass) lPass.innerText = p.pLabel;
-        var bAuth = document.getElementById('btn-submit-auth'); if(bAuth && (typeof RetoricaAuth === 'undefined' || RetoricaAuth.state.mode === 'login')) bAuth.innerText = p.btnAuth;
-        var tAuth = document.getElementById('auth-toggle-mode'); if(tAuth && (typeof RetoricaAuth === 'undefined' || RetoricaAuth.state.mode === 'login')) tAuth.innerText = p.toggleAuth;
-        var dLine = document.getElementById('auth-divider-line'); if(dLine) dLine.innerText = p.hardware;
-        
-        var oG = document.getElementById('btn-oauth-google'); if(oG) oG.innerText = p.gBtn;
-        var oF = document.getElementById('btn-oauth-facebook'); if(oF) oF.innerText = p.fBtn;
-        var oW = document.getElementById('btn-oauth-whatsapp'); if(oW) oW.innerText = p.wBtn;
+    this.currentLang = lang;
+    this.currentVoiceLang = lang;
+    var p = this.db[lang] || this.db['en-GB']; 
+    
+    function updateLabelWithMarquee(elementId, text) {
+        var el = document.getElementById(elementId);
+        if (!el) return;
+        if (text && text.length > 8) {
+            el.innerHTML = '<span class="scroll-text">' + text + '</span>';
+        } else {
+            el.innerText = text || '';
+        }
+    }
 
-        // Traducción de tarjetas dinámicas en la biblioteca (Panel Lateral)
-        document.querySelectorAll('.card-btn-delete').forEach(function(el) { el.innerText = p.del || 'BORRAR'; });
-        document.querySelectorAll('.card-btn-copy').forEach(function(el) { el.innerText = p.copyCard || 'COPIAR'; });
-        document.querySelectorAll('.card-btn-share').forEach(function(el) { el.innerText = p.share || 'COMPARTIR'; });
+    // Mapeo de botones de la barra superior
+    updateLabelWithMarquee('lbl-tool-save', p.save || 'GUARDAR');
+    updateLabelWithMarquee('lbl-tool-new', p.new || 'NUEVO');
+    updateLabelWithMarquee('lbl-tool-sizedown', p.sizedown || 'REDUCIR');
+    updateLabelWithMarquee('lbl-tool-sizeup', p.sizeup || 'AUMENTAR');
+    updateLabelWithMarquee('lbl-tool-color', p.color || 'COLOR');
+    updateLabelWithMarquee('lbl-tool-table', p.table || 'TABLA');
+    updateLabelWithMarquee('lbl-tool-mic', p.mic || 'VOZ');
+    updateLabelWithMarquee('lbl-tool-read', p.read || 'LEER');
+    updateLabelWithMarquee('lbl-tool-stop', p.stop || 'FIN');
+    updateLabelWithMarquee('lbl-tool-vmsg', p.vmsg || 'GRABAR');
+    updateLabelWithMarquee('lbl-tool-tts', p.tts || 'AUDIO');
+    updateLabelWithMarquee('lbl-tool-copyall', p.copy || 'COPIAR');
+    updateLabelWithMarquee('lbl-tool-import', p.import || 'IMPORTAR');
+    updateLabelWithMarquee('lbl-tool-pdf', p.pdf || 'PDF');
+    updateLabelWithMarquee('lbl-tool-pdfedit', p.pdfedit || 'EDIT PDF');
+    updateLabelWithMarquee('lbl-tool-doc', p.doc || 'DOC');
+    updateLabelWithMarquee('lbl-tool-sync', p.sync || 'SINCRONIZAR');
+    updateLabelWithMarquee('lbl-tool-backup', p.backup || 'RESPALDO');
+    updateLabelWithMarquee('lbl-tool-restore', p.restore || 'RESTAURAR');
+    updateLabelWithMarquee('lbl-tool-zoomin', p.zoomin || 'AMPLIAR');
+    updateLabelWithMarquee('lbl-tool-zoomout', p.zoomout || 'REDUCIR');
+    
+    // Placeholders
+    var tInput = document.getElementById('editor-title'); if(tInput) tInput.placeholder = p.pTitle;
+    var bInput = document.getElementById('editor-body'); if(bInput) bInput.placeholder = p.pBody;
+    
+    // Controles generales
+    updateLabelWithMarquee('lbl-nav-menu', p.menu || 'MENÚ');
+    updateLabelWithMarquee('lbl-nav-install', p.install || 'INSTALAR');
+    updateLabelWithMarquee('lbl-nav-theme', p.theme || 'TEMA');
+    updateLabelWithMarquee('lbl-nav-langtxt', p.langTxt || 'TEXTO');
+    
+    // Tarjetas de plantillas
+    document.querySelectorAll('.card-btn-delete').forEach(function(el) { el.innerText = p.del || 'BORRAR'; });
+    document.querySelectorAll('.card-btn-copy').forEach(function(el) { el.innerText = p.copyCard || 'COPIAR'; });
+    document.querySelectorAll('.card-btn-share').forEach(function(el) { el.innerText = p.share || 'COMPARTIR'; });
 
-        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Idioma Activo: " + p.name);
-    },
+    if (typeof RetoricaUI !== 'undefined' && RetoricaUI.notify) {
+        RetoricaUI.notify("Idioma Activo: " + p.name);
+    }
+}
 
     toggleAccordion: function() {
         var panel = document.getElementById('accordion-languages');
