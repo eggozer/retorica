@@ -279,39 +279,80 @@ var RetoricaStorage = {
         });
     },
     
-    refreshLibrary: function() {
-        var self = this;
-        this.getAllDocs(function(docs) {
-            var container = document.getElementById('docs-list-render');
-            if (!container) return;
+    // REEMPLAZO DE LA FUNCIÓN refreshLibrary EN storage.js
+refreshLibrary: function() {
+    var self = this;
+    var container = document.getElementById('docs-list-render');
+    if (!container) return;
 
-            container.innerHTML = '';
+    this.getAllDocs(function(docs) {
+        container.innerHTML = '';
+        if (!docs || docs.length === 0) {
+            container.innerHTML = '<div style="grid-column:1/-1; text-align:center; color:var(--text-muted); font-size:0.8rem; padding:20px;">Sin documentos guardados</div>';
+            return;
+        }
 
-            docs.sort(function(a, b) {
-                return new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0);
-            });
+        var p = (typeof RetoricaI18n !== 'undefined' && RetoricaI18n.db[RetoricaI18n.currentLang]) 
+                ? RetoricaI18n.db[RetoricaI18n.currentLang] 
+                : { del: 'BORRAR', copyCard: 'COPIAR', share: 'COMPARTIR' };
 
-            docs.forEach(function(doc) {
-                var card = document.createElement('div');
-                card.className = 'card-template';
-                card.onclick = function() { self.loadDoc(doc.id); };
-
-                var title = self.escapeHTML(doc.title || 'Sin Título');
-                var body = self.escapeHTML(doc.body || 'Sin Contenido');
-
-                card.innerHTML = 
-                    '<div class="card-template-title">' + title + '</div>' +
-                    '<div class="card-template-body">' + body + '</div>' +
-                    '<div class="card-template-actions">' +
-                        '<button class="btn-action-tmpl" onclick="RetoricaStorage.deleteDoc(\'' + doc.id + '\', event)" title="Borrar">BORRAR</button>' +
-                        '<button class="btn-action-tmpl" onclick="RetoricaStorage.copyDoc(\'' + doc.id + '\', event)" title="Copiar">COPIAR</button>' +
-                        '<button class="btn-action-tmpl" onclick="RetoricaStorage.shareDoc(\'' + doc.id + '\', event)" title="Compartir">COMPARTIR</button>' +
-                    '</div>';
-
-                container.appendChild(card);
-            });
+        docs.sort(function(a, b) {
+            return new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0);
         });
-    },
+
+        docs.forEach(function(doc) {
+            var card = document.createElement('div');
+            card.className = 'card-template';
+            card.onclick = function() { self.loadDoc(doc.id); };
+
+            var title = document.createElement('div');
+            title.className = 'card-template-title';
+            title.innerText = doc.title || 'Sin Título';
+
+            var cleanBody = (doc.body || '').replace(/<[^>]*>?/gm, '');
+            var body = document.createElement('div');
+            body.className = 'card-template-body';
+            body.innerText = cleanBody || 'Vacio...';
+
+            var actions = document.createElement('div');
+            actions.className = 'card-template-actions';
+            actions.style.display = 'flex';
+            actions.style.justifyContent = 'space-around';
+            actions.style.alignItems = 'center';
+
+            // Botón 3D Redondo - Copiar
+            var btnCopyWrapper = document.createElement('div');
+            btnCopyWrapper.className = 'btn-wrapper-3d';
+            btnCopyWrapper.style.width = '40px';
+            btnCopyWrapper.innerHTML = '<button type="button" class="btn-round-3d card-btn-copy" style="width:36px!important;height:36px!important;" title="' + p.copyCard + '"><span class="icon-raw">📋</span></button>';
+            btnCopyWrapper.onclick = function(e) { self.copyDoc(doc.id, e); };
+
+            // Botón 3D Redondo - Compartir / Exportar
+            var btnShareWrapper = document.createElement('div');
+            btnShareWrapper.className = 'btn-wrapper-3d';
+            btnShareWrapper.style.width = '40px';
+            btnShareWrapper.innerHTML = '<button type="button" class="btn-round-3d card-btn-share" style="width:36px!important;height:36px!important;" title="' + p.share + '"><span class="icon-raw">🔗</span></button>';
+            btnShareWrapper.onclick = function(e) { self.shareDoc(doc.id, e); };
+
+            // Botón 3D Redondo - Eliminar
+            var btnDelWrapper = document.createElement('div');
+            btnDelWrapper.className = 'btn-wrapper-3d';
+            btnDelWrapper.style.width = '40px';
+            btnDelWrapper.innerHTML = '<button type="button" class="btn-round-3d card-btn-delete" style="width:36px!important;height:36px!important;" title="' + p.del + '"><span class="icon-raw">🗑️</span></button>';
+            btnDelWrapper.onclick = function(e) { self.deleteDoc(doc.id, e); };
+
+            actions.appendChild(btnCopyWrapper);
+            actions.appendChild(btnShareWrapper);
+            actions.appendChild(btnDelWrapper);
+
+            card.appendChild(title);
+            card.appendChild(body);
+            card.appendChild(actions);
+
+            container.appendChild(card);
+        });
+    });
+}
 
     syncWithCloud: function() {
         if (typeof window.retoricaActiveUser === 'undefined' || !window.retoricaActiveUser) return;
