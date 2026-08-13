@@ -1,4 +1,4 @@
-// --- RETÓRICA INTERNATIONALIZATION & TRANSLATION ENGINE (idiomas.js CORREGIDO) ---
+// --- RETÓRICA INTERNATIONALIZATION ENGINE (COMPATIBLE CON ANDROID 5) ---
 var RetoricaI18n = {
     currentLang: 'en-GB', 
     currentVoiceLang: 'en-GB', 
@@ -21,84 +21,52 @@ var RetoricaI18n = {
         'zh-CN': { name: 'Chinese', save: '保存', new: '新建', mic: '语音', read: '朗读', stop: '停止', vmsg: '录音', tts: '音频', copy: '复制', import: '导入', pdf: 'PDF', pdfedit: '编辑PDF', doc: 'DOC', sync: '同步', backup: '备份', restore: '恢复', zoomin: '放大', zoomout: '缩小', pTitle: '剧本标题...', pBody: '在此处编写您的剧本...', menu: '菜单', install: '安装', theme: '主题', langTxt: '文字', langVoz: '语音', del: '删除', copyCard: '复制', share: '分享' }
     },
 
-    init: function() {
-        var sysLang = (navigator.language || navigator.userLanguage || 'en-GB').toLowerCase();
-        var match = this.langsOrder.find(function(l) { return l.toLowerCase() === sysLang; });
-        if (!match) {
-            var sysCode = sysLang.split('-')[0];
-            match = this.langsOrder.find(function(l) { return l.toLowerCase().startsWith(sysCode); });
-        }
-        var finalLang = match || 'en-GB';
-        this.setAppLang(finalLang);
-    },
-
     setAppLang: function(lang) {
         this.currentLang = lang;
         this.currentVoiceLang = lang;
         var p = this.db[lang] || this.db['en-GB']; 
         
-        function updateLabelWithMarquee(elementId, text) {
-            var el = document.getElementById(elementId);
+        function updateLabel(id, text) {
+            var el = document.getElementById(id);
             if (!el) return;
-            if (text && text.length > 8) {
-                el.innerHTML = '<span class="scroll-text">' + text + '</span>';
-            } else {
-                el.innerText = text || '';
-            }
+            el.innerText = text || '';
         }
 
-        // Mapeo de botones de la barra superior
-        updateLabelWithMarquee('lbl-tool-save', p.save || 'GUARDAR');
-        updateLabelWithMarquee('lbl-tool-new', p.new || 'NUEVO');
-        updateLabelWithMarquee('lbl-tool-mic', p.mic || 'VOZ');
-        updateLabelWithMarquee('lbl-tool-read', p.read || 'LEER');
-        updateLabelWithMarquee('lbl-tool-stop', p.stop || 'FIN');
-        updateLabelWithMarquee('lbl-tool-vmsg', p.vmsg || 'GRABAR');
-        updateLabelWithMarquee('lbl-tool-tts', p.tts || 'AUDIO');
-        updateLabelWithMarquee('lbl-tool-copyall', p.copy || 'COPIAR');
-        updateLabelWithMarquee('lbl-tool-import', p.import || 'IMPORTAR');
-        updateLabelWithMarquee('lbl-tool-pdf', p.pdf || 'PDF');
-        updateLabelWithMarquee('lbl-tool-pdfedit', p.pdfedit || 'EDIT PDF');
-        updateLabelWithMarquee('lbl-tool-doc', p.doc || 'DOC');
-        updateLabelWithMarquee('lbl-tool-sync', p.sync || 'SINCRONIZAR');
-        updateLabelWithMarquee('lbl-tool-backup', p.backup || 'RESPALDO');
-        updateLabelWithMarquee('lbl-tool-restore', p.restore || 'RESTAURAR');
-        updateLabelWithMarquee('lbl-tool-zoomin', p.zoomin || 'AMPLIAR');
-        updateLabelWithMarquee('lbl-tool-zoomout', p.zoomout || 'REDUCIR');
-        
-        // Placeholders de los editores
+        // Mapeo directo de textos a la interfaz
+        updateLabel('lbl-tool-save', p.save);
+        updateLabel('lbl-tool-new', p.new);
+        updateLabel('lbl-tool-mic', p.mic);
+        updateLabel('lbl-tool-read', p.read);
+        updateLabel('lbl-tool-stop', p.stop);
+        updateLabel('lbl-tool-vmsg', p.vmsg);
+        updateLabel('lbl-tool-tts', p.tts);
+        updateLabel('lbl-tool-copyall', p.copy);
+        updateLabel('lbl-tool-import', p.import);
+        updateLabel('lbl-tool-pdf', p.pdf);
+        updateLabel('lbl-tool-pdfedit', p.pdfedit);
+        updateLabel('lbl-tool-doc', p.doc);
+        updateLabel('lbl-tool-sync', p.sync);
+        updateLabel('lbl-tool-backup', p.backup);
+        updateLabel('lbl-tool-restore', p.restore);
+        updateLabel('lbl-tool-zoomin', p.zoomin);
+        updateLabel('lbl-tool-zoomout', p.zoomout);
+
+        updateLabel('lbl-nav-menu', p.menu);
+        updateLabel('lbl-nav-install', p.install);
+        updateLabel('lbl-nav-theme', p.theme);
+        updateLabel('lbl-nav-langtxt', p.langTxt);
+
         var tInput = document.getElementById('editor-title'); 
         if(tInput) tInput.placeholder = p.pTitle;
-        var bInput = document.getElementById('editor-body'); 
-        if(bInput && !bInput.innerText.trim()) {
-            // No sobreescribir contenido existente del usuario
-        }
-        
-        // Controles de Navegación
-        updateLabelWithMarquee('lbl-nav-menu', p.menu || 'MENÚ');
-        updateLabelWithMarquee('lbl-nav-install', p.install || 'INSTALAR');
-        updateLabelWithMarquee('lbl-nav-theme', p.theme || 'TEMA');
-        updateLabelWithMarquee('lbl-nav-langtxt', p.langTxt || 'TEXTO');
-        
-        // Actualizar etiquetas de la biblioteca de tarjetas
-        document.querySelectorAll('.card-btn-delete').forEach(function(el) { 
-            el.setAttribute('title', p.del || 'BORRAR'); 
-            el.setAttribute('aria-label', p.del || 'BORRAR'); 
-        });
-        document.querySelectorAll('.card-btn-copy').forEach(function(el) { 
-            el.setAttribute('title', p.copyCard || 'COPIAR'); 
-            el.setAttribute('aria-label', p.copyCard || 'COPIAR'); 
-        });
-        document.querySelectorAll('.card-btn-share').forEach(function(el) { 
-            el.setAttribute('title', p.share || 'COMPARTIR'); 
-            el.setAttribute('aria-label', p.share || 'COMPARTIR'); 
-        });
 
-        // Disparar traducción si hay texto seleccionado en el editor
+        // Actualización rápida de estados activos (Estilos Directos para Android 5)
+        this.updateAccordionStyles();
+
+        // Ejecutar traducción
         this.translateWork();
 
         if (typeof RetoricaUI !== 'undefined' && RetoricaUI.notify) {
-            RetoricaUI.notify("Idioma Activo: " + p.name);
+            RetoricaUI.notify("Idioma: " + p.name);
         }
     },
 
@@ -111,7 +79,12 @@ var RetoricaI18n = {
         if (isClosed) {
             panel.classList.remove('accordion-closed');
             if (arrow) arrow.style.transform = 'rotate(180deg)';
-            this.renderAccordionLanguages();
+            
+            // Solo renderizar si el contenedor está vacío para evitar lentitud
+            var track = document.getElementById('accordion-slider-track');
+            if (track && track.children.length === 0) {
+                this.renderAccordionLanguages();
+            }
         } else {
             panel.classList.add('accordion-closed');
             if (arrow) arrow.style.transform = 'rotate(0deg)';
@@ -124,11 +97,12 @@ var RetoricaI18n = {
         track.innerHTML = '';
 
         var self = this;
+        var fragment = document.createDocumentFragment(); // Fragmento en memoria para acelerar renderizado
+
         this.langsOrder.forEach(function(langKey) {
             var wrapper = document.createElement('div');
-            var isActive = (langKey === self.currentLang);
-            
-            wrapper.className = 'btn-wrapper-3d' + (isActive ? ' active-wrapper' : '');
+            wrapper.className = 'btn-wrapper-3d';
+            wrapper.setAttribute('data-lang', langKey);
 
             var label = document.createElement('div');
             label.className = 'btn-label-3d';
@@ -136,7 +110,7 @@ var RetoricaI18n = {
 
             var btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = 'btn-round-3d' + (isActive ? ' active' : '');
+            btn.className = 'btn-round-3d';
             
             var iconSpan = document.createElement('span');
             iconSpan.className = 'icon-raw';
@@ -149,79 +123,71 @@ var RetoricaI18n = {
             wrapper.onclick = function(e) {
                 if (e) e.stopPropagation();
                 self.setAppLang(langKey);
-                self.renderAccordionLanguages();
             };
 
-            track.appendChild(wrapper);
+            fragment.appendChild(wrapper);
+        });
+
+        track.appendChild(fragment);
+        this.updateAccordionStyles();
+    },
+
+    updateAccordionStyles: function() {
+        var self = this;
+        var wrappers = document.querySelectorAll('#accordion-slider-track .btn-wrapper-3d');
+        
+        wrappers.forEach(function(wrapper) {
+            var langKey = wrapper.getAttribute('data-lang');
+            var btn = wrapper.querySelector('.btn-round-3d');
+            var isActive = (langKey === self.currentLang);
+
+            if (isActive) {
+                wrapper.className = 'btn-wrapper-3d active-wrapper';
+                if (btn) {
+                    btn.className = 'btn-round-3d active';
+                    // Colores directo en línea para Android 5 WebView
+                    btn.style.backgroundColor = '#00e676';
+                    btn.style.color = '#000000';
+                    btn.style.borderColor = '#ffffff';
+                    btn.style.boxShadow = '0 0 10px #00e676';
+                }
+            } else {
+                wrapper.className = 'btn-wrapper-3d';
+                if (btn) {
+                    btn.className = 'btn-round-3d';
+                    btn.style.backgroundColor = '';
+                    btn.style.color = '';
+                    btn.style.borderColor = '';
+                    btn.style.boxShadow = '';
+                }
+            }
         });
     },
 
     translateWork: function() {
-        this.checkAndTranslateSelection(this.currentLang, this.currentLang);
-    },
-
-    checkAndTranslateSelection: function(sourceLang, targetLang) {
         var editor = document.getElementById('editor-body');
         if (!editor || !editor.innerText.trim()) return;
 
-        var selection = window.getSelection();
-        var selectedText = selection.toString().trim();
-        
-        // Si no hay texto seleccionado, traducir todo el texto del editor
-        var isFullText = false;
-        if (!selectedText) {
-            selectedText = editor.innerText.trim();
-            isFullText = true;
-        }
+        var textToTranslate = editor.innerText.trim();
+        var targetClean = this.currentLang.split('-')[0];
 
-        var targetClean = (targetLang || this.currentLang).split('-')[0];
-
-        var sourceClean = "autodetect";
-        var url = "https://api.mymemory.translated.net/get?q=" + encodeURIComponent(selectedText) + "&langpair=" + sourceClean + "|" + targetClean;
+        var url = "https://api.mymemory.translated.net/get?q=" + encodeURIComponent(textToTranslate) + "&langpair=autodetect|" + targetClean;
 
         fetch(url)
-        .then(function(res) { 
-            if (!res.ok) throw new Error("Error HTTP " + res.status);
-            return res.json(); 
-        })
+        .then(function(res) { return res.json(); })
         .then(function(data) {
             if (data && data.responseData && data.responseStatus === 200) {
                 var translatedText = data.responseData.translatedText;
-                
-                if (!translatedText || translatedText.includes("INVALID SOURCE LANGUAGE") || translatedText.includes("PLEASE SELECT TWO DISTINCT LANGUAGES")) {
-                    return;
-                }
-
-                if (!isFullText && selection.rangeCount > 0) {
-                    var range = selection.getRangeAt(0);
-                    range.deleteContents();
-                    range.insertNode(document.createTextNode(translatedText));
-                } else {
+                if (translatedText && !translatedText.includes("INVALID SOURCE")) {
                     editor.innerText = translatedText;
-                }
-                
-                if (typeof RetoricaUI !== 'undefined') {
-                    RetoricaUI.updateCounters();
-                    if (typeof RetoricaUI.triggerAutoSave === 'function') RetoricaUI.triggerAutoSave();
-                    RetoricaUI.notify("Traducción completada ✓");
+                    if (typeof RetoricaUI !== 'undefined') {
+                        RetoricaUI.updateCounters();
+                        if (typeof RetoricaUI.triggerAutoSave === 'function') RetoricaUI.triggerAutoSave();
+                    }
                 }
             }
         }).catch(function(err) {
-            console.warn("Traducción no disponible en este momento:", err);
+            console.warn("Traducción omitida:", err);
         });
     }
 };
-
-var handleLayoutResize = function() {
-    setTimeout(function() {
-        if (typeof RetoricaI18n !== 'undefined' && RetoricaI18n.renderAccordionLanguages) {
-            var panel = document.getElementById('accordion-languages');
-            if (panel && !panel.classList.contains('accordion-closed')) {
-                RetoricaI18n.renderAccordionLanguages();
-            }
-        }
-    }, 200);
-};
-
-window.addEventListener("orientationchange", handleLayoutResize);
-window.addEventListener("resize", handleLayoutResize);
