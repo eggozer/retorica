@@ -1,4 +1,4 @@
-// --- RETÓRICA INTERNATIONALIZATION ENGINE (COMPATIBLE CON ANDROID 5) ---
+// --- RETÓRICA INTERNATIONALIZATION & ENGINE (COMPATIBLE CON ANDROID 5 Y COBERTURATOTAL) ---
 var RetoricaI18n = {
     currentLang: 'en-GB', 
     currentVoiceLang: 'en-GB', 
@@ -6,63 +6,102 @@ var RetoricaI18n = {
     langsOrder: ['ar-SA', 'de-DE', 'en-GB', 'es-ES', 'es-MX', 'fr-FR', 'hi-IN', 'it-IT', 'ja-JP', 'pt-PT', 'ru-RU', 'uk-UA', 'zh-CN'],
     
     db: {
-        'ar-SA': { name: 'Al-Arabiya', save: 'حفظ', new: 'جديد', mic: 'صوت', read: 'إقرأ', stop: 'إلغاء', vmsg: 'تسجيل', tts: 'صوت', copy: 'نسخ', import: 'استيراد', pdf: 'PDF', pdfedit: 'تعديل PDF', doc: 'WORD', sync: 'تزامن', backup: 'نسخ', restore: 'استعادة', zoomin: 'تكبير', zoomout: 'تصغير', pTitle: 'عنوان النص...', pBody: 'اكتب أو أملي نصوصك هنا...', menu: 'قائمة', install: 'تثبيت', theme: 'سمة', langTxt: 'لغة', langVoz: 'صوت', del: 'حذف', copyCard: 'نسخ', share: 'مشاركة' },
-        'de-DE': { name: 'Deutsch', save: 'SPE', new: 'NEU', mic: 'DIK', read: 'LIES', stop: 'HALT', vmsg: 'REC', tts: 'TON', copy: 'KOP', import: 'IMP', pdf: 'PDF', pdfedit: 'PDF EDT', doc: 'DOC', sync: 'SYN', backup: 'SIC', restore: 'RÜC', zoomin: 'ZOO +', zoomout: 'ZOO -', pTitle: 'Skripttitel...', pBody: 'Schreiben oder diktieren Sie hier...', menu: 'MENÜ', install: 'APP', theme: 'THM', langTxt: 'TXT', langVoz: 'TON', del: 'LÖSCHEN', copyCard: 'KOPIEREN', share: 'TEILEN' },
-        'en-GB': { name: 'English', save: 'SAV', new: 'NEW', mic: 'MIC', read: 'SAY', stop: 'STOP', vmsg: 'REC', tts: 'AUD', copy: 'CPY', import: 'IMP', pdf: 'PDF', pdfedit: 'PDF EDIT', doc: 'DOC', sync: 'SYNC', backup: 'BAK', restore: 'REST', zoomin: 'ZOOM +', zoomout: 'ZOOM -', pTitle: 'Script Title...', pBody: 'Write or dictate your rhetoric here...', menu: 'MENU', install: 'APP', theme: 'THM', langTxt: 'TXT', langVoz: 'VOI', del: 'DELETE', copyCard: 'COPY', share: 'SHARE' },
-        'es-ES': { name: 'Español (ES)', save: 'GUA', new: 'NVO', mic: 'VOZ', read: 'LEE', stop: 'FIN', vmsg: 'REC', tts: 'AUD', copy: 'COP', import: 'IMP', pdf: 'PDF', pdfedit: 'EDIT PDF', doc: 'DOC', sync: 'SINC', backup: 'RESP', restore: 'REST', zoomin: 'ZOOM +', zoomout: 'ZOOM -', pTitle: 'Titular de la Obra...', pBody: 'Escribe o dicta aquí tu obra...', menu: 'MENÚ', install: 'APP', theme: 'TEMA', langTxt: 'TXT', langVoz: 'VOZ', del: 'BORRAR', copyCard: 'COPIAR', share: 'COMPARTIR' },
-        'es-MX': { name: 'Español (MX)', save: 'GUA', new: 'NVO', mic: 'VOZ', read: 'LEE', stop: 'FIN', vmsg: 'REC', tts: 'AUD', copy: 'COP', import: 'IMP', pdf: 'PDF', pdfedit: 'EDIT PDF', doc: 'DOC', sync: 'SINC', backup: 'RESP', restore: 'REST', zoomin: 'ZOOM +', zoomout: 'ZOOM -', pTitle: 'Título del Guion...', pBody: 'Escribe o dicta aquí tu retórica...', menu: 'MENÚ', install: 'APP', theme: 'TEMA', langTxt: 'TXT', langVoz: 'VOZ', del: 'BORRAR', copyCard: 'COPIAR', share: 'COMPARTIR' },
-        'fr-FR': { name: 'Français', save: 'SAV', new: 'NOU', mic: 'MIC', read: 'LIS', stop: 'FIN', vmsg: 'REC', tts: 'AUD', copy: 'COP', import: 'IMP', pdf: 'PDF', pdfedit: 'ÉDIT PDF', doc: 'DOC', sync: 'SYN', backup: 'SAUV', restore: 'REST', zoomin: 'ZOOM +', zoomout: 'ZOOM -', pTitle: 'Titre du Scénario...', pBody: 'Écrivez ou dictez votre rhétorique ici...', menu: 'MENU', install: 'APP', theme: 'THM', langTxt: 'TXT', langVoz: 'VOI', del: 'SUPPRIMER', copyCard: 'COPIER', share: 'PARTAGER' },
-        'hi-IN': { name: 'Hindi', save: 'रखो', new: 'नया', mic: 'बोल', read: 'सुन', stop: 'रोक', vmsg: 'रिए', tts: 'ध्व', copy: 'प्रति', import: 'आयात', pdf: 'PDF', pdfedit: 'PDF संपा', doc: 'DOC', sync: 'सिंक', backup: 'बैक', restore: 'पुनः', zoomin: 'ज़ूम +', zoomout: 'ज़ूम -', pTitle: 'शीर्षक...', pBody: 'अपनी पटकथा यहाँ लिखें...', menu: 'सूची', install: 'ऐप', theme: 'थीम', langTxt: 'पाठ', langVoz: 'आवाज़', del: 'हटाएं', copyCard: 'कॉपी', share: 'साझा' },
-        'it-IT': { name: 'Italiano', save: 'SAL', new: 'NVO', mic: 'VOC', read: 'LEG', stop: 'ALT', vmsg: 'REC', tts: 'AUD', copy: 'COP', import: 'IMP', pdf: 'PDF', pdfedit: 'MOD PDF', doc: 'DOC', sync: 'SINC', backup: 'BAC', restore: 'RIP', zoomin: 'ZOOM +', zoomout: 'ZOOM -', pTitle: 'Titolo dello Script...', pBody: 'Scrivi o detta qui la tua retorica...', menu: 'MENU', install: 'APP', theme: 'TEMA', langTxt: 'TXT', langVoz: 'VOC', del: 'ELIMINA', copyCard: 'COPIA', share: 'CONDIVIDI' },
-        'ja-JP': { name: 'Japanese', save: '保存', new: '新規', mic: '音声', read: '再生', stop: '停止', vmsg: '録音', tts: '音源', copy: '複写', import: '取込', pdf: 'PDF', pdfedit: 'PDF編集', doc: 'DOC', sync: '同期', backup: '退避', restore: '復元', zoomin: '拡大', zoomout: '縮小', pTitle: 'タイトル...', pBody: 'ここにレトリックを書きます...', menu: '献立', install: '追加', theme: '配色', langTxt: '文字', langVoz: '音声', del: '削除', copyCard: '複製', share: '共有' },
-        'pt-PT': { name: 'Português', save: 'GUA', new: 'NVO', mic: 'VOZ', read: 'LEI', stop: 'FIM', vmsg: 'REC', tts: 'AUD', copy: 'COP', import: 'IMP', pdf: 'PDF', pdfedit: 'EDIT PDF', doc: 'DOC', sync: 'SINC', backup: 'CÓP', restore: 'REST', zoomin: 'ZOOM +', zoomout: 'ZOOM -', pTitle: 'Título do Roteiro...', pBody: 'Escreva ou dite sua retórica aqui...', menu: 'MENU', install: 'APP', theme: 'TEMA', langTxt: 'TXT', langVoz: 'VOZ', del: 'APAGAR', copyCard: 'COPIAR', share: 'PARTILHAR' },
-        'ru-RU': { name: 'Русский', save: 'СОХ', new: 'НОВ', mic: 'ГОЛ', read: 'ЧИТ', stop: 'СТОП', vmsg: 'ЗАП', tts: 'ЗВУК', copy: 'КОП', import: 'ИМП', pdf: 'PDF', pdfedit: 'РЕД PDF', doc: 'DOC', sync: 'СИНК', backup: 'РЕЗ', restore: 'ВОС', zoomin: 'МАС +', zoomout: 'МАС -', pTitle: 'Название...', pBody: 'Пишите здесь...', menu: 'МЕНЮ', install: 'АПП', theme: 'ТЕМ', langTxt: 'ТКСТ', langVoz: 'ГОЛ', del: 'УДАЛИТЬ', copyCard: 'КОПИРОВАТЬ', share: 'ПОДЕЛИТЬСЯ' },
-        'uk-UA': { name: 'Ukrainian', save: 'ЗБЕР', new: 'НОВ', mic: 'ГОЛ', read: 'ЧИТ', stop: 'СТОП', vmsg: 'ЗАП', tts: 'ЗВУК', copy: 'КОП', import: 'ІМП', pdf: 'PDF', pdfedit: 'РЕД PDF', doc: 'DOC', sync: 'СИНХ', backup: 'КОП', restore: 'VOS', zoomin: 'ЗУМ +', zoomout: 'ЗУМ -', pTitle: 'Назва Сценарію...', pBody: 'Пишіть або диктуйте риторику тут...', menu: 'МЕНЮ', install: 'АПП', theme: 'ТЕМ', langTxt: 'ТЕКСТ', langVoz: 'ГОЛ', del: 'ВИДАЛИТИ', copyCard: 'КОПІЮВАТИ', share: 'ПОДІЛИТИСЯ' },
-        'zh-CN': { name: 'Chinese', save: '保存', new: '新建', mic: '语音', read: '朗读', stop: '停止', vmsg: '录音', tts: '音频', copy: '复制', import: '导入', pdf: 'PDF', pdfedit: '编辑PDF', doc: 'DOC', sync: '同步', backup: '备份', restore: '恢复', zoomin: '放大', zoomout: '缩小', pTitle: '剧本标题...', pBody: '在此处编写您的剧本...', menu: '菜单', install: '安装', theme: '主题', langTxt: '文字', langVoz: '语音', del: '删除', copyCard: '复制', share: '分享' }
+        'ar-SA': { name: 'Al-Arabiya', save: 'حفظ', new: 'جديد', mic: 'صوت', read: 'إقرأ', stop: 'إلغاء', vmsg: 'تسجيل', tts: 'صوت', copy: 'نسخ', import: 'استيراد', pdf: 'PDF', pdfedit: 'تعديل PDF', doc: 'WORD', sync: 'تزامن', backup: 'نسخ', restore: 'استعادة', zoomin: 'تكبير', zoomout: 'تصغير', pTitle: 'عنوان النص...', pBody: 'اكتب أو أملي نصوصك هنا...', menu: 'قائمة', install: 'تثبيت', theme: 'سمة', langTxt: 'لغة', langVoz: 'صوت', del: 'حذف', copyCard: 'نسخ', share: 'مشاركة', history: 'السجل', close: 'إغلاق', clear: 'مسح', confirmDel: 'هل أنت تأكد من الحذف؟' },
+        'de-DE': { name: 'Deutsch', save: 'SPE', new: 'NEU', mic: 'DIK', read: 'LIES', stop: 'HALT', vmsg: 'REC', tts: 'TON', copy: 'KOP', import: 'IMP', pdf: 'PDF', pdfedit: 'PDF EDT', doc: 'DOC', sync: 'SYN', backup: 'SIC', restore: 'RÜC', zoomin: 'ZOO +', zoomout: 'ZOO -', pTitle: 'Skripttitel...', pBody: 'Schreiben oder diktieren Sie hier...', menu: 'MENÜ', install: 'APP', theme: 'THM', langTxt: 'TXT', langVoz: 'TON', del: 'LÖSCHEN', copyCard: 'KOPIEREN', share: 'TEILEN', history: 'VERLAUF', close: 'SCHLIESSEN', clear: 'LÖSCHEN', confirmDel: 'Wirklich löschen?' },
+        'en-GB': { name: 'English', save: 'SAV', new: 'NEW', mic: 'MIC', read: 'SAY', stop: 'STOP', vmsg: 'REC', tts: 'AUD', copy: 'CPY', import: 'IMP', pdf: 'PDF', pdfedit: 'PDF EDIT', doc: 'DOC', sync: 'SYNC', backup: 'BAK', restore: 'REST', zoomin: 'ZOOM +', zoomout: 'ZOOM -', pTitle: 'Script Title...', pBody: 'Write or dictate your rhetoric here...', menu: 'MENU', install: 'APP', theme: 'THM', langTxt: 'TXT', langVoz: 'VOI', del: 'DELETE', copyCard: 'COPY', share: 'SHARE', history: 'HISTORY', close: 'CLOSE', clear: 'CLEAR', confirmDel: 'Are you sure you want to delete?' },
+        'es-ES': { name: 'Español (ES)', save: 'GUA', new: 'NVO', mic: 'VOZ', read: 'LEE', stop: 'FIN', vmsg: 'REC', tts: 'AUD', copy: 'COP', import: 'IMP', pdf: 'PDF', pdfedit: 'EDIT PDF', doc: 'DOC', sync: 'SINC', backup: 'RESP', restore: 'REST', zoomin: 'ZOOM +', zoomout: 'ZOOM -', pTitle: 'Titular de la Obra...', pBody: 'Escribe o dicta aquí tu obra...', menu: 'MENÚ', install: 'APP', theme: 'TEMA', langTxt: 'TXT', langVoz: 'VOZ', del: 'BORRAR', copyCard: 'COPIAR', share: 'COMPARTIR', history: 'HISTORIAL', close: 'CERRAR', clear: 'LIMPIAR', confirmDel: '¿Deseas eliminar este registro?' },
+        'es-MX': { name: 'Español (MX)', save: 'GUA', new: 'NVO', mic: 'VOZ', read: 'LEE', stop: 'FIN', vmsg: 'REC', tts: 'AUD', copy: 'COP', import: 'IMP', pdf: 'PDF', pdfedit: 'EDIT PDF', doc: 'DOC', sync: 'SINC', backup: 'RESP', restore: 'REST', zoomin: 'ZOOM +', zoomout: 'ZOOM -', pTitle: 'Título del Guion...', pBody: 'Escribe o dicta aquí tu retórica...', menu: 'MENÚ', install: 'APP', theme: 'TEMA', langTxt: 'TXT', langVoz: 'VOZ', del: 'BORRAR', copyCard: 'COPIAR', share: 'COMPARTIR', history: 'HISTORIAL', close: 'CERRAR', clear: 'LIMPIAR', confirmDel: '¿Deseas eliminar este registro?' },
+        'fr-FR': { name: 'Français', save: 'SAV', new: 'NOU', mic: 'MIC', read: 'LIS', stop: 'FIN', vmsg: 'REC', tts: 'AUD', copy: 'COP', import: 'IMP', pdf: 'PDF', pdfedit: 'ÉDIT PDF', doc: 'DOC', sync: 'SYN', backup: 'SAUV', restore: 'REST', zoomin: 'ZOOM +', zoomout: 'ZOOM -', pTitle: 'Titre du Scénario...', pBody: 'Écrivez ou dictez votre rhétorique ici...', menu: 'MENU', install: 'APP', theme: 'THM', langTxt: 'TXT', langVoz: 'VOI', del: 'SUPPRIMER', copyCard: 'COPIER', share: 'PARTAGER', history: 'HISTORIQUE', close: 'FERMER', clear: 'EFFACER', confirmDel: 'Voulez-vous supprimer?' },
+        'hi-IN': { name: 'Hindi', save: 'रखो', new: 'नया', mic: 'बोल', read: 'सुन', stop: 'रोक', vmsg: 'रिए', tts: 'ध्व', copy: 'प्रति', import: 'आयात', pdf: 'PDF', pdfedit: 'PDF संपा', doc: 'DOC', sync: 'सिंक', backup: 'बैक', restore: 'पुनः', zoomin: 'ज़ूम +', zoomout: 'ज़ूम -', pTitle: 'शीर्षक...', pBody: 'अपनी पटकथा यहाँ लिखें...', menu: 'सूची', install: 'ऐप', theme: 'थीम', langTxt: 'पाठ', langVoz: 'आवाज़', del: 'हटाएं', copyCard: 'कॉपी', share: 'साझा', history: 'इतिहास', close: 'बंद करें', clear: 'साफ़ करें', confirmDel: 'क्या आप हटाना चाहते हैं?' },
+        'it-IT': { name: 'Italiano', save: 'SAL', new: 'NVO', mic: 'VOC', read: 'LEG', stop: 'ALT', vmsg: 'REC', tts: 'AUD', copy: 'COP', import: 'IMP', pdf: 'PDF', pdfedit: 'MOD PDF', doc: 'DOC', sync: 'SINC', backup: 'BAC', restore: 'RIP', zoomin: 'ZOOM +', zoomout: 'ZOOM -', pTitle: 'Titolo dello Script...', pBody: 'Scrivi o detta qui la tua retorica...', menu: 'MENU', install: 'APP', theme: 'TEMA', langTxt: 'TXT', langVoz: 'VOC', del: 'ELIMINA', copyCard: 'COPIA', share: 'CONDIVIDI', history: 'CRONOLOGIA', close: 'CHIUDI', clear: 'PULISCI', confirmDel: 'Sei sicuro di voler eliminare?' },
+        'ja-JP': { name: 'Japanese', save: '保存', new: '新規', mic: '音声', read: '再生', stop: '停止', vmsg: '録音', tts: '音源', copy: '複写', import: '取込', pdf: 'PDF', pdfedit: 'PDF編集', doc: 'DOC', sync: '同期', backup: '退避', restore: '復元', zoomin: '拡大', zoomout: '縮小', pTitle: 'タイトル...', pBody: 'ここにレトリックを書きます...', menu: '献立', install: '追加', theme: '配色', langTxt: '文字', langVoz: '音声', del: '削除', copyCard: '複製', share: '共有', history: '履歴', close: '閉じる', clear: '消去', confirmDel: '削除してもよろしいですか？' },
+        'pt-PT': { name: 'Português', save: 'GUA', new: 'NVO', mic: 'VOZ', read: 'LEI', stop: 'FIM', vmsg: 'REC', tts: 'AUD', copy: 'COP', import: 'IMP', pdf: 'PDF', pdfedit: 'EDIT PDF', doc: 'DOC', sync: 'SINC', backup: 'CÓP', restore: 'REST', zoomin: 'ZOOM +', zoomout: 'ZOOM -', pTitle: 'Título do Roteiro...', pBody: 'Escreva ou dite sua retórica aqui...', menu: 'MENU', install: 'APP', theme: 'TEMA', langTxt: 'TXT', langVoz: 'VOZ', del: 'APAGAR', copyCard: 'COPIAR', share: 'PARTILHAR', history: 'HISTÓRICO', close: 'FECHAR', clear: 'LIMPAR', confirmDel: 'Deseja realmente apagar?' },
+        'ru-RU': { name: 'Русский', save: 'СОХ', new: 'НОВ', mic: 'ГОЛ', read: 'ЧИТ', stop: 'СТОП', vmsg: 'ЗАП', tts: 'ЗВУК', copy: 'КОП', import: 'ИМП', pdf: 'PDF', pdfedit: 'РЕД PDF', doc: 'DOC', sync: 'СИНК', backup: 'РЕЗ', restore: 'ВОС', zoomin: 'МАС +', zoomout: 'МАС -', pTitle: 'Название...', pBody: 'Пишите здесь...', menu: 'МЕНЮ', install: 'АПП', theme: 'ТЕМ', langTxt: 'ТКСТ', langVoz: 'ГОЛ', del: 'УДАЛИТЬ', copyCard: 'КОПИРОВАТЬ', share: 'ПОДЕЛИТЬСЯ', history: 'ИСТОРИЯ', close: 'ЗАКРЫТЬ', clear: 'ОЧИСТИТЬ', confirmDel: 'Удалить эту запись?' },
+        'uk-UA': { name: 'Ukrainian', save: 'ЗБЕР', new: 'НОВ', mic: 'ГОЛ', read: 'ЧИТ', stop: 'СТОП', vmsg: 'ЗАП', tts: 'ЗВУК', copy: 'КОП', import: 'ІМП', pdf: 'PDF', pdfedit: 'РЕД PDF', doc: 'DOC', sync: 'СИНХ', backup: 'КОП', restore: 'VOS', zoomin: 'ЗУМ +', zoomout: 'ЗУМ -', pTitle: 'Назва Сценарію...', pBody: 'Пишіть або диктуйте риторику тут...', menu: 'МЕНЮ', install: 'АПП', theme: 'ТЕМ', langTxt: 'ТЕКСТ', langVoz: 'ГОЛ', del: 'ВИДАЛИТИ', copyCard: 'КОПІЮВАТИ', share: 'ПОДІЛИТИСЯ', history: 'ІСТОРІЯ', close: 'ЗАКРИТИ', clear: 'ОЧИСТИТИ', confirmDel: 'Видалити цей запис?' },
+        'zh-CN': { name: 'Chinese', save: '保存', new: '新建', mic: '语音', read: '朗读', stop: '停止', vmsg: '录音', tts: '音频', copy: '复制', import: '导入', pdf: 'PDF', pdfedit: '编辑PDF', doc: 'DOC', sync: '同步', backup: '备份', restore: '恢复', zoomin: '放大', zoomout: '缩小', pTitle: '剧本标题...', pBody: '在此处编写您的剧本...', menu: '菜单', install: '安装', theme: '主题', langTxt: '文字', langVoz: '语音', del: '删除', copyCard: '复制', share: '分享', history: '历史记录', close: '关闭', clear: '清除', confirmDel: '您确定要删除吗？' }
+    },
+
+    init: function() {
+        // Detecta el idioma predeterminado del sistema operativo / navegador
+        var sysLang = (navigator.language || navigator.userLanguage || 'en-GB').toLowerCase();
+        
+        // Coincidencia exacta (ej. 'es-mx' o 'zh-cn')
+        var match = this.langsOrder.find(function(l) { return l.toLowerCase() === sysLang; });
+        
+        // Coincidencia por código base de 2 letras (ej. 'hi' para 'hi-IN' o 'ar' para 'ar-SA')
+        if (!match) {
+            var sysCode = sysLang.split('-')[0];
+            match = this.langsOrder.find(function(l) { return l.toLowerCase().startsWith(sysCode); });
+        }
+
+        // Si no detecta nada soportado, por defecto inicia en 'en-GB' (Inglés)
+        var finalLang = match || 'en-GB';
+        this.setAppLang(finalLang);
     },
 
     setAppLang: function(lang) {
         this.currentLang = lang;
         this.currentVoiceLang = lang;
         var p = this.db[lang] || this.db['en-GB']; 
-        
-        function updateLabel(id, text) {
+
+        // Actualización universal de texto seguro
+        function setText(id, text) {
             var el = document.getElementById(id);
-            if (!el) return;
-            el.innerText = text || '';
+            if (el) el.innerText = text || '';
         }
 
-        // Mapeo directo de textos a la interfaz
-        updateLabel('lbl-tool-save', p.save);
-        updateLabel('lbl-tool-new', p.new);
-        updateLabel('lbl-tool-mic', p.mic);
-        updateLabel('lbl-tool-read', p.read);
-        updateLabel('lbl-tool-stop', p.stop);
-        updateLabel('lbl-tool-vmsg', p.vmsg);
-        updateLabel('lbl-tool-tts', p.tts);
-        updateLabel('lbl-tool-copyall', p.copy);
-        updateLabel('lbl-tool-import', p.import);
-        updateLabel('lbl-tool-pdf', p.pdf);
-        updateLabel('lbl-tool-pdfedit', p.pdfedit);
-        updateLabel('lbl-tool-doc', p.doc);
-        updateLabel('lbl-tool-sync', p.sync);
-        updateLabel('lbl-tool-backup', p.backup);
-        updateLabel('lbl-tool-restore', p.restore);
-        updateLabel('lbl-tool-zoomin', p.zoomin);
-        updateLabel('lbl-tool-zoomout', p.zoomout);
+        // 1. Barra de herramientas superior
+        setText('lbl-tool-save', p.save);
+        setText('lbl-tool-new', p.new);
+        setText('lbl-tool-mic', p.mic);
+        setText('lbl-tool-read', p.read);
+        setText('lbl-tool-stop', p.stop);
+        setText('lbl-tool-vmsg', p.vmsg);
+        setText('lbl-tool-tts', p.tts);
+        setText('lbl-tool-copyall', p.copy);
+        setText('lbl-tool-import', p.import);
+        setText('lbl-tool-pdf', p.pdf);
+        setText('lbl-tool-pdfedit', p.pdfedit);
+        setText('lbl-tool-doc', p.doc);
+        setText('lbl-tool-sync', p.sync);
+        setText('lbl-tool-backup', p.backup);
+        setText('lbl-tool-restore', p.restore);
+        setText('lbl-tool-zoomin', p.zoomin);
+        setText('lbl-tool-zoomout', p.zoomout);
 
-        updateLabel('lbl-nav-menu', p.menu);
-        updateLabel('lbl-nav-install', p.install);
-        updateLabel('lbl-nav-theme', p.theme);
-        updateLabel('lbl-nav-langtxt', p.langTxt);
+        // 2. Barra de navegación principal
+        setText('lbl-nav-menu', p.menu);
+        setText('lbl-nav-install', p.install);
+        setText('lbl-nav-theme', p.theme);
+        setText('lbl-nav-langtxt', p.langTxt);
 
+        // 3. Editores de texto (Placeholders)
         var tInput = document.getElementById('editor-title'); 
-        if(tInput) tInput.placeholder = p.pTitle;
+        if (tInput) tInput.placeholder = p.pTitle;
 
-        // Actualización rápida de estados activos (Estilos Directos para Android 5)
+        // 4. Secciones Modales e Historial (si existen en el DOM)
+        setText('lbl-modal-history-title', p.history);
+        setText('lbl-btn-close-modal', p.close);
+        setText('lbl-btn-clear-history', p.clear);
+
+        // 5. Botones dinámicos dentro de las Tarjetas Generadas
+        document.querySelectorAll('.card-btn-delete').forEach(function(el) { 
+            el.setAttribute('title', p.del); 
+            el.setAttribute('aria-label', p.del); 
+        });
+        document.querySelectorAll('.card-btn-copy').forEach(function(el) { 
+            el.setAttribute('title', p.copyCard); 
+            el.setAttribute('aria-label', p.copyCard); 
+        });
+        document.querySelectorAll('.card-btn-share').forEach(function(el) { 
+            el.setAttribute('title', p.share); 
+            el.setAttribute('aria-label', p.share); 
+        });
+
+        // 6. Refrescar colores/estilos en línea del acordeón para Android 5
         this.updateAccordionStyles();
 
-        // Ejecutar traducción
+        // 7. Traducir contenido activo del usuario si corresponde
         this.translateWork();
 
         if (typeof RetoricaUI !== 'undefined' && RetoricaUI.notify) {
@@ -80,7 +119,6 @@ var RetoricaI18n = {
             panel.classList.remove('accordion-closed');
             if (arrow) arrow.style.transform = 'rotate(180deg)';
             
-            // Solo renderizar si el contenedor está vacío para evitar lentitud
             var track = document.getElementById('accordion-slider-track');
             if (track && track.children.length === 0) {
                 this.renderAccordionLanguages();
@@ -97,7 +135,7 @@ var RetoricaI18n = {
         track.innerHTML = '';
 
         var self = this;
-        var fragment = document.createDocumentFragment(); // Fragmento en memoria para acelerar renderizado
+        var fragment = document.createDocumentFragment();
 
         this.langsOrder.forEach(function(langKey) {
             var wrapper = document.createElement('div');
@@ -145,7 +183,7 @@ var RetoricaI18n = {
                 wrapper.className = 'btn-wrapper-3d active-wrapper';
                 if (btn) {
                     btn.className = 'btn-round-3d active';
-                    // Colores directo en línea para Android 5 WebView
+                    // Estilos explícitos en el DOM para compatibilidad estricta con Android 5
                     btn.style.backgroundColor = '#00e676';
                     btn.style.color = '#000000';
                     btn.style.borderColor = '#ffffff';
@@ -191,3 +229,8 @@ var RetoricaI18n = {
         });
     }
 };
+
+// Autoejecutar inicialización tan pronto carga la ventana
+window.addEventListener('DOMContentLoaded', function() {
+    RetoricaI18n.init();
+});
