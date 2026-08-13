@@ -108,7 +108,7 @@
     pointer-events: auto;
 }
 
-/* ACTUALIZACIÓN ENTRE LÍNEAS 125 Y 145 DE index.html */
+/* ACTUALIZACIÓN DE MARQUESINA CONTINUA PARA RETÓRICA */
 .top-navbar .btn-label-3d, .accordion-body .btn-label-3d {
     font-size: 0.58rem;
     font-weight: bold;
@@ -126,17 +126,22 @@
     position: relative;
 }
 
-/* Animación de desplazamiento lateral si el texto supera el espacio */
+/* Animación de marquesina continua al pasar el cursor o interactuar */
 .top-navbar .btn-wrapper-3d:hover .btn-label-3d,
-.top-navbar .btn-wrapper-3d:focus .btn-label-3d {
+.top-navbar .btn-wrapper-3d:focus .btn-label-3d,
+.accordion-body .btn-wrapper-3d:hover .btn-label-3d {
     display: inline-block;
-    animation: marqueeLabel 3s linear infinite;
+    padding-left: 100%;
+    animation: marqueeLabelContinuous 6s linear infinite;
 }
 
-@keyframes marqueeLabel {
-    0% { transform: translateX(0%); }
-    50% { transform: translateX(-30%); }
-    100% { transform: translateX(0%); }
+@keyframes marqueeLabelContinuous {
+    0% {
+        transform: translateX(0%);
+    }
+    100% {
+        transform: translateX(-100%);
+    }
 }
 
 /* Botón 3D Monocromático */
