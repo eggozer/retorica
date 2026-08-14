@@ -699,6 +699,60 @@
         </div>
     </div>
 
+<!-- BOTONERA SECUNDARIA DE EXCEL (DESLIZABLE INDEPENDIENTE) -->
+    <div id="accordion-excel-toolbar" class="accordion-panel accordion-closed" role="region" aria-label="Herramientas Excel">
+        <div class="accordion-content glass-panel">
+            <div class="accordion-header">
+                <span class="accordion-title" id="lbl-excel-toolbar-title">HERRAMIENTAS DE HOJA DE CÁLCULO</span>
+                <span class="arrow-icon" aria-hidden="true">📊</span>
+            </div>
+            <div class="accordion-body">
+                <div class="btn-wrapper-3d">
+                    <div class="btn-label-3d" id="lbl-xl-addrow">Añadir Fila</div>
+                    <button type="button" class="btn-round-3d" onclick="RetoricaExcel.addRow()" title="Añadir Fila">
+                        <span class="icon-raw" aria-hidden="true">➕󰝤</span>
+                    </button>
+                </div>
+                <div class="btn-wrapper-3d">
+                    <div class="btn-label-3d" id="lbl-xl-addcol">Añadir Columna</div>
+                    <button type="button" class="btn-round-3d" onclick="RetoricaExcel.addCol()" title="Añadir Columna">
+                        <span class="icon-raw" aria-hidden="true">➕󰝣</span>
+                    </button>
+                </div>
+                <div class="btn-wrapper-3d">
+                    <div class="btn-label-3d" id="lbl-xl-delrow">Eliminar Fila</div>
+                    <button type="button" class="btn-round-3d" onclick="RetoricaExcel.delRow()" title="Eliminar Fila">
+                        <span class="icon-raw" aria-hidden="true">➖󰝤</span>
+                    </button>
+                </div>
+                <div class="btn-wrapper-3d">
+                    <div class="btn-label-3d" id="lbl-xl-delcol">Eliminar Columna</div>
+                    <button type="button" class="btn-round-3d" onclick="RetoricaExcel.delCol()" title="Eliminar Columna">
+                        <span class="icon-raw" aria-hidden="true">➖󰝣</span>
+                    </button>
+                </div>
+                <div class="btn-wrapper-3d">
+                    <div class="btn-label-3d" id="lbl-xl-calc">Recalcular</div>
+                    <button type="button" class="btn-round-3d" onclick="RetoricaExcel.recalculate()" title="Recalcular Fórmulas">
+                        <span class="icon-raw" aria-hidden="true">⚡</span>
+                    </button>
+                </div>
+                <div class="btn-wrapper-3d">
+                    <div class="btn-label-3d" id="lbl-xl-expxlsx">Exportar XLSX</div>
+                    <button type="button" class="btn-round-3d" onclick="RetoricaExcel.exportXLSX()" title="Exportar a Microsoft Excel (.xlsx)">
+                        <span class="icon-raw" aria-hidden="true">📗</span>
+                    </button>
+                </div>
+                <div class="btn-wrapper-3d">
+                    <div class="btn-label-3d" id="lbl-xl-expcsv">Exportar CSV/Lotus</div>
+                    <button type="button" class="btn-round-3d" onclick="RetoricaExcel.exportCSV()" title="Exportar a CSV / Lotus 1-2-3 / Hojas Clásicas">
+                        <span class="icon-raw" aria-hidden="true">📄</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <input type="file" id="file-picker-local" class="file-input-hidden" accept=".pdf,.doc,.docx,.txt,.html,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onchange="RetoricaStorage.importLocalFile(event)">
 
     <!-- MENÚ LATERAL -->
