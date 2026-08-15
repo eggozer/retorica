@@ -819,5 +819,19 @@
     <script src="./storage.js?v=2026_GOD_MODE"></script>
     <script src="./excel.js?v=2026_GOD_MODE"></script>
     <script src="./main.js?v=2026_GOD_MODE"></script>
+
+    <!-- MODAL PARA MOSTRAR GRÁFICAS ESTADÍSTICAS EN MODO EXCEL -->
+    <div id="excel-chart-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:99999; justify-content:center; align-items:center;">
+        <div style="background:var(--bg-main, #fff); padding:20px; border-radius:12px; width:90%; max-width:600px; position:relative; max-height:90vh; overflow-y:auto;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h3 style="margin:0; font-size:1.1rem;" id="lbl-chart-title">Gráfica Estadística</h3>
+                <button type="button" onclick="RetoricaExcel.closeChartModal()" style="border:none; background:transparent; font-size:1.5rem; cursor:pointer;">&times;</button>
+            </div>
+            <div style="position:relative; width:100%; height:300px;">
+                <canvas id="retorica-chart-canvas"></canvas>
+            </div>
+        </div>
+    </div>
+    
 </body>
 </html>
