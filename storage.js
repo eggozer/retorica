@@ -412,7 +412,7 @@ var RetoricaStorage = {
                 RetoricaStorage.save();
             };
             reader.readAsText(file);
-        } else if (ext === 'pdf' && window.pdfjsLib) {
+                } else if (ext === 'pdf' && window.pdfjsLib) {
             var reader = new FileReader();
             reader.onload = function(e) {
                 var typedarray = new Uint8Array(e.target.result);
@@ -431,28 +431,26 @@ var RetoricaStorage = {
                         pagesItems.forEach(function(items) {
                             var line = "";
                             items.forEach(function(item) {
-                                if (item.trim().length > 0) {
-                                    line += item + "\t";
-                                }
+                                if (item.trim().length > 0) line += item + "\t";
                             });
                             allLines.push(line);
                         });
 
-                        // Si el modo Excel está activo o el usuario importa un PDF de precios
+                        // Activar interfaz Excel automáticamente al detectar PDF estructurado
                         RetoricaExcel.activeMode = true;
                         var toolbar = document.getElementById('accordion-excel-toolbar');
                         if (toolbar) toolbar.classList.remove('accordion-closed');
 
-                        var tableHTML = '<table id="retorica-excel-table" style="width:100%; border-collapse:collapse; margin:10px 0; font-size:0.85rem;" border="1"><thead><tr style="background:var(--bg-sidebar); text-align:center;"><th>#</th><th>A (Código/Llanta)</th><th>B (Medida)</th><th>C (Precio Base)</th><th>D (IVA 16%)</th><th>E (Precio Total)</th></tr></thead><tbody>';
+                        var tableHTML = '<table id="retorica-excel-table" style="width:100%; border-collapse:collapse; margin:10px 0; font-size:0.85rem;" border="1"><thead><tr style="background:var(--bg-sidebar, #f0f0f0); text-align:center;"><th>#</th><th>A (Código/Llanta)</th><th>B (Medida)</th><th>C (Precio Base)</th><th>D (IVA 16%)</th><th>E (Precio Total)</th></tr></thead><tbody>';
 
                         allLines.forEach(function(lineStr, idx) {
                             var parts = lineStr.split('\t').filter(function(p) { return p.trim() !== ''; });
                             if (parts.length > 0) {
                                 var r = idx + 1;
-                                tableHTML += '<tr><td style="background:var(--bg-sidebar); font-weight:bold; text-align:center;">' + r + '</td>';
+                                tableHTML += '<tr><td style="background:var(--bg-sidebar, #f0f0f0); font-weight:bold; text-align:center;">' + r + '</td>';
                                 tableHTML += '<td contenteditable="true" data-cell="A' + r + '" onblur="RetoricaExcel.evalCell(this)">' + (parts[0] || '') + '</td>';
                                 tableHTML += '<td contenteditable="true" data-cell="B' + r + '" onblur="RetoricaExcel.evalCell(this)">' + (parts[1] || '') + '</td>';
-                                tableHTML += '<td contenteditable="true" data-cell="C' + r + '" onblur="RetoricaExcel.evalCell(this)">' + (parts[2] || '') + '</td>';
+                                tableHTML += '<td contenteditable="true" data-cell="C' + r + '" onblur="RetoricaExcel.evalCell(this)">' + (parts[2] || '0.00') + '</td>';
                                 tableHTML += '<td contenteditable="true" data-cell="D' + r + '" onblur="RetoricaExcel.evalCell(this)">=C' + r + '*IVA</td>';
                                 tableHTML += '<td contenteditable="true" data-cell="E' + r + '" onblur="RetoricaExcel.evalCell(this)">=C' + r + '+D' + r + '</td>';
                                 tableHTML += '</tr>';
@@ -462,7 +460,7 @@ var RetoricaStorage = {
 
                         if (bodyInput) bodyInput.innerHTML = tableHTML;
                         RetoricaExcel.recalculate();
-                        RetoricaStorage.save();
+                        if (typeof RetoricaStorage !== 'undefined') RetoricaStorage.save();
                     });
                 });
             };
