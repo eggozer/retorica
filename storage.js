@@ -412,17 +412,21 @@ var RetoricaStorage = {
                 RetoricaStorage.save();
             };
             reader.readAsText(file);
-                        } else if (ext === 'pdf' && window.pdfjsLib) {
+                                } else if (ext === 'pdf' && window.pdfjsLib) {
             var reader = new FileReader();
             reader.onload = function(e) {
                 var typedarray = new Uint8Array(e.target.result);
+                // Configurar worker explícito para compatibilidad con Android 5
+                if (pdfjsLib.GlobalWorkerOptions && !pdfjsLib.GlobalWorkerOptions.workerSrc) {
+                    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+                }
+                
                 pdfjsLib.getDocument(typedarray).promise.then(function(pdf) {
                     var maxPages = pdf.numPages;
                     var pagePromises = [];
                     for (var p = 1; p <= maxPages; p++) {
                         pagePromises.push(pdf.getPage(p).then(function(page) {
                             return page.getTextContent().then(function(textContent) {
-                                // Agrupar texto por coordenada Y para preservar filas reales
                                 var items = textContent.items;
                                 var linesMap = {};
                                 items.forEach(function(item) {
@@ -454,7 +458,6 @@ var RetoricaStorage = {
                         var r = 0;
                         allRows.forEach(function(lineStr) {
                             var parts = lineStr.split('\t');
-                            // Filtrar encabezados repetidos
                             if (lineStr.indexOf("LISTA DE PRECIOS") !== -1 || lineStr.indexOf("Descripción") !== -1 || parts.length < 3) return;
                             r++;
                             var clave = parts[0] || '';
@@ -463,7 +466,6 @@ var RetoricaStorage = {
                             var almac = parts[3] || '';
                             var precioRaw = parts[4] || parts[3] || '0.00';
                             
-                            // Ajuste si la posición del precio varía por la columna almacén
                             if (isNaN(parseFloat(precioRaw.replace(/,/g, ''))) && parts[3]) {
                                 precioRaw = parts[3];
                                 almac = 'CEDIS';
@@ -480,9 +482,12 @@ var RetoricaStorage = {
                         tableHTML += '</tbody></table>';
 
                         if (bodyInput) bodyInput.innerHTML = tableHTML;
-                        RetoricaExcel.recalculate();
-                        RetoricaStorage.saveToDB(tableHTML);
+                        if (typeof RetoricaExcel !== 'undefined') RetoricaExcel.recalculate();
+                        // Uso de la función nativa de guardado
+                        RetoricaStorage.save();
                     });
+                }).catch(function(err) {
+                    if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error procesando PDF: " + err.message);
                 });
             };
             reader.readAsArrayBuffer(file);
