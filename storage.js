@@ -412,55 +412,76 @@ var RetoricaStorage = {
                 RetoricaStorage.save();
             };
             reader.readAsText(file);
-                } else if (ext === 'pdf' && window.pdfjsLib) {
+                        } else if (ext === 'pdf' && window.pdfjsLib) {
             var reader = new FileReader();
             reader.onload = function(e) {
                 var typedarray = new Uint8Array(e.target.result);
                 pdfjsLib.getDocument(typedarray).promise.then(function(pdf) {
                     var maxPages = pdf.numPages;
-                    var countPromises = [];
-                    for (var i = 1; i <= maxPages; i++) {
-                        countPromises.push(pdf.getPage(i).then(function(page) {
+                    var pagePromises = [];
+                    for (var p = 1; p <= maxPages; p++) {
+                        pagePromises.push(pdf.getPage(p).then(function(page) {
                             return page.getTextContent().then(function(textContent) {
-                                return textContent.items.map(function(s) { return s.str; });
+                                // Agrupar texto por coordenada Y para preservar filas reales
+                                var items = textContent.items;
+                                var linesMap = {};
+                                items.forEach(function(item) {
+                                    var y = Math.round(item.transform[5]);
+                                    if (!linesMap[y]) linesMap[y] = [];
+                                    linesMap[y].push({ x: item.transform[4], str: item.str });
+                                });
+                                var sortedY = Object.keys(linesMap).sort(function(a, b) { return b - a; });
+                                var pageRows = [];
+                                sortedY.forEach(function(y) {
+                                    linesMap[y].sort(function(a, b) { return a.x - b.x; });
+                                    var rowText = linesMap[y].map(function(i) { return i.str.trim(); }).filter(Boolean).join("\t");
+                                    if (rowText) pageRows.push(rowText);
+                                });
+                                return pageRows;
                             });
                         }));
                     }
-                    Promise.all(countPromises).then(function(pagesItems) {
-                        var allLines = [];
-                        pagesItems.forEach(function(items) {
-                            var line = "";
-                            items.forEach(function(item) {
-                                if (item.trim().length > 0) line += item + "\t";
-                            });
-                            allLines.push(line);
-                        });
+                    Promise.all(pagePromises).then(function(allPagesRows) {
+                        var allRows = [];
+                        allPagesRows.forEach(function(pRows) { allRows = allRows.concat(pRows); });
 
-                        // Activar interfaz Excel automáticamente al detectar PDF estructurado
                         RetoricaExcel.activeMode = true;
                         var toolbar = document.getElementById('accordion-excel-toolbar');
                         if (toolbar) toolbar.classList.remove('accordion-closed');
 
-                        var tableHTML = '<table id="retorica-excel-table" style="width:100%; border-collapse:collapse; margin:10px 0; font-size:0.85rem;" border="1"><thead><tr style="background:var(--bg-sidebar, #f0f0f0); text-align:center;"><th>#</th><th>A (Código/Llanta)</th><th>B (Medida)</th><th>C (Precio Base)</th><th>D (IVA 16%)</th><th>E (Precio Total)</th></tr></thead><tbody>';
+                        var tableHTML = '<table id="retorica-excel-table" style="width:100%; border-collapse:collapse; margin:10px 0; font-size:0.85rem;" border="1"><thead><tr style="background:var(--bg-sidebar, #f0f0f0); text-align:center;"><th>#</th><th>Clave</th><th>Descripción</th><th>Existencias</th><th>Almacén</th><th>Mayoreo (+100pz)</th></tr></thead><tbody>';
 
-                        allLines.forEach(function(lineStr, idx) {
-                            var parts = lineStr.split('\t').filter(function(p) { return p.trim() !== ''; });
-                            if (parts.length > 0) {
-                                var r = idx + 1;
-                                tableHTML += '<tr><td style="background:var(--bg-sidebar, #f0f0f0); font-weight:bold; text-align:center;">' + r + '</td>';
-                                tableHTML += '<td contenteditable="true" data-cell="A' + r + '" onblur="RetoricaExcel.evalCell(this)">' + (parts[0] || '') + '</td>';
-                                tableHTML += '<td contenteditable="true" data-cell="B' + r + '" onblur="RetoricaExcel.evalCell(this)">' + (parts[1] || '') + '</td>';
-                                tableHTML += '<td contenteditable="true" data-cell="C' + r + '" onblur="RetoricaExcel.evalCell(this)">' + (parts[2] || '0.00') + '</td>';
-                                tableHTML += '<td contenteditable="true" data-cell="D' + r + '" onblur="RetoricaExcel.evalCell(this)">=C' + r + '*IVA</td>';
-                                tableHTML += '<td contenteditable="true" data-cell="E' + r + '" onblur="RetoricaExcel.evalCell(this)">=C' + r + '+D' + r + '</td>';
-                                tableHTML += '</tr>';
+                        var r = 0;
+                        allRows.forEach(function(lineStr) {
+                            var parts = lineStr.split('\t');
+                            // Filtrar encabezados repetidos
+                            if (lineStr.indexOf("LISTA DE PRECIOS") !== -1 || lineStr.indexOf("Descripción") !== -1 || parts.length < 3) return;
+                            r++;
+                            var clave = parts[0] || '';
+                            var desc = parts[1] || '';
+                            var exist = parts[2] || '0';
+                            var almac = parts[3] || '';
+                            var precioRaw = parts[4] || parts[3] || '0.00';
+                            
+                            // Ajuste si la posición del precio varía por la columna almacén
+                            if (isNaN(parseFloat(precioRaw.replace(/,/g, ''))) && parts[3]) {
+                                precioRaw = parts[3];
+                                almac = 'CEDIS';
                             }
+
+                            tableHTML += '<tr><td style="background:var(--bg-sidebar, #f0f0f0); font-weight:bold; text-align:center;">' + r + '</td>';
+                            tableHTML += '<td contenteditable="true" data-cell="A' + r + '" onblur="RetoricaExcel.evalCell(this)">' + clave + '</td>';
+                            tableHTML += '<td contenteditable="true" data-cell="B' + r + '" onblur="RetoricaExcel.evalCell(this)">' + desc + '</td>';
+                            tableHTML += '<td contenteditable="true" data-cell="C' + r + '" onblur="RetoricaExcel.evalCell(this)">' + exist + '</td>';
+                            tableHTML += '<td contenteditable="true" data-cell="D' + r + '" onblur="RetoricaExcel.evalCell(this)">' + almac + '</td>';
+                            tableHTML += '<td contenteditable="true" data-cell="E' + r + '" onblur="RetoricaExcel.evalCell(this)">' + precioRaw + '</td>';
+                            tableHTML += '</tr>';
                         });
                         tableHTML += '</tbody></table>';
 
                         if (bodyInput) bodyInput.innerHTML = tableHTML;
                         RetoricaExcel.recalculate();
-                        if (typeof RetoricaStorage !== 'undefined') RetoricaStorage.save();
+                        RetoricaStorage.saveToDB(tableHTML);
                     });
                 });
             };
