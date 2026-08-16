@@ -1,3 +1,38 @@
+// PERSISTENCIA DE DATOS EN INDEXEDDB PARA ANDROID 5 Y CACHÉ LIMPIO
+var RetoricaStorage = {
+    dbName: "RetoricaDB",
+    saveToDB: function(content) {
+        if (!window.indexedDB) return localStorage.setItem("retorica_backup", content);
+        var req = indexedDB.open(this.dbName, 1);
+        req.onupgradeneeded = function(e) { e.target.result.createObjectStore("docs", { keyPath: "id" }); };
+        req.onsuccess = function(e) {
+            var db = e.target.result;
+            var tx = db.transaction("docs", "readwrite");
+            tx.objectStore("docs").put({ id: "current_sheet", data: content, updated: new Date() });
+        };
+    },
+    loadFromDB: function(callback) {
+        if (!window.indexedDB) return callback(localStorage.getItem("retorica_backup"));
+        var req = indexedDB.open(this.dbName, 1);
+        req.onsuccess = function(e) {
+            var db = e.target.result;
+            if (!db.objectStoreNames.contains("docs")) return callback(null);
+            var tx = db.transaction("docs", "readonly");
+            var getReq = tx.objectStore("docs").get("current_sheet");
+            getReq.onsuccess = function() { callback(getReq.result ? getReq.result.data : null); };
+        };
+    }
+};
+
+// Carga automática al iniciar la página
+document.addEventListener("DOMContentLoaded", function() {
+    RetoricaStorage.loadFromDB(function(data) {
+        if (data && document.getElementById('editor-body')) {
+            document.getElementById('editor-body').innerHTML = data;
+            if (typeof RetoricaExcel !== 'undefined') RetoricaExcel.recalculate();
+        }
+    });
+});
 // --- RETÓRICA EXCEL ENGINE (excel.js - ES5 COMPATIBLE Y MULTILENGUAJE) ---
 var RetoricaExcel = {
     activeMode: false,
