@@ -412,18 +412,23 @@ var RetoricaStorage = {
                 RetoricaStorage.save();
             };
             reader.readAsText(file);
-                                } else if (ext === 'pdf' && window.pdfjsLib) {
+        } else if (ext === 'pdf') {
             var reader = new FileReader();
             reader.onload = function(e) {
                 var typedarray = new Uint8Array(e.target.result);
-                // Configurar worker explícito para compatibilidad con Android 5
-                if (pdfjsLib.GlobalWorkerOptions && !pdfjsLib.GlobalWorkerOptions.workerSrc) {
-                    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+                var pdfjsLib = window['pdfjs-dist/build/pdf'] || window.pdfjsLib;
+
+                if (!pdfjsLib) {
+                    if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error: Librería PDF.js no disponible.");
+                    return;
                 }
-                
+
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.worker.min.js';
+
                 pdfjsLib.getDocument(typedarray).promise.then(function(pdf) {
                     var maxPages = pdf.numPages;
                     var pagePromises = [];
+
                     for (var p = 1; p <= maxPages; p++) {
                         pagePromises.push(pdf.getPage(p).then(function(page) {
                             return page.getTextContent().then(function(textContent) {
@@ -445,31 +450,29 @@ var RetoricaStorage = {
                             });
                         }));
                     }
+
                     Promise.all(pagePromises).then(function(allPagesRows) {
                         var allRows = [];
                         allPagesRows.forEach(function(pRows) { allRows = allRows.concat(pRows); });
 
-                        RetoricaExcel.activeMode = true;
-                        var toolbar = document.getElementById('accordion-excel-toolbar');
-                        if (toolbar) toolbar.classList.remove('accordion-closed');
+                        if (typeof RetoricaExcel !== 'undefined') {
+                            RetoricaExcel.activeMode = true;
+                            var toolbar = document.getElementById('accordion-excel-toolbar');
+                            if (toolbar) toolbar.classList.remove('accordion-closed');
+                        }
 
-                        var tableHTML = '<table id="retorica-excel-table" style="width:100%; border-collapse:collapse; margin:10px 0; font-size:0.85rem;" border="1"><thead><tr style="background:var(--bg-sidebar, #f0f0f0); text-align:center;"><th>#</th><th>Clave</th><th>Descripción</th><th>Existencias</th><th>Almacén</th><th>Mayoreo (+100pz)</th></tr></thead><tbody>';
+                        var tableHTML = '<table id="retorica-excel-table" style="width:100%; border-collapse:collapse; margin:10px 0; font-size:0.85rem;" border="1"><thead><tr style="background:var(--bg-sidebar, #f0f0f0); text-align:center;"><th>#</th><th>Clave</th><th>Descripción</th><th>Existencias</th><th>Almacén</th><th>Precio</th></tr></thead><tbody>';
 
                         var r = 0;
                         allRows.forEach(function(lineStr) {
                             var parts = lineStr.split('\t');
-                            if (lineStr.indexOf("LISTA DE PRECIOS") !== -1 || lineStr.indexOf("Descripción") !== -1 || parts.length < 3) return;
+                            if (lineStr.indexOf("LISTA DE PRECIOS") !== -1 || lineStr.indexOf("Descripción") !== -1 || parts.length < 2) return;
                             r++;
                             var clave = parts[0] || '';
                             var desc = parts[1] || '';
                             var exist = parts[2] || '0';
-                            var almac = parts[3] || '';
+                            var almac = parts[3] || 'CEDIS';
                             var precioRaw = parts[4] || parts[3] || '0.00';
-                            
-                            if (isNaN(parseFloat(precioRaw.replace(/,/g, ''))) && parts[3]) {
-                                precioRaw = parts[3];
-                                almac = 'CEDIS';
-                            }
 
                             tableHTML += '<tr><td style="background:var(--bg-sidebar, #f0f0f0); font-weight:bold; text-align:center;">' + r + '</td>';
                             tableHTML += '<td contenteditable="true" data-cell="A' + r + '" onblur="RetoricaExcel.evalCell(this)">' + clave + '</td>';
@@ -482,12 +485,11 @@ var RetoricaStorage = {
                         tableHTML += '</tbody></table>';
 
                         if (bodyInput) bodyInput.innerHTML = tableHTML;
-                        if (typeof RetoricaExcel !== 'undefined') RetoricaExcel.recalculate();
-                        // Uso de la función nativa de guardado
+                        if (typeof RetoricaExcel !== 'undefined' && RetoricaExcel.recalculate) RetoricaExcel.recalculate();
                         RetoricaStorage.save();
                     });
                 }).catch(function(err) {
-                    if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error procesando PDF: " + err.message);
+                    if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error leyendo PDF: " + err.message);
                 });
             };
             reader.readAsArrayBuffer(file);
