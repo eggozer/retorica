@@ -15,11 +15,10 @@
        <!-- LIBRERÍA DE GRÁFICAS ESTADÍSTICAS (COMPATIBLE CON ANDROID 5 / ES5) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
     
-    <!-- LIBRERÍAS DE LECTURA E IMPORTACIÓN (COMPATIBLES CON ANDROID 5 ES5 LEGACY) -->
+    <!-- LIBRERÍA DE LECTURA E IMPORTACIÓN PDF (COMPATIBLE ES5) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script>
-        if (window['pdfjs-dist/build/pdf']) {
+        if (typeof window !== 'undefined' && window['pdfjs-dist/build/pdf']) {
             window['pdfjs-dist/build/pdf'].GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.worker.min.js';
         }
     </script>
