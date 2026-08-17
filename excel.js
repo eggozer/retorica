@@ -156,19 +156,23 @@ var RetoricaExcel = {
             var result = eval(expr);
             if (!isNaN(result)) {
                 td.setAttribute('data-formula-val', result);
-                td.innerText = Number(result).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                td.innerText = result.toFixed(2);
             }
         } catch (e) {
-            td.innerText = "#ERR";
+            console.warn("Error evaluando celda:", e);
         }
     },
 
     recalculate: function() {
         var cells = document.querySelectorAll('td[data-cell]');
         for (var i = 0; i < cells.length; i++) {
-            this.evalCell(cells[i]);
+            var txt = cells[i].innerText || "";
+            if (txt.indexOf('=') === 0) {
+                this.evalCell(cells[i]);
+            }
         }
-    },
+    }
+};
 
     openChartModal: function() {
         var table = document.getElementById('retorica-excel-table');
