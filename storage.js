@@ -392,26 +392,24 @@ var RetoricaStorage = {
         var file = event.target.files[0];
         if (!file) return;
 
-        var fileName = file.name;
-        var ext = fileName.split('.').pop().toLowerCase();
-        var titleInput = document.getElementById('editor-title');
+        var reader = new FileReader();
         var bodyInput = document.getElementById('editor-body');
+        var titleInput = document.getElementById('editor-title');
 
-        if (titleInput) titleInput.value = fileName.replace(/\.[^/.]+$/, "");
+        reader.onload = function(e) {
+            if (bodyInput) bodyInput.innerText = e.target.result;
+            if (titleInput && !titleInput.value) {
+                titleInput.value = file.name.replace(/\.[^/.]+$/, "");
+            }
+            RetoricaStorage.save();
+            if (typeof RetoricaUI !== 'undefined') {
+                RetoricaUI.notify("Archivo importado ✓");
+            }
+        };
 
-        if (ext === 'txt' || ext === 'html') {
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                if (bodyInput) {
-                    if (ext === 'html') {
-                        bodyInput.innerHTML = e.target.result;
-                    } else {
-                        bodyInput.innerText = e.target.result;
-                    }
-                }
-                RetoricaStorage.save();
-            };
-            reader.readAsText(file);
+        // Lectura directa de texto (.txt, .md, .csv, etc.)
+        reader.readAsText(file);
+        
         } else if (ext === 'pdf' && window.pdfjsLib) {
             var reader = new FileReader();
             reader.onload = function(e) {
