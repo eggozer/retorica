@@ -409,7 +409,7 @@ var RetoricaStorage = {
 
         // Lectura directa de texto (.txt, .md, .csv, etc.)
         reader.readAsText(file);
-        
+    }
         } else if (ext === 'pdf' && window.pdfjsLib) {
             var reader = new FileReader();
             reader.onload = function(e) {
