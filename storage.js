@@ -410,42 +410,4 @@ var RetoricaStorage = {
         // Lectura directa de texto (.txt, .md, .csv, etc.)
         reader.readAsText(file);
     }
-        } else if (ext === 'pdf' && window.pdfjsLib) {
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                var typedarray = new Uint8Array(e.target.result);
-                pdfjsLib.getDocument(typedarray).promise.then(function(pdf) {
-                    var maxPages = pdf.numPages;
-                    var countPromises = [];
-                    for (var i = 1; i <= maxPages; i++) {
-                        countPromises.push(pdf.getPage(i).then(function(page) {
-                            return page.getTextContent().then(function(textContent) {
-                                return textContent.items.map(function(s) { return s.str; }).join(' ');
-                            });
-                        }));
-                    }
-                    Promise.all(countPromises).then(function(texts) {
-                        if (bodyInput) bodyInput.innerText = texts.join('\n\n');
-                        RetoricaStorage.save();
-                    });
-                });
-            };
-            reader.readAsArrayBuffer(file);
-        } else if ((ext === 'doc' || ext === 'docx') && window.mammoth) {
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                mammoth.convertToHtml({ arrayBuffer: e.target.result })
-                    .then(function(result) {
-                        if (bodyInput) bodyInput.innerHTML = result.value;
-                        RetoricaStorage.save();
-                    })
-                    .catch(function(err) {
-                        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error leyendo archivo de Word");
-                    });
-            };
-            reader.readAsArrayBuffer(file);
-        } else {
-            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Formato no soportado directamente");
-        }
-    }
 };
