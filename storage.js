@@ -307,6 +307,19 @@ var RetoricaStorage = {
             var txtCopy = p.copyCard || 'COPIAR';
             var txtShare = p.share || 'COMPARTIR';
 
+            // Función interna para dar formato legible a la fecha
+            var formatDate = function(isoStr) {
+                if (!isoStr) return '--/--/-- --:--';
+                var d = new Date(isoStr);
+                if (isNaN(d.getTime())) return '--/--/-- --:--';
+                var day = ('0' + d.getDate()).slice(-2);
+                var month = ('0' + (d.getMonth() + 1)).slice(-2);
+                var year = d.getFullYear().toString().slice(-2);
+                var hours = ('0' + d.getHours()).slice(-2);
+                var minutes = ('0' + d.getMinutes()).slice(-2);
+                return day + '/' + month + '/' + year + ' ' + hours + ':' + minutes;
+            };
+
             docs.forEach(function(doc) {
                 var card = document.createElement('div');
                 card.className = 'card-template';
@@ -319,9 +332,17 @@ var RetoricaStorage = {
                 var titleEsc = self.escapeHTML(doc.title || 'Sin Título');
                 var snippetEsc = self.escapeHTML(snippet);
 
+                // Formateo de fechas de creación y actualización
+                var createdFormatted = formatDate(doc.createdAt);
+                var updatedFormatted = formatDate(doc.updatedAt || doc.createdAt);
+
                 card.innerHTML = 
                     '<div class="card-template-title">' + titleEsc + '</div>' +
                     '<div class="card-template-body">' + snippetEsc + '</div>' +
+                    '<div class="card-template-dates" style="font-size: 0.7rem; color: var(--text-muted, #777); margin: 6px 0; line-height: 1.2;">' +
+                        '<div><strong>Creado:</strong> ' + createdFormatted + '</div>' +
+                        '<div><strong>Modificado:</strong> ' + updatedFormatted + '</div>' +
+                    '</div>' +
                     '<div class="card-template-actions">' +
                         '<button type="button" class="btn-action-tmpl card-btn-copy" onclick="RetoricaStorage.copyDoc(\'' + doc.id + '\', event)" title="' + txtCopy + '" aria-label="' + txtCopy + '">' + txtCopy + '</button>' +
                         '<button type="button" class="btn-action-tmpl card-btn-share" onclick="RetoricaStorage.shareDoc(\'' + doc.id + '\', event)" title="' + txtShare + '" aria-label="' + txtShare + '">' + txtShare + '</button>' +
