@@ -478,16 +478,23 @@
                 <button class="btn-oauth" id="btn-mode-dual" style="display: block; flex: 1; text-align: center; font-size: 0.7rem; opacity: 0.5;" onclick="RetoricaAuth.switchAccessMode('dual')" title="Ingresar con Email y Celular" aria-label="Ingresar con Email y Celular">EMAIL + CELULAR</button>
             </div>
 
-            <div class="input-group" id="group-input-email">
-                <label id="lbl-auth-email" for="auth-input-email">CORREO ELECTRÓNICO (GOOGLE / EMAIL)</label>
-                <input type="email" id="auth-input-email" class="input-field" placeholder="ejemplo@gmail.com">
-            </div>
+            <!-- MÓDULO DE IDENTIFICACIÓN -->
+<div class="input-group" id="group-input-email">
+    <label id="lbl-auth-email" for="auth-input-email">CORREO ELECTRÓNICO (GOOGLE / EMAIL)</label>
+    <input type="email" id="auth-input-email" class="input-field" placeholder="ejemplo@gmail.com">
+</div>
 
-            <div class="input-group" id="group-input-phone" style="display: none;">
-                <label id="lbl-auth-phone" for="auth-input-phone">NÚMERO TELEFÓNICO CELULAR</label>
-                <input type="tel" id="auth-input-phone" class="input-field" placeholder="Ingresa tu número celular">
-            </div>
+<div class="input-group" id="group-input-phone" style="display: none;">
+    <label id="lbl-auth-phone" for="auth-input-phone">NÚMERO TELEFÓNICO CELULAR (SÓLO NÚMEROS)</label>
+    <input type="tel" id="auth-input-phone" class="input-field" pattern="[0-9]*" inputmode="numeric" placeholder="Ingresa tu celular (solo números)">
+</div>
 
+<!-- MÓDULO OPCIONAL DE CONTRASEÑA -->
+<div class="input-group" id="group-input-password">
+    <label id="lbl-auth-password" for="auth-input-password">CONTRASEÑA ADICIONAL (OPCIONAL)</label>
+    <input type="password" id="auth-input-password" class="input-field" placeholder="Opcional: agrega contraseña para cifrado extra">
+</div>
+            
             <button type="button" class="btn-auth-3d" id="btn-submit-auth" style="margin-top: 10px;" onclick="RetoricaAuth.process()" title="Continuar e ingresar al sistema" aria-label="Continuar e ingresar al sistema">CONTINUAR E INGRESAR</button>
         </div>
     </div>
