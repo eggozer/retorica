@@ -38,38 +38,39 @@ var RetoricaAuth = {
     },
 
     switchAccessMode: function(mode) {
-        this.state.mode = mode;
-        var containerEmail = document.getElementById('group-input-email');
-        var containerPhone = document.getElementById('group-input-phone');
-        
-        var btnGoogle = document.getElementById('btn-mode-google');
-        var btnPhone = document.getElementById('btn-mode-phone');
-        var btnDual = document.getElementById('btn-mode-dual');
+    this.state.mode = mode;
+    var containerEmail = document.getElementById('group-input-email');
+    var containerPhone = document.getElementById('group-input-phone');
 
-        if (btnGoogle) btnGoogle.style.opacity = (mode === 'email') ? '1' : '0.5';
-        if (btnPhone) btnPhone.style.opacity = (mode === 'phone') ? '1' : '0.5';
-        if (btnDual) btnDual.style.opacity = (mode === 'dual') ? '1' : '0.5';
+    var btnGoogle = document.getElementById('btn-mode-google');
+    var btnPhone  = document.getElementById('btn-mode-phone');
+    var btnDual   = document.getElementById('btn-mode-dual');
 
-        if (mode === 'email') {
-            if (containerEmail) containerEmail.style.display = 'block';
-            if (containerPhone) containerPhone.style.display = 'none';
-        } else if (mode === 'phone') {
-            if (containerEmail) containerEmail.style.display = 'none';
-            if (containerPhone) containerPhone.style.display = 'block';
-        } else if (mode === 'dual') {
-            if (containerEmail) containerEmail.style.display = 'block';
-            if (containerPhone) containerPhone.style.display = 'block';
-        }
-    },
+    if (btnGoogle) btnGoogle.style.opacity = (mode === 'email') ? '1' : '0.5';
+    if (btnPhone)  btnPhone.style.opacity  = (mode === 'phone') ? '1' : '0.5';
+    if (btnDual)   btnDual.style.opacity   = (mode === 'dual')  ? '1' : '0.5';
 
-    process: function() {
+    // Opciones 1, 2 y 3: Conmutación de visibilidad de campos
+    if (mode === 'email') {
+        if (containerEmail) containerEmail.style.display = 'block';
+        if (containerPhone) containerPhone.style.display = 'none';
+    } else if (mode === 'phone') {
+        if (containerEmail) containerEmail.style.display = 'none';
+        if (containerPhone) containerPhone.style.display = 'block';
+    } else if (mode === 'dual') {
+        if (containerEmail) containerEmail.style.display = 'block';
+        if (containerPhone) containerPhone.style.display = 'block';
+    }
+},
+
+process: function() {
     var emailVal = document.getElementById('auth-input-email') ? document.getElementById('auth-input-email').value.trim() : '';
     var phoneVal = document.getElementById('auth-input-phone') ? document.getElementById('auth-input-phone').value.trim() : '';
     var passVal  = document.getElementById('auth-input-password') ? document.getElementById('auth-input-password').value : '';
-    
+
     var finalUid = '';
 
-    // OPCIÓN 1: Solo Email
+    // OPCIÓN 1: Ingreso solo por Email
     if (this.state.mode === 'email') {
         if (!emailVal || emailVal.indexOf('@') === -1) {
             alert(this.getTxt('errInvalidEmail', "Ingresa un correo electrónico válido."));
@@ -77,7 +78,7 @@ var RetoricaAuth = {
         }
         finalUid = emailVal;
     } 
-    // OPCIÓN 2: Solo Celular
+    // OPCIÓN 2: Ingreso solo por Celular
     else if (this.state.mode === 'phone') {
         var cleanPhone = phoneVal.replace(/\D/g, '');
         if (cleanPhone.length < 7) {
@@ -86,7 +87,7 @@ var RetoricaAuth = {
         }
         finalUid = "+" + cleanPhone;
     } 
-    // OPCIÓN 3: Email + Celular (Dual)
+    // OPCIÓN 3: Ingreso Dual (Email + Celular)
     else if (this.state.mode === 'dual') {
         var cleanPhoneDual = phoneVal.replace(/\D/g, '');
         if (!emailVal || emailVal.indexOf('@') === -1 || cleanPhoneDual.length < 7) {
@@ -96,7 +97,7 @@ var RetoricaAuth = {
         finalUid = emailVal + " | +" + cleanPhoneDual;
     }
 
-    // OPCIÓN 4: Validación de Contraseña (Solo actúa SI EL USUARIO la escribe)
+    // OPCIÓN 4: Verificación opcional de contraseña (SI EL USUARIO DECIDIÓ ESCRIBIR UNA)
     if (passVal && passVal.trim() !== '') {
         if (passVal.length < 6) {
             alert(this.getTxt('errPasswordShort', "La contraseña debe tener al menos 6 caracteres."));
@@ -107,16 +108,22 @@ var RetoricaAuth = {
             alert(this.getTxt('errInvalidPass', "Contraseña incorrecta para esta cuenta."));
             return;
         }
-        // Registra o actualiza la contraseña para este UID
+        // Asigna o actualiza la contraseña para este UID
         localStorage.setItem('ret_pass_' + finalUid, passVal);
     }
 
-    // Permitir actualización/cambio de datos de perfil
+    // --- SISTEMA DE DEFENSA Y BAN LIST (Intacto) ---
+    var banList = JSON.parse(localStorage.getItem('ret_ban_list') || '[]');
+    if (banList.indexOf(finalUid) > -1 || banList.indexOf(emailVal) > -1) {
+        alert(this.getTxt('errBanned', "Este acceso se encuentra restringido."));
+        return;
+    }
+
+    // Guardado local y actualización de datos de perfil
     var profile = {
         id: finalUid,
         email: emailVal,
         phone: phoneVal,
-        hasCustomPassword: !!(passVal && passVal.trim() !== ''),
         loginType: this.state.mode,
         lastAccess: new Date().toISOString()
     };
