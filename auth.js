@@ -7,6 +7,27 @@ var RetoricaAuth = {
         if (currentActive) {
             this.grantAccess(currentActive);
         }
+        this.bindPhoneInputRestriction();
+    },
+
+    // Restringe la entrada del campo de teléfono exclusivamente a dígitos numéricos en tiempo real
+    bindPhoneInputRestriction: function() {
+        var phoneInput = document.getElementById('auth-input-phone');
+        if (!phoneInput) return;
+
+        phoneInput.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '');
+        });
+
+        phoneInput.addEventListener('keydown', function(e) {
+            var allowedKeys = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight', 'Home', 'End'];
+            if (allowedKeys.indexOf(e.key) !== -1 || (e.ctrlKey || e.metaKey)) {
+                return;
+            }
+            if (!/^\d$/.test(e.key)) {
+                e.preventDefault();
+            }
+        });
     },
 
     getTxt: function(key, fallback) {
@@ -44,6 +65,7 @@ var RetoricaAuth = {
     process: function() {
         var emailVal = document.getElementById('auth-input-email') ? document.getElementById('auth-input-email').value.trim() : '';
         var phoneVal = document.getElementById('auth-input-phone') ? document.getElementById('auth-input-phone').value.trim() : '';
+        var passVal = document.getElementById('auth-input-password') ? document.getElementById('auth-input-password').value : '';
         
         var finalUid = '';
 
@@ -54,10 +76,9 @@ var RetoricaAuth = {
             }
             finalUid = emailVal;
         } else if (this.state.mode === 'phone') {
-            // Limpieza y validación de dígitos telefónicos universales
             var cleanPhone = phoneVal.replace(/\D/g, '');
             if (cleanPhone.length < 7) {
-                alert(this.getTxt('errInvalidPhone', "Ingresa un número celular válido."));
+                alert(this.getTxt('errInvalidPhone', "Ingresa un número celular válido (solo números)."));
                 return;
             }
             finalUid = "+" + cleanPhone;
@@ -68,6 +89,20 @@ var RetoricaAuth = {
                 return;
             }
             finalUid = emailVal + " | +" + cleanPhoneDual;
+        }
+
+        // --- VALIDACIÓN Y PERSISTENCIA DE CONTRASEÑA/PIN ---
+        if (passVal) {
+            if (passVal.length < 6) {
+                alert(this.getTxt('errPasswordShort', "La contraseña debe tener al menos 6 caracteres para mantener la seguridad criptográfica."));
+                return;
+            }
+            var storedPass = localStorage.getItem('ret_pass_' + finalUid);
+            if (storedPass && storedPass !== passVal) {
+                alert(this.getTxt('errInvalidPass', "Contraseña incorrecta para esta cuenta."));
+                return;
+            }
+            localStorage.setItem('ret_pass_' + finalUid, passVal);
         }
 
         // --- SISTEMA DE DEFENSA Y BAN LIST ---
@@ -101,7 +136,6 @@ var RetoricaAuth = {
         if (typeof RetoricaStorage !== 'undefined') {
             RetoricaStorage.refreshLibrary();
             
-            // --- NUEVO: SISTEMA DE AUTO-RECUPERACIÓN ---
             setTimeout(function() {
                 RetoricaStorage.getAllDocs(function(docs) {
                     if (docs.length === 0) {
@@ -110,8 +144,7 @@ var RetoricaAuth = {
                         RetoricaStorage.manualSync();
                     }
                 });
-            }, 800); // Pequeño retraso para asegurar que la DB está inicializada
-            // -------------------------------------------
+            }, 800);
         }
         
         if (typeof RetoricaUI !== 'undefined') {
@@ -124,14 +157,15 @@ var RetoricaAuth = {
         location.reload();
     }
 };
+
 // --- RETÓRICA E2EE CRYPTO ENGINE (Web Crypto API) ---
 var RetoricaCrypto = {
-    // Genera una clave AES-GCM derivada del UID del usuario
-    getKey: async function(rawUid) {
+    getKey: async function(rawUid, userPassword) {
         var enc = new TextEncoder();
+        var secretSource = rawUid + "_" + (userPassword || "RETORICA_DEFAULT_PASS") + "_SALT_2026";
         var keyMaterial = await window.crypto.subtle.importKey(
             "raw", 
-            enc.encode(rawUid + "_RETORICA_SALT_2026"), 
+            enc.encode(secretSource), 
             { name: "PBKDF2" }, 
             false, 
             ["deriveKey"]
@@ -150,10 +184,9 @@ var RetoricaCrypto = {
         );
     },
 
-    // Cifra texto plano y devuelve un texto codificado en Base64 con su IV
-    encryptData: async function(plainText, rawUid) {
+    encryptData: async function(plainText, rawUid, userPassword) {
         try {
-            var key = await this.getKey(rawUid);
+            var key = await this.getKey(rawUid, userPassword);
             var iv = window.crypto.getRandomValues(new Uint8Array(12));
             var enc = new TextEncoder();
             var encrypted = await window.crypto.subtle.encrypt(
@@ -167,7 +200,6 @@ var RetoricaCrypto = {
             combined.set(iv, 0);
             combined.set(cipherArray, iv.length);
             
-            // --- CONVERSIÓN SEGURA A BASE64 (Apta para textos/archivos grandes) ---
             var binString = Array.from(combined, function(byte) {
                 return String.fromCharCode(byte);
             }).join('');
@@ -175,16 +207,14 @@ var RetoricaCrypto = {
             return btoa(binString);
         } catch(e) {
             console.error("Error al cifrar:", e);
-            return plainText; // Fallback
+            return plainText;
         }
     },
 
-    // Descifra el texto Base64 usando la clave del usuario
-    decryptData: async function(cipherBase64, rawUid) {
+    decryptData: async function(cipherBase64, rawUid, userPassword) {
         try {
-            var key = await this.getKey(rawUid);
+            var key = await this.getKey(rawUid, userPassword);
             
-            // --- DECODIFICACIÓN SEGURA DE BASE64 A UINT8ARRAY ---
             var binaryString = atob(cipherBase64);
             var combined = new Uint8Array(binaryString.length);
             for (var i = 0; i < binaryString.length; i++) {
@@ -204,7 +234,7 @@ var RetoricaCrypto = {
             return dec.decode(decrypted);
         } catch(e) {
             console.error("Error al descifrar:", e);
-            return cipherBase64; // Retorna tal cual si ya estaba descifrado o falla
+            return cipherBase64;
         }
     }
 };
