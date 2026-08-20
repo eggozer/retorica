@@ -1,11 +1,10 @@
 // --- RETÓRICA INTERNATIONALIZATION & ENGINE (COMPATIBLE CON ANDROID 5 Y COBERTURA TOTAL) ---
 var RetoricaI18n = {
-    currentLang: 'en-GB', 
-    currentVoiceLang: 'en-GB', 
+    currentLang: 'es-MX', 
+    currentVoiceLang: 'es-MX', 
     
     langsOrder: ['ar-SA', 'de-DE', 'en-GB', 'es-ES', 'es-MX', 'fr-FR', 'hi-IN', 'it-IT', 'ja-JP', 'pt-PT', 'ru-RU', 'uk-UA', 'zh-CN'],
     
-    // Nombres de idiomas en una sola palabra para los botones del acordeón
     singleWordLangs: {
         'ar-SA': 'العربية',
         'de-DE': 'Deutsch',
@@ -22,6 +21,12 @@ var RetoricaI18n = {
         'zh-CN': '中文'
     },
 
+    // Traducciones en el idioma activo del usuario para identificar los demás idiomas
+    translatedLangNames: {
+        'es-MX': { 'ar-SA': 'Árabe', 'de-DE': 'Alemán', 'en-GB': 'Inglés', 'es-ES': 'Español (ES)', 'es-MX': 'Español (MX)', 'fr-FR': 'Francés', 'hi-IN': 'Hindi', 'it-IT': 'Italiano', 'ja-JP': 'Japonés', 'pt-PT': 'Portugués', 'ru-RU': 'Ruso', 'uk-UA': 'Ucraniano', 'zh-CN': 'Chino' },
+        'en-GB': { 'ar-SA': 'Arabic', 'de-DE': 'German', 'en-GB': 'English', 'es-ES': 'Spanish (ES)', 'es-MX': 'Spanish (MX)', 'fr-FR': 'French', 'hi-IN': 'Hindi', 'it-IT': 'Italian', 'ja-JP': 'Japanese', 'pt-PT': 'Portuguese', 'ru-RU': 'Russian', 'uk-UA': 'Ukrainian', 'zh-CN': 'Chinese' }
+    },
+
     db: {
         'ar-SA': { name: 'Al-Arabiya', save: 'حفظ', new: 'جديد', mic: 'صوت', read: 'إقرأ', stop: 'إلغاء', vmsg: 'تسجيل', tts: 'صوت', copy: 'نسخ', import: 'استيراد', pdf: 'PDF', pdfedit: 'تعديل PDF', doc: 'WORD', sync: 'تزامن', backup: 'نسخ', restore: 'استعادة', zoomin: 'تكبير', zoomout: 'تصغير', pTitle: 'عنوان النص...', pBody: 'اكتب أو أملي نصوصك هنا...', menu: 'قائمة', install: 'تثبيت', theme: 'سمة', langTxt: 'لغة', langVoz: 'صوت', del: 'حذف', copyCard: 'نسخ', share: 'مشاركة', history: 'السجل', close: 'إغلاق', clear: 'مسح', confirmDel: 'هل أنت تأكد من الحذف؟' },
         'de-DE': { name: 'Deutsch', save: 'SPEI', new: 'NEU', mic: 'DIKT', read: 'LIES', stop: 'HALT', vmsg: 'REC', tts: 'TON', copy: 'KOPI', import: 'IMPO', pdf: 'PDF', pdfedit: 'PDF EDT', doc: 'DOC', sync: 'SYNC', backup: 'SICH', restore: 'RÜCK', zoomin: 'ZOO +', zoomout: 'ZOO -', pTitle: 'Skripttitel...', pBody: 'Schreiben oder diktieren Sie hier...', menu: 'MENÜ', install: 'APP', theme: 'THM', langTxt: 'TXT', langVoz: 'TON', del: 'LÖSCHEN', copyCard: 'KOPIEREN', share: 'TEILEN', history: 'VERLAUF', close: 'SCHLIESSEN', clear: 'LÖSCHEN', confirmDel: 'Wirklich löschen?' },
@@ -29,7 +34,7 @@ var RetoricaI18n = {
         'es-ES': { name: 'Español (ES)', save: 'GUA', new: 'NVO', mic: 'VOZ', read: 'LEE', stop: 'FIN', vmsg: 'REC', tts: 'AUD', copy: 'COP', import: 'IMP', pdf: 'PDF', pdfedit: 'EDIT PDF', doc: 'DOC', sync: 'SINC', backup: 'RESP', restore: 'REST', zoomin: 'ZOOM +', zoomout: 'ZOOM -', pTitle: 'Titular de la Obra...', pBody: 'Escribe o dicta aquí tu obra...', menu: 'MENÚ', install: 'APP', theme: 'TEMA', langTxt: 'TXT', langVoz: 'VOZ', del: 'BORRAR', copyCard: 'COPIAR', share: 'COMPARTIR', history: 'HISTORIAL', close: 'CERRAR', clear: 'LIMPIAR', confirmDel: '¿Deseas eliminar este registro?' },
         'es-MX': { name: 'Español (MX)', save: 'GUA', new: 'NVO', mic: 'VOZ', read: 'LEE', stop: 'FIN', vmsg: 'REC', tts: 'AUD', copy: 'COP', import: 'IMP', pdf: 'PDF', pdfedit: 'EDIT PDF', doc: 'DOC', sync: 'SINC', backup: 'RESP', restore: 'REST', zoomin: 'ZOOM +', zoomout: 'ZOOM -', pTitle: 'Título del Guion...', pBody: 'Escribe o dicta aquí tu retórica...', menu: 'MENÚ', install: 'APP', theme: 'TEMA', langTxt: 'TXT', langVoz: 'VOZ', del: 'BORRAR', copyCard: 'COPIAR', share: 'COMPARTIR', history: 'HISTORIAL', close: 'CERRAR', clear: 'LIMPIAR', confirmDel: '¿Deseas eliminar este registro?' },
         'fr-FR': { name: 'Français', save: 'ENR', new: 'NOU', mic: 'MIC', read: 'LIR', stop: 'FIN', vmsg: 'REC', tts: 'AUD', copy: 'COP', import: 'IMP', pdf: 'PDF', pdfedit: 'ÉDIT PDF', doc: 'DOC', sync: 'SYN', backup: 'SAUV', restore: 'REST', zoomin: 'ZOOM +', zoomout: 'ZOOM -', pTitle: 'Titre du Scénario...', pBody: 'Écrivez ou dictez votre rhétorique ici...', menu: 'MENU', install: 'APP', theme: 'THM', langTxt: 'TXT', langVoz: 'VOI', del: 'SUPPRIMER', copyCard: 'COPIER', share: 'PARTAGER', history: 'HISTORIQUE', close: 'FERMER', clear: 'EFFACER', confirmDel: 'Voulez-vous supprimer?' },
-        'hi-IN': { name: 'Hindi', save: 'रखो', new: 'नया', mic: 'बोल', read: 'सुन', stop: 'रोक', vmsg: 'रिए', tts: 'ध्व', copy: 'प्रति', import: 'आयात', pdf: 'PDF', pdfedit: 'PDF संपा', doc: 'DOC', sync: 'सिंक', backup: 'बैक', restore: 'पुनः', zoomin: 'ज़ूम +', zoomout: 'ज़ूम -', pTitle: 'शीर्षक...', pBody: 'अपनी पटकथा यहाँ लिखें...', menu: 'सूची', install: 'ऐप', theme: 'थीम', langTxt: 'पाठ', langVoz: 'आवाज़', del: 'हटाएं', copyCard: 'कॉपी', share: 'साझा', history: 'इतिहास', close: 'बंद करें', clear: 'साफ़ करें', confirmDel: 'क्या आप हटाना चाहते हैं?' },
+        'hi-IN': { name: 'Hindi', save: 'रखो', new: 'नया', mic: 'बोल', read: 'सुन', stop: 'रोक', vmsg: 'रिए', tts: 'ध्व', copy: 'प्रति', import: 'आयात', pdf: 'PDF', pdfedit: 'PDF संपा', doc: 'DOC', sync: 'सिंक', backup: 'बैक', restore: 'पुनः', zoomin: 'ज़ूम +', zoomout: 'ज़ूम -', pTitle: 'शीर्षक...', pBody: 'अपनी पटकथा यहाँ लिखें...', menu: 'सूची', install: 'ऐप', theme: 'थीم', langTxt: 'पाठ', langVoz: 'आवाज़', del: 'हटाएं', copyCard: 'कॉपी', share: 'साझा', history: 'इतिहास', close: 'बंद करें', clear: 'साफ़ करें', confirmDel: 'क्या आप हटाना चाहते हैं?' },
         'it-IT': { name: 'Italiano', save: 'SALV', new: 'NVO', mic: 'VOC', read: 'LEGG', stop: 'ALT', vmsg: 'REC', tts: 'AUD', copy: 'COP', import: 'IMP', pdf: 'PDF', pdfedit: 'MOD PDF', doc: 'DOC', sync: 'SINC', backup: 'BAC', restore: 'RIPR', zoomin: 'ZOOM +', zoomout: 'ZOOM -', pTitle: 'Titolo dello Script...', pBody: 'Scrivi o detta qui la tua retorica...', menu: 'MENU', install: 'APP', theme: 'TEMA', langTxt: 'TXT', langVoz: 'VOC', del: 'ELIMINA', copyCard: 'COPIA', share: 'CONDIVIDI', history: 'CRONOLOGIA', close: 'CHIUDI', clear: 'PULISCI', confirmDel: 'Sei sicuro di voler eliminare?' },
         'ja-JP': { name: 'Japanese', save: '保存', new: '新規', mic: '音声', read: '再生', stop: '停止', vmsg: '録音', tts: '音源', copy: '複写', import: '取込', pdf: 'PDF', pdfedit: 'PDF編集', doc: 'DOC', sync: '同期', backup: '退避', restore: '復元', zoomin: '拡大', zoomout: '縮小', pTitle: 'タイトル...', pBody: 'ここにレトリックを書きます...', menu: '献立', install: '追加', theme: '配色', langTxt: '文字', langVoz: '音声', del: '削除', copyCard: '複製', share: '共有', history: '履歴', close: '閉じる', clear: '消去', confirmDel: '削除してもよろしいですか？' },
         'pt-PT': { name: 'Português', save: 'GUA', new: 'NVO', mic: 'VOZ', read: 'LEI', stop: 'FIM', vmsg: 'REC', tts: 'AUD', copy: 'COP', import: 'IMP', pdf: 'PDF', pdfedit: 'EDIT PDF', doc: 'DOC', sync: 'SINC', backup: 'CÓP', restore: 'REST', zoomin: 'ZOOM +', zoomout: 'ZOOM -', pTitle: 'Título do Roteiro...', pBody: 'Escreva ou dite sua retórica aqui...', menu: 'MENU', install: 'APP', theme: 'TEMA', langTxt: 'TXT', langVoz: 'VOZ', del: 'APAGAR', copyCard: 'COPIAR', share: 'PARTILHAR', history: 'HISTÓRICO', close: 'FECHAR', clear: 'LIMPAR', confirmDel: 'Deseja realmente apagar?' },
@@ -39,6 +44,12 @@ var RetoricaI18n = {
     },
 
     init: function() {
+        var savedLang = localStorage.getItem('retorica_user_lang');
+        if (savedLang) {
+            this.setAppLang(savedLang, false);
+            return;
+        }
+
         var sysLang = (navigator.language || navigator.userLanguage || 'en-GB').toLowerCase();
         
         var match = this.langsOrder.find(function(l) { return l.toLowerCase() === sysLang; });
@@ -48,12 +59,16 @@ var RetoricaI18n = {
         }
 
         var finalLang = match || 'en-GB';
-        this.setAppLang(finalLang);
+        this.setAppLang(finalLang, false);
     },
 
-    setAppLang: function(lang) {
+    setAppLang: function(lang, triggerTranslate) {
+        if (typeof triggerTranslate === 'undefined') triggerTranslate = true;
+
         this.currentLang = lang;
         this.currentVoiceLang = lang;
+        localStorage.setItem('retorica_user_lang', lang);
+
         var p = this.db[lang] || this.db['en-GB']; 
 
         function setText(id, text) {
@@ -109,11 +124,13 @@ var RetoricaI18n = {
             el.setAttribute('aria-label', p.share); 
         });
 
-        // 6. Actualizar estados del acordeón
-        this.updateAccordionStyles();
+        // 6. Actualizar acordeón
+        this.renderAccordionLanguages();
 
-        // 7. Traducción de texto del usuario
-        this.translateWork();
+        // 7. Traducción de texto opcional solo por selección explícita
+        if (triggerTranslate) {
+            this.translateWork();
+        }
 
         if (typeof RetoricaUI !== 'undefined' && RetoricaUI.notify) {
             RetoricaUI.notify("Idioma: " + p.name);
@@ -129,11 +146,7 @@ var RetoricaI18n = {
         if (isClosed) {
             panel.classList.remove('accordion-closed');
             if (arrow) arrow.style.transform = 'rotate(180deg)';
-            
-            var track = document.getElementById('accordion-slider-track');
-            if (track && track.children.length === 0) {
-                this.renderAccordionLanguages();
-            }
+            this.renderAccordionLanguages();
         } else {
             panel.classList.add('accordion-closed');
             if (arrow) arrow.style.transform = 'rotate(0deg)';
@@ -147,22 +160,25 @@ var RetoricaI18n = {
 
         var self = this;
         var fragment = document.createDocumentFragment();
+        var currentMap = this.translatedLangNames[this.currentLang] || this.translatedLangNames['es-MX'] || {};
 
         this.langsOrder.forEach(function(langKey) {
             var wrapper = document.createElement('div');
             wrapper.className = 'btn-wrapper-3d';
             wrapper.setAttribute('data-lang', langKey);
 
-            // Nombre completo del idioma en UNA sola palabra en la parte inferior
             var label = document.createElement('div');
             label.className = 'btn-label-3d scrollable-label';
-            label.innerText = self.singleWordLangs[langKey] || langKey.split('-')[0];
+            
+            // Muestra el nombre traducido al idioma del usuario y entre paréntesis el término nativo
+            var translatedName = currentMap[langKey] || langKey.split('-')[0];
+            var nativeName = self.singleWordLangs[langKey] || langKey.split('-')[0];
+            label.innerText = (translatedName === nativeName) ? nativeName : translatedName + " (" + nativeName + ")";
 
             var btn = document.createElement('button');
             btn.type = 'button';
             btn.className = 'btn-round-3d';
             
-            // Icono/Sigla dentro de la esfera
             var iconSpan = document.createElement('span');
             iconSpan.className = 'icon-raw';
             iconSpan.innerText = langKey.substring(0, 2).toUpperCase();
@@ -173,7 +189,7 @@ var RetoricaI18n = {
 
             wrapper.onclick = function(e) {
                 if (e) e.stopPropagation();
-                self.setAppLang(langKey);
+                self.setAppLang(langKey, true);
             };
 
             fragment.appendChild(wrapper);
