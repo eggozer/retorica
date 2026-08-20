@@ -63,65 +63,67 @@ var RetoricaAuth = {
     },
 
     process: function() {
-        var emailVal = document.getElementById('auth-input-email') ? document.getElementById('auth-input-email').value.trim() : '';
-        var phoneVal = document.getElementById('auth-input-phone') ? document.getElementById('auth-input-phone').value.trim() : '';
-        var passVal = document.getElementById('auth-input-password') ? document.getElementById('auth-input-password').value : '';
-        
-        var finalUid = '';
+    var emailVal = document.getElementById('auth-input-email') ? document.getElementById('auth-input-email').value.trim() : '';
+    var phoneVal = document.getElementById('auth-input-phone') ? document.getElementById('auth-input-phone').value.trim() : '';
+    var passVal  = document.getElementById('auth-input-password') ? document.getElementById('auth-input-password').value : '';
+    
+    var finalUid = '';
 
-        if (this.state.mode === 'email') {
-            if (!emailVal || emailVal.indexOf('@') === -1) {
-                alert(this.getTxt('errInvalidEmail', "Ingresa un correo electrónico válido."));
-                return;
-            }
-            finalUid = emailVal;
-        } else if (this.state.mode === 'phone') {
-            var cleanPhone = phoneVal.replace(/\D/g, '');
-            if (cleanPhone.length < 7) {
-                alert(this.getTxt('errInvalidPhone', "Ingresa un número celular válido (solo números)."));
-                return;
-            }
-            finalUid = "+" + cleanPhone;
-        } else if (this.state.mode === 'dual') {
-            var cleanPhoneDual = phoneVal.replace(/\D/g, '');
-            if (!emailVal || emailVal.indexOf('@') === -1 || cleanPhoneDual.length < 7) {
-                alert(this.getTxt('errInvalidDual', "Ingresa un email válido y un número de celular."));
-                return;
-            }
-            finalUid = emailVal + " | +" + cleanPhoneDual;
-        }
-
-        // --- VALIDACIÓN Y PERSISTENCIA DE CONTRASEÑA/PIN ---
-        if (passVal) {
-            if (passVal.length < 6) {
-                alert(this.getTxt('errPasswordShort', "La contraseña debe tener al menos 6 caracteres para mantener la seguridad criptográfica."));
-                return;
-            }
-            var storedPass = localStorage.getItem('ret_pass_' + finalUid);
-            if (storedPass && storedPass !== passVal) {
-                alert(this.getTxt('errInvalidPass', "Contraseña incorrecta para esta cuenta."));
-                return;
-            }
-            localStorage.setItem('ret_pass_' + finalUid, passVal);
-        }
-
-        // --- SISTEMA DE DEFENSA Y BAN LIST ---
-        var banList = JSON.parse(localStorage.getItem('ret_ban_list') || '[]');
-        if (banList.indexOf(finalUid) > -1 || banList.indexOf(emailVal) > -1) {
-            alert(this.getTxt('errBanned', "Este acceso se encuentra restringido por seguridad."));
+    // OPCIÓN 1: Solo Email
+    if (this.state.mode === 'email') {
+        if (!emailVal || emailVal.indexOf('@') === -1) {
+            alert(this.getTxt('errInvalidEmail', "Ingresa un correo electrónico válido."));
             return;
         }
+        finalUid = emailVal;
+    } 
+    // OPCIÓN 2: Solo Celular
+    else if (this.state.mode === 'phone') {
+        var cleanPhone = phoneVal.replace(/\D/g, '');
+        if (cleanPhone.length < 7) {
+            alert(this.getTxt('errInvalidPhone', "Ingresa un número celular válido (solo números)."));
+            return;
+        }
+        finalUid = "+" + cleanPhone;
+    } 
+    // OPCIÓN 3: Email + Celular (Dual)
+    else if (this.state.mode === 'dual') {
+        var cleanPhoneDual = phoneVal.replace(/\D/g, '');
+        if (!emailVal || emailVal.indexOf('@') === -1 || cleanPhoneDual.length < 7) {
+            alert(this.getTxt('errInvalidDual', "Ingresa un email válido y un número celular."));
+            return;
+        }
+        finalUid = emailVal + " | +" + cleanPhoneDual;
+    }
 
-        // Guardado local de perfil
-        var profile = {
-            id: finalUid,
-            loginType: this.state.mode,
-            lastAccess: new Date().toISOString()
-        };
-        localStorage.setItem('ret_profile_' + finalUid, JSON.stringify(profile));
+    // OPCIÓN 4: Validación de Contraseña (Solo actúa SI EL USUARIO la escribe)
+    if (passVal && passVal.trim() !== '') {
+        if (passVal.length < 6) {
+            alert(this.getTxt('errPasswordShort', "La contraseña debe tener al menos 6 caracteres."));
+            return;
+        }
+        var storedPass = localStorage.getItem('ret_pass_' + finalUid);
+        if (storedPass && storedPass !== passVal) {
+            alert(this.getTxt('errInvalidPass', "Contraseña incorrecta para esta cuenta."));
+            return;
+        }
+        // Registra o actualiza la contraseña para este UID
+        localStorage.setItem('ret_pass_' + finalUid, passVal);
+    }
 
-        this.grantAccess(finalUid);
-    },
+    // Permitir actualización/cambio de datos de perfil
+    var profile = {
+        id: finalUid,
+        email: emailVal,
+        phone: phoneVal,
+        hasCustomPassword: !!(passVal && passVal.trim() !== ''),
+        loginType: this.state.mode,
+        lastAccess: new Date().toISOString()
+    };
+    localStorage.setItem('ret_profile_' + finalUid, JSON.stringify(profile));
+
+    this.grantAccess(finalUid);
+}
 
     grantAccess: function(uid) {
         window.retoricaActiveUser = uid;
