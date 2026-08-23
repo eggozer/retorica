@@ -471,12 +471,12 @@
                 <div class="auth-subtitle">SISTEMA MODULAR PROFESIONAL</div>
             </div>
 
-            <!-- MÉTODOS DE INGRESO DIRECTOS -->
-            <div class="oauth-container" style="display: flex; gap: 8px; margin-bottom: 20px;">
-                <button class="btn-oauth" id="btn-mode-google" style="display: block; flex: 1; text-align: center; font-size: 0.7rem;" onclick="RetoricaAuth.switchAccessMode('email')" title="Ingresar con Email o Google" aria-label="Ingresar con Email o Google">EMAIL / GOOGLE</button>
-                <button class="btn-oauth" id="btn-mode-phone" style="display: block; flex: 1; text-align: center; font-size: 0.7rem; opacity: 0.5;" onclick="RetoricaAuth.switchAccessMode('phone')" title="Ingresar con Número Celular" aria-label="Ingresar con Número Celular">NÚMERO CELULAR</button>
-                <button class="btn-oauth" id="btn-mode-dual" style="display: block; flex: 1; text-align: center; font-size: 0.7rem; opacity: 0.5;" onclick="RetoricaAuth.switchAccessMode('dual')" title="Ingresar con Email y Celular" aria-label="Ingresar con Email y Celular">EMAIL + CELULAR</button>
-            </div>
+            <!-- MÉTODOS DE INGRESO DIRECTOS (Líneas 474-480) -->
+<div class="oauth-container" style="display: flex; gap: 8px; margin-bottom: 15px;">
+    <button type="button" class="btn-oauth" id="btn-mode-google" onclick="retoricaAuth.switchAccessMode('email')">EMAIL / GOOGLE</button>
+    <button type="button" class="btn-oauth" id="btn-mode-phone" onclick="retoricaAuth.switchAccessMode('phone')">NÚMERO CELULAR</button>
+    <button type="button" class="btn-oauth" id="btn-mode-dual" onclick="retoricaAuth.switchAccessMode('dual')">EMAIL + CELULAR</button>
+</div>
 
             <div class="input-group" id="group-input-email">
                 <label id="lbl-auth-email" for="auth-input-email">CORREO ELECTRÓNICO (GOOGLE / EMAIL)</label>
