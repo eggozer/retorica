@@ -3,10 +3,29 @@ var RetoricaAuth = {
     state: { mode: 'email' },
 
     initLifecycle: function() {
+        var self = this;
         var currentActive = localStorage.getItem('ret_session_active');
         if (currentActive) {
             this.grantAccess(currentActive);
         }
+
+        // Asignación directa de eventos a los botones de conmutación
+        var btnGoogle = document.getElementById('btn-mode-google');
+        var btnPhone  = document.getElementById('btn-mode-phone');
+        var btnDual   = document.getElementById('btn-mode-dual');
+
+        if (btnGoogle) {
+            btnGoogle.onclick = function(e) { if (e) e.preventDefault(); self.switchAccessMode('email'); };
+        }
+        if (btnPhone) {
+            btnPhone.onclick = function(e) { if (e) e.preventDefault(); self.switchAccessMode('phone'); };
+        }
+        if (btnDual) {
+            btnDual.onclick = function(e) { if (e) e.preventDefault(); self.switchAccessMode('dual'); };
+        }
+
+        // Pestaña predeterminada al cargar
+        this.switchAccessMode('email');
     },
 
     getTxt: function(key, fallback) {
@@ -16,32 +35,12 @@ var RetoricaAuth = {
         return fallback;
     },
 
-    init: function() {
-        var self = this;
-        var btnGoogle = document.getElementById('btn-mode-google');
-        var btnPhone  = document.getElementById('btn-mode-phone');
-        var btnDual   = document.getElementById('btn-mode-dual');
-
-        if (btnGoogle) {
-            btnGoogle.onclick = function(e) { if(e) e.preventDefault(); self.switchAccessMode('email'); };
-        }
-        if (btnPhone) {
-            btnPhone.onclick = function(e) { if(e) e.preventDefault(); self.switchAccessMode('phone'); };
-        }
-        if (btnDual) {
-            btnDual.onclick = function(e) { if(e) e.preventDefault(); self.switchAccessMode('dual'); };
-        }
-
-        this.switchAccessMode('email');
-    },
-
     switchAccessMode: function(mode) {
         this.state.mode = mode;
-
         var containerEmail = document.getElementById('group-input-email');
         var containerPhone = document.getElementById('group-input-phone');
         var containerPass  = document.getElementById('group-input-password');
-
+        
         var btnGoogle = document.getElementById('btn-mode-google');
         var btnPhone  = document.getElementById('btn-mode-phone');
         var btnDual   = document.getElementById('btn-mode-dual');
@@ -62,7 +61,6 @@ var RetoricaAuth = {
         }
 
         if (containerPass) containerPass.style.display = 'block';
-    },
     },
 
     process: function() {
