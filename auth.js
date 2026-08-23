@@ -16,18 +16,39 @@ var RetoricaAuth = {
         return fallback;
     },
 
+    init: function() {
+        var self = this;
+        var btnGoogle = document.getElementById('btn-mode-google');
+        var btnPhone  = document.getElementById('btn-mode-phone');
+        var btnDual   = document.getElementById('btn-mode-dual');
+
+        if (btnGoogle) {
+            btnGoogle.onclick = function(e) { if(e) e.preventDefault(); self.switchAccessMode('email'); };
+        }
+        if (btnPhone) {
+            btnPhone.onclick = function(e) { if(e) e.preventDefault(); self.switchAccessMode('phone'); };
+        }
+        if (btnDual) {
+            btnDual.onclick = function(e) { if(e) e.preventDefault(); self.switchAccessMode('dual'); };
+        }
+
+        this.switchAccessMode('email');
+    },
+
     switchAccessMode: function(mode) {
         this.state.mode = mode;
+
         var containerEmail = document.getElementById('group-input-email');
         var containerPhone = document.getElementById('group-input-phone');
-        
-        var btnGoogle = document.getElementById('btn-mode-google');
-        var btnPhone = document.getElementById('btn-mode-phone');
-        var btnDual = document.getElementById('btn-mode-dual');
+        var containerPass  = document.getElementById('group-input-password');
 
-        if (btnGoogle) btnGoogle.style.opacity = (mode === 'email') ? '1' : '0.5';
-        if (btnPhone) btnPhone.style.opacity = (mode === 'phone') ? '1' : '0.5';
-        if (btnDual) btnDual.style.opacity = (mode === 'dual') ? '1' : '0.5';
+        var btnGoogle = document.getElementById('btn-mode-google');
+        var btnPhone  = document.getElementById('btn-mode-phone');
+        var btnDual   = document.getElementById('btn-mode-dual');
+
+        if (btnGoogle) btnGoogle.style.opacity = (mode === 'email') ? '1' : '0.4';
+        if (btnPhone)  btnPhone.style.opacity  = (mode === 'phone') ? '1' : '0.4';
+        if (btnDual)   btnDual.style.opacity   = (mode === 'dual')  ? '1' : '0.4';
 
         if (mode === 'email') {
             if (containerEmail) containerEmail.style.display = 'block';
@@ -39,6 +60,9 @@ var RetoricaAuth = {
             if (containerEmail) containerEmail.style.display = 'block';
             if (containerPhone) containerPhone.style.display = 'block';
         }
+
+        if (containerPass) containerPass.style.display = 'block';
+    },
     },
 
     process: function() {
