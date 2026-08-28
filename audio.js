@@ -20,16 +20,18 @@ var RetoricaAudio = {
             this.state.recognition.lang = typeof RetoricaI18n !== 'undefined' ? RetoricaI18n.currentLang : 'es-MX';
             
             this.state.recognition.onresult = function(event) {
-                var textChunk = event.results[event.results.length - 1][0].transcript;
-                var editor = document.getElementById('editor-body');
-                if (editor) { 
-                    editor.value += (editor.value ? ' ' : '') + textChunk; 
-                    if (typeof RetoricaUI !== 'undefined') {
-                        RetoricaUI.updateCounters();
-                        RetoricaUI.triggerAutoSave();
-                    }
-                }
-            };
+    var textChunk = event.results[event.results.length - 1][0].transcript;
+    var editor = document.getElementById('editor-body');
+    if (editor) { 
+        var currentText = editor.innerText || editor.textContent || '';
+        var newText = (currentText.trim() ? currentText + ' ' : '') + textChunk;
+        editor.innerText = newText;
+        if (typeof RetoricaUI !== 'undefined') {
+            RetoricaUI.updateCounters();
+            RetoricaUI.triggerAutoSave();
+        }
+    }
+};
             
             this.state.recognition.onerror = function() { RetoricaAudio.stopMicLocally(); };
             this.state.recognition.onend = function() { RetoricaAudio.stopMicLocally(); };
