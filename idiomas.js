@@ -57,9 +57,11 @@ var RetoricaI18n = {
         var p = this.db[lang] || this.db['en-GB']; 
 
         function setText(id, text) {
-            var el = document.getElementById(id);
-            if (el) el.innerText = text || '';
-        }
+    var el = document.getElementById(id);
+    if (el && text !== undefined && text !== null && text !== '') {
+        el.innerText = text;
+    }
+}
 
         // 1. Barra superior
         setText('lbl-tool-save', p.save);
