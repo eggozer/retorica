@@ -113,7 +113,7 @@ var RetoricaAudio = {
     // 4. Renderizado real de texto a archivo de audio (.wav)
     convertTextToVoiceFile: function() {
         var bodyInput = document.getElementById('editor-body');
-        var body = bodyInput ? bodyInput.value.trim() : '';
+        var body = bodyInput ? (bodyInput.innerText || bodyInput.textContent || '').trim() : '';
         if (!body) { 
             if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("No hay texto para convertir."); 
             return; 
