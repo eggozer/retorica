@@ -27,7 +27,7 @@
             --cyan-active: #0088cc;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
-        body, html { width: 100%; height: 100%; background: var(--bg-main); color: var(--text-main); overflow: hidden; display: flex; flex-direction: column; }
+        body, html { width: 100%; height: 100%; background: var(--bg-main); color: var(--text-main); overflow-y: auto; display: flex; flex-direction: column; }
         
         /* Capa de Autenticación */
         .auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-main); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; }
@@ -44,9 +44,9 @@
         .btn-auth-3d { width: 100%; background: var(--btn-3d-bg); border: none; border-bottom: 4px solid var(--btn-shadow); padding: 12px; border-radius: 8px; color: var(--text-main); font-weight: bold; font-size: 0.85rem; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
         .btn-auth-3d:active { transform: translateY(2px); border-bottom-width: 2px; }
         .oauth-container { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
-.btn-oauth { text-align: left; padding: 10px 15px; font-size: 0.8rem; display: block; }
-.btn-oauth:active { transform: translateY(2px); border-bottom-width: 2px; }
-.auth-divider { display: none; align-items: center; text-align: center; color: var(--text-muted); }
+        .btn-oauth { text-align: left; padding: 10px 15px; font-size: 0.8rem; display: block; }
+        .btn-oauth:active { transform: translateY(2px); border-bottom-width: 2px; }
+        .auth-divider { display: none; align-items: center; text-align: center; color: var(--text-muted); }
         .auth-divider::before, .auth-divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--border); }
         .auth-divider:not(:empty)::before { margin-right: .55em; }
         .auth-divider:not(:empty)::after { margin-left: .55em; }
@@ -59,18 +59,16 @@
         .header-app h1 { font-size: 1.3rem; font-weight: 900; letter-spacing: 3px; color: var(--text-main); text-align: center; margin: 0; }
         
         /* Barra de Navegación */
-        /* --- INICIO DE PARCHE PARA ANDROID 5 / WEBVIEW --- */
         .top-navbar {
             background: var(--bg-sidebar);
             border-bottom: 1px solid var(--border);
             padding: 10px 15px;
             display: flex !important;
             flex-wrap: nowrap !important;
-            overflow: hidden !important; 
+            overflow-x: auto !important; 
             gap: 16px;
             z-index: 1000;
-            position: sticky !important;
-            top: 0 !important;
+            position: relative !important;
             align-items: flex-start;
         }
 
@@ -98,7 +96,6 @@
             pointer-events: auto;
         }
 
-        /* ACTUALIZACIÓN DE MARQUESINA CONTINUA PARA RETÓRICA */
         .top-navbar .btn-label-3d, .accordion-body .btn-label-3d {
             font-size: 0.58rem;
             font-weight: bold;
@@ -116,7 +113,6 @@
             position: relative;
         }
 
-        /* Animación de marquesina continua al pasar el cursor o interactuar */
         .top-navbar .btn-wrapper-3d:hover .btn-label-3d,
         .top-navbar .btn-wrapper-3d:focus .btn-label-3d,
         .accordion-body .btn-wrapper-3d:hover .btn-label-3d {
@@ -164,7 +160,6 @@
             font-weight: bold; 
         }
 
-        /* Resaltado sin usar :has() para compatibilidad Android 5 */
         .btn-round-3d.active {
             background: var(--bg-card) !important;
             color: var(--text-main) !important;
@@ -176,9 +171,7 @@
             font-weight: 900;
         }
 
-        /* --- FIN DE PARCHE --- */
-
-        /* --- ESTILO DE ACORDEÓN DEPURA Y SIN LÍNEA FANTASMA --- */
+        /* Estilo de Acordeón */
         .accordion-panel {
             max-height: 250px;
             overflow-y: auto;
@@ -230,7 +223,7 @@
         .sidebar-header .btn-round-3d { width: 36px !important; height: 36px !important; margin: 0 !important; flex-shrink: 0 !important; }
         .sidebar-content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; }
         
-        /* Rejilla de Plantillas - Alineación y Centrado */
+        /* Rejilla de Plantillas */
         #docs-list-render { 
             display: flex !important; 
             flex-wrap: wrap !important; 
@@ -263,7 +256,6 @@
             min-width: 100% !important;
         }
 
-        /* Título y cuerpo alineados/centrados con precisión */
         .card-template-title { 
             font-size: 0.85rem; 
             font-weight: bold; 
@@ -334,7 +326,7 @@
         
         .sidebar-footer { position: absolute; bottom: 0; left: 0; width: 100%; padding: 15px 20px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--bg-main); box-shadow: 0 -4px 10px rgba(0,0,0,0.3); padding-bottom: calc(15px + env(safe-area-inset-bottom)); }
         
-        /* Área de Trabajo - Contenedores corregidos para evitar encimados */
+        /* Área de Trabajo */
         .main-view { 
             flex: 1; 
             display: flex; 
@@ -471,12 +463,11 @@
                 <div class="auth-subtitle">SISTEMA MODULAR PROFESIONAL</div>
             </div>
 
-            <!-- MÉTODOS DE INGRESO DIRECTOS (Líneas 474-480) -->
-<div class="oauth-container" style="display: flex; gap: 8px; margin-bottom: 15px;">
-    <button type="button" class="btn-oauth" id="btn-mode-google" onclick="RetoricaAuth.switchAccessMode('email')">EMAIL / GOOGLE</button>
-    <button type="button" class="btn-oauth" id="btn-mode-phone" onclick="RetoricaAuth.switchAccessMode('phone')">NÚMERO CELULAR</button>
-    <button type="button" class="btn-oauth" id="btn-mode-dual" onclick="RetoricaAuth.switchAccessMode('dual')">EMAIL + CELULAR</button>
-</div>
+            <div class="oauth-container" style="display: flex; gap: 8px; margin-bottom: 15px;">
+                <button type="button" class="btn-oauth" id="btn-mode-google" onclick="RetoricaAuth.switchAccessMode('email')">EMAIL / GOOGLE</button>
+                <button type="button" class="btn-oauth" id="btn-mode-phone" onclick="RetoricaAuth.switchAccessMode('phone')">NÚMERO CELULAR</button>
+                <button type="button" class="btn-oauth" id="btn-mode-dual" onclick="RetoricaAuth.switchAccessMode('dual')">EMAIL + CELULAR</button>
+            </div>
 
             <form id="auth-form" onsubmit="event.preventDefault(); RetoricaAuth.process();">
                 <div class="input-group" id="group-input-email">
@@ -504,112 +495,7 @@
         </div>
     </div>
 
-    <!-- BOTONERA PRINCIPAL ENRIQUECIDA CON BOTONES 3D MONOCROMÁTICOS -->
-    <nav class="top-navbar" role="toolbar" aria-label="Herramientas principales del editor">
-        <div class="btn-wrapper-3d">
-            <div class="btn-label-3d" id="lbl-nav-menu">Menú</div>
-            <button type="button" class="btn-round-3d" onclick="RetoricaUI.toggleSidebar()" title="Abrir panel lateral de menú" aria-label="Abrir panel lateral de menú">
-                <span class="icon-raw" aria-hidden="true">☰</span>
-            </button>
-        </div>
-
-        <div class="menu-scroll-area">
-            <div class="btn-wrapper-3d" id="pwa-install-wrapper">
-                <div class="btn-label-3d" id="lbl-nav-install">Instalar Aplicación</div>
-                <button type="button" class="btn-round-3d" id="btn-pwa-install" onclick="RetoricaUI.installPWA()" title="Instalar aplicación en el dispositivo" aria-label="Instalar aplicación en el dispositivo">
-                    <span class="icon-raw" aria-hidden="true">📱</span>
-                </button>
-            </div>
-            <div class="btn-wrapper-3d">
-                <div class="btn-label-3d" id="lbl-tool-save">Guardar</div>
-                <button type="button" class="btn-round-3d" id="btn-icon-save" onclick="RetoricaStorage.save()" title="Guardar documento actual" aria-label="Guardar documento actual">
-                    <span class="icon-raw" aria-hidden="true">✓</span>
-                </button>
-            </div>
-            <div class="btn-wrapper-3d">
-                <div class="btn-label-3d" id="lbl-tool-new">Nuevo</div>
-                <button type="button" class="btn-round-3d" id="btn-icon-new" onclick="RetoricaStorage.clearCanvas()" title="Crear nuevo lienzo" aria-label="Crear nuevo lienzo">
-                    <span class="icon-raw" aria-hidden="true">＋</span>
-                </button>
-            </div>
-
-            <!-- BOTONES DE FORMATO, COLOR Y TABLA CON ID DE LEYENDA ASIGNADO -->
-<div class="btn-wrapper-3d">
-    <div class="btn-label-3d" id="lbl-tool-fontminus">A-</div>
-    <button type="button" class="btn-round-3d" onclick="RetoricaUI.setFontSize('2')" title="Fuente Pequeña" aria-label="Fuente Pequeña">
-        <span class="icon-raw" aria-hidden="true">A⁻</span>
-    </button>
-</div>
-<div class="btn-wrapper-3d">
-    <div class="btn-label-3d" id="lbl-tool-fontplus">A+</div>
-    <button type="button" class="btn-round-3d" onclick="RetoricaUI.setFontSize('5')" title="Fuente Grande" aria-label="Fuente Grande">
-        <span class="icon-raw" aria-hidden="true">A⁺</span>
-    </button>
-</div>
-<div class="btn-wrapper-3d">
-    <div class="btn-label-3d" id="lbl-tool-color">COLOR</div>
-    <button type="button" class="btn-round-3d" onclick="RetoricaUI.triggerColorPicker()" title="Color de Fuente" aria-label="Color de Fuente">
-        <span class="icon-raw" aria-hidden="true">🎨</span>
-    </button>
-</div>
-<div class="btn-wrapper-3d">
-    <div class="btn-label-3d" id="lbl-tool-table">TABLA</div>
-    <button type="button" class="btn-round-3d" onclick="RetoricaUI.insertAdvancedTable()" title="Insertar Tabla Configurable" aria-label="Insertar Tabla Configurable">
-        <span class="icon-raw" aria-hidden="true">▦</span>
-    </button>
-</div>
-
-            <div class="btn-wrapper-3d">
-                <div class="btn-label-3d" id="lbl-tool-mic">Dictado</div>
-                <button type="button" class="btn-round-3d" id="btn-mic-main" onclick="RetoricaAudio.toggleMic()" title="Activar o desactivar dictado por voz" aria-label="Activar o desactivar dictado por voz">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
-                </button>
-            </div>
-            <div class="btn-wrapper-3d">
-                <div class="btn-label-3d" id="lbl-tool-read">Lectura</div>
-                <button type="button" class="btn-round-3d" id="btn-play-main" onclick="RetoricaAudio.play()" title="Iniciar lectura del texto en voz alta" aria-label="Iniciar lectura del texto en voz alta">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
-                </button>
-            </div>
-            <div class="btn-wrapper-3d">
-                <div class="btn-label-3d" id="lbl-tool-stop">Abortar</div>
-                <button type="button" class="btn-round-3d" id="btn-icon-stop" style="color:var(--text-muted);" onclick="RetoricaAudio.stop()" title="Detener reproducción o grabación activa" aria-label="Detener reproducción o grabación activa">
-                    <span aria-hidden="true">🟦</span>
-                </button>
-            </div>
-            <div class="btn-wrapper-3d">
-                <div class="btn-label-3d" id="lbl-tool-vmsg">Prod. Audio</div>
-                <button type="button" class="btn-round-3d btn-play-style" id="btn-icon-vmsg" onclick="RetoricaAudio.produceVoiceMessage()" title="Producir mensaje de voz" aria-label="Producir mensaje de voz">
-                    <span aria-hidden="true">🔴</span>
-                </button>
-            </div>
-            <div class="btn-wrapper-3d">
-                <div class="btn-label-3d" id="lbl-tool-tts">AUD</div>
-                <button type="button" class="btn-round-3d" onclick="RetoricaAudio.convertTextToVoiceFile()" title="Convertir texto a archivo de audio" aria-label="Convertir texto a archivo de audio">
-                    <svg viewBox="0 0 100 100" style="width: 65%; height: 65%; display: block; margin: auto; fill: currentColor;" aria-hidden="true">
-                        <path d="M50 35a15 15 0 1 0 0 30 15 15 0 0 0 0-30zm0 6a9 9 0 1 1 0 18 9 9 0 0 1 0-18zm-3-10h6v5h-6zm0 28h6v5h-6zm-14-11h5v6h-5zm28 0h5v6h-5zm-11.8-10.2l4.2-4.2 4.2 4.2-4.2 4.2zm14.1 14.1l4.2-4.2 4.2 4.2-4.2 4.2zm-18.3 0l-4.2-4.2 4.2-4.2 4.2 4.2zm0-18.3l-4.2-4.2 4.2-4.2 4.2 4.2z"/>
-                        <path d="M50 10A40 40 0 0 1 85 30l-7 4A32 32 0 0 0 50 18v8L32 14l18-12v10zm0 80A40 40 0 0 1 15 70l7-4a32 32 0 0 0 28 16v-8l18 12-18 12v-10z"/>
-                    </svg>
-                </button>
-            </div>
-            <div class="btn-wrapper-3d">
-                <div class="btn-label-3d" id="lbl-tool-import">Importar</div>
-                <button type="button" class="btn-round-3d" onclick="document.getElementById('file-picker-local').click()" title="Importar documento desde archivo local" aria-label="Importar documento desde archivo local">
-                    <span class="icon-raw" aria-hidden="true">📂</span>
-                </button>
-            </div>
-            <div class="btn-wrapper-3d">
-                <div class="btn-label-3d" id="lbl-tool-copyall">Copiar</div>
-                <button type="button" class="btn-round-3d" onclick="RetoricaUI.copyFullTemplate()" title="Copiar todo el contenido al portapapeles" aria-label="Copiar todo el contenido al portapapeles">
-                    <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; display: block; margin: auto;" aria-hidden="true">
-                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                    </svg>
-                </button>
-            </div>
-            <div class="btn-wrapper-3d">
-                <div class="btn-label-3d" id="lbl-tool-pdf">PDF</div>
-<!-- BOTONERA PRINCIPAL ENRIQUECIDA CON BOTONES 3D MONOCROMÁTICOS -->
+    <!-- BOTONERA PRINCIPAL -->
     <nav class="top-navbar" role="toolbar" aria-label="Herramientas principales del editor">
         <div class="btn-wrapper-3d">
             <div class="btn-label-3d" id="lbl-nav-menu">Menú</div>
@@ -775,7 +661,7 @@
         </div>
     </nav>
 
-    <!-- PANEL ACORDEÓN DESPLEGABLE DE IDIOMAS (SIN LÍNEA FANTASMA) -->
+    <!-- PANEL ACORDEÓN DESPLEGABLE DE IDIOMAS -->
     <div id="accordion-languages" class="accordion-panel accordion-closed" role="region" aria-label="Selección de Idiomas">
         <div class="accordion-content glass-panel">
             <div class="accordion-header">
@@ -823,10 +709,8 @@
                 <div class="unified-container" id="unified-sel-container">
                     <input type="text" id="editor-title" class="doc-title" placeholder="Título del Guion..." aria-label="Título del Guion">
                     
-                    <!-- INPUT DE COLOR OCULTO PARA INVOCAR DESDE EL BOTÓN 3D DE LA BOTONERA -->
                     <input type="color" id="font-color-picker" style="display:none;" onchange="RetoricaUI.setFontColor(this.value)">
 
-                    <!-- CONTENEDOR EDITABLE (Sustituye al textarea para soportar HTML, tablas y estilos) -->
                     <div id="editor-body" class="textarea-main" contenteditable="true" style="min-height: 350px; outline: none; overflow-y: auto; border: 1px dashed var(--border); padding: 10px; border-radius: 8px;" aria-label="Cuerpo del texto del guion"></div>
                 </div>
             </div>
