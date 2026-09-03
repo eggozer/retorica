@@ -388,8 +388,28 @@
         }
 
         body.light-theme .doc-title, body.light-theme .textarea-main, body.light-theme .unified-container { color: #1a202c !important; }
-        .toast { position: fixed; bottom: 65px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--text-main); color: var(--bg-main); padding: 10px 20px; border-radius: 30px; font-size: 0.75rem; font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.3); transition: transform 0.3s ease-out, opacity 0.3s ease-out; z-index: 3000; pointer-events: none; opacity: 0; }
-.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        /* LÍNEAS 228 - 238: Reemplazar el bloque .toast original */
+.toast { 
+    position: fixed; 
+    bottom: 65px; 
+    left: 50%; 
+    transform: translateX(-50%) translateY(100px); 
+    background: var(--text-main); 
+    color: var(--bg-main); 
+    padding: 10px 20px; 
+    border-radius: 30px; 
+    font-size: 0.75rem; 
+    font-weight: bold; 
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3); 
+    transition: transform 0.3s ease-out, opacity 0.3s ease-out; 
+    z-index: 3000; 
+    pointer-events: none; 
+    opacity: 0; 
+}
+.toast.show { 
+    transform: translateX(-50%) translateY(0); 
+    opacity: 1; 
+}
         .recording-active { border-color: #ff3b30 !important; animation: pulseMic 1.5s infinite; }
         .reading-active { border-color: var(--cyan-active) !important; }
         @keyframes pulseMic { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
