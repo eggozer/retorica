@@ -234,16 +234,21 @@ var RetoricaUI = {
         if (document.getElementById('count-lines')) document.getElementById('count-lines').innerText = "LINES: " + lines;
     },
 
-    notify: function(msg) {
-        var toast = document.getElementById('toast-notif');
-        if (!toast) return;
-        toast.innerText = msg;
-        toast.classList.add('show');
-        if (this._toastTimeout) clearTimeout(this._toastTimeout);
-        this._toastTimeout = setTimeout(function() { 
-            toast.classList.remove('show'); 
-        }, 2500);
-    },
+    // LÍNEAS 205 - 214: Reemplazar función notify
+notify: function(msg) {
+    var toast = document.getElementById('toast-notif');
+    if (!toast) return;
+    toast.innerText = msg;
+    toast.classList.add('show');
+    
+    if (this._toastTimer) {
+        clearTimeout(this._toastTimer);
+    }
+    
+    this._toastTimer = setTimeout(function() {
+        toast.classList.remove('show');
+    }, 2500);
+}
 
     expPDF: function() {
         this.notify("Exportando PDF completo...");
