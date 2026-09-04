@@ -239,7 +239,9 @@ var RetoricaUI = {
         if (!toast) return;
         toast.innerText = msg;
         toast.classList.add('show');
-        if (this._toastTimeout) clearTimeout(this._toastTimeout);
+        if (this._toastTimeout) {
+            clearTimeout(this._toastTimeout);
+        }
         this._toastTimeout = setTimeout(function() { 
             toast.classList.remove('show'); 
         }, 2500);
