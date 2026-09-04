@@ -198,11 +198,17 @@ var RetoricaUI = {
     },
 
     toggleSidebar: function() {
-        var sidebar = document.getElementById('sidebar');
-        if (!sidebar) return;
-        sidebar.classList.toggle('active');
-        if (sidebar.classList.contains('active') && typeof RetoricaStorage !== 'undefined') {
-            RetoricaStorage.refreshLibrary();
+        var sb = document.getElementById('sidebar');
+        var ov = document.getElementById('overlay');
+        if (!sb || !ov) return;
+
+        var isOpen = sb.classList.contains('active');
+        if (isOpen) {
+            sb.classList.remove('active');
+            ov.classList.remove('active');
+        } else {
+            sb.classList.add('active');
+            ov.classList.add('active');
         }
     },
 
