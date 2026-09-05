@@ -17,7 +17,7 @@ var RetoricaUI = {
         var editor = document.getElementById('editor-body');
         var titleInput = document.getElementById('editor-title');
 
-        if (typeof RetoricaI18n !== 'undefined') {
+        if (typeof RetoricaI18n !== 'undefined' && typeof RetoricaI18n.init === 'function') {
             RetoricaI18n.init();
         }
 
@@ -34,7 +34,7 @@ var RetoricaUI = {
         }
 
         var lastDocId = localStorage.getItem('retorica_last_doc_id');
-        if (lastDocId && typeof RetoricaStorage !== 'undefined') {
+        if (lastDocId && typeof RetoricaStorage !== 'undefined' && typeof RetoricaStorage.loadDoc === 'function') {
             RetoricaStorage.loadDoc(lastDocId);
         }
 
@@ -51,10 +51,12 @@ var RetoricaUI = {
         this.initViewportFix();
         this.updateCounters();
         
-        if (typeof RetoricaAuth !== 'undefined') RetoricaAuth.initLifecycle();
+        if (typeof RetoricaAuth !== 'undefined' && typeof RetoricaAuth.initLifecycle === 'function') {
+            RetoricaAuth.initLifecycle();
+        }
     },
 
-    // --- FUNCIONES DE FORMATO, COLOR Y TABLAS CON DISEÑO Y CONFIGURACIÓN COMPLETA ---
+    // --- FUNCIONES DE FORMATO, COLOR Y TABLAS ---
     setFontSize: function(size) {
         document.execCommand('fontSize', false, size);
     },
@@ -120,7 +122,7 @@ var RetoricaUI = {
     },
     
     newDocumentAction: function() {
-        if (typeof RetoricaStorage !== 'undefined') {
+        if (typeof RetoricaStorage !== 'undefined' && typeof RetoricaStorage.createNewDoc === 'function') {
             RetoricaStorage.createNewDoc();
         }
     },
@@ -149,7 +151,7 @@ var RetoricaUI = {
     triggerAutoSave: function() {
         clearTimeout(autoSaveTimeout);
         autoSaveTimeout = setTimeout(function() {
-            if (typeof RetoricaStorage !== 'undefined') {
+            if (typeof RetoricaStorage !== 'undefined' && typeof RetoricaStorage.autoSaveSilent === 'function') {
                 RetoricaStorage.autoSaveSilent();
             }
         }, 1500);
@@ -182,7 +184,7 @@ var RetoricaUI = {
         }
         if (diffX > 150) {
             var sidebar = document.getElementById('sidebar');
-            if (sidebar && sidebar.classList.contains('active')) this.toggleSidebar();
+            if (sidebar && sidebar.classList.contains('active')) this.closeSidebar();
         }
     },
 
@@ -201,8 +203,16 @@ var RetoricaUI = {
         var sidebar = document.getElementById('sidebar');
         if (!sidebar) return;
         sidebar.classList.toggle('active');
-        if (sidebar.classList.contains('active') && typeof RetoricaStorage !== 'undefined') {
+        if (sidebar.classList.contains('active') && typeof RetoricaStorage !== 'undefined' && typeof RetoricaStorage.refreshLibrary === 'function') {
             RetoricaStorage.refreshLibrary();
+        }
+    },
+
+    // --- CORRECCIÓN DE CERRADO EXPLÍCITO ---
+    closeSidebar: function() {
+        var sidebar = document.getElementById('sidebar');
+        if (sidebar && sidebar.classList.contains('active')) {
+            sidebar.classList.remove('active');
         }
     },
 
@@ -245,7 +255,12 @@ var RetoricaUI = {
         }, 2500);
     },
 
+    // --- EXPORTACIONES CON VERIFICACIÓN SEGURA ---
     expPDF: function() {
+        if (typeof html2pdf === 'undefined') {
+            RetoricaUI.notify("Librería PDF no cargada o inaccesible.");
+            return;
+        }
         this.notify("Exportando PDF completo...");
         var title = document.getElementById('editor-title').value.trim() || "Promociones Mega";
         var bodyElem = document.getElementById('editor-body');
@@ -279,6 +294,10 @@ var RetoricaUI = {
     },
 
     expPDFEditable: function() {
+        if (typeof html2pdf === 'undefined') {
+            RetoricaUI.notify("Librería PDF no cargada o inaccesible.");
+            return;
+        }
         this.notify("Generando PDF Formulario...");
         var title = document.getElementById('editor-title').value.trim() || "Promociones Mega Editable";
         var bodyElem = document.getElementById('editor-body');
@@ -315,16 +334,15 @@ var RetoricaUI = {
     },
 
     expDOC: function() {
+        var docxInstance = window.docx;
+        if (!docxInstance) {
+            RetoricaUI.notify("Librería Word no cargada o inaccesible.");
+            return;
+        }
         this.notify("Procesando Word nativo...");
         var title = document.getElementById('editor-title').value.trim() || "guion";
         var bodyElem = document.getElementById('editor-body');
         var bodyText = bodyElem ? (bodyElem.innerText || bodyElem.textContent || "") : "";
-
-        var docxInstance = window.docx;
-        if (!docxInstance) {
-            RetoricaUI.notify("Error: Librería Word no cargada.");
-            return;
-        }
 
         var paragraphs = bodyText.split('\n').map(function(line) {
             return new docxInstance.Paragraph({
