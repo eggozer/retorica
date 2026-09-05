@@ -5,7 +5,6 @@ var RetoricaStorage = {
     dbInstance: null,
     currentDocId: null,
 
-    // Función de sanitización XSS
     escapeHTML: function(str) {
         return String(str || '').replace(/[&<>"']/g, function(m) {
             return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
@@ -73,7 +72,7 @@ var RetoricaStorage = {
                     id: self.currentDocId,
                     title: title,
                     body: body,
-                    lang: (typeof RetoricaI18n !== 'undefined') ? RetoricaI18n.currentLang : 'es',
+                    lang: (typeof RetoricaI18n !== 'undefined' && RetoricaI18n.currentLang) ? RetoricaI18n.currentLang : 'es',
                     createdAt: createdAt,
                     updatedAt: nowStr
                 };
@@ -120,7 +119,7 @@ var RetoricaStorage = {
                     id: self.currentDocId,
                     title: title,
                     body: body,
-                    lang: (typeof RetoricaI18n !== 'undefined') ? RetoricaI18n.currentLang : 'es',
+                    lang: (typeof RetoricaI18n !== 'undefined' && RetoricaI18n.currentLang) ? RetoricaI18n.currentLang : 'es',
                     createdAt: createdAt,
                     updatedAt: nowStr
                 };
@@ -208,8 +207,9 @@ var RetoricaStorage = {
                     RetoricaUI.updateCounters();
                     RetoricaUI.notify("Documento cargado ✓");
                     
-                    if (typeof RetoricaUI.toggleSidebar === 'function') {
-                        RetoricaUI.toggleSidebar();
+                    // Cierre explícito para evitar alternancia involuntaria del menú
+                    if (typeof RetoricaUI.closeSidebar === 'function') {
+                        RetoricaUI.closeSidebar();
                     }
                 }
             }
@@ -300,14 +300,13 @@ var RetoricaStorage = {
                 return new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0);
             });
 
-            var p = (typeof RetoricaI18n !== 'undefined' && RetoricaI18n.db[RetoricaI18n.currentLang]) ? 
+            var p = (typeof RetoricaI18n !== 'undefined' && RetoricaI18n.db && RetoricaI18n.db[RetoricaI18n.currentLang]) ? 
                     RetoricaI18n.db[RetoricaI18n.currentLang] : {};
 
             var txtDel = p.del || 'BORRAR';
             var txtCopy = p.copyCard || 'COPIAR';
             var txtShare = p.share || 'COMPARTIR';
 
-            // Función interna para dar formato legible a la fecha
             var formatDate = function(isoStr) {
                 if (!isoStr) return '--/--/-- --:--';
                 var d = new Date(isoStr);
@@ -332,7 +331,6 @@ var RetoricaStorage = {
                 var titleEsc = self.escapeHTML(doc.title || 'Sin Título');
                 var snippetEsc = self.escapeHTML(snippet);
 
-                // Formateo de fechas de creación y actualización
                 var createdFormatted = formatDate(doc.createdAt);
                 var updatedFormatted = formatDate(doc.updatedAt || doc.createdAt);
 
@@ -409,16 +407,27 @@ var RetoricaStorage = {
         reader.readAsText(file);
     },
 
+    // --- IMPORTACIÓN CON FILTRADO DE FORMATOS SOTORTADOS ---
     importLocalFile: function(event) {
         var file = event.target.files[0];
         if (!file) return;
+
+        var ext = file.name.split('.').pop().toLowerCase();
+        var validTextExtensions = ['txt', 'html', 'md', 'csv', 'json'];
+
+        if (validTextExtensions.indexOf(ext) === -1) {
+            if (typeof RetoricaUI !== 'undefined') {
+                RetoricaUI.notify("Formato ." + ext.toUpperCase() + " no soportado para lectura directa. Usa .txt, .html o .md");
+            }
+            return;
+        }
 
         var reader = new FileReader();
         var bodyInput = document.getElementById('editor-body');
         var titleInput = document.getElementById('editor-title');
 
         reader.onload = function(e) {
-            if (bodyInput) bodyInput.innerText = e.target.result;
+            if (bodyInput) bodyInput.innerHTML = e.target.result;
             if (titleInput && !titleInput.value) {
                 titleInput.value = file.name.replace(/\.[^/.]+$/, "");
             }
@@ -428,7 +437,6 @@ var RetoricaStorage = {
             }
         };
 
-        // Lectura directa de texto (.txt, .md, .csv, etc.)
         reader.readAsText(file);
     }
 };
