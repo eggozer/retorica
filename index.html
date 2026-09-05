@@ -82,7 +82,6 @@
         }
         .menu-scroll-area::-webkit-scrollbar { display: none; }
 
-        /* Wrapper de botón */
         .top-navbar .btn-wrapper-3d, .accordion-body .btn-wrapper-3d {
             flex-shrink: 0 !important;   
             width: 60px !important;
@@ -119,11 +118,6 @@
             display: block;
             padding-left: 0;
             animation: none;
-        }
-
-        @keyframes marqueeLabelContinuous {
-            0% { transform: translateX(0%); }
-            100% { transform: translateX(-100%); }
         }
 
         /* Botón 3D Monocromático */
@@ -389,37 +383,10 @@
 
         body.light-theme .doc-title, body.light-theme .textarea-main, body.light-theme .unified-container { color: #1a202c !important; }
         .toast { position: fixed; bottom: 65px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--text-main); color: var(--bg-main); padding: 10px 20px; border-radius: 30px; font-size: 0.75rem; font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.3); transition: transform 0.3s ease-out, opacity 0.3s ease-out; z-index: 3000; pointer-events: none; opacity: 0; }
-.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-        .recording-active { border-color: #ff3b30 !important; animation: pulseMic 1.5s infinite; }
-        .reading-active { border-color: var(--cyan-active) !important; }
-        @keyframes pulseMic { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
         .file-input-hidden { display: none; }
 
-        /* Estilos Adaptativos para Tablas Dinámicas */
-        #editor-body table {
-            width: 100%;
-            table-layout: auto;
-            border-collapse: collapse;
-            margin: 12px 0;
-            word-break: break-word;
-        }
-        #editor-body table, #editor-body th, #editor-body td {
-            border-style: solid;
-        }
-        #editor-body th, #editor-body td {
-            padding: 8px 10px;
-            text-align: left;
-            min-width: 40px;
-        }
-
-        /* Correcciones Modo Tema Oscuro */
-        body:not(.light-theme) .top-navbar,
-        body:not(.light-theme) .accordion-panel {
-            background: #161925 !important;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
-        }
-
-        /* Ajustes Modo Horizontal (Landscape) */
+        /* Ajustes Modo Horizontal */
         @media screen and (orientation: landscape) and (max-height: 500px) {
             body, html { overflow: auto !important; }
             .header-app { display: none !important; }
@@ -430,22 +397,6 @@
                 overflow: visible !important; 
                 padding: 4px 10px !important; 
                 align-items: center !important; 
-            }
-            
-            .accordion-panel {
-                max-height: 180px !important;
-                position: absolute !important;
-                top: 50px !important;
-                left: 0;
-                right: 0;
-                z-index: 1200 !important;
-                overflow-y: hidden !important;
-            }
-
-            .accordion-body {
-                overflow-x: auto !important;
-                -webkit-overflow-scrolling: touch;
-                padding: 8px 5px !important;
             }
         }
     </style>
@@ -464,12 +415,12 @@
             </div>
 
             <div class="oauth-container" style="display: flex; gap: 8px; margin-bottom: 15px;">
-                <button type="button" class="btn-oauth" id="btn-mode-google" onclick="RetoricaAuth.switchAccessMode('email')">EMAIL / GOOGLE</button>
-                <button type="button" class="btn-oauth" id="btn-mode-phone" onclick="RetoricaAuth.switchAccessMode('phone')">NÚMERO CELULAR</button>
-                <button type="button" class="btn-oauth" id="btn-mode-dual" onclick="RetoricaAuth.switchAccessMode('dual')">EMAIL + CELULAR</button>
+                <button type="button" class="btn-oauth" id="btn-mode-google" onclick="if(typeof RetoricaAuth!=='undefined') RetoricaAuth.switchAccessMode('email')">EMAIL / GOOGLE</button>
+                <button type="button" class="btn-oauth" id="btn-mode-phone" onclick="if(typeof RetoricaAuth!=='undefined') RetoricaAuth.switchAccessMode('phone')">NÚMERO CELULAR</button>
+                <button type="button" class="btn-oauth" id="btn-mode-dual" onclick="if(typeof RetoricaAuth!=='undefined') RetoricaAuth.switchAccessMode('dual')">EMAIL + CELULAR</button>
             </div>
 
-            <form id="auth-form" onsubmit="event.preventDefault(); RetoricaAuth.process();">
+            <form id="auth-form" onsubmit="event.preventDefault(); if(typeof RetoricaAuth!=='undefined') RetoricaAuth.process();">
                 <div class="input-group" id="group-input-email">
                     <label id="lbl-auth-email" for="auth-input-email">CORREO ELECTRÓNICO (GOOGLE / EMAIL)</label>
                     <input type="email" id="auth-input-email" class="input-field" placeholder="ejemplo@gmail.com">
@@ -551,31 +502,31 @@
 
             <div class="btn-wrapper-3d">
                 <div class="btn-label-3d" id="lbl-tool-mic">Dictado</div>
-                <button type="button" class="btn-round-3d" id="btn-mic-main" onclick="RetoricaAudio.toggleMic()" title="Activar o desactivar dictado por voz" aria-label="Activar o desactivar dictado por voz">
+                <button type="button" class="btn-round-3d" id="btn-mic-main" onclick="if(typeof RetoricaAudio!=='undefined') RetoricaAudio.toggleMic()" title="Activar o desactivar dictado por voz" aria-label="Activar o desactivar dictado por voz">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
                 </button>
             </div>
             <div class="btn-wrapper-3d">
                 <div class="btn-label-3d" id="lbl-tool-read">Lectura</div>
-                <button type="button" class="btn-round-3d" id="btn-play-main" onclick="RetoricaAudio.play()" title="Iniciar lectura del texto en voz alta" aria-label="Iniciar lectura del texto en voz alta">
+                <button type="button" class="btn-round-3d" id="btn-play-main" onclick="if(typeof RetoricaAudio!=='undefined') RetoricaAudio.play()" title="Iniciar lectura del texto en voz alta" aria-label="Iniciar lectura del texto en voz alta">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
                 </button>
             </div>
             <div class="btn-wrapper-3d">
                 <div class="btn-label-3d" id="lbl-tool-stop">Abortar</div>
-                <button type="button" class="btn-round-3d" id="btn-icon-stop" style="color:var(--text-muted);" onclick="RetoricaAudio.stop()" title="Detener reproducción o grabación activa" aria-label="Detener reproducción o grabación activa">
+                <button type="button" class="btn-round-3d" id="btn-icon-stop" style="color:var(--text-muted);" onclick="if(typeof RetoricaAudio!=='undefined') RetoricaAudio.stop()" title="Detener reproducción o grabación activa" aria-label="Detener reproducción o grabación activa">
                     <span aria-hidden="true">🟦</span>
                 </button>
             </div>
             <div class="btn-wrapper-3d">
                 <div class="btn-label-3d" id="lbl-tool-vmsg">Prod. Audio</div>
-                <button type="button" class="btn-round-3d btn-play-style" id="btn-icon-vmsg" onclick="RetoricaAudio.produceVoiceMessage()" title="Producir mensaje de voz" aria-label="Producir mensaje de voz">
+                <button type="button" class="btn-round-3d btn-play-style" id="btn-icon-vmsg" onclick="if(typeof RetoricaAudio!=='undefined') RetoricaAudio.produceVoiceMessage()" title="Producir mensaje de voz" aria-label="Producir mensaje de voz">
                     <span aria-hidden="true">🔴</span>
                 </button>
             </div>
             <div class="btn-wrapper-3d">
                 <div class="btn-label-3d" id="lbl-tool-tts">AUD</div>
-                <button type="button" class="btn-round-3d" onclick="RetoricaAudio.convertTextToVoiceFile()" title="Convertir texto a archivo de audio" aria-label="Convertir texto a archivo de audio">
+                <button type="button" class="btn-round-3d" onclick="if(typeof RetoricaAudio!=='undefined') RetoricaAudio.convertTextToVoiceFile()" title="Convertir texto a archivo de audio" aria-label="Convertir texto a archivo de audio">
                     <svg viewBox="0 0 100 100" style="width: 65%; height: 65%; display: block; margin: auto; fill: currentColor;" aria-hidden="true">
                         <path d="M50 35a15 15 0 1 0 0 30 15 15 0 0 0 0-30zm0 6a9 9 0 1 1 0 18 9 9 0 0 1 0-18zm-3-10h6v5h-6zm0 28h6v5h-6zm-14-11h5v6h-5zm28 0h5v6h-5zm-11.8-10.2l4.2-4.2 4.2 4.2-4.2 4.2zm14.1 14.1l4.2-4.2 4.2 4.2-4.2 4.2zm-18.3 0l-4.2-4.2 4.2-4.2 4.2 4.2zm0-18.3l-4.2-4.2 4.2-4.2 4.2 4.2z"/>
                         <path d="M50 10A40 40 0 0 1 85 30l-7 4A32 32 0 0 0 50 18v8L32 14l18-12v10zm0 80A40 40 0 0 1 15 70l7-4a32 32 0 0 0 28 16v-8l18 12-18 12v-10z"/>
@@ -654,7 +605,7 @@
             </div>
             <div class="btn-wrapper-3d">
                 <div class="btn-label-3d" id="lbl-nav-langtxt">Idiomas</div>
-                <button type="button" class="btn-round-3d btn-fire-blue" id="btn-toggle-accordion" onclick="RetoricaI18n.toggleAccordion()" title="Desplegar o contraer panel de selección de idiomas" aria-label="Desplegar o contraer panel de idiomas">
+                <button type="button" class="btn-round-3d btn-fire-blue" id="btn-toggle-accordion" onclick="if(typeof RetoricaI18n!=='undefined') RetoricaI18n.toggleAccordion()" title="Desplegar o contraer panel de selección de idiomas" aria-label="Desplegar o contraer panel de idiomas">
                     <span class="icon-raw" aria-hidden="true">🌐</span>
                 </button>
             </div>
@@ -674,7 +625,8 @@
         </div>
     </div>
 
-    <input type="file" id="file-picker-local" class="file-input-hidden" accept=".pdf,.doc,.docx,.txt,.html,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onchange="RetoricaStorage.importLocalFile(event)">
+    <!-- SELECTOR CON ATRIBUTO ACCEPT ACTUALIZADO PARA EVITAR ARCHIVOS BINARIOS -->
+    <input type="file" id="file-picker-local" class="file-input-hidden" accept=".txt,.html,.md,.csv,.json" onchange="RetoricaStorage.importLocalFile(event)">
 
     <!-- MENÚ LATERAL -->
     <div class="sidebar-panel" id="sidebar" role="dialog" aria-label="Menú Lateral">
@@ -685,7 +637,7 @@
                 </div>
                 <span style="font-size: 1.3rem; font-weight: 900; letter-spacing: 3px; color: var(--text-main);">RETÓRICA</span>
             </div>
-            <button type="button" class="btn-round-3d" onclick="RetoricaUI.toggleSidebar()" title="Cerrar panel lateral" aria-label="Cerrar panel lateral">
+            <button type="button" class="btn-round-3d" onclick="RetoricaUI.closeSidebar()" title="Cerrar panel lateral" aria-label="Cerrar panel lateral">
                 <span class="icon-raw" aria-hidden="true">⏮️</span>
             </button>
         </div>
@@ -698,7 +650,7 @@
             <div style="font-size:0.7rem; color:var(--text-muted); font-weight:bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 75%;">
                 <span id="lbl-side-user">USER:</span> <span id="display-user-name" style="color:var(--text-main);">Anon</span>
             </div>
-            <button type="button" onclick="RetoricaAuth.logout()" style="color:var(--text-muted); background:transparent; border:none; font-size:0.85rem; font-weight:bold; cursor:pointer;" id="lbl-side-logout" title="Cerrar sesión de usuario" aria-label="Cerrar sesión de usuario">SALIR</button>
+            <button type="button" onclick="if(typeof RetoricaAuth!=='undefined') RetoricaAuth.logout()" style="color:var(--text-muted); background:transparent; border:none; font-size:0.85rem; font-weight:bold; cursor:pointer;" id="lbl-side-logout" title="Cerrar sesión de usuario" aria-label="Cerrar sesión de usuario">SALIR</button>
         </div>
     </div>
 
