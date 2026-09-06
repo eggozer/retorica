@@ -176,6 +176,8 @@ var RetoricaI18n = {
             wrapper.onclick = function(e) {
                 if (e) e.stopPropagation();
                 self.setAppLang(langKey);
+                // Cierre automático del acordeón tras seleccionar idioma
+                self.toggleAccordion();
             };
 
             fragment.appendChild(wrapper);
