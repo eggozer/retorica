@@ -20,18 +20,18 @@ var RetoricaAudio = {
             this.state.recognition.lang = typeof RetoricaI18n !== 'undefined' ? RetoricaI18n.currentLang : 'es-MX';
             
             this.state.recognition.onresult = function(event) {
-    var textChunk = event.results[event.results.length - 1][0].transcript;
-    var editor = document.getElementById('editor-body');
-    if (editor) { 
-        var currentText = editor.innerText || editor.textContent || '';
-        var newText = (currentText.trim() ? currentText + ' ' : '') + textChunk;
-        editor.innerText = newText;
-        if (typeof RetoricaUI !== 'undefined') {
-            RetoricaUI.updateCounters();
-            RetoricaUI.triggerAutoSave();
-        }
-    }
-};
+                var textChunk = event.results[event.results.length - 1][0].transcript;
+                var editor = document.getElementById('editor-body');
+                if (editor) { 
+                    var currentText = editor.innerText || editor.textContent || '';
+                    var newText = (currentText.trim() ? currentText + ' ' : '') + textChunk;
+                    editor.innerText = newText;
+                    if (typeof RetoricaUI !== 'undefined') {
+                        RetoricaUI.updateCounters();
+                        RetoricaUI.triggerAutoSave();
+                    }
+                }
+            };
             
             this.state.recognition.onerror = function() { RetoricaAudio.stopMicLocally(); };
             this.state.recognition.onend = function() { RetoricaAudio.stopMicLocally(); };
@@ -119,6 +119,11 @@ var RetoricaAudio = {
             return; 
         }
         
+        // Bloqueo visual e inhabilitación del botón para prevenir ejecuciones repetidas
+        var ttsBtn = document.getElementById('lbl-tool-tts');
+        var parentBtn = ttsBtn ? ttsBtn.closest('button') : null;
+        if (parentBtn) parentBtn.disabled = true;
+
         if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Renderizando texto a voz... ⚙️");
 
         // 1. Reproducción inmediata mediante la voz del sistema
@@ -130,6 +135,7 @@ var RetoricaAudio = {
             if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Reproduciendo render final ✓");
         };
         utterance.onerror = function() {
+            if (parentBtn) parentBtn.disabled = false;
             if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error en la síntesis de voz.");
         };
         window.speechSynthesis.speak(utterance);
@@ -199,10 +205,12 @@ var RetoricaAudio = {
             setTimeout(function() {
                 document.body.removeChild(a);
                 window.URL.revokeObjectURL(url);
+                if (parentBtn) parentBtn.disabled = false;
             }, 1000);
 
         } catch (err) {
             console.error("Error al exportar render de audio:", err);
+            if (parentBtn) parentBtn.disabled = false;
         }
     }
 };
