@@ -58,7 +58,9 @@ var RetoricaUI = {
 
     // --- FUNCIONES DE FORMATO, COLOR Y TABLAS ---
     setFontSize: function(size) {
+        var editor = document.getElementById('editor-body');
         document.execCommand('fontSize', false, size);
+        if (editor) editor.focus();
     },
 
     triggerColorPicker: function() {
@@ -73,6 +75,7 @@ var RetoricaUI = {
         if (editor) {
             editor.focus();
             document.execCommand('foreColor', false, color);
+            editor.focus();
         }
     },
 
