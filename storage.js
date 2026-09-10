@@ -307,79 +307,96 @@ var RetoricaStorage = {
                 return new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0);
             });
 
-            var p = (typeof RetoricaI18n !== 'undefined' && RetoricaI18n.db && RetoricaI18n.db[RetoricaI18n.currentLang]) ? 
-                    RetoricaI18n.db[RetoricaI18n.currentLang] : {};
-
-            var txtDel = p.del || 'BORRAR';
-            var txtCopy = p.copyCard || 'COPIAR';
-            var txtShare = p.share || 'COMPARTIR';
-
-            var formatDate = function(isoStr) {
-                if (!isoStr) return '--/--/-- --:--';
-                var d = new Date(isoStr);
-                if (isNaN(d.getTime())) return '--/--/-- --:--';
-                var day = ('0' + d.getDate()).slice(-2);
-                var month = ('0' + (d.getMonth() + 1)).slice(-2);
-                var year = d.getFullYear().toString().slice(-2);
-                var hours = ('0' + d.getHours()).slice(-2);
-                var minutes = ('0' + d.getMinutes()).slice(-2);
-                return day + '/' + month + '/' + year + ' ' + hours + ':' + minutes;
-            };
-
+            var fragment = document.createDocumentFragment();
             docs.forEach(function(doc) {
                 var card = document.createElement('div');
                 card.className = 'card-template';
                 card.onclick = function() { self.loadDoc(doc.id); };
 
-                var dummyDiv = document.createElement("div");
-                dummyDiv.innerHTML = doc.body || "";
-                var snippet = dummyDiv.innerText || dummyDiv.textContent || "...";
-
-                var titleEsc = self.escapeHTML(doc.title || 'Sin Título');
-                var snippetEsc = self.escapeHTML(snippet);
-
-                var createdFormatted = formatDate(doc.createdAt);
-                var updatedFormatted = formatDate(doc.updatedAt || doc.createdAt);
+                var tempDiv = document.createElement('div');
+                tempDiv.innerHTML = doc.body || '';
+                var plainText = tempDiv.innerText || tempDiv.textContent || '';
 
                 card.innerHTML = 
-                    '<div class="card-template-title">' + titleEsc + '</div>' +
-                    '<div class="card-template-body">' + snippetEsc + '</div>' +
-                    '<div class="card-template-dates" style="font-size: 0.7rem; color: var(--text-muted, #777); margin: 6px 0; line-height: 1.2;">' +
-                        '<div><strong>Creado:</strong> ' + createdFormatted + '</div>' +
-                        '<div><strong>Modificado:</strong> ' + updatedFormatted + '</div>' +
-                    '</div>' +
+                    '<div class="card-template-title">' + self.escapeHTML(doc.title || 'Sin Título') + '</div>' +
+                    '<div class="card-template-body">' + self.escapeHTML(plainText || 'Documento vacío...') + '</div>' +
                     '<div class="card-template-actions">' +
-                        '<button type="button" class="btn-action-tmpl card-btn-copy" onclick="RetoricaStorage.copyDoc(\'' + doc.id + '\', event)" title="' + txtCopy + '" aria-label="' + txtCopy + '">' + txtCopy + '</button>' +
-                        '<button type="button" class="btn-action-tmpl card-btn-share" onclick="RetoricaStorage.shareDoc(\'' + doc.id + '\', event)" title="' + txtShare + '" aria-label="' + txtShare + '">' + txtShare + '</button>' +
-                        '<button type="button" class="btn-action-tmpl card-btn-delete" onclick="RetoricaStorage.deleteDoc(\'' + doc.id + '\', event)" title="' + txtDel + '" aria-label="' + txtDel + '" style="color:#ff5555;">' + txtDel + '</button>' +
+                        '<button type="button" class="btn-action-tmpl" onclick="RetoricaStorage.renameDoc(\'' + doc.id + '\', event)">EDITAR TÍTULO</button>' +
+                        '<button type="button" class="btn-action-tmpl card-btn-copy" onclick="RetoricaStorage.copyDoc(\'' + doc.id + '\', event)">COPIAR</button>' +
+                        '<button type="button" class="btn-action-tmpl card-btn-share" onclick="RetoricaStorage.shareDoc(\'' + doc.id + '\', event)">COMPARTIR</button>' +
+                        '<button type="button" class="btn-action-tmpl card-btn-delete" onclick="RetoricaStorage.deleteDoc(\'' + doc.id + '\', event)">BORRAR</button>' +
                     '</div>';
 
-                container.appendChild(card);
+                fragment.appendChild(card);
             });
+            container.appendChild(fragment);
         });
+    },
+
+    renameDoc: function(id, event) {
+        if (event) event.stopPropagation();
+        var self = this;
+        this.getDocById(id, function(doc) {
+            if (!doc) return;
+            var newTitle = prompt("Ingresa el nuevo título para este documento:", doc.title || "");
+            if (newTitle !== null && newTitle.trim() !== "") {
+                doc.title = newTitle.trim();
+                doc.updatedAt = new Date().toISOString();
+
+                var transaction = self.dbInstance.transaction(['documents'], 'readwrite');
+                var store = transaction.objectStore('documents');
+                store.put(doc);
+
+                transaction.oncomplete = function() {
+                    if (self.currentDocId === id) {
+                        var titleInput = document.getElementById('editor-title');
+                        if (titleInput) titleInput.value = doc.title;
+                    }
+                    self.refreshLibrary();
+                    if (typeof RetoricaUI !== 'undefined') {
+                        RetoricaUI.notify("Título actualizado ✓");
+                    }
+                };
+            }
+        });
+    },
+
+    importLocalFile: function(event) {
+        var file = event.target.files[0];
+        if (!file) return;
+
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var content = e.target.result;
+            var titleInput = document.getElementById('editor-title');
+            var bodyInput = document.getElementById('editor-body');
+
+            if (titleInput) titleInput.value = file.name.replace(/\.[^/.]+$/, "");
+            if (bodyInput) bodyInput.innerText = content;
+
+            RetoricaStorage.currentDocId = 'doc_' + Date.now();
+            RetoricaStorage.save();
+        };
+        reader.readAsText(file);
     },
 
     manualSync: function() {
         this.save();
-        if (typeof RetoricaUI !== 'undefined') {
-            RetoricaUI.notify("Sincronización local completada ✓");
-        }
     },
 
     syncWithCloud: function() {
-        console.log("Retórica - Sincronización en la nube verificada.");
+        // Reservado para futuras integraciones remotas
     },
 
     exportBackup: function() {
         this.getAllDocs(function(docs) {
-            var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(docs, null, 2));
+            var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(docs));
             var downloadAnchor = document.createElement('a');
             downloadAnchor.setAttribute("href", dataStr);
             downloadAnchor.setAttribute("download", "retorica_backup_" + Date.now() + ".json");
             document.body.appendChild(downloadAnchor);
             downloadAnchor.click();
             downloadAnchor.remove();
-            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Respaldo exportado ✓");
         });
     },
 
@@ -393,57 +410,19 @@ var RetoricaStorage = {
             try {
                 var docs = JSON.parse(e.target.result);
                 if (Array.isArray(docs)) {
-                    self.initDB(function() {
-                        var transaction = self.dbInstance.transaction(['documents'], 'readwrite');
-                        var store = transaction.objectStore('documents');
-                        docs.forEach(function(doc) {
-                            if (doc.id) store.put(doc);
-                        });
-                        transaction.oncomplete = function() {
-                            self.refreshLibrary();
-                            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Respaldo restaurado con éxito ✓");
-                        };
-                    });
-                } else {
-                    if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Archivo de respaldo no válido");
+                    var transaction = self.dbInstance.transaction(['documents'], 'readwrite');
+                    var store = transaction.objectStore('documents');
+                    docs.forEach(function(doc) { store.put(doc); });
+
+                    transaction.oncomplete = function() {
+                        self.refreshLibrary();
+                        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Copia de seguridad restaurada ✓");
+                    };
                 }
             } catch (err) {
-                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error al procesar el archivo JSON");
+                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Archivo de respaldo inválido");
             }
         };
-        reader.readAsText(file);
-    },
-
-    // --- IMPORTACIÓN CON FILTRADO DE FORMATOS SOTORTADOS ---
-    importLocalFile: function(event) {
-        var file = event.target.files[0];
-        if (!file) return;
-
-        var ext = file.name.split('.').pop().toLowerCase();
-        var validTextExtensions = ['txt', 'html', 'md', 'csv', 'json'];
-
-        if (validTextExtensions.indexOf(ext) === -1) {
-            if (typeof RetoricaUI !== 'undefined') {
-                RetoricaUI.notify("Formato ." + ext.toUpperCase() + " no soportado para lectura directa. Usa .txt, .html o .md");
-            }
-            return;
-        }
-
-        var reader = new FileReader();
-        var bodyInput = document.getElementById('editor-body');
-        var titleInput = document.getElementById('editor-title');
-
-        reader.onload = function(e) {
-            if (bodyInput) bodyInput.innerHTML = e.target.result;
-            if (titleInput && !titleInput.value) {
-                titleInput.value = file.name.replace(/\.[^/.]+$/, "");
-            }
-            RetoricaStorage.save();
-            if (typeof RetoricaUI !== 'undefined') {
-                RetoricaUI.notify("Archivo importado ✓");
-            }
-        };
-
         reader.readAsText(file);
     }
 };
