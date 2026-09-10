@@ -211,7 +211,6 @@ var RetoricaUI = {
         }
     },
 
-    // --- CORRECCIÓN DE CERRADO EXPLÍCITO ---
     closeSidebar: function() {
         var sidebar = document.getElementById('sidebar');
         if (sidebar && sidebar.classList.contains('active')) {
