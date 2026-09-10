@@ -13,14 +13,18 @@ var RetoricaAudio = {
     setQuality: function(quality) {
         this.state.quality = quality;
         if (typeof RetoricaUI !== 'undefined') {
-            RetoricaUI.notify("Calidad de audio: " + (quality === 'high' ? "Alta (HQ)" : "Ligera (MP3)"));
+            var label = (typeof RetoricaI18n !== 'undefined' && RetoricaI18n.db[RetoricaI18n.currentLang]) ? 
+                RetoricaI18n.db[RetoricaI18n.currentLang].audioQuality : "Calidad de audio";
+            RetoricaUI.notify(label + ": " + (quality === 'high' ? "HQ" : "MP3"));
         }
     },
 
     setSpeedRate: function(rate) {
         this.state.speedRate = parseFloat(rate) || 1.0;
         if (typeof RetoricaUI !== 'undefined') {
-            RetoricaUI.notify("Velocidad de audio: " + this.state.speedRate + "x");
+            var label = (typeof RetoricaI18n !== 'undefined' && RetoricaI18n.db[RetoricaI18n.currentLang]) ? 
+                RetoricaI18n.db[RetoricaI18n.currentLang].audioSpeed : "Velocidad de audio";
+            RetoricaUI.notify(label + ": " + this.state.speedRate + "x");
         }
     },
 
@@ -29,7 +33,11 @@ var RetoricaAudio = {
         var btn = document.getElementById('btn-mic-main');
         var Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!Speech) { 
-            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Dictado no soportado en este navegador."); 
+            if (typeof RetoricaUI !== 'undefined') {
+                var msg = (typeof RetoricaI18n !== 'undefined' && RetoricaI18n.db[RetoricaI18n.currentLang]) ? 
+                    RetoricaI18n.db[RetoricaI18n.currentLang].noMic : "Dictado no soportado en este navegador.";
+                RetoricaUI.notify(msg);
+            }
             return; 
         }
 
@@ -59,7 +67,7 @@ var RetoricaAudio = {
             this.state.recognition.start(); 
             this.state.isRecording = true;
             if (btn) btn.classList.add('recording-active'); 
-            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Micrófono abierto (Dictando)...");
+            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Micrófono abierto...");
         } else {
             this.stopMicLocally();
         }
@@ -78,7 +86,11 @@ var RetoricaAudio = {
     // 3. Lectura en voz alta
     play: function() {
         if (!('speechSynthesis' in window)) {
-            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Lectura de voz no disponible.");
+            if (typeof RetoricaUI !== 'undefined') {
+                var msg = (typeof RetoricaI18n !== 'undefined' && RetoricaI18n.db[RetoricaI18n.currentLang]) ? 
+                    RetoricaI18n.db[RetoricaI18n.currentLang].noTTS : "Lectura de voz no disponible.";
+                RetoricaUI.notify(msg);
+            }
             return;
         }
         try {
@@ -141,7 +153,7 @@ var RetoricaAudio = {
         }
 
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Grabación no soportada en este navegador.");
+            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Grabación no soportada.");
             return;
         }
 
@@ -165,12 +177,20 @@ var RetoricaAudio = {
                     stream.getTracks().forEach(function(track) { track.stop(); });
                     self.renderAudioControl(blob, "Grabación");
                     if (btn) btn.classList.remove('recording-active');
-                    if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Audio grabado e insertado ✓");
+                    if (typeof RetoricaUI !== 'undefined') {
+                        var msg = (typeof RetoricaI18n !== 'undefined' && RetoricaI18n.db[RetoricaI18n.currentLang]) ? 
+                            RetoricaI18n.db[RetoricaI18n.currentLang].audioInserted : "Audio grabado e insertado ✓";
+                        RetoricaUI.notify(msg);
+                    }
                 };
 
                 self.state.mediaRecorder.start();
                 if (btn) btn.classList.add('recording-active');
-                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Grabando audio...");
+                if (typeof RetoricaUI !== 'undefined') {
+                    var msg = (typeof RetoricaI18n !== 'undefined' && RetoricaI18n.db[RetoricaI18n.currentLang]) ? 
+                        RetoricaI18n.db[RetoricaI18n.currentLang].recActive : "Grabando audio...";
+                    RetoricaUI.notify(msg);
+                }
             })
             .catch(function(err) {
                 console.error("Error al acceder al micrófono:", err);
@@ -188,7 +208,7 @@ var RetoricaAudio = {
         }
 
         var lang = typeof RetoricaI18n !== 'undefined' ? RetoricaI18n.currentVoiceLang : 'es-MX';
-        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Generando archivo de audio... ⚙️");
+        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Generando archivo de audio...");
 
         var utterance = new SpeechSynthesisUtterance(body);
         utterance.lang = lang;
@@ -211,7 +231,11 @@ var RetoricaAudio = {
 
             utterance.onend = function() {
                 if (mediaRecorder.state !== 'inactive') mediaRecorder.stop();
-                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Audio generado en pantalla ✓");
+                if (typeof RetoricaUI !== 'undefined') {
+                    var msg = (typeof RetoricaI18n !== 'undefined' && RetoricaI18n.db[RetoricaI18n.currentLang]) ? 
+                        RetoricaI18n.db[RetoricaI18n.currentLang].audioGenerated : "Audio generado en pantalla ✓";
+                    RetoricaUI.notify(msg);
+                }
             };
             utterance.onerror = function() {
                 if (mediaRecorder.state !== 'inactive') mediaRecorder.stop();
@@ -269,12 +293,16 @@ var RetoricaAudio = {
             return wrapper;
         };
 
-        var btnCopy = createBtn3D('📋', 'COPIAR', function() {
+        var p = (typeof RetoricaI18n !== 'undefined' && RetoricaI18n.db[RetoricaI18n.currentLang]) ? 
+            RetoricaI18n.db[RetoricaI18n.currentLang] : { copyCard: 'COPIAR', share: 'COMPARTIR', del: 'BORRAR' };
+
+        var btnCopy = createBtn3D('📋', p.copyCard || 'COPIAR', function() {
             navigator.clipboard.writeText(audioUrl);
-            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Enlace de audio copiado");
+            var msg = p.audioCopied || "Enlace de audio copiado";
+            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify(msg);
         });
 
-        var btnShare = createBtn3D('📤', 'COMPARTIR', function() {
+        var btnShare = createBtn3D('📤', p.share || 'COMPARTIR', function() {
             if (navigator.share) {
                 var file = new File([blob], labelText + ".wav", { type: blob.type });
                 navigator.share({ files: [file], title: labelText }).catch(function(){});
@@ -286,12 +314,14 @@ var RetoricaAudio = {
             }
         });
 
-        var btnDelete = createBtn3D('🗑️', 'BORRAR', function() {
-            if (confirm("¿Deseas eliminar este archivo de audio?")) {
+        var btnDelete = createBtn3D('🗑️', p.del || 'BORRAR', function() {
+            var confirmMsg = p.confirmDel || "¿Deseas eliminar este archivo de audio?";
+            if (confirm(confirmMsg)) {
                 container.remove();
                 if (typeof RetoricaUI !== 'undefined') {
                     RetoricaUI.updateCounters();
                     RetoricaUI.triggerAutoSave();
+                    if (p.audioDeleted) RetoricaUI.notify(p.audioDeleted);
                 }
             }
         });
