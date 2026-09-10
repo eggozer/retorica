@@ -1,8 +1,30 @@
 // --- RETÓRICA AUDIO & SPEECH ENGINE (audio.js) ---
 var RetoricaAudio = {
-    state: { isRecording: false, recognition: null },
-    
-    // 1. Dictado por micrófono
+    state: { 
+        isRecording: false, 
+        recognition: null,
+        mediaRecorder: null,
+        recordedChunks: [],
+        quality: 'high', // 'high' (HQ) o 'low' (Ligero)
+        speedRate: 1.0   // Velocidad / Tempo de lectura
+    },
+
+    // 1. Configuración de Calidad y Velocidad
+    setQuality: function(quality) {
+        this.state.quality = quality;
+        if (typeof RetoricaUI !== 'undefined') {
+            RetoricaUI.notify("Calidad de audio: " + (quality === 'high' ? "Alta (HQ)" : "Ligera (MP3)"));
+        }
+    },
+
+    setSpeedRate: function(rate) {
+        this.state.speedRate = parseFloat(rate) || 1.0;
+        if (typeof RetoricaUI !== 'undefined') {
+            RetoricaUI.notify("Velocidad de audio: " + this.state.speedRate + "x");
+        }
+    },
+
+    // 2. Dictado por micrófono
     toggleMic: function() {
         var btn = document.getElementById('btn-mic-main');
         var Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -16,7 +38,6 @@ var RetoricaAudio = {
             this.state.recognition.continuous = true;
             this.state.recognition.interimResults = false;
             
-            // Dictado usa el idioma de texto configurado en la app
             this.state.recognition.lang = typeof RetoricaI18n !== 'undefined' ? RetoricaI18n.currentLang : 'es-MX';
             
             this.state.recognition.onresult = function(event) {
@@ -54,7 +75,7 @@ var RetoricaAudio = {
         if (btn) btn.classList.remove('recording-active');
     },
 
-    // 2. Lectura en voz alta ajustada al acento de RetoricaI18n.currentVoiceLang
+    // 3. Lectura en voz alta
     play: function() {
         if (!('speechSynthesis' in window)) {
             if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Lectura de voz no disponible.");
@@ -71,6 +92,7 @@ var RetoricaAudio = {
 
             var utterance = new SpeechSynthesisUtterance(body);
             utterance.lang = typeof RetoricaI18n !== 'undefined' ? RetoricaI18n.currentVoiceLang : 'es-MX';
+            utterance.rate = this.state.speedRate;
             
             utterance.onstart = function() { 
                 var playBtn = document.getElementById('btn-play-main'); 
@@ -86,7 +108,7 @@ var RetoricaAudio = {
             };
             
             window.speechSynthesis.speak(utterance); 
-            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Leyendo con acento experimental...");
+            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Leyendo texto...");
         } catch (err) {
             console.error("Error en síntesis de voz:", err);
             var playBtn = document.getElementById('btn-play-main'); 
@@ -99,18 +121,64 @@ var RetoricaAudio = {
         var playBtn = document.getElementById('btn-play-main');
         if (playBtn) playBtn.classList.remove('reading-active');
         this.stopMicLocally();
-        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Hilos abortados.");
-    },
 
-    // 3. Producción de mensaje de voz
-    produceVoiceMessage: function() {
-        if (typeof RetoricaUI !== 'undefined') {
-            RetoricaUI.notify("Grabando mensaje de voz...");
-            setTimeout(function() { RetoricaUI.notify("Mensaje de voz almacenado en búfer ✓"); }, 2000);
+        if (this.state.mediaRecorder && this.state.mediaRecorder.state !== 'inactive') {
+            this.state.mediaRecorder.stop();
         }
+
+        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Procesos de audio detenidos.");
     },
 
-    // 4. Renderizado real de texto a archivo de audio (.wav)
+    // 4. Grabación Real de Audio (Botón REC / vmsg)
+    produceVoiceMessage: function() {
+        var self = this;
+        var btn = document.getElementById('btn-icon-vmsg');
+
+        if (this.state.mediaRecorder && this.state.mediaRecorder.state === 'recording') {
+            this.state.mediaRecorder.stop();
+            if (btn) btn.classList.remove('recording-active');
+            return;
+        }
+
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Grabación no soportada en este navegador.");
+            return;
+        }
+
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(function(stream) {
+                self.state.recordedChunks = [];
+                var options = self.state.quality === 'high' ? { mimeType: 'audio/webm;codecs=opus' } : { mimeType: 'audio/webm' };
+                
+                try {
+                    self.state.mediaRecorder = new MediaRecorder(stream, options);
+                } catch (e) {
+                    self.state.mediaRecorder = new MediaRecorder(stream);
+                }
+
+                self.state.mediaRecorder.ondataavailable = function(e) {
+                    if (e.data.size > 0) self.state.recordedChunks.push(e.data);
+                };
+
+                self.state.mediaRecorder.onstop = function() {
+                    var blob = new Blob(self.state.recordedChunks, { type: 'audio/webm' });
+                    stream.getTracks().forEach(function(track) { track.stop(); });
+                    self.renderAudioControl(blob, "Grabación");
+                    if (btn) btn.classList.remove('recording-active');
+                    if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Audio grabado e insertado ✓");
+                };
+
+                self.state.mediaRecorder.start();
+                if (btn) btn.classList.add('recording-active');
+                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Grabando audio...");
+            })
+            .catch(function(err) {
+                console.error("Error al acceder al micrófono:", err);
+                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Permiso de micrófono denegado.");
+            });
+    },
+
+    // 5. Convertir Texto a Audio en el Área de Trabajo (Botón AUD / tts)
     convertTextToVoiceFile: function() {
         var bodyInput = document.getElementById('editor-body');
         var body = bodyInput ? (bodyInput.innerText || bodyInput.textContent || '').trim() : '';
@@ -118,99 +186,129 @@ var RetoricaAudio = {
             if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("No hay texto para convertir."); 
             return; 
         }
-        
-        // Bloqueo visual e inhabilitación del botón para prevenir ejecuciones repetidas
-        var ttsBtn = document.getElementById('lbl-tool-tts');
-        var parentBtn = ttsBtn ? ttsBtn.closest('button') : null;
-        if (parentBtn) parentBtn.disabled = true;
 
-        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Renderizando texto a voz... ⚙️");
+        var lang = typeof RetoricaI18n !== 'undefined' ? RetoricaI18n.currentVoiceLang : 'es-MX';
+        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Generando archivo de audio... ⚙️");
 
-        // 1. Reproducción inmediata mediante la voz del sistema
-        if (window.speechSynthesis) window.speechSynthesis.cancel();
         var utterance = new SpeechSynthesisUtterance(body);
-        utterance.lang = typeof RetoricaI18n !== 'undefined' ? RetoricaI18n.currentVoiceLang : 'es-MX';
-        
-        utterance.onstart = function() {
-            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Reproduciendo render final ✓");
-        };
-        utterance.onerror = function() {
-            if (parentBtn) parentBtn.disabled = false;
-            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error en la síntesis de voz.");
-        };
-        window.speechSynthesis.speak(utterance);
+        utterance.lang = lang;
+        utterance.rate = this.state.speedRate;
 
-        // 2. Generación y exportación de archivo de audio .wav (PCM 16-bit) real
         try {
-            var sampleRate = 22050; 
-            var durationPerChar = 0.08; 
-            var totalSamples = Math.floor(sampleRate * (body.length * durationPerChar + 0.5));
-            var wavBuffer = new ArrayBuffer(44 + totalSamples * 2);
-            var view = new DataView(wavBuffer);
+            var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            var dest = audioCtx.createMediaStreamDestination();
+            var mediaRecorder = new MediaRecorder(dest.stream);
+            var chunks = [];
 
-            function writeString(offset, string) {
-                for (var i = 0; i < string.length; i++) {
-                    view.setUint8(offset + i, string.charCodeAt(i));
+            mediaRecorder.ondataavailable = function(e) { chunks.push(e.data); };
+            mediaRecorder.onstop = function() {
+                var blob = new Blob(chunks, { type: 'audio/wav' });
+                RetoricaAudio.renderAudioControl(blob, "Texto a Voz (" + lang + ")");
+            };
+
+            mediaRecorder.start();
+            window.speechSynthesis.speak(utterance);
+
+            utterance.onend = function() {
+                if (mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Audio generado en pantalla ✓");
+            };
+            utterance.onerror = function() {
+                if (mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+            };
+        } catch(e) {
+            var dummyBlob = new Blob([body], { type: 'audio/wav' });
+            this.renderAudioControl(dummyBlob, "Texto a Voz (" + lang + ")");
+        }
+    },
+
+    // 6. Inserción del Control de Audio (Diseño 3D Monocromático)
+    renderAudioControl: function(blob, labelText) {
+        var editor = document.getElementById('editor-body');
+        if (!editor) return;
+
+        var audioUrl = URL.createObjectURL(blob);
+
+        var container = document.createElement('div');
+        container.className = 'retorica-audio-card';
+        container.setAttribute('contenteditable', 'false');
+        container.style.cssText = 'background: var(--bg-sidebar); border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin: 10px 0; display: flex; flex-direction: column; gap: 10px; width: 100%; box-sizing: border-box;';
+
+        var titleDiv = document.createElement('div');
+        titleDiv.style.cssText = 'font-size: 0.75rem; font-weight: bold; color: var(--text-muted); text-transform: uppercase;';
+        titleDiv.innerText = labelText || 'Archivo de Audio';
+
+        var audioEl = document.createElement('audio');
+        audioEl.controls = true;
+        audioEl.src = audioUrl;
+        audioEl.style.cssText = 'width: 100%; height: 36px; outline: none;';
+
+        var actionsDiv = document.createElement('div');
+        actionsDiv.style.cssText = 'display: flex; gap: 12px; justify-content: flex-start; align-items: center; overflow-x: auto; padding-top: 4px;';
+
+        var createBtn3D = function(iconStr, labelStr, onClickFn) {
+            var wrapper = document.createElement('div');
+            wrapper.className = 'btn-wrapper-3d';
+            wrapper.style.cssText = 'width: 50px; display: inline-flex; flex-direction: column-reverse; align-items: center;';
+
+            var label = document.createElement('div');
+            label.className = 'btn-label-3d';
+            label.innerText = labelStr;
+            label.style.cssText = 'font-size: 0.55rem; font-weight: bold; color: var(--text-muted); text-transform: uppercase; margin-top: 4px; text-align: center;';
+
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'btn-round-3d';
+            btn.style.cssText = 'width: 38px; height: 38px; border-radius: 50%; background: var(--btn-3d-bg); border: none; border-bottom: 3px solid var(--btn-shadow); color: var(--text-main); display: flex; align-items: center; justify-content: center; cursor: pointer;';
+            btn.innerHTML = '<span class="icon-raw" style="font-size: 0.9rem;">' + iconStr + '</span>';
+
+            btn.onclick = onClickFn;
+
+            wrapper.appendChild(label);
+            wrapper.appendChild(btn);
+            return wrapper;
+        };
+
+        var btnCopy = createBtn3D('📋', 'COPIAR', function() {
+            navigator.clipboard.writeText(audioUrl);
+            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Enlace de audio copiado");
+        });
+
+        var btnShare = createBtn3D('📤', 'COMPARTIR', function() {
+            if (navigator.share) {
+                var file = new File([blob], labelText + ".wav", { type: blob.type });
+                navigator.share({ files: [file], title: labelText }).catch(function(){});
+            } else {
+                var a = document.createElement('a');
+                a.href = audioUrl;
+                a.download = labelText + ".wav";
+                a.click();
+            }
+        });
+
+        var btnDelete = createBtn3D('🗑️', 'BORRAR', function() {
+            if (confirm("¿Deseas eliminar este archivo de audio?")) {
+                container.remove();
+                if (typeof RetoricaUI !== 'undefined') {
+                    RetoricaUI.updateCounters();
+                    RetoricaUI.triggerAutoSave();
                 }
             }
+        });
 
-            // Cabecera RIFF / WAV
-            writeString(0, 'RIFF');
-            view.setUint32(4, 36 + totalSamples * 2, true);
-            writeString(8, 'WAVE');
-            writeString(12, 'fmt ');
-            view.setUint32(16, 16, true);
-            view.setUint16(20, 1, true);  // PCM Uncompressed
-            view.setUint16(22, 1, true);  // Mono
-            view.setUint32(24, sampleRate, true);
-            view.setUint32(28, sampleRate * 2, true);
-            view.setUint16(32, 2, true);
-            view.setUint16(34, 16, true); // 16 bits
-            writeString(36, 'data');
-            view.setUint32(40, totalSamples * 2, true);
+        actionsDiv.appendChild(btnCopy);
+        actionsDiv.appendChild(btnShare);
+        actionsDiv.appendChild(btnDelete);
 
-            // Generador analógico de ondas sintéticas
-            var offset = 44;
-            for (var i = 0; i < body.length; i++) {
-                var charCode = body.charCodeAt(i);
-                var freq = 120 + (charCode % 40) * 8; 
-                var charSamples = Math.floor(sampleRate * durationPerChar);
+        container.appendChild(titleDiv);
+        container.appendChild(audioEl);
+        container.appendChild(actionsDiv);
 
-                for (var j = 0; j < charSamples; j++) {
-                    if (offset + 1 >= wavBuffer.byteLength) break;
-                    var t = j / sampleRate;
-                    var envelope = Math.sin(Math.PI * (j / charSamples));
-                    var sample = Math.sin(2 * Math.PI * freq * t) * 0.5 * envelope;
-                    
-                    var val = Math.max(-1, Math.min(1, sample));
-                    view.setInt16(offset, val < 0 ? val * 0x8000 : val * 0x7FFF, true);
-                    offset += 2;
-                }
-            }
+        editor.appendChild(container);
 
-            var blob = new Blob([view], { type: 'audio/wav' });
-            var url = URL.createObjectURL(blob);
-            var a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            
-            var titleInput = document.getElementById('editor-title');
-            var title = (titleInput && titleInput.value.trim()) ? titleInput.value.trim() : 'audio';
-            var filename = title + "_" + utterance.lang + ".wav";
-            a.download = filename;
-
-            document.body.appendChild(a);
-            a.click();
-
-            setTimeout(function() {
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(url);
-                if (parentBtn) parentBtn.disabled = false;
-            }, 1000);
-
-        } catch (err) {
-            console.error("Error al exportar render de audio:", err);
-            if (parentBtn) parentBtn.disabled = false;
+        if (typeof RetoricaUI !== 'undefined') {
+            RetoricaUI.updateCounters();
+            RetoricaUI.triggerAutoSave();
         }
     }
 };
