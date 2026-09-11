@@ -120,27 +120,78 @@
             animation: none;
         }
 
-        /* Botón 3D Monocromático */
+        /* Botones Redondos 3D Monocromáticos Neutros */
         .btn-round-3d { 
             width: 44px !important; 
             height: 44px !important; 
             border-radius: 50% !important; 
-            background: var(--btn-3d-bg) !important; 
-            border: none; 
-            border-bottom: 4px solid var(--btn-shadow); 
+            background: linear-gradient(145deg, var(--bg-card), var(--btn-3d-bg)) !important; 
+            border: 1px solid var(--border) !important; 
+            border-bottom: 4px solid var(--btn-shadow) !important; 
             color: var(--text-main) !important; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
             cursor: pointer; 
             box-shadow: 0 4px 6px rgba(0,0,0,0.3); 
-            transition: all 0.1s; 
+            transition: all 0.15s ease; 
             flex-shrink: 0 !important;
+            position: relative;
         }
         .btn-round-3d:active { 
             transform: translateY(2px); 
-            border-bottom-width: 1px; 
+            border-bottom-width: 2px !important; 
             box-shadow: 0 2px 3px rgba(0,0,0,0.3); 
+        }
+        .btn-round-3d svg, .btn-round-3d span.icon-raw { 
+            width: 75%; 
+            height: 75%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            fill: currentColor; 
+            font-size: 1.25rem; 
+            font-style: normal; 
+            font-weight: bold; 
+        }
+
+        /* Indicador Fosforescente Neón de Uso */
+        .btn-round-3d.active {
+            background: var(--bg-card) !important;
+            color: var(--text-main) !important;
+            border: 1px solid #00ff66 !important;
+            box-shadow: 0 0 10px #00ff66, inset 0 0 4px #00ff66 !important;
+        }
+
+        /* Notificación Flotante Deshacer (Undo Toast) */
+        .undo-toast-banner {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-sidebar);
+            color: var(--text-main);
+            padding: 10px 20px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            border: 1px solid #00ff66;
+            z-index: 3500;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .undo-toast-banner button {
+            background: transparent;
+            border: none;
+            color: #00ff66;
+            font-weight: 900;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
         }
         .btn-round-3d svg, .btn-round-3d span.icon-raw { 
             width: 75%; 
