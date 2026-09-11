@@ -523,167 +523,206 @@
         </div>
     </div>
 
-    <!-- BOTONERA PRINCIPAL -->
+    <!-- BOTONERA PRINCIPAL UNIFICADA -->
     <nav class="top-navbar" role="toolbar" aria-label="Herramientas principales del editor">
         <div class="btn-wrapper-3d">
-            <div class="btn-label-3d" id="lbl-nav-menu">Menú</div>
             <button type="button" class="btn-round-3d" onclick="RetoricaUI.toggleSidebar()" title="Abrir panel lateral de menú" aria-label="Abrir panel lateral de menú">
                 <span class="icon-raw" aria-hidden="true">☰</span>
             </button>
+            <div class="btn-label-3d" id="lbl-nav-menu">Menú</div>
         </div>
 
         <div class="menu-scroll-area">
+            <!-- 1. Instalar App -->
             <div class="btn-wrapper-3d" id="pwa-install-wrapper">
-                <div class="btn-label-3d" id="lbl-nav-install">Instalar Aplicación</div>
                 <button type="button" class="btn-round-3d" id="btn-pwa-install" onclick="RetoricaUI.installPWA()" title="Instalar aplicación en el dispositivo" aria-label="Instalar aplicación en el dispositivo">
                     <span class="icon-raw" aria-hidden="true">📱</span>
                 </button>
+                <div class="btn-label-3d" id="lbl-nav-install"><span class="scroll-txt">Instalar Aplicación</span></div>
             </div>
+
+            <!-- 2. Guardar -->
             <div class="btn-wrapper-3d">
-                <div class="btn-label-3d" id="lbl-tool-save">Guardar</div>
                 <button type="button" class="btn-round-3d" id="btn-icon-save" onclick="RetoricaStorage.save()" title="Guardar documento actual" aria-label="Guardar documento actual">
                     <span class="icon-raw" aria-hidden="true">✓</span>
                 </button>
+                <div class="btn-label-3d" id="lbl-tool-save">Guardar</div>
             </div>
+
+            <!-- 3. Nuevo -->
             <div class="btn-wrapper-3d">
-                <div class="btn-label-3d" id="lbl-tool-new">Nuevo</div>
                 <button type="button" class="btn-round-3d" id="btn-icon-new" onclick="RetoricaStorage.clearCanvas()" title="Crear nuevo lienzo" aria-label="Crear nuevo lienzo">
                     <span class="icon-raw" aria-hidden="true">＋</span>
                 </button>
+                <div class="btn-label-3d" id="lbl-tool-new">Nuevo</div>
             </div>
 
+            <!-- 4. Disminuir Fuente -->
             <div class="btn-wrapper-3d">
-                <div class="btn-label-3d" id="lbl-tool-fontminus">A-</div>
                 <button type="button" class="btn-round-3d" onclick="RetoricaUI.setFontSize('2')" title="Fuente Pequeña" aria-label="Fuente Pequeña">
                     <span class="icon-raw" aria-hidden="true">A⁻</span>
                 </button>
+                <div class="btn-label-3d" id="lbl-tool-fontminus"><span class="scroll-txt">Fuente Pequeña</span></div>
             </div>
+
+            <!-- 5. Aumentar Fuente -->
             <div class="btn-wrapper-3d">
-                <div class="btn-label-3d" id="lbl-tool-fontplus">A+</div>
                 <button type="button" class="btn-round-3d" onclick="RetoricaUI.setFontSize('5')" title="Fuente Grande" aria-label="Fuente Grande">
                     <span class="icon-raw" aria-hidden="true">A⁺</span>
                 </button>
+                <div class="btn-label-3d" id="lbl-tool-fontplus"><span class="scroll-txt">Fuente Grande</span></div>
             </div>
+
+            <!-- 6. Color -->
             <div class="btn-wrapper-3d">
-                <div class="btn-label-3d" id="lbl-tool-color">COLOR</div>
                 <button type="button" class="btn-round-3d" onclick="RetoricaUI.triggerColorPicker()" title="Color de Fuente" aria-label="Color de Fuente">
                     <span class="icon-raw" aria-hidden="true">🎨</span>
                 </button>
+                <div class="btn-label-3d" id="lbl-tool-color">Color</div>
             </div>
+
+            <!-- 7. Tabla -->
             <div class="btn-wrapper-3d">
-                <div class="btn-label-3d" id="lbl-tool-table">TABLA</div>
                 <button type="button" class="btn-round-3d" onclick="RetoricaUI.insertAdvancedTable()" title="Insertar Tabla Configurable" aria-label="Insertar Tabla Configurable">
                     <span class="icon-raw" aria-hidden="true">▦</span>
                 </button>
+                <div class="btn-label-3d" id="lbl-tool-table">Tabla</div>
             </div>
 
+            <!-- 8. Dictado -->
             <div class="btn-wrapper-3d">
-                <div class="btn-label-3d" id="lbl-tool-mic">Dictado</div>
                 <button type="button" class="btn-round-3d" id="btn-mic-main" onclick="if(typeof RetoricaAudio!=='undefined') RetoricaAudio.toggleMic()" title="Activar o desactivar dictado por voz" aria-label="Activar o desactivar dictado por voz">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
+                    <svg viewBox="0 0 24 24" aria-hidden="true" style="width:22px; height:22px; fill:currentColor;"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
                 </button>
+                <div class="btn-label-3d" id="lbl-tool-mic">Dictado</div>
             </div>
+
+            <!-- 9. Lectura -->
             <div class="btn-wrapper-3d">
-                <div class="btn-label-3d" id="lbl-tool-read">Lectura</div>
                 <button type="button" class="btn-round-3d" id="btn-play-main" onclick="if(typeof RetoricaAudio!=='undefined') RetoricaAudio.play()" title="Iniciar lectura del texto en voz alta" aria-label="Iniciar lectura del texto en voz alta">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+                    <svg viewBox="0 0 24 24" aria-hidden="true" style="width:22px; height:22px; fill:currentColor;"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
                 </button>
+                <div class="btn-label-3d" id="lbl-tool-read">Lectura</div>
             </div>
+
+            <!-- 10. Abortar -->
             <div class="btn-wrapper-3d">
-                <div class="btn-label-3d" id="lbl-tool-stop">Abortar</div>
-                <button type="button" class="btn-round-3d" id="btn-icon-stop" style="color:var(--text-muted);" onclick="if(typeof RetoricaAudio!=='undefined') RetoricaAudio.stop()" title="Detener reproducción o grabación activa" aria-label="Detener reproducción o grabación activa">
+                <button type="button" class="btn-round-3d" id="btn-icon-stop" onclick="if(typeof RetoricaAudio!=='undefined') RetoricaAudio.stop()" title="Detener reproducción o grabación activa" aria-label="Detener reproducción o grabación activa">
                     <span aria-hidden="true">🟦</span>
                 </button>
+                <div class="btn-label-3d" id="lbl-tool-stop">Abortar</div>
             </div>
+
+            <!-- 11. Producción de Audio -->
             <div class="btn-wrapper-3d">
-                <div class="btn-label-3d" id="lbl-tool-vmsg">Prod. Audio</div>
-                <button type="button" class="btn-round-3d btn-play-style" id="btn-icon-vmsg" onclick="if(typeof RetoricaAudio!=='undefined') RetoricaAudio.produceVoiceMessage()" title="Producir mensaje de voz" aria-label="Producir mensaje de voz">
+                <button type="button" class="btn-round-3d" id="btn-icon-vmsg" onclick="if(typeof RetoricaAudio!=='undefined') RetoricaAudio.produceVoiceMessage()" title="Producir mensaje de voz" aria-label="Producir mensaje de voz">
                     <span aria-hidden="true">🔴</span>
                 </button>
+                <div class="btn-label-3d" id="lbl-tool-vmsg"><span class="scroll-txt">Producir Audio</span></div>
             </div>
+
+            <!-- 12. Convertir a Audio -->
             <div class="btn-wrapper-3d">
-                <div class="btn-label-3d" id="lbl-tool-tts">AUD</div>
                 <button type="button" class="btn-round-3d" onclick="if(typeof RetoricaAudio!=='undefined') RetoricaAudio.convertTextToVoiceFile()" title="Convertir texto a archivo de audio" aria-label="Convertir texto a archivo de audio">
-  <svg viewBox="0 0 24 24" style="width: 75%; height: 75%; display: block; margin: auto; fill: currentColor;" aria-hidden="true">
-    <path d="M12 2C6.48 2 2 5.58 2 10c0 2.24 1.15 4.26 3 5.71V20l3.6-1.8c1.07.51 2.22.8 3.4.8 5.52 0 10-3.58 10-8s-4.48-8-10-8zm0 13c-2.8 0-5.2-1.6-6.1-3.8.9-2.2 3.3-3.8 6.1-3.8s5.2 1.6 6.1 3.8c-.9 2.2-3.3 3.8-6.1 3.8zm0-6c-1.2 0-2.2.9-2.2 2.1s1 2.1 2.2 2.1 2.2-.9 2.2-2.1S13.2 9 12 9zm0 3c-.5 0-.9-.4-.9-.9s.4-.9 .9-.9 .9.4 .9 .9-.4 .9-.9 .9z"/>
-  </svg>
-</button>
+                    <span class="icon-raw" aria-hidden="true">🔊</span>
+                </button>
+                <div class="btn-label-3d" id="lbl-tool-tts"><span class="scroll-txt">Convertir Audio</span></div>
             </div>
+
+            <!-- 13. Importar -->
             <div class="btn-wrapper-3d">
-                <div class="btn-label-3d" id="lbl-tool-import">Importar</div>
                 <button type="button" class="btn-round-3d" onclick="document.getElementById('file-picker-local').click()" title="Importar documento desde archivo local" aria-label="Importar documento desde archivo local">
                     <span class="icon-raw" aria-hidden="true">📂</span>
                 </button>
+                <div class="btn-label-3d" id="lbl-tool-import">Importar</div>
             </div>
+
+            <!-- 14. Copiar -->
             <div class="btn-wrapper-3d">
-                <div class="btn-label-3d" id="lbl-tool-copyall">Copiar</div>
                 <button type="button" class="btn-round-3d" onclick="RetoricaUI.copyFullTemplate()" title="Copiar todo el contenido al portapapeles" aria-label="Copiar todo el contenido al portapapeles">
-                    <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; display: block; margin: auto;" aria-hidden="true">
-                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                    </svg>
+                    <span class="icon-raw" aria-hidden="true">📋</span>
                 </button>
+                <div class="btn-label-3d" id="lbl-tool-copyall">Copiar</div>
             </div>
+
+            <!-- 15. Exportar PDF -->
             <div class="btn-wrapper-3d">
-                <div class="btn-label-3d" id="lbl-tool-pdf">PDF</div>
                 <button type="button" class="btn-round-3d" onclick="RetoricaUI.expPDF()" title="Exportar a formato PDF estándar" aria-label="Exportar a formato PDF estándar">
                     <span class="icon-raw" aria-hidden="true">🖨️</span>
                 </button>
+                <div class="btn-label-3d" id="lbl-tool-pdf">PDF</div>
             </div>
+
+            <!-- 16. PDF Editable -->
             <div class="btn-wrapper-3d">
-                <div class="btn-label-3d" id="lbl-tool-pdfedit">PDF Edit</div>
                 <button type="button" class="btn-round-3d" onclick="RetoricaUI.expPDFEditable()" title="Exportar como PDF editable" aria-label="Exportar como PDF editable">
                     <span class="icon-raw" aria-hidden="true">📝</span>
                 </button>
+                <div class="btn-label-3d" id="lbl-tool-pdfedit"><span class="scroll-txt">PDF Editable</span></div>
             </div>
+
+            <!-- 17. Exportar Word -->
             <div class="btn-wrapper-3d">
-                <div class="btn-label-3d" id="lbl-tool-doc">Word</div>
                 <button type="button" class="btn-round-3d" onclick="RetoricaUI.expDOC()" title="Exportar como documento de Word (.docx)" aria-label="Exportar como documento de Word">
                     <span class="icon-raw" aria-hidden="true">ⓦ</span>
                 </button>
+                <div class="btn-label-3d" id="lbl-tool-doc">Word</div>
             </div>
+
+            <!-- 18. Sincronizar -->
             <div class="btn-wrapper-3d">
-                <div class="btn-label-3d" id="lbl-tool-sync">SYNC</div>
                 <button type="button" class="btn-round-3d" id="btn-icon-sync" onclick="RetoricaStorage.manualSync()" title="Sincronizar cambios localmente" aria-label="Sincronizar cambios localmente">
                     <span class="icon-raw" aria-hidden="true">🔄</span>
                 </button>
+                <div class="btn-label-3d" id="lbl-tool-sync">Sincronizar</div>
             </div>
+
+            <!-- 19. Copia de Seguridad -->
             <div class="btn-wrapper-3d">
-                <div class="btn-label-3d" id="lbl-tool-backup">BAK</div>
                 <button type="button" class="btn-round-3d" id="btn-icon-backup" onclick="RetoricaStorage.exportBackup()" title="Descargar copia de seguridad en JSON" aria-label="Descargar copia de seguridad">
                     <span class="icon-raw" aria-hidden="true">📥</span>
                 </button>
+                <div class="btn-label-3d" id="lbl-tool-backup"><span class="scroll-txt">Copia Respaldo</span></div>
             </div>
+
+            <!-- 20. Restaurar -->
             <div class="btn-wrapper-3d">
-                <div class="btn-label-3d" id="lbl-tool-restore">REST</div>
                 <button type="button" class="btn-round-3d" id="btn-icon-restore" onclick="document.getElementById('importFileInput').click()" title="Restaurar datos desde copia de respaldo" aria-label="Restaurar datos desde copia de respaldo">
                     <span class="icon-raw" aria-hidden="true">📤</span>
                 </button>
+                <div class="btn-label-3d" id="lbl-tool-restore">Restaurar</div>
             </div>
-            <input type="file" id="importFileInput" accept=".json" class="file-input-hidden" onchange="RetoricaStorage.importBackup(event)">
+
+            <!-- 21. Aumentar Zoom -->
             <div class="btn-wrapper-3d">
-                <div class="btn-label-3d" id="lbl-tool-zoomin">Zoom +</div>
                 <button type="button" class="btn-round-3d" onclick="RetoricaUI.adjustZoom(0.1)" title="Aumentar el tamaño de la vista" aria-label="Aumentar el tamaño de la vista">
-                    <span class="icon-raw" aria-hidden="true">＋</span>
+                    <span class="icon-raw" aria-hidden="true">🔍⁺</span>
                 </button>
+                <div class="btn-label-3d" id="lbl-tool-zoomin"><span class="scroll-txt">Aumentar Zoom</span></div>
             </div>
+
+            <!-- 22. Disminuir Zoom -->
             <div class="btn-wrapper-3d">
-                <div class="btn-label-3d" id="lbl-tool-zoomout">Zoom -</div>
                 <button type="button" class="btn-round-3d" onclick="RetoricaUI.adjustZoom(-0.1)" title="Disminuir el tamaño de la vista" aria-label="Disminuir el tamaño de la vista">
-                    <span class="icon-raw" aria-hidden="true">－</span>
+                    <span class="icon-raw" aria-hidden="true">🔍⁻</span>
                 </button>
+                <div class="btn-label-3d" id="lbl-tool-zoomout"><span class="scroll-txt">Reducir Zoom</span></div>
             </div>
+
+            <!-- 23. Tema -->
             <div class="btn-wrapper-3d">
-                <div class="btn-label-3d" id="lbl-nav-theme">Tema</div>
                 <button type="button" class="btn-round-3d" onclick="RetoricaUI.toggleTheme()" title="Cambiar tema claro u oscuro" aria-label="Cambiar tema claro u oscuro">
                     <span class="icon-raw" aria-hidden="true">🌓</span>
                 </button>
+                <div class="btn-label-3d" id="lbl-nav-theme">Tema</div>
             </div>
+
+            <!-- 24. Idiomas -->
             <div class="btn-wrapper-3d">
-                <div class="btn-label-3d" id="lbl-nav-langtxt">Idiomas</div>
-                <button type="button" class="btn-round-3d btn-fire-blue" id="btn-toggle-accordion" onclick="if(typeof RetoricaI18n!=='undefined') RetoricaI18n.toggleAccordion()" title="Desplegar o contraer panel de selección de idiomas" aria-label="Desplegar o contraer panel de idiomas">
+                <button type="button" class="btn-round-3d" id="btn-toggle-accordion" onclick="if(typeof RetoricaI18n!=='undefined') RetoricaI18n.toggleAccordion()" title="Desplegar o contraer panel de selección de idiomas" aria-label="Desplegar o contraer panel de idiomas">
                     <span class="icon-raw" aria-hidden="true">🌐</span>
                 </button>
+                <div class="btn-label-3d" id="lbl-nav-langtxt">Idiomas</div>
             </div>
         </div>
     </nav>
