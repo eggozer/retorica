@@ -75,45 +75,126 @@ var RetoricaAudio = {
         if (btn) btn.classList.remove('recording-active');
     },
 
-    // 3. Lectura en voz alta
+    // 3. Lectura Karaoke con Sincronización Real y Salto por Clic
     play: function() {
         if (!('speechSynthesis' in window)) {
             if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Lectura de voz no disponible.");
             return;
         }
-        try {
-            window.speechSynthesis.cancel(); 
-            var bodyInput = document.getElementById('editor-body');
-            var body = bodyInput ? (bodyInput.innerText || bodyInput.textContent || '').trim() : '';
-            if (!body) { 
-                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("No hay texto para leer."); 
-                return; 
-            }
 
-            var utterance = new SpeechSynthesisUtterance(body);
-            utterance.lang = typeof RetoricaI18n !== 'undefined' ? RetoricaI18n.currentVoiceLang : 'es-MX';
-            utterance.rate = this.state.speedRate;
-            
-            utterance.onstart = function() { 
-                var playBtn = document.getElementById('btn-play-main'); 
-                if (playBtn) playBtn.classList.add('reading-active'); 
-            };
-            utterance.onend = function() { 
-                var playBtn = document.getElementById('btn-play-main'); 
-                if (playBtn) playBtn.classList.remove('reading-active'); 
-            };
-            utterance.onerror = function() {
-                var playBtn = document.getElementById('btn-play-main'); 
-                if (playBtn) playBtn.classList.remove('reading-active'); 
-            };
-            
-            window.speechSynthesis.speak(utterance); 
-            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Leyendo texto...");
-        } catch (err) {
-            console.error("Error en síntesis de voz:", err);
-            var playBtn = document.getElementById('btn-play-main'); 
-            if (playBtn) playBtn.classList.remove('reading-active');
+        var editor = document.getElementById('editor-body');
+        if (!editor) return;
+
+        var text = (editor.innerText || editor.textContent || '').trim();
+        if (!text) { 
+            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("No hay texto para leer."); 
+            return; 
         }
+
+        var self = this;
+        window.speechSynthesis.cancel(); 
+
+        // Preparar el DOM dividiendo las palabras para poder resaltarlas y tocarlas
+        this.prepareKaraokeDOM(editor, text);
+
+        // Iniciar reproducción desde el principio (índice 0)
+        this.playFromIndex(0, text);
+    },
+
+    prepareKaraokeDOM: function(container, rawText) {
+        container.setAttribute('dir', 'auto'); // Ajuste automático RTL/LTR
+        container.innerHTML = '';
+
+        var tokens = rawText.split(/(\s+)/);
+        var charOffset = 0;
+
+        tokens.forEach(function(token) {
+            if (token.trim().length > 0) {
+                var span = document.createElement('span');
+                span.textContent = token;
+                span.dataset.start = charOffset;
+                span.className = 'karaoke-word';
+                span.style.cursor = 'pointer';
+                
+                // Salto de lectura al presionar/hacer clic en la palabra
+                span.onclick = function(e) {
+                    e.stopPropagation();
+                    var start = parseInt(this.dataset.start, 10);
+                    RetoricaAudio.playFromIndex(start, rawText);
+                };
+
+                container.appendChild(span);
+            } else {
+                container.appendChild(document.createTextNode(token));
+            }
+            charOffset += token.length;
+        });
+    },
+
+    playFromIndex: function(startIndex, fullText) {
+        window.speechSynthesis.cancel();
+
+        var remainingText = fullText.substring(startIndex);
+        var utterance = new SpeechSynthesisUtterance(remainingText);
+        
+        utterance.lang = typeof RetoricaI18n !== 'undefined' ? RetoricaI18n.currentVoiceLang : 'es-MX';
+        utterance.rate = this.state.speedRate;
+
+        // Evento principal para resaltar palabra actual en tiempo real
+        utterance.onboundary = function(event) {
+            if (event.name === 'word') {
+                var currentAbsIndex = startIndex + event.charIndex;
+                RetoricaAudio.highlightWordAt(currentAbsIndex);
+            }
+        };
+
+        utterance.onstart = function() {
+            var playBtn = document.getElementById('btn-play-main');
+            if (playBtn) playBtn.classList.add('reading-active');
+            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Iniciando karaoke...");
+        };
+
+        utterance.onend = function() {
+            RetoricaAudio.clearHighlights();
+            var playBtn = document.getElementById('btn-play-main');
+            if (playBtn) playBtn.classList.remove('reading-active');
+        };
+
+        utterance.onerror = function() {
+            RetoricaAudio.clearHighlights();
+            var playBtn = document.getElementById('btn-play-main');
+            if (playBtn) playBtn.classList.remove('reading-active');
+        };
+
+        window.speechSynthesis.speak(utterance);
+    },
+
+    highlightWordAt: function(charIndex) {
+        this.clearHighlights();
+        var editor = document.getElementById('editor-body');
+        if (!editor) return;
+
+        var spans = editor.querySelectorAll('.karaoke-word');
+        for (var i = 0; i < spans.length; i++) {
+            var span = spans[i];
+            var start = parseInt(span.dataset.start, 10);
+            var length = span.textContent.length;
+
+            if (charIndex >= start && charIndex < start + length) {
+                span.classList.add('karaoke-word-active');
+                span.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                break;
+            }
+        }
+    },
+
+    clearHighlights: function() {
+        var editor = document.getElementById('editor-body');
+        if (!editor) return;
+        var activeSpans = editor.querySelectorAll('.karaoke-word-active');
+        activeSpans.forEach(function(el) {
+            el.classList.remove('karaoke-word-active');
+        });
     },
 
     stop: function() {
