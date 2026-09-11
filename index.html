@@ -463,6 +463,27 @@
                 align-items: center !important; 
             }
         }
+        /* --- ESTILOS KARAOKE Y DIRECCIÓN DE LECTURA --- */
+.karaoke-word {
+    transition: background-color 0.1s ease;
+    border-radius: 3px;
+    padding: 0 1px;
+}
+
+.karaoke-word-active {
+    background-color: #00ff66 !important;
+    color: #000000 !important;
+    font-weight: bold;
+    border-radius: 3px;
+    padding: 0 2px;
+    box-shadow: 0 0 8px #00ff66;
+}
+
+/* Dirección automática del editor (RTL para árabe/hebreo, LTR para español) */
+#editor-body {
+    unicode-bidi: plaintext;
+    text-align: start;
+}
     </style>
 </head>
 <body>
