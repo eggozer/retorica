@@ -9,19 +9,16 @@
 </head>
 <body>
 
-    <!-- Encabezado / Barra Superior -->
     <header class="app-header">
         <button id="btn-menu-hamb" class="icon-btn">☰</button>
         <h1 class="app-title">Retórica</h1>
         <button id="btn-publish" class="btn-publish">Publicar</button>
     </header>
 
-    <!-- Botonera Principal Deslicable -->
-    <nav class="toolbar-scroll" id="main-toolbar">
-        <!-- Los botones redondos se inyectan dinámicamente vía JS -->
-    </nav>
+    <!-- Contenedor estricto para carrusel horizontal -->
+    <div class="toolbar-scroll" id="main-toolbar"></div>
 
-    <!-- Barra de Herramientas WYSIWYG (Edición de Texto) -->
+    <!-- Barra de edición -->
     <div class="wysiwyg-toolbar" id="wysiwyg-tools">
         <button onclick="DocEditor.execCmd('bold')"><b>B</b></button>
         <button onclick="DocEditor.execCmd('italic')"><i>I</i></button>
@@ -33,20 +30,16 @@
         </label>
     </div>
 
-    <!-- Lienzo de Edición / Trabajo -->
+    <!-- Lienzo principal con borde y espacio visible -->
     <main class="editor-container">
         <div id="editor" class="editor-workspace" placeholder="Escribe o dicta tu documento aquí..."></div>
     </main>
 
-    <!-- Sección de Biblioteca de Plantillas -->
     <section class="library-section">
         <h3>Mis Plantillas</h3>
-        <div id="library-grid" class="library-grid">
-            <!-- Tarjetas de documentos -->
-        </div>
+        <div id="library-grid" class="library-grid"></div>
     </section>
 
-    <!-- Scripts del Proyecto -->
     <script src="ui-core.js"></script>
     <script src="storage.js"></script>
     <script src="audio-engine.js"></script>
