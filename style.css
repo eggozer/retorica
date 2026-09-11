@@ -1,0 +1,137 @@
+/* Botones Redondos Invisibles */
+.btn-round-container {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 8px;
+    width: 65px;
+}
+
+.btn-round {
+    position: relative;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    outline: none;
+    padding: 0;
+}
+
+.btn-round svg.ring {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 52px;
+    height: 52px;
+    transform: rotate(-90deg);
+}
+
+.btn-round svg.ring circle {
+    fill: none;
+    stroke: transparent;
+    stroke-width: 3;
+    stroke-dasharray: 150;
+    stroke-dashoffset: 150;
+    transition: stroke-dashoffset 0.6s ease, stroke 0.3s ease;
+}
+
+/* Estado al Presionar (Guardar / Acción Rápida) */
+.btn-round.pulse svg.ring circle {
+    stroke: #00FF66; /* Verde Neón */
+    animation: neonPulse 0.6s ease-in-out;
+}
+
+/* Estado Activo Continuo (Grabando / Leyendo) */
+.btn-round.active svg.ring circle {
+    stroke: #FF3366; /* Rojo/Naranja Neón */
+    stroke-dashoffset: 0;
+    animation: neonSpin 1.2s linear infinite;
+}
+
+@keyframes neonPulse {
+    0% { stroke-dashoffset: 150; }
+    100% { stroke-dashoffset: 0; }
+}
+
+@keyframes neonSpin {
+    0% { transform: rotate(0deg); transform-origin: center; }
+    100% { transform: rotate(360deg); transform-origin: center; }
+}
+
+/* Etiqueta del Botón y Marquesina */
+.btn-label-wrap {
+    width: 65px;
+    overflow: hidden;
+    text-align: center;
+    margin-top: 4px;
+}
+
+.btn-label {
+    font-size: 11px;
+    white-space: nowrap;
+    display: inline-block;
+}
+
+.btn-label.marquee {
+    animation: marqueeScroll 4s linear infinite;
+}
+
+@keyframes marqueeScroll {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+}
+
+/* Grid de Biblioteca (Pares Horizontales) */
+.library-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 10px;
+}
+
+@media (min-width: 768px) {
+    .library-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.card-template {
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 10px;
+    background: #ffffff;
+    position: relative;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.card-preview {
+    font-size: 12px;
+    line-height: 1.3;
+    height: 3.9em;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
+
+/* Toast de Deshacer (Undo) */
+#toast-undo {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #323232;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 20px;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    z-index: 9999;
+}
