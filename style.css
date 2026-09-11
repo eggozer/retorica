@@ -1,227 +1,64 @@
-/* Reset y Base */
+/* Reset y Corrección de Layout */
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: sans-serif;
 }
 
 body {
-    background-color: #f8f9fa;
-    color: #212529;
     padding: 12px;
+    background: #f8f9fa;
 }
 
-/* Encabezado */
 .app-header {
     display: flex;
-    align-items: center;
     justify-content: space-between;
+    align-items: center;
     margin-bottom: 12px;
 }
 
-.app-title {
-    font-size: 24px;
-    font-weight: bold;
-}
-
-.icon-btn {
-    background: none;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    padding: 6px 10px;
-    font-size: 16px;
-    cursor: pointer;
-}
-
-.btn-publish {
-    background-color: #ffffff;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    padding: 6px 12px;
-    font-size: 14px;
-    cursor: pointer;
-}
-
-/* CARROUSEL HORIZONTAL DE BOTONES (Solución al amontonamiento) */
-.toolbar-scroll {
+/* Forzar carrusel horizontal estricto para evitar cuadrícula */
+#main-toolbar, .toolbar-scroll {
     display: flex !important;
     flex-direction: row !important;
-    flex-wrap: nowrap !important;
     overflow-x: auto !important;
-    white-space: nowrap;
-    padding: 8px 0;
-    margin-bottom: 12px;
-    -webkit-overflow-scrolling: touch;
+    white-space: nowrap !important;
+    padding: 10px 0 !important;
+    gap: 8px !important;
+    width: 100% !important;
 }
 
-.toolbar-scroll::-webkit-scrollbar {
-    display: none; /* Oculta la barra de desplazamiento en móvil */
-}
-
-/* Botones Redondos e Iconos */
 .btn-round-container {
-    display: inline-flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    flex: 0 0 auto;
-    width: 70px;
-    margin-right: 8px;
+    display: inline-flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    flex: 0 0 auto !important;
+    width: 65px !important;
 }
 
 .btn-round {
-    position: relative;
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    background: #ffffff;
-    border: 1px solid #e0e0e0;
-    cursor: pointer;
+    border: 1px solid #ccc;
+    background: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
-    outline: none;
-    padding: 0;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
-.btn-round svg.ring {
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    width: 52px;
-    height: 52px;
-    transform: rotate(-90deg);
-    pointer-events: none;
-}
-
-.btn-round svg.ring circle {
-    fill: none;
-    stroke: transparent;
-    stroke-width: 3;
-    stroke-dasharray: 150;
-    stroke-dashoffset: 150;
-    transition: stroke-dashoffset 0.6s ease, stroke 0.3s ease;
-}
-
-.btn-round.pulse svg.ring circle {
-    stroke: #00FF66;
-    animation: neonPulse 0.6s ease-in-out;
-}
-
-.btn-round.active svg.ring circle {
-    stroke: #FF3366;
-    stroke-dashoffset: 0;
-    animation: neonSpin 1.2s linear infinite;
-}
-
-@keyframes neonPulse {
-    0% { stroke-dashoffset: 150; }
-    100% { stroke-dashoffset: 0; }
-}
-
-@keyframes neonSpin {
-    0% { transform: rotate(0deg); transform-origin: center; }
-    100% { transform: rotate(360deg); transform-origin: center; }
-}
-
-/* Etiquetas debajo de los botones */
-.btn-label-wrap {
-    width: 100%;
-    overflow: hidden;
-    text-align: center;
-    margin-top: 6px;
-}
-
-.btn-label {
-    font-size: 11px;
-    white-space: nowrap;
-    display: block;
-    color: #495057;
-}
-
-.btn-label.marquee {
-    display: inline-block;
-    animation: marqueeScroll 4s linear infinite;
-}
-
-@keyframes marqueeScroll {
-    0% { transform: translateX(100%); }
-    100% { transform: translateX(-100%); }
-}
-
-/* Barra WYSIWYG */
-.wysiwyg-toolbar {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-    margin-bottom: 12px;
-    background: #ffffff;
-    padding: 6px;
-    border-radius: 8px;
-    border: 1px solid #e0e0e0;
-}
-
-.wysiwyg-toolbar button, .btn-file-label {
-    background: #f1f3f5;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-    padding: 4px 10px;
-    font-size: 13px;
-    cursor: pointer;
-}
-
-/* Área de Trabajo (Lienzo Visible) */
+/* Área de trabajo/Lienzo visible */
 .editor-container {
-    background: #ffffff;
-    border: 1px solid #ced4da;
+    margin: 12px 0;
+    background: #fff;
+    border: 1px solid #ccc;
     border-radius: 8px;
     min-height: 250px;
-    margin-bottom: 20px;
-    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
 }
 
 .editor-workspace {
-    width: 100%;
     min-height: 250px;
     padding: 12px;
     outline: none;
-    font-size: 15px;
-    line-height: 1.5;
-}
-
-.editor-workspace[placeholder]:empty:before {
-    content: attr(placeholder);
-    color: #adb5bd;
-}
-
-/* Sección de Biblioteca */
-.library-section {
-    margin-top: 20px;
-}
-
-.library-section h3 {
-    font-size: 18px;
-    margin-bottom: 10px;
-}
-
-.library-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-}
-
-.card-template {
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    padding: 10px;
-    background: #ffffff;
-    position: relative;
-}
-
-.card-preview {
-    font-size: 12px;
-    height: 3.6em;
-    overflow: hidden;
 }
