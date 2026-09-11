@@ -223,10 +223,26 @@ var RetoricaStorage = {
         });
     },
 
+    pendingDeletion: null,
+
     deleteDoc: function(id, event) {
         if (event) event.stopPropagation();
         var self = this;
-        this.initDB(function() {
+
+        // Obtener el documento antes de removerlo temporalmente
+        this.getDocById(id, function(doc) {
+            if (!doc) return;
+
+            // Almacenar respaldo en memoria
+            self.pendingDeletion = {
+                doc: doc,
+                timer: setTimeout(function() {
+                    // Confirmación definitiva tras 10 segundos
+                    self.finalizeDelete(id);
+                }, 10000)
+            };
+
+            // Ocultar de IndexedDB inmediatamente para respuesta visual rápida
             var transaction = self.dbInstance.transaction(['documents'], 'readwrite');
             var store = transaction.objectStore('documents');
             store.delete(id);
@@ -236,11 +252,52 @@ var RetoricaStorage = {
                     self.createNewDoc();
                 }
                 self.refreshLibrary();
-                if (typeof RetoricaUI !== 'undefined') {
-                    RetoricaUI.notify("Documento eliminado ✓");
-                }
+                self.showUndoToast();
             };
         });
+    },
+
+    undoDelete: function() {
+        if (!this.pendingDeletion) return;
+
+        clearTimeout(this.pendingDeletion.timer);
+        var restoredDoc = this.pendingDeletion.doc;
+        var self = this;
+
+        var transaction = this.dbInstance.transaction(['documents'], 'readwrite');
+        var store = transaction.objectStore('documents');
+        store.put(restoredDoc);
+
+        transaction.oncomplete = function() {
+            self.pendingDeletion = null;
+            self.removeUndoToast();
+            self.loadDoc(restoredDoc.id);
+            self.refreshLibrary();
+            if (typeof RetoricaUI !== 'undefined') {
+                RetoricaUI.notify("Documento restaurado ✓");
+            }
+        };
+    },
+
+    finalizeDelete: function(id) {
+        this.pendingDeletion = null;
+        this.removeUndoToast();
+    },
+
+    showUndoToast: function() {
+        this.removeUndoToast();
+        var toast = document.createElement('div');
+        toast.id = 'undo-toast-banner';
+        toast.className = 'undo-toast-banner';
+        toast.innerHTML = '<span>Documento eliminado</span><button onclick="RetoricaStorage.undoDelete()">DESHACER</button>';
+        document.body.appendChild(toast);
+    },
+
+    removeUndoToast: function() {
+        var elem = document.getElementById('undo-toast-banner');
+        if (elem && elem.parentNode) {
+            elem.parentNode.removeChild(elem);
+        }
     },
 
     copyDoc: function(id, event) {
