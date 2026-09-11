@@ -1,29 +1,47 @@
-var CACHE_NAME = 'retorica-v1';
-var urlsToCache = [
-    './',
-    './index.html',
-    './style.css',
-    './ui-core.js',
-    './storage.js',
-    './audio-engine.js',
-    './doc-editor.js',
-    './i18n.js',
-    './app.js',
-    './manifest.json'
+// --- RETÓRICA AUTO-CLEANING SERVICE WORKER (sw.js) ---
+const CACHE_NAME = 'retorica-godmode-cache-v2026';
+const ASSETS = [
+  './',
+  './index.html',
+  './main.js',
+  './storage.js',
+  './idiomas.js',
+  './audio.js',
+  './auth.js',
+  './manifest.json',
+  './icon-192.png'
 ];
 
-self.addEventListener('install', function(event) {
-    event.waitUntil(
-        caches.open(CACHE_NAME).then(function(cache) {
-            return cache.addAll(urlsToCache);
-        })
-    );
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(ASSETS);
+    }).then(() => {
+      return self.skipWaiting();
+    })
+  );
 });
 
-self.addEventListener('fetch', function(event) {
-    event.respondWith(
-        caches.match(event.request).then(function(response) {
-            return response || fetch(event.request);
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cache) => {
+          if (cache !== CACHE_NAME) {
+            return caches.delete(cache);
+          }
         })
-    );
+      );
+    }).then(() => {
+      return self.clients.claim();
+    })
+  );
+});
+
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    fetch(event.request).catch(() => {
+      return caches.match(event.request);
+    })
+  );
 });
