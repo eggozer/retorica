@@ -1,34 +1,99 @@
-/* Botones Redondos Invisibles */
+/* Reset y Base */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+    background-color: #f8f9fa;
+    color: #212529;
+    padding: 12px;
+}
+
+/* Encabezado */
+.app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.app-title {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.icon-btn {
+    background: none;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.btn-publish {
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+/* CARROUSEL HORIZONTAL DE BOTONES (Solución al amontonamiento) */
+.toolbar-scroll {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    white-space: nowrap;
+    padding: 8px 0;
+    margin-bottom: 12px;
+    -webkit-overflow-scrolling: touch;
+}
+
+.toolbar-scroll::-webkit-scrollbar {
+    display: none; /* Oculta la barra de desplazamiento en móvil */
+}
+
+/* Botones Redondos e Iconos */
 .btn-round-container {
     display: inline-flex;
     flex-direction: column;
     align-items: center;
-    margin: 8px;
-    width: 65px;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 70px;
+    margin-right: 8px;
 }
 
 .btn-round {
     position: relative;
-    width: 52px;
-    height: 52px;
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
-    background: transparent;
-    border: none;
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     outline: none;
     padding: 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .btn-round svg.ring {
     position: absolute;
-    top: 0;
-    left: 0;
+    top: -2px;
+    left: -2px;
     width: 52px;
     height: 52px;
     transform: rotate(-90deg);
+    pointer-events: none;
 }
 
 .btn-round svg.ring circle {
@@ -40,15 +105,13 @@
     transition: stroke-dashoffset 0.6s ease, stroke 0.3s ease;
 }
 
-/* Estado al Presionar (Guardar / Acción Rápida) */
 .btn-round.pulse svg.ring circle {
-    stroke: #00FF66; /* Verde Neón */
+    stroke: #00FF66;
     animation: neonPulse 0.6s ease-in-out;
 }
 
-/* Estado Activo Continuo (Grabando / Leyendo) */
 .btn-round.active svg.ring circle {
-    stroke: #FF3366; /* Rojo/Naranja Neón */
+    stroke: #FF3366;
     stroke-dashoffset: 0;
     animation: neonSpin 1.2s linear infinite;
 }
@@ -63,21 +126,23 @@
     100% { transform: rotate(360deg); transform-origin: center; }
 }
 
-/* Etiqueta del Botón y Marquesina */
+/* Etiquetas debajo de los botones */
 .btn-label-wrap {
-    width: 65px;
+    width: 100%;
     overflow: hidden;
     text-align: center;
-    margin-top: 4px;
+    margin-top: 6px;
 }
 
 .btn-label {
     font-size: 11px;
     white-space: nowrap;
-    display: inline-block;
+    display: block;
+    color: #495057;
 }
 
 .btn-label.marquee {
+    display: inline-block;
     animation: marqueeScroll 4s linear infinite;
 }
 
@@ -86,52 +151,77 @@
     100% { transform: translateX(-100%); }
 }
 
-/* Grid de Biblioteca (Pares Horizontales) */
+/* Barra WYSIWYG */
+.wysiwyg-toolbar {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    margin-bottom: 12px;
+    background: #ffffff;
+    padding: 6px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+.wysiwyg-toolbar button, .btn-file-label {
+    background: #f1f3f5;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+/* Área de Trabajo (Lienzo Visible) */
+.editor-container {
+    background: #ffffff;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    min-height: 250px;
+    margin-bottom: 20px;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.editor-workspace {
+    width: 100%;
+    min-height: 250px;
+    padding: 12px;
+    outline: none;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+.editor-workspace[placeholder]:empty:before {
+    content: attr(placeholder);
+    color: #adb5bd;
+}
+
+/* Sección de Biblioteca */
+.library-section {
+    margin-top: 20px;
+}
+
+.library-section h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
 .library-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-    padding: 10px;
-}
-
-@media (min-width: 768px) {
-    .library-grid {
-        grid-template-columns: repeat(4, 1fr);
-    }
+    gap: 10px;
 }
 
 .card-template {
     border: 1px solid #e0e0e0;
-    border-radius: 12px;
+    border-radius: 8px;
     padding: 10px;
     background: #ffffff;
     position: relative;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
 .card-preview {
     font-size: 12px;
-    line-height: 1.3;
-    height: 3.9em;
+    height: 3.6em;
     overflow: hidden;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-}
-
-/* Toast de Deshacer (Undo) */
-#toast-undo {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #323232;
-    color: #fff;
-    padding: 10px 20px;
-    border-radius: 20px;
-    display: flex;
-    gap: 15px;
-    align-items: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    z-index: 9999;
 }
