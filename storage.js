@@ -349,46 +349,89 @@ var RetoricaStorage = {
     },
 
     refreshLibrary: function() {
-        var container = document.getElementById('docs-list-render');
-        if (!container) return;
+    var container = document.getElementById('docs-list-render');
+    if (!container) return;
 
-        var self = this;
-        this.getAllDocs(function(docs) {
-            container.innerHTML = '';
-            if (!docs || docs.length === 0) {
-                container.innerHTML = '<div style="color:var(--text-muted); font-size:0.8rem; text-align:center; padding:20px; width:100%;">No hay documentos guardados.</div>';
-                return;
-            }
+    var self = this;
+    this.getAllDocs(function(docs) {
+        container.innerHTML = '';
+        if (!docs || docs.length === 0) {
+            container.innerHTML = '<div style="color:var(--text-muted); font-size:0.8rem; text-align:center; padding:20px; width:100%;">No hay documentos guardados.</div>';
+            return;
+        }
 
-            docs.sort(function(a, b) {
-                return new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0);
-            });
-
-            var fragment = document.createDocumentFragment();
-            docs.forEach(function(doc) {
-                var card = document.createElement('div');
-                card.className = 'card-template';
-                card.onclick = function() { self.loadDoc(doc.id); };
-
-                var tempDiv = document.createElement('div');
-                tempDiv.innerHTML = doc.body || '';
-                var plainText = tempDiv.innerText || tempDiv.textContent || '';
-
-                card.innerHTML = 
-                    '<div class="card-template-title">' + self.escapeHTML(doc.title || 'Sin Título') + '</div>' +
-                    '<div class="card-template-body">' + self.escapeHTML(plainText || 'Documento vacío...') + '</div>' +
-                    '<div class="card-template-actions">' +
-                        '<button type="button" class="btn-action-tmpl" onclick="RetoricaStorage.renameDoc(\'' + doc.id + '\', event)">EDITAR TÍTULO</button>' +
-                        '<button type="button" class="btn-action-tmpl card-btn-copy" onclick="RetoricaStorage.copyDoc(\'' + doc.id + '\', event)">COPIAR</button>' +
-                        '<button type="button" class="btn-action-tmpl card-btn-share" onclick="RetoricaStorage.shareDoc(\'' + doc.id + '\', event)">COMPARTIR</button>' +
-                        '<button type="button" class="btn-action-tmpl card-btn-delete" onclick="RetoricaStorage.deleteDoc(\'' + doc.id + '\', event)">BORRAR</button>' +
-                    '</div>';
-
-                fragment.appendChild(card);
-            });
-            container.appendChild(fragment);
+        docs.sort(function(a, b) {
+            return new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0);
         });
-    },
+
+        var fragment = document.createDocumentFragment();
+        docs.forEach(function(doc) {
+            var card = document.createElement('div');
+            card.className = 'card-template';
+            card.onclick = function() { self.loadDoc(doc.id); };
+
+            var tempDiv = document.createElement('div');
+            tempDiv.innerHTML = doc.body || '';
+            var plainText = tempDiv.innerText || tempDiv.textContent || '';
+
+            // Renderizado con menú superior de 3 puntos y botones redondos 3D fosforescentes
+            card.innerHTML = 
+                '<div class="card-template-header">' +
+                    '<div class="card-template-title">' + self.escapeHTML(doc.title || 'Sin Título') + '</div>' +
+                    '<button type="button" class="btn-more-actions" onclick="RetoricaStorage.toggleCardMenu(\'' + doc.id + '\', event)">⋮</button>' +
+                '</div>' +
+                '<div class="card-template-body">' + self.escapeHTML(plainText || 'Documento vacío...') + '</div>' +
+                '<div class="card-template-actions" id="actions-' + doc.id + '">' +
+                    
+                    '<!-- EDITAR -->' +
+                    '<div class="card-action-wrapper">' +
+                        '<button type="button" class="btn-round-mini" onclick="RetoricaStorage.renameDoc(\'' + doc.id + '\', event)">✏️</button>' +
+                        '<div class="btn-mini-label">Editar</div>' +
+                    '</div>' +
+
+                    '<!-- COPIAR (Con indicador fosforescente activo) -->' +
+                    '<div class="card-action-wrapper">' +
+                        '<button type="button" class="btn-round-mini active" onclick="RetoricaStorage.copyDoc(\'' + doc.id + '\', event)">📋</button>' +
+                        '<div class="btn-mini-label">Copiar</div>' +
+                    '</div>' +
+
+                    '<!-- COMPARTIR (Con desplazamiento de 2 palabras) -->' +
+                    '<div class="card-action-wrapper">' +
+                        '<button type="button" class="btn-round-mini" onclick="RetoricaStorage.shareDoc(\'' + doc.id + '\', event)">🔗</button>' +
+                        '<div class="btn-mini-label"><span class="scroll-txt">Enviar Enlace</span></div>' +
+                    '</div>' +
+
+                    '<!-- BORRAR -->' +
+                    '<div class="card-action-wrapper">' +
+                        '<button type="button" class="btn-round-mini" style="color:#ef4444 !important;" onclick="RetoricaStorage.deleteDoc(\'' + doc.id + '\', event)">🗑️</button>' +
+                        '<div class="btn-mini-label">Borrar</div>' +
+                    '</div>' +
+
+                '</div>';
+
+            fragment.appendChild(card);
+        });
+        container.appendChild(fragment);
+    });
+},
+
+// Método para alternar el menú desplegable de 3 puntos
+toggleCardMenu: function(id, event) {
+    if (event) event.stopPropagation();
+    
+    // Ocultar cualquier otro menú abierto
+    var allMenus = document.querySelectorAll('.card-template-actions');
+    allMenus.forEach(function(menu) {
+        if (menu.id !== 'actions-' + id) {
+            menu.classList.remove('visible');
+        }
+    });
+
+    var targetMenu = document.getElementById('actions-' + id);
+    if (targetMenu) {
+        targetMenu.classList.toggle('visible');
+    }
+}
 
     renameDoc: function(id, event) {
         if (event) event.stopPropagation();
