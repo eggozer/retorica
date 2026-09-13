@@ -393,3 +393,12 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error("Error al inicializar Retórica:", err);
     }
 });
+// Cierre automático de menús flotantes al tocar fuera de las tarjetas
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.card-template-header') && !e.target.closest('.card-template-actions')) {
+        var openMenus = document.querySelectorAll('.card-template-actions.visible');
+        openMenus.forEach(function(menu) {
+            menu.classList.remove('visible');
+        });
+    }
+});
