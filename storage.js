@@ -461,24 +461,82 @@ toggleCardMenu: function(id, event) {
         });
     },
 
-    importLocalFile: function(event) {
-        var file = event.target.files[0];
-        if (!file) return;
+    // storage.js (Corrección de métodos de importación de archivos local y respaldo)
+importLocalFile: function(event) {
+    var file = event.target.files[0];
+    if (!file) return;
 
-        var reader = new FileReader();
-        reader.onload = function(e) {
-            var content = e.target.result;
-            var titleInput = document.getElementById('editor-title');
-            var bodyInput = document.getElementById('editor-body');
+    var reader = new FileReader();
+    var self = this;
+    reader.onload = function(e) {
+        var content = e.target.result;
+        var titleInput = document.getElementById('editor-title');
+        var bodyInput = document.getElementById('editor-body');
 
-            if (titleInput) titleInput.value = file.name.replace(/\.[^/.]+$/, "");
-            if (bodyInput) bodyInput.innerText = content;
+        var fileName = file.name.replace(/\.[^/.]+$/, "");
+        if (titleInput) titleInput.value = fileName;
 
-            RetoricaStorage.currentDocId = 'doc_' + Date.now();
-            RetoricaStorage.save();
-        };
-        reader.readAsText(file);
-    },
+        if (bodyInput) {
+            var formattedContent = self.escapeHTML(content).replace(/\n/g, '<br>');
+            bodyInput.innerHTML = formattedContent;
+        }
+
+        self.currentDocId = 'doc_' + Date.now();
+        self.save();
+        event.target.value = '';
+    };
+    reader.readAsText(file);
+},
+
+importBackup: function(event) {
+    var file = event.target.files[0];
+    if (!file) return;
+
+    var reader = new FileReader();
+    var self = this;
+    reader.onload = function(e) {
+        try {
+            var docs = JSON.parse(e.target.result);
+            if (Array.isArray(docs)) {
+                self.initDB(function() {
+                    var transaction = self.dbInstance.transaction(['documents'], 'readwrite');
+                    var store = transaction.objectStore('documents');
+                    docs.forEach(function(doc) { store.put(doc); });
+
+                    transaction.oncomplete = function() {
+                        self.refreshLibrary();
+                        if (docs.length > 0) {
+                            self.loadDoc(docs[0].id);
+                        }
+                        if (typeof RetoricaUI !== 'undefined') {
+                            RetoricaUI.notify("Respaldo restaurado con éxito ✓");
+                        }
+                    };
+                });
+            }
+        } catch (err) {
+            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error: Formato de respaldo JSON no válido");
+        }
+        event.target.value = '';
+    };
+    reader.readAsText(file);
+}
+JavaScript
+// main.js (Ajuste de guardado automático sin bloqueos)
+triggerAutoSave: function() {
+    clearTimeout(autoSaveTimeout);
+    autoSaveTimeout = setTimeout(function() {
+        if (typeof RetoricaStorage !== 'undefined' && typeof RetoricaStorage.autoSaveSilent === 'function') {
+            RetoricaStorage.autoSaveSilent();
+        }
+    }, 1000);
+}
+Pasos para probar la solución
+Reemplaza las funciones actualizadas en tu archivo storage.js y main.js.
+
+Agrega el selector de archivos <input type="file" id="importFileInput"...> en index.html.
+
+Recarga la aplicación con Ctrl + F5 (o limpia la caché del navegador) para asegurar que se ejecute la versión corregida.
 
     manualSync: function() {
         this.save();
