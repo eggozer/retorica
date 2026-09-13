@@ -211,7 +211,6 @@ var RetoricaUI = {
         }
     },
 
-    // --- CORRECCIÓN DE CERRADO EXPLÍCITO ---
     closeSidebar: function() {
         var sidebar = document.getElementById('sidebar');
         if (sidebar && sidebar.classList.contains('active')) {
@@ -258,7 +257,6 @@ var RetoricaUI = {
         }, 2500);
     },
 
-    // --- EXPORTACIONES CON VERIFICACIÓN SEGURA ---
     expPDF: function() {
         if (typeof html2pdf === 'undefined') {
             RetoricaUI.notify("Librería PDF no cargada o inaccesible.");
