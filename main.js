@@ -151,14 +151,15 @@ var RetoricaUI = {
         RetoricaUI.notify("Plantilla copiada ✓");
     },
 
-    triggerAutoSave: function() {
-        clearTimeout(autoSaveTimeout);
-        autoSaveTimeout = setTimeout(function() {
-            if (typeof RetoricaStorage !== 'undefined' && typeof RetoricaStorage.autoSaveSilent === 'function') {
-                RetoricaStorage.autoSaveSilent();
-            }
-        }, 1500);
-    },
+    // main.js (Ajuste de guardado automático sin bloqueos)
+triggerAutoSave: function() {
+    clearTimeout(autoSaveTimeout);
+    autoSaveTimeout = setTimeout(function() {
+        if (typeof RetoricaStorage !== 'undefined' && typeof RetoricaStorage.autoSaveSilent === 'function') {
+            RetoricaStorage.autoSaveSilent();
+        }
+    }, 1000);
+}
 
     initTouchGestures: function() {
         var self = this;
