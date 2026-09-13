@@ -151,15 +151,14 @@ var RetoricaUI = {
         RetoricaUI.notify("Plantilla copiada ✓");
     },
 
-    // main.js (Ajuste de guardado automático sin bloqueos)
-triggerAutoSave: function() {
-    clearTimeout(autoSaveTimeout);
-    autoSaveTimeout = setTimeout(function() {
-        if (typeof RetoricaStorage !== 'undefined' && typeof RetoricaStorage.autoSaveSilent === 'function') {
-            RetoricaStorage.autoSaveSilent();
-        }
-    }, 1000);
-}
+    triggerAutoSave: function() {
+        clearTimeout(autoSaveTimeout);
+        autoSaveTimeout = setTimeout(function() {
+            if (typeof RetoricaStorage !== 'undefined' && typeof RetoricaStorage.autoSaveSilent === 'function') {
+                RetoricaStorage.autoSaveSilent();
+            }
+        }, 1500);
+    },
 
     initTouchGestures: function() {
         var self = this;
@@ -212,6 +211,7 @@ triggerAutoSave: function() {
         }
     },
 
+    // --- CORRECCIÓN DE CERRADO EXPLÍCITO ---
     closeSidebar: function() {
         var sidebar = document.getElementById('sidebar');
         if (sidebar && sidebar.classList.contains('active')) {
@@ -258,6 +258,7 @@ triggerAutoSave: function() {
         }, 2500);
     },
 
+    // --- EXPORTACIONES CON VERIFICACIÓN SEGURA ---
     expPDF: function() {
         if (typeof html2pdf === 'undefined') {
             RetoricaUI.notify("Librería PDF no cargada o inaccesible.");
@@ -392,14 +393,5 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     } catch (err) {
         console.error("Error al inicializar Retórica:", err);
-    }
-});
-// Cierre automático de menús flotantes al tocar fuera de las tarjetas
-document.addEventListener('click', function(e) {
-    if (!e.target.closest('.card-template-header') && !e.target.closest('.card-template-actions')) {
-        var openMenus = document.querySelectorAll('.card-template-actions.visible');
-        openMenus.forEach(function(menu) {
-            menu.classList.remove('visible');
-        });
     }
 });
