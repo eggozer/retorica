@@ -438,13 +438,6 @@ var RetoricaStorage = {
     },
 
     manualSync: function() {
-        var btn = document.getElementById('btn-icon-sync');
-        if (btn) {
-            btn.classList.add('spin-anim');
-            setTimeout(function() {
-                btn.classList.remove('spin-anim');
-            }, 600);
-        }
         this.save();
     },
 
