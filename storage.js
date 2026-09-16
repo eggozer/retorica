@@ -1,5 +1,107 @@
 // --- RETÓRICA PERSISTENCE & STORAGE ENGINE (storage.js - INDEXEDDB & CLOUD EDITION) ---
 var RetoricaStorage = {
+    dbName: 'RetoricaDB_V2026',
+    dbVersion: 1,
+    dbInstance: null,
+    currentDocId: null,
+    driveAccessToken: null,
+
+    escapeHTML: function(str) {
+        return String(str || '').replace(/[&<>"']/g, function(m) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+        });
+    },
+
+    initDB: function(callback) {
+        if (navigator.storage && navigator.storage.persist) {
+            navigator.storage.persist().then(function(persistent) {
+                console.log("Retórica - Almacenamiento persistente:", persistent ? "Garantizado" : "Temporal");
+            }).catch(function(e) {
+                console.warn("No se pudo solicitar persistencia:", e);
+            });
+        }
+
+        if (this.dbInstance) {
+            if (callback) callback();
+            return;
+        }
+
+        var self = this;
+        var request = indexedDB.open(this.dbName, this.dbVersion);
+
+        request.onerror = function(e) {
+            console.error("Error abriendo IndexedDB:", e);
+            if (typeof RetoricaUI !== 'undefined') {
+                RetoricaUI.notify("Error de acceso a almacenamiento local");
+            }
+            if (callback) callback();
+        };
+
+        request.onsuccess = function(e) {
+            self.dbInstance = e.target.result;
+            if (callback) callback();
+        };
+
+        request.onupgradeneeded = function(e) {
+            var db = e.target.result;
+            if (!db.objectStoreNames.contains('documents')) {
+                db.createObjectStore('documents', { keyPath: 'id' });
+            }
+        };
+    },
+
+    save: function() {
+        var self = this;
+        this.initDB(function() {
+            var titleInput = document.getElementById('editor-title');
+            var bodyInput = document.getElementById('editor-body');
+            if (!titleInput || !bodyInput) return;
+
+            var title = titleInput.value.trim();
+            var body = bodyInput.innerHTML;
+
+            if (!self.currentDocId) {
+                self.currentDocId = 'doc_' + Date.now();
+            }
+
+            var nowStr = new Date().toISOString();
+            
+            self.getDocById(self.currentDocId, function(existingDoc) {
+                var createdAt = existingDoc ? (existingDoc.createdAt || nowStr) : nowStr;
+
+                var docData = {
+                    id: self.currentDocId,
+                    title: title,
+                    body: body,
+                    lang: (typeof RetoricaI18n !== 'undefined' && RetoricaI18n.currentLang) ? RetoricaI18n.currentLang : 'es',
+                    createdAt: createdAt,
+                    updatedAt: nowStr
+                };
+
+                var transaction = self.dbInstance.transaction(['documents'], 'readwrite');
+                var store = transaction.objectStore('documents');
+                store.put(docData);
+
+                transaction.oncomplete = function() {
+                    localStorage.setItem('retorica_last_doc_id', self.currentDocId);
+                    if (typeof RetoricaUI !== 'undefined') {
+                        RetoricaUI.updateCounters();
+                        RetoricaUI.notify("Guardado en disco persistente ✓");
+                    }
+                    self.refreshLibrary();
+                    self.syncWithCloud();
+                };
+            });
+        });
+    },
+
+    autoSaveSilent: function() {
+        var self = this;
+        this.initDB(function() {
+            var titleInput = document.getElementById('editor-title');
+            var bodyInput = document.getElementById('editor-body');
+            if (!titleInput || !bodyInput) return;
+
             var title = titleInput.value.trim();
             var body = bodyInput.innerHTML;
 
