@@ -89,7 +89,7 @@ var RetoricaStorage = {
                         RetoricaUI.notify("Guardado en disco persistente ✓");
                     }
                     self.refreshLibrary();
-                    self.syncWithCloud();
+                    // Conexión remota suspendida: sincronización puramente local
                 };
             });
         });
@@ -433,32 +433,10 @@ var RetoricaStorage = {
     },
 
     initDriveAuth: function(callback) {
-        if (this.driveAccessToken) {
-            if (callback) callback(this.driveAccessToken);
-            return;
+        // Método mantenido para evitar romper referencias externas
+        if (typeof RetoricaUI !== 'undefined') {
+            RetoricaUI.notify("Sincronización en la nube desactivada");
         }
-
-        if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) {
-            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("SDK de Google no cargado");
-            return;
-        }
-
-        var CLIENT_ID = 'TU_CLIENT_ID_DE_GOOGLE.apps.googleusercontent.com';
-
-        var client = google.accounts.oauth2.initTokenClient({
-            client_id: CLIENT_ID,
-            scope: 'https://www.googleapis.com/auth/drive.appdata',
-            callback: function(tokenResponse) {
-                if (tokenResponse && tokenResponse.access_token) {
-                    RetoricaStorage.driveAccessToken = tokenResponse.access_token;
-                    if (callback) callback(tokenResponse.access_token);
-                } else {
-                    if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Error de autenticación en Google Drive");
-                }
-            }
-        });
-
-        client.requestAccessToken();
     },
 
     manualSync: function() {
@@ -470,44 +448,13 @@ var RetoricaStorage = {
             }, 1000);
         }
 
+        // Ejecuta guardado local directo en IndexedDB
         this.save();
-        this.syncWithCloud();
     },
 
     syncWithCloud: function() {
-        var self = this;
-        this.initDriveAuth(function(token) {
-            self.getAllDocs(function(docs) {
-                var fileContent = JSON.stringify(docs);
-                var file = new Blob([fileContent], { type: 'application/json' });
-                var metadata = {
-                    name: 'retorica_backup_sync.json',
-                    parents: ['appDataFolder']
-                };
-
-                var form = new FormData();
-                form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-                form.append('file', file);
-
-                fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-                    method: 'POST',
-                    headers: new Headers({ 'Authorization': 'Bearer ' + token }),
-                    body: form
-                })
-                .then(function(res) { return res.json(); })
-                .then(function(data) {
-                    if (typeof RetoricaUI !== 'undefined') {
-                        RetoricaUI.notify("Sincronizado con Google Drive ✓");
-                    }
-                })
-                .catch(function(err) {
-                    console.error("Error al subir a Drive:", err);
-                    if (typeof RetoricaUI !== 'undefined') {
-                        RetoricaUI.notify("Error al sincronizar con Drive");
-                    }
-                });
-            });
-        });
+        // Método mantenido como callback nulo
+        return true;
     },
 
     exportBackup: function() {
