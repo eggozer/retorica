@@ -385,6 +385,13 @@ var RetoricaUI = {
 };
 
 document.addEventListener('DOMContentLoaded', function() {
-    try { Retórica:", err);
+    try {
+        RetoricaUI.init();
+        var savedTheme = localStorage.getItem('retorica_theme_pref');
+        if (savedTheme === 'light') {
+            document.body.classList.add('light-theme');
+        }
+    } catch (err) {
+        console.error("Error al inicializar Retórica:", err);
     }
 });
