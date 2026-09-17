@@ -10,8 +10,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/docx@7.1.1/build/index.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-    <!-- SDK de Google para autenticación y Drive API -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+   
     <style>
         :root {
             --bg-main: #0f111a; --bg-sidebar: #161925; --bg-card: #1f2335;
@@ -125,7 +124,6 @@
             background: var(--bg-card) !important;
             color: #00ff66 !important;
             border: 1px solid #00ff66 !important;
-            border-bottom: 4px solid #00cc52 !important;
             box-shadow: 0 0 12px #00ff66, inset 0 0 5px #00ff66 !important;
         }
 
@@ -199,6 +197,12 @@
             font-weight: bold; 
         }
 
+        .btn-round-3d.active {
+            background: var(--bg-card) !important;
+            color: var(--text-main) !important;
+            border: 1px solid var(--text-muted) !important;
+            border-bottom: 4px solid var(--text-muted) !important;
+        }
         .btn-wrapper-3d.active-wrapper .btn-label-3d {
             color: var(--text-main) !important;
             font-weight: 900;
@@ -452,26 +456,26 @@
             }
         }
         /* --- ESTILOS KARAOKE Y DIRECCIÓN DE LECTURA --- */
-        .karaoke-word {
-            transition: background-color 0.1s ease;
-            border-radius: 3px;
-            padding: 0 1px;
-        }
+.karaoke-word {
+    transition: background-color 0.1s ease;
+    border-radius: 3px;
+    padding: 0 1px;
+}
 
-        .karaoke-word-active {
-            background-color: #00ff66 !important;
-            color: #000000 !important;
-            font-weight: bold;
-            border-radius: 3px;
-            padding: 0 2px;
-            box-shadow: 0 0 8px #00ff66;
-        }
+.karaoke-word-active {
+    background-color: #00ff66 !important;
+    color: #000000 !important;
+    font-weight: bold;
+    border-radius: 3px;
+    padding: 0 2px;
+    box-shadow: 0 0 8px #00ff66;
+}
 
-        /* Dirección automática del editor (RTL para árabe/hebreo, LTR para español) */
-        #editor-body {
-            unicode-bidi: plaintext;
-            text-align: start;
-        }
+/* Dirección automática del editor (RTL para árabe/hebreo, LTR para español) */
+#editor-body {
+    unicode-bidi: plaintext;
+    text-align: start;
+}
     </style>
 </head>
 <body>
