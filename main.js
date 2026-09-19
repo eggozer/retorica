@@ -235,17 +235,30 @@ var RetoricaUI = {
     },
 
     updateCounters: function() {
-        var body = document.getElementById('editor-body');
-        var text = body ? (body.innerText || body.textContent || "") : "";
-        
-        var chars = text.length;
-        var words = text.trim() === "" ? 0 : text.trim().split(/\s+/).length;
-        var lines = text === "" ? 1 : text.split('\n').length;
-        
-        if (document.getElementById('count-chars')) document.getElementById('count-chars').innerText = "CHARS: " + chars;
-        if (document.getElementById('count-words')) document.getElementById('count-words').innerText = "WORDS: " + words;
-        if (document.getElementById('count-lines')) document.getElementById('count-lines').innerText = "LINES: " + lines;
-    },
+    var body = document.getElementById('editor-body');
+    var text = body ? (body.innerText || body.textContent || "") : "";
+    
+    var chars = text.length;
+    var words = text.trim() === "" ? 0 : text.trim().split(/\s+/).length;
+    var lines = text === "" ? 1 : text.split('\n').length;
+    
+    var elChars = document.getElementById('count-chars');
+    var elWords = document.getElementById('count-words');
+    var elLines = document.getElementById('count-lines');
+
+    if (elChars) {
+        var icon = elChars.querySelector('span.icon-raw');
+        elChars.innerHTML = (icon ? icon.outerHTML + " " : "") + "CHARS: " + chars;
+    }
+    if (elWords) {
+        var icon = elWords.querySelector('span.icon-raw');
+        elWords.innerHTML = (icon ? icon.outerHTML + " " : "") + "WORDS: " + words;
+    }
+    if (elLines) {
+        var icon = elLines.querySelector('span.icon-raw');
+        elLines.innerHTML = (icon ? icon.outerHTML + " " : "") + "LINES: " + lines;
+    }
+},
 
     notify: function(msg) {
         var toast = document.getElementById('toast-notif');
