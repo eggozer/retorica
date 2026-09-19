@@ -24,7 +24,7 @@ var RetoricaAudio = {
         }
     },
 
-    // 2. Dictado por micrófono
+    // 2. Dictado por micrófono con inserción en la posición del cursor
     toggleMic: function() {
         var btn = document.getElementById('btn-mic-main');
         var Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -34,6 +34,11 @@ var RetoricaAudio = {
         }
 
         if (!this.state.isRecording) {
+            var editor = document.getElementById('editor-body');
+            if (editor) {
+                editor.focus();
+            }
+
             this.state.recognition = new Speech(); 
             this.state.recognition.continuous = true;
             this.state.recognition.interimResults = false;
@@ -43,14 +48,41 @@ var RetoricaAudio = {
             this.state.recognition.onresult = function(event) {
                 var textChunk = event.results[event.results.length - 1][0].transcript;
                 var editor = document.getElementById('editor-body');
-                if (editor) { 
-                    var currentText = editor.innerText || editor.textContent || '';
-                    var newText = (currentText.trim() ? currentText + ' ' : '') + textChunk;
-                    editor.innerText = newText;
-                    if (typeof RetoricaUI !== 'undefined') {
-                        RetoricaUI.updateCounters();
-                        RetoricaUI.triggerAutoSave();
+                if (!editor) return;
+
+                editor.focus();
+
+                // Intento 1: Usar execCommand para mantener el historial de deshacer y posición
+                var success = false;
+                try {
+                    success = document.execCommand('insertText', false, textChunk + ' ');
+                } catch(e) {
+                    success = false;
+                }
+
+                // Intento 2: Inserción directa en el Rango del Cursor si execCommand falla
+                if (!success) {
+                    var sel = window.getSelection();
+                    if (sel.rangeCount > 0) {
+                        var range = sel.getRangeAt(0);
+                        range.deleteContents();
+                        var textNode = document.createTextNode(textChunk + ' ');
+                        range.insertNode(textNode);
+                        
+                        // Mover el cursor después del texto insertado
+                        range.setStartAfter(textNode);
+                        range.setEndAfter(textNode);
+                        sel.removeAllRanges();
+                        sel.addRange(range);
+                    } else {
+                        // Fallback secundario al final solo si no hay ningún foco previo
+                        editor.innerText += (editor.innerText.trim() ? ' ' : '') + textChunk;
                     }
+                }
+
+                if (typeof RetoricaUI !== 'undefined') {
+                    RetoricaUI.updateCounters();
+                    RetoricaUI.triggerAutoSave();
                 }
             };
             
