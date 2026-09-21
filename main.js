@@ -124,11 +124,30 @@ var RetoricaUI = {
         }
     },
     
-    newDocumentAction: function() {
-        if (typeof RetoricaStorage !== 'undefined' && typeof RetoricaStorage.createNewDoc === 'function') {
-            RetoricaStorage.createNewDoc();
-        }
-    },
+    // OPCIÓN OPTIMIZADA EN main_4.js
+newDocumentAction: function() {
+    var editor = document.getElementById('editor-body');
+    var titleInput = document.getElementById('editor-title');
+
+    // 1. Limpieza instantánea del lienzo
+    if (editor) editor.innerHTML = '';
+    if (titleInput) titleInput.value = '';
+
+    // 2. Reinicio de contadores e historial de traducción original
+    if (typeof RetoricaI18n !== 'undefined') {
+        RetoricaI18n.originalText = null;
+        RetoricaI18n.originalTitle = null;
+    }
+
+    // 3. Crear nuevo documento limpio en almacenamiento sin pedir confirmación
+    if (typeof RetoricaStorage !== 'undefined' && typeof RetoricaStorage.createNewDoc === 'function') {
+        RetoricaStorage.createNewDoc({ silent: true }); 
+    }
+
+    // 4. Actualizar contadores y notificar de forma fluida
+    this.updateCounters();
+    this.notify("Nuevo lienzo listo");
+},
 
     copyFullTemplate: function() {
         var title = document.getElementById('editor-title').value.trim();
