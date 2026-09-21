@@ -80,35 +80,30 @@ var RetoricaUI = {
     },
 
     insertAdvancedTable: function() {
-        var editor = document.getElementById('editor-body');
-        if (!editor) return;
+    var editor = document.getElementById('editor-body');
+    if (!editor) return;
 
-        var rows = prompt("Número de filas:", "3");
-        if (!rows || isNaN(rows) || rows < 1) return;
+    // Valores predeterminados directos (3x3 con borde sutil)
+    var rows = 3;
+    var cols = 3;
+    var borderWidth = 1;
+    var borderColor = "#2d3748";
 
-        var cols = prompt("Número de columnas:", "3");
-        if (!cols || isNaN(cols) || cols < 1) return;
-
-        var borderWidth = prompt("Grosor del borde en px:", "1");
-        if (borderWidth === null) borderWidth = "1";
-
-        var borderColor = prompt("Color del borde (Código HEX o Nombre, ej. #00d2ff o #ffffff):", "#2d3748");
-        if (!borderColor) borderColor = "var(--border)";
-
-        var tableHTML = '<table style="width:100%; border-collapse:collapse; margin:10px 0; table-layout:auto;">';
-        
-        for (var r = 0; r < parseInt(rows); r++) {
-            tableHTML += '<tr>';
-            for (var c = 0; c < parseInt(cols); c++) {
-                tableHTML += '<td style="border:' + borderWidth + 'px solid ' + borderColor + '; padding:8px; min-width:30px;">&nbsp;</td>';
-            }
-            tableHTML += '</tr>';
+    var tableHTML = '<table style="width:100%; border-collapse:collapse; margin:10px 0; table-layout:auto;">';
+    
+    for (var r = 0; r < rows; r++) {
+        tableHTML += '<tr>';
+        for (var c = 0; c < cols; c++) {
+            tableHTML += '<td style="border:' + borderWidth + 'px solid ' + borderColor + '; padding:8px; min-width:30px;">&nbsp;</td>';
         }
-        tableHTML += '</table><br>';
+        tableHTML += '</tr>';
+    }
+    tableHTML += '</table><br>';
 
-        editor.focus();
-        document.execCommand('insertHTML', false, tableHTML);
-    },
+    editor.focus();
+    document.execCommand('insertHTML', false, tableHTML);
+    this.notify("Tabla 3x3 insertada");
+},
 
     installPWA: function() {
         if (deferredPWAPrompt) {
