@@ -90,9 +90,9 @@
         .menu-scroll-area::-webkit-scrollbar { display: none; }
 
         /* Contenedor de Botón + Leyenda Exterior */
-        .top-navbar .btn-wrapper-3d, .accordion-body .btn-wrapper-3d {
+        .top-navbar .btn-wrapper-3d, .accordion-body .btn-wrapper-3d, .card-template-actions .btn-wrapper-3d {
             flex-shrink: 0 !important;   
-            width: 64px !important;
+            width: 48px !important;
             display: inline-flex;
             flex-direction: column !important;
             align-items: center;
@@ -127,7 +127,7 @@
         }
 
         /* Leyenda Exterior Inferior con Desplazamiento Lateral Continuo (Ida y Vuelta) si supera 1 palabra */
-        .top-navbar .btn-label-3d, .accordion-body .btn-label-3d {
+        .top-navbar .btn-label-3d, .accordion-body .btn-label-3d, .card-template-actions .btn-label-3d {
             font-size: 0.58rem;
             font-weight: bold;
             color: var(--text-muted);
@@ -142,7 +142,7 @@
             position: relative;
         }
 
-        .top-navbar .btn-label-3d span.scroll-txt, .accordion-body .btn-label-3d span.scroll-txt {
+        .top-navbar .btn-label-3d span.scroll-txt, .accordion-body .btn-label-3d span.scroll-txt, .card-template-actions .btn-label-3d span.scroll-txt {
             display: inline-block;
             white-space: nowrap;
             animation: marquee-side 4s ease-in-out infinite alternate;
@@ -255,6 +255,7 @@
             overflow: hidden; 
             height: auto; 
             text-align: center;
+            position: relative;
         }
 
         .card-template-title { 
@@ -297,6 +298,7 @@
             padding: 6px; 
             z-index: 50;
             flex-direction: row !important; 
+            justify-content: space-around !important;
             box-shadow: 0 8px 16px rgba(0,0,0,0.4);
         }
 
@@ -306,24 +308,16 @@
             display: flex !important;
         }
 
-        .btn-action-tmpl { 
-            flex: 1 1 0% !important; 
-            min-width: 0 !important; 
-            background: var(--btn-3d-bg); 
-            border: none; 
-            border-bottom: 2px solid var(--btn-shadow); 
-            padding: 6px 2px !important; 
-            font-size: 0.5rem !important;
-            font-weight: 800; 
-            color: var(--text-main); 
-            border-radius: 6px; 
-            cursor: pointer; 
-            text-align: center !important; 
-            white-space: nowrap; 
-            overflow: hidden;
+        .card-template-actions .btn-round-3d {
+            width: 38px !important;
+            height: 38px !important;
         }
 
-        .btn-action-tmpl.card-btn-delete { color: #ef4444 !important; }
+        .card-template-actions .btn-label-3d {
+            font-size: 0.5rem !important;
+            height: 1rem;
+            line-height: 1rem;
+        }
 
         .sidebar-footer { position: absolute; bottom: 0; left: 0; width: 100%; padding: 15px 20px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--bg-main); box-shadow: 0 -4px 10px rgba(0,0,0,0.3); padding-bottom: calc(15px + env(safe-area-inset-bottom)); }
         
@@ -480,12 +474,12 @@
             </div>
 
             <!-- 3. Nuevo -->
-<div class="btn-wrapper-3d">
-    <button type="button" class="btn-round-3d" id="btn-icon-new" onclick="RetoricaUI.newDocumentAction()" title="Crear nuevo lienzo" aria-label="Crear nuevo lienzo">
-        <span class="emoji-icon" aria-hidden="true">➕</span>
-    </button>
-    <div class="btn-label-3d" id="lbl-tool-new">Nuevo</div>
-</div>
+            <div class="btn-wrapper-3d">
+                <button type="button" class="btn-round-3d" id="btn-icon-new" onclick="RetoricaUI.newDocumentAction()" title="Crear nuevo lienzo" aria-label="Crear nuevo lienzo">
+                    <span class="emoji-icon" aria-hidden="true">➕</span>
+                </button>
+                <div class="btn-label-3d" id="lbl-tool-new">Nuevo</div>
+            </div>
 
             <!-- 4. Dictar -->
             <div class="btn-wrapper-3d">
