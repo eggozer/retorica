@@ -31,6 +31,7 @@ var RetoricaI18n = {
             pdfedit: 'تعديل PDF', fontminus: 'خط -', fontplus: 'خط +', color: 'لون', table: 'جدول', 
             import: 'استكشاف', sync: 'مزامنة', restore: 'استيراد', backup: 'تصدير', zoomin: 'تكبير', 
             zoomout: 'تصغير', theme: 'مظهر', langTxt: 'لغة', menu: 'قائمة', pTitle: 'عنوان...', pBody: 'اكتب هنا...',
+            rename: 'إعادة تسمية', share: 'مشاركة',
             lang_ar: 'العربية', lang_ru: 'الروسية', lang_de: 'الألمانية', lang_zh_hk: 'الكانتونية', lang_zh_cn: 'الصينية',
             lang_ja: 'اليابانية', lang_es: 'الإسبانية', lang_it: 'الإيطالية', lang_uk: 'الأوكرانية', lang_hi: 'الهندية',
             lang_pt: 'البرتغالية', lang_fr: 'الفرنسية', lang_en: ' الإنجليزية'
@@ -41,6 +42,7 @@ var RetoricaI18n = {
             pdfedit: 'Редактируемый PDF', fontminus: 'Шрифт -', fontplus: 'Шрифт +', color: 'Цвет', table: 'Таблица', 
             import: 'Обзор', sync: 'Синхронизация', restore: 'Импорт', backup: 'Экспорт', zoomin: 'Приблизить', 
             zoomout: 'Отдалить', theme: 'Тема', langTxt: 'Язык', menu: 'Меню', pTitle: 'Заголовок...', pBody: 'Пишите здесь...',
+            rename: 'Переименовать', share: 'Поделиться',
             lang_ar: 'АРАБСКИЙ', lang_ru: 'РУССКИЙ', lang_de: 'НЕМЕЦКИЙ', lang_zh_hk: 'КАНТОНСКИЙ', lang_zh_cn: 'КИТАЙСКИЙ',
             lang_ja: 'ЯПОНСКИЙ', lang_es: 'ИСПАНСКИЙ', lang_it: 'ИТАЛЬЯНСКИЙ', lang_uk: 'УКРАИНСКИЙ', lang_hi: 'ХИНДИ',
             lang_pt: 'ПОРТУГАЛЬСКИЙ', lang_fr: 'ФРАНЦУЗСКИЙ', lang_en: 'АНГЛИЙСКИЙ'
@@ -51,6 +53,7 @@ var RetoricaI18n = {
             pdfedit: 'PDF Editierbar', fontminus: 'Schrift -', fontplus: 'Schrift +', color: 'Farbe', table: 'Tabelle', 
             import: 'Durchsuchen', sync: 'Synchronisieren', restore: 'Importieren', backup: 'Exportieren', zoomin: 'Vergrößern', 
             zoomout: 'Verkleinern', theme: 'Design', langTxt: 'Sprache', menu: 'Menü', pTitle: 'Titel...', pBody: 'Schreiben Sie hier...',
+            rename: 'Umbenennen', share: 'Teilen',
             lang_ar: 'ARABISCH', lang_ru: 'RUSSISCH', lang_de: 'DEUTSCH', lang_zh_hk: 'KANTONESISCH', lang_zh_cn: 'CHINESISCH',
             lang_ja: 'JAPANISCH', lang_es: 'SPANISCH', lang_it: 'ITALIENISCH', lang_uk: 'UKRAINISCH', lang_hi: 'HINDI',
             lang_pt: 'PORTUGIESISCH', lang_fr: 'FRANZÖSISCH', lang_en: 'ENGLISCH'
@@ -61,6 +64,7 @@ var RetoricaI18n = {
             pdfedit: '可編輯PDF', fontminus: '字型 -', fontplus: '字型 +', color: '顏色', table: '表格', 
             import: '瀏覽', sync: '同步', restore: '匯入', backup: '匯出', zoomin: '放大', 
             zoomout: '縮小', theme: '主題', langTxt: '語言', menu: '選單', pTitle: '標題...', pBody: '在此處撰寫...',
+            rename: '重新命名', share: '分享',
             lang_ar: '阿拉伯語', lang_ru: '俄語', lang_de: '德語', lang_zh_hk: '粵語', lang_zh_cn: '中文',
             lang_ja: '日語', lang_es: '西班牙語', lang_it: '義大利語', lang_uk: '烏克蘭語', lang_hi: '印地語',
             lang_pt: '葡萄牙語', lang_fr: '法語', lang_en: '英語'
@@ -71,6 +75,7 @@ var RetoricaI18n = {
             pdfedit: '可编辑PDF', fontminus: '字体 -', fontplus: '字体 +', color: '颜色', table: '表格', 
             import: '浏览', sync: '同步', restore: '导入', backup: '导出', zoomin: '放大', 
             zoomout: '缩小', theme: '主题', langTxt: '语言', menu: '菜单', pTitle: '标题...', pBody: '在此处编写...',
+            rename: '重命名', share: '分享',
             lang_ar: '阿拉伯语', lang_ru: '俄语', lang_de: '德语', lang_zh_hk: '粤语', lang_zh_cn: '中文',
             lang_ja: '日语', lang_es: '西班牙语', lang_it: '意大利语', lang_uk: '乌克兰语', lang_hi: '印地语',
             lang_pt: '葡萄牙语', lang_fr: '法语', lang_en: '英语'
@@ -81,6 +86,7 @@ var RetoricaI18n = {
             pdfedit: '編集可能PDF', fontminus: '文字 -', fontplus: '文字 +', color: '配色', table: '表', 
             import: '参照', sync: '同期', restore: '取込', backup: '導出', zoomin: '拡大', 
             zoomout: '縮小', theme: '基調', langTxt: '言語', menu: '献立', pTitle: '題名...', pBody: 'ここに書く...',
+            rename: '名前変更', share: '共有',
             lang_ar: 'アラビア語', lang_ru: 'ロシア語', lang_de: 'ドイツ語', lang_zh_hk: '広東語', lang_zh_cn: '中国語',
             lang_ja: '日本語', lang_es: 'スペイン語', lang_it: 'イタリア語', lang_uk: 'ウクライナ語', lang_hi: 'ヒンディー語',
             lang_pt: 'ポルトガル語', lang_fr: 'フランス語', lang_en: '英語'
@@ -91,6 +97,7 @@ var RetoricaI18n = {
             pdfedit: 'PDF editable', fontminus: 'Fuente -', fontplus: 'Fuente +', color: 'Color', table: 'Tabla', 
             import: 'Explorar', sync: 'Sincronizar', restore: 'Importar', backup: 'Exportar', zoomin: 'Acercar', 
             zoomout: 'Alejar', theme: 'Tema', langTxt: 'Idioma', menu: 'Menú', pTitle: 'Título del Guion...', pBody: 'Escribe o dicta aquí...',
+            rename: 'Renombrar', share: 'Compartir',
             lang_ar: 'ÁRABE', lang_ru: 'RUSO', lang_de: 'ALEMÁN', lang_zh_hk: 'CANTONÉS', lang_zh_cn: 'CHINO',
             lang_ja: 'JAPONÉS', lang_es: 'ESPAÑOL', lang_it: 'ITALIANO', lang_uk: 'UCRANIANO', lang_hi: 'HINDI',
             lang_pt: 'PORTUGUÉS', lang_fr: 'FRANCÉS', lang_en: 'INGLÉS'
@@ -101,6 +108,7 @@ var RetoricaI18n = {
             pdfedit: 'PDF Modificabile', fontminus: 'Font -', fontplus: 'Font +', color: 'Colore', table: 'Tabella', 
             import: 'Esplora', sync: 'Sincronizza', restore: 'Importa', backup: 'Esporta', zoomin: 'Ingrandisci', 
             zoomout: 'Riduci', theme: 'Tema', langTxt: 'Lingua', menu: 'Menu', pTitle: 'Titolo...', pBody: 'Scrivi qui...',
+            rename: 'Rinomina', share: 'Condividi',
             lang_ar: 'ARABO', lang_ru: 'RUSSO', lang_de: 'TEDESCO', lang_zh_hk: 'CANTONESE', lang_zh_cn: 'CINESE',
             lang_ja: 'GIAPPONESE', lang_es: 'SPAGNOLO', lang_it: 'ITALIANO', lang_uk: 'UCRAINO', lang_hi: 'HINDI',
             lang_pt: 'PORTOGHESE', lang_fr: 'FRANCESE', lang_en: 'INGLESE'
@@ -111,6 +119,7 @@ var RetoricaI18n = {
             pdfedit: 'Редагований PDF', fontminus: 'Шрифт -', fontplus: 'Шрифт +', color: 'Колір', table: 'Таблиця', 
             import: 'Огляд', sync: 'Синхронізація', restore: 'Імпорт', backup: 'Експорт', zoomin: 'Наблизити', 
             zoomout: 'Віддалити', theme: 'Тема', langTxt: 'Мова', menu: 'Меню', pTitle: 'Заголовок...', pBody: 'Пишіть тут...',
+            rename: 'Перейменувати', share: 'Поділитися',
             lang_ar: 'АРАБСЬКА', lang_ru: 'РОСІЙСЬКА', lang_de: 'НІМЕЦЬКА', lang_zh_hk: 'КАНТОНСЬКА', lang_zh_cn: 'КИТАЙСЬКА',
             lang_ja: 'ЯПОНСЬКА', lang_es: 'ІСПАНСЬКА', lang_it: 'ІТАЛІЙСЬКА', lang_uk: 'УКРАЇНСЬКА', lang_hi: 'ХІНДІ',
             lang_pt: 'ПОРТУГАЛЬСЬКА', lang_fr: 'ФРАНЦУЗЬКА', lang_en: 'АНГЛІЙСЬКА'
@@ -121,6 +130,7 @@ var RetoricaI18n = {
             pdfedit: 'संपादन योग्य PDF', fontminus: 'फ़ॉन्ट -', fontplus: 'फ़ॉन्ट +', color: 'रंग', table: 'तालिका', 
             import: 'ब्राउज़', sync: 'सिंक', restore: 'आयात', backup: 'निर्यात', zoomin: 'ज़ूम +', 
             zoomout: 'ज़ूम -', theme: 'थीम', langTxt: 'भाषा', menu: 'सूची', pTitle: 'शीर्षक...', pBody: 'यहाँ लिखें...',
+            rename: 'नाम बदलें', share: 'शेयर करें',
             lang_ar: 'अरबी', lang_ru: 'रूसी', lang_de: 'जर्मन', lang_zh_hk: 'कैंटोनीज़', lang_zh_cn: 'चीनी',
             lang_ja: 'जापानी', lang_es: 'स्पैनिश', lang_it: 'इतालवी', lang_uk: 'यूक्रेनी', lang_hi: 'हिंदी',
             lang_pt: 'पुर्तगाली', lang_fr: 'फ्रेंच', lang_en: 'अंग्रेज़ी'
@@ -131,6 +141,7 @@ var RetoricaI18n = {
             pdfedit: 'PDF Editável', fontminus: 'Fonte -', fontplus: 'Fonte +', color: 'Cor', table: 'Tabela', 
             import: 'Explorar', sync: 'Sincronizar', restore: 'Importar', backup: 'Exportar', zoomin: 'Aproximar', 
             zoomout: 'Afastar', theme: 'Tema', langTxt: 'Idioma', menu: 'Menu', pTitle: 'Título...', pBody: 'Escreva aqui...',
+            rename: 'Renomear', share: 'Partilhar',
             lang_ar: 'ÁRABE', lang_ru: 'RUSSO', lang_de: 'ALEMÃO', lang_zh_hk: 'CANTONÊS', lang_zh_cn: 'CHINÊS',
             lang_ja: 'JAPONÊS', lang_es: 'ESPANHOL', lang_it: 'ITALIANO', lang_uk: 'UCRANIANO', lang_hi: 'HINDI',
             lang_pt: 'PORTUGUÊS', lang_fr: 'FRANCÊS', lang_en: 'INGLÊS'
@@ -141,6 +152,7 @@ var RetoricaI18n = {
             pdfedit: 'PDF Éditable', fontminus: 'Police -', fontplus: 'Police +', color: 'Couleur', table: 'Tableau', 
             import: 'Explorer', sync: 'Synchroniser', restore: 'Importer', backup: 'Exporter', zoomin: 'Zoom +', 
             zoomout: 'Zoom -', theme: 'Thème', langTxt: 'Langue', menu: 'Menu', pTitle: 'Titre...', pBody: 'Écrivez ici...',
+            rename: 'Renommer', share: 'Partager',
             lang_ar: 'ARABE', lang_ru: 'RUSSE', lang_de: 'ALLEMAND', lang_zh_hk: 'CANTONAIS', lang_zh_cn: 'CHINOIS',
             lang_ja: 'JAPONAIS', lang_es: 'ESPAGNOL', lang_it: 'ITALIEN', lang_uk: 'UKRAINIEN', lang_hi: 'HINDI',
             lang_pt: 'PORTUGAIS', lang_fr: 'FRANÇAIS', lang_en: 'ANGLAIS'
@@ -151,6 +163,7 @@ var RetoricaI18n = {
             pdfedit: 'Editable PDF', fontminus: 'Font -', fontplus: 'Font +', color: 'Colour', table: 'Table', 
             import: 'Explore', sync: 'Synchronise', restore: 'Import', backup: 'Export', zoomin: 'Zoom In', 
             zoomout: 'Zoom Out', theme: 'Theme', langTxt: 'Language', menu: 'Menu', pTitle: 'Script Title...', pBody: 'Write or dictate here...',
+            rename: 'Rename', share: 'Share',
             lang_ar: 'ARABIC', lang_ru: 'RUSSIAN', lang_de: 'GERMAN', lang_zh_hk: 'CANTONESE', lang_zh_cn: 'CHINESE',
             lang_ja: 'JAPANESE', lang_es: 'SPANISH', lang_it: 'ITALIAN', lang_uk: 'UKRAINIAN', lang_hi: 'HINDI',
             lang_pt: 'PORTUGUESE', lang_fr: 'FRENCH', lang_en: 'ENGLISH'
