@@ -365,13 +365,35 @@ var RetoricaStorage = {
                 tempDiv.innerHTML = doc.body || '';
                 var plainText = tempDiv.innerText || tempDiv.textContent || '';
 
+                // Submenú de plantillas con diseño 3D monocromático y temporizador de borrado seguro
                 card.innerHTML = 
                     '<div class="card-template-title">' + self.escapeHTML(doc.title || 'Sin Título') + '</div>' +
                     '<div class="card-template-body">' + self.escapeHTML(plainText || 'Documento vacío...') + '</div>' +
-                    '<div class="card-template-actions">' +
-                        '<button type="button" class="btn-action-tmpl card-btn-copy" onclick="RetoricaStorage.copyDoc(\'' + doc.id + '\', event)">COPIAR</button>' +
-                        '<button type="button" class="btn-action-tmpl card-btn-share" onclick="RetoricaStorage.shareDoc(\'' + doc.id + '\', event)">COMPARTIR</button>' +
-                        '<button type="button" class="btn-action-tmpl card-btn-delete" onclick="RetoricaStorage.deleteDoc(\'' + doc.id + '\', event)">BORRAR</button>' +
+                    '<div class="card-template-actions" style="display:flex; gap:6px; justify-content:center; margin-top:8px;">' +
+                        '<div class="btn-wrapper-3d" style="width:48px;">' +
+                            '<button type="button" class="btn-round-3d" onclick="RetoricaStorage.renameDocPrompt(\'' + doc.id + '\', event)" title="Renombrar">' +
+                                '<span class="emoji-icon" aria-hidden="true">✏️</span>' +
+                            '</button>' +
+                            '<div class="btn-label-3d"><span class="scroll-txt">Renombrar</span></div>' +
+                        '</div>' +
+                        '<div class="btn-wrapper-3d" style="width:48px;">' +
+                            '<button type="button" class="btn-round-3d" onclick="RetoricaStorage.copyDoc(\'' + doc.id + '\', event)" title="Copiar">' +
+                                '<span class="emoji-icon" aria-hidden="true">📋</span>' +
+                            '</button>' +
+                            '<div class="btn-label-3d"><span class="scroll-txt">Copiar</span></div>' +
+                        '</div>' +
+                        '<div class="btn-wrapper-3d" style="width:48px;">' +
+                            '<button type="button" class="btn-round-3d" onclick="RetoricaStorage.shareDoc(\'' + doc.id + '\', event)" title="Compartir">' +
+                                '<span class="emoji-icon" aria-hidden="true">📤</span>' +
+                            '</button>' +
+                            '<div class="btn-label-3d"><span class="scroll-txt">Compartir</span></div>' +
+                        '</div>' +
+                        '<div class="btn-wrapper-3d" style="width:48px;">' +
+                            '<button type="button" class="btn-round-3d" onclick="RetoricaStorage.deleteDoc(\'' + doc.id + '\', event)" title="Borrar" style="color:#ef4444 !important;">' +
+                                '<span class="emoji-icon" aria-hidden="true">🗑️</span>' +
+                            '</button>' +
+                            '<div class="btn-label-3d"><span class="scroll-txt">Borrar</span></div>' +
+                        '</div>' +
                     '</div>';
 
                 fragment.appendChild(card);
