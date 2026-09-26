@@ -170,10 +170,16 @@ var RetoricaStorage = {
         };
     },
 
-    createNewDoc: function(options) {
-        var opts = options || {};
+    createNewDoc: function() {
         var bodyInput = document.getElementById('editor-body');
         var titleInput = document.getElementById('editor-title');
+        
+        // Validación UX: Evita borrado accidental si hay contenido activo
+        if (bodyInput && (bodyInput.innerText || bodyInput.textContent || "").trim().length > 0) {
+            if (!confirm("¿Deseas iniciar un nuevo lienzo? Se limpiará el texto no guardado de la pantalla.")) {
+                return;
+            }
+        }
 
         this.currentDocId = 'doc_' + Date.now();
         if (titleInput) titleInput.value = '';
@@ -183,9 +189,7 @@ var RetoricaStorage = {
 
         if (typeof RetoricaUI !== 'undefined') {
             RetoricaUI.updateCounters();
-            if (!opts.silent) {
-                RetoricaUI.notify("Nuevo lienzo listo");
-            }
+            RetoricaUI.notify("Nuevo documento iniciado");
         }
     },
 
@@ -210,6 +214,7 @@ var RetoricaStorage = {
                     RetoricaUI.updateCounters();
                     RetoricaUI.notify("Documento cargado ✓");
                     
+                    // Cierre explícito para evitar alternancia involuntaria del menú
                     if (typeof RetoricaUI.closeSidebar === 'function') {
                         RetoricaUI.closeSidebar();
                     }
@@ -224,23 +229,27 @@ var RetoricaStorage = {
         if (event) event.stopPropagation();
         var self = this;
 
+        // Obtener el documento antes de removerlo temporalmente
         this.getDocById(id, function(doc) {
             if (!doc) return;
 
+            // Almacenar respaldo en memoria
             self.pendingDeletion = {
                 doc: doc,
                 timer: setTimeout(function() {
+                    // Confirmación definitiva tras 10 segundos
                     self.finalizeDelete(id);
                 }, 10000)
             };
 
+            // Ocultar de IndexedDB inmediatamente para respuesta visual rápida
             var transaction = self.dbInstance.transaction(['documents'], 'readwrite');
             var store = transaction.objectStore('documents');
             store.delete(id);
 
             transaction.oncomplete = function() {
                 if (self.currentDocId === id) {
-                    self.createNewDoc({ silent: true });
+                    self.createNewDoc();
                 }
                 self.refreshLibrary();
                 self.showUndoToast();
@@ -365,40 +374,47 @@ var RetoricaStorage = {
                 tempDiv.innerHTML = doc.body || '';
                 var plainText = tempDiv.innerText || tempDiv.textContent || '';
 
-                // Submenú de plantillas con diseño 3D monocromático y temporizador de borrado seguro
                 card.innerHTML = 
                     '<div class="card-template-title">' + self.escapeHTML(doc.title || 'Sin Título') + '</div>' +
                     '<div class="card-template-body">' + self.escapeHTML(plainText || 'Documento vacío...') + '</div>' +
-                    '<div class="card-template-actions" style="display:flex; gap:6px; justify-content:center; margin-top:8px;">' +
-                        '<div class="btn-wrapper-3d" style="width:48px;">' +
-                            '<button type="button" class="btn-round-3d" onclick="RetoricaStorage.renameDocPrompt(\'' + doc.id + '\', event)" title="Renombrar">' +
-                                '<span class="emoji-icon" aria-hidden="true">✏️</span>' +
-                            '</button>' +
-                            '<div class="btn-label-3d"><span class="scroll-txt">Renombrar</span></div>' +
-                        '</div>' +
-                        '<div class="btn-wrapper-3d" style="width:48px;">' +
-                            '<button type="button" class="btn-round-3d" onclick="RetoricaStorage.copyDoc(\'' + doc.id + '\', event)" title="Copiar">' +
-                                '<span class="emoji-icon" aria-hidden="true">📋</span>' +
-                            '</button>' +
-                            '<div class="btn-label-3d"><span class="scroll-txt">Copiar</span></div>' +
-                        '</div>' +
-                        '<div class="btn-wrapper-3d" style="width:48px;">' +
-                            '<button type="button" class="btn-round-3d" onclick="RetoricaStorage.shareDoc(\'' + doc.id + '\', event)" title="Compartir">' +
-                                '<span class="emoji-icon" aria-hidden="true">📤</span>' +
-                            '</button>' +
-                            '<div class="btn-label-3d"><span class="scroll-txt">Compartir</span></div>' +
-                        '</div>' +
-                        '<div class="btn-wrapper-3d" style="width:48px;">' +
-                            '<button type="button" class="btn-round-3d" onclick="RetoricaStorage.deleteDoc(\'' + doc.id + '\', event)" title="Borrar" style="color:#ef4444 !important;">' +
-                                '<span class="emoji-icon" aria-hidden="true">🗑️</span>' +
-                            '</button>' +
-                            '<div class="btn-label-3d"><span class="scroll-txt">Borrar</span></div>' +
-                        '</div>' +
+                    '<div class="card-template-actions">' +
+                        '<button type="button" class="btn-action-tmpl" onclick="RetoricaStorage.renameDoc(\'' + doc.id + '\', event)">EDITAR TÍTULO</button>' +
+                        '<button type="button" class="btn-action-tmpl card-btn-copy" onclick="RetoricaStorage.copyDoc(\'' + doc.id + '\', event)">COPIAR</button>' +
+                        '<button type="button" class="btn-action-tmpl card-btn-share" onclick="RetoricaStorage.shareDoc(\'' + doc.id + '\', event)">COMPARTIR</button>' +
+                        '<button type="button" class="btn-action-tmpl card-btn-delete" onclick="RetoricaStorage.deleteDoc(\'' + doc.id + '\', event)">BORRAR</button>' +
                     '</div>';
 
                 fragment.appendChild(card);
             });
             container.appendChild(fragment);
+        });
+    },
+
+    renameDoc: function(id, event) {
+        if (event) event.stopPropagation();
+        var self = this;
+        this.getDocById(id, function(doc) {
+            if (!doc) return;
+            var newTitle = prompt("Ingresa el nuevo título para este documento:", doc.title || "");
+            if (newTitle !== null && newTitle.trim() !== "") {
+                doc.title = newTitle.trim();
+                doc.updatedAt = new Date().toISOString();
+
+                var transaction = self.dbInstance.transaction(['documents'], 'readwrite');
+                var store = transaction.objectStore('documents');
+                store.put(doc);
+
+                transaction.oncomplete = function() {
+                    if (self.currentDocId === id) {
+                        var titleInput = document.getElementById('editor-title');
+                        if (titleInput) titleInput.value = doc.title;
+                    }
+                    self.refreshLibrary();
+                    if (typeof RetoricaUI !== 'undefined') {
+                        RetoricaUI.notify("Título actualizado ✓");
+                    }
+                };
+            }
         });
     },
 
@@ -425,7 +441,9 @@ var RetoricaStorage = {
         this.save();
     },
 
-    syncWithCloud: function() {},
+    syncWithCloud: function() {
+        // Reservado para futuras integraciones remotas
+    },
 
     exportBackup: function() {
         this.getAllDocs(function(docs) {

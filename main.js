@@ -80,30 +80,35 @@ var RetoricaUI = {
     },
 
     insertAdvancedTable: function() {
-    var editor = document.getElementById('editor-body');
-    if (!editor) return;
+        var editor = document.getElementById('editor-body');
+        if (!editor) return;
 
-    // Valores predeterminados directos (3x3 con borde sutil)
-    var rows = 3;
-    var cols = 3;
-    var borderWidth = 1;
-    var borderColor = "#2d3748";
+        var rows = prompt("Número de filas:", "3");
+        if (!rows || isNaN(rows) || rows < 1) return;
 
-    var tableHTML = '<table style="width:100%; border-collapse:collapse; margin:10px 0; table-layout:auto;">';
-    
-    for (var r = 0; r < rows; r++) {
-        tableHTML += '<tr>';
-        for (var c = 0; c < cols; c++) {
-            tableHTML += '<td style="border:' + borderWidth + 'px solid ' + borderColor + '; padding:8px; min-width:30px;">&nbsp;</td>';
+        var cols = prompt("Número de columnas:", "3");
+        if (!cols || isNaN(cols) || cols < 1) return;
+
+        var borderWidth = prompt("Grosor del borde en px:", "1");
+        if (borderWidth === null) borderWidth = "1";
+
+        var borderColor = prompt("Color del borde (Código HEX o Nombre, ej. #00d2ff o #ffffff):", "#2d3748");
+        if (!borderColor) borderColor = "var(--border)";
+
+        var tableHTML = '<table style="width:100%; border-collapse:collapse; margin:10px 0; table-layout:auto;">';
+        
+        for (var r = 0; r < parseInt(rows); r++) {
+            tableHTML += '<tr>';
+            for (var c = 0; c < parseInt(cols); c++) {
+                tableHTML += '<td style="border:' + borderWidth + 'px solid ' + borderColor + '; padding:8px; min-width:30px;">&nbsp;</td>';
+            }
+            tableHTML += '</tr>';
         }
-        tableHTML += '</tr>';
-    }
-    tableHTML += '</table><br>';
+        tableHTML += '</table><br>';
 
-    editor.focus();
-    document.execCommand('insertHTML', false, tableHTML);
-    this.notify("Tabla 3x3 insertada");
-},
+        editor.focus();
+        document.execCommand('insertHTML', false, tableHTML);
+    },
 
     installPWA: function() {
         if (deferredPWAPrompt) {
@@ -119,30 +124,11 @@ var RetoricaUI = {
         }
     },
     
-    // OPCIÓN OPTIMIZADA EN main_4.js
-newDocumentAction: function() {
-    var editor = document.getElementById('editor-body');
-    var titleInput = document.getElementById('editor-title');
-
-    // 1. Limpieza instantánea del lienzo
-    if (editor) editor.innerHTML = '';
-    if (titleInput) titleInput.value = '';
-
-    // 2. Reinicio de contadores e historial de traducción original
-    if (typeof RetoricaI18n !== 'undefined') {
-        RetoricaI18n.originalText = null;
-        RetoricaI18n.originalTitle = null;
-    }
-
-    // 3. Crear nuevo documento limpio en almacenamiento sin pedir confirmación
-    if (typeof RetoricaStorage !== 'undefined' && typeof RetoricaStorage.createNewDoc === 'function') {
-        RetoricaStorage.createNewDoc({ silent: true }); 
-    }
-
-    // 4. Actualizar contadores y notificar de forma fluida
-    this.updateCounters();
-    this.notify("Nuevo lienzo listo");
-},
+    newDocumentAction: function() {
+        if (typeof RetoricaStorage !== 'undefined' && typeof RetoricaStorage.createNewDoc === 'function') {
+            RetoricaStorage.createNewDoc();
+        }
+    },
 
     copyFullTemplate: function() {
         var title = document.getElementById('editor-title').value.trim();
