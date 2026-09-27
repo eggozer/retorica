@@ -1,71 +1,182 @@
-// --- RETÓRICA INTERNATIONALIZATION & ENGINE (COMPATIBLE CON ANDROID 5 Y COBERTURA TOTAL) ---
+// --- RETÓRICA INTERNATIONALIZATION & ENGINE (IDIOMAS, AUTO-DETECCIÓN Y RESTAURACIÓN SINTÁCTICA) ---
 var RetoricaI18n = {
     currentLang: 'en-GB', 
     currentVoiceLang: 'en-GB', 
-    originalDocState: null, // Respaldo del documento original en su idioma nativo
+    originalText: null,      // Texto original en que fue escrito antes de traducir
+    originalTitle: null,     // Título original en que fue escrito
+    originalLang: null,      // Idioma original registrado
 
-    langsOrder: ['ar-SA', 'de-DE', 'en-GB', 'es-ES', 'es-MX', 'fr-FR', 'hi-IN', 'it-IT', 'ja-JP', 'pt-PT', 'ru-RU', 'uk-UA', 'zh-CN'],
-
-    // Nombres de idiomas en una sola palabra para los botones del acordeón
+    // 13 IDIOMAS EN ORDEN EXACTO SOLICITADO
+    langsOrder: [
+        'ar-SA', // Árabe
+        'ru-RU', // Ruso
+        'de-DE', // Alemán
+        'zh-HK', // Cantones
+        'zh-CN', // Chino
+        'ja-JP', // Japonés
+        'es-MX', // Español de Latinoamérica
+        'it-IT', // Italiano
+        'uk-UA', // Ucrania
+        'hi-IN', // India (Hindi)
+        'pt-PT', // Portugués
+        'fr-FR', // Francés
+        'en-GB'  // Inglés de Inglaterra
+    ],
+    
+    // Nombres de idiomas en una sola palabra para el acordeón de selección
     singleWordLangs: {
         'ar-SA': 'العربية',
-        'de-DE': 'Deutsch',
-        'en-GB': 'English',
-        'es-ES': 'Español',
-        'es-MX': 'Español',
-        'fr-FR': 'Français',
-        'hi-IN': 'हिन्दी',
-        'it-IT': 'Italiano',
-        'ja-JP': '日本語',
-        'pt-PT': 'Português',
         'ru-RU': 'Русский',
+        'de-DE': 'Deutsch',
+        'zh-HK': '粵語',
+        'zh-CN': '中文',
+        'ja-JP': '日本語',
+        'es-MX': 'Español',
+        'it-IT': 'Italiano',
         'uk-UA': 'Українська',
-        'zh-CN': '中文'
+        'hi-IN': 'हिन्दी',
+        'pt-PT': 'Português',
+        'fr-FR': 'Français',
+        'en-GB': 'English'
     },
 
-    // Mapeo completo de las 24 leyendas en una sola palabra por idioma
+    // Diccionario de los 24 botones y elementos con soporte de 1 palabra o scroll automático
     db: {
-        'ar-SA': { name: 'Al-Arabiya', install: 'تثبيت', save: 'حفظ', new: 'جديد', mic: 'إملاء', read: 'قراءة', vmsg: 'صوتي', tts: 'توليد', stop: 'إيقاف', copy: 'نسخ', doc: 'مستند', pdf: 'PDF', pdfedit: 'تعديل', fontminus: 'تصغير', fontplus: 'تكبير', color: 'لون', table: 'جدول', import: 'استكشاف', sync: 'مزامنة', restore: 'استيراد', backup: 'تصدير', zoomin: 'اقتراب', zoomout: 'ابتعاد', theme: 'مظهر', langTxt: 'لغة', pTitle: 'عنوان...', pBody: 'اكتب هنا...', menu: 'قائمة', del: 'حذف', copyCard: 'نسخ', share: 'مشاركة', history: 'السجل', close: 'إغلاق', clear: 'مسح', confirmDel: 'هل أنت تأكد؟' },
-        'de-DE': { name: 'Deutsch', install: 'Installieren', save: 'Speichern', new: 'Neu', mic: 'Diktieren', read: 'Lesen', vmsg: 'Sprachnachricht', tts: 'Audio-Text', stop: 'Stoppen', copy: 'Kopieren', doc: 'Dokument', pdf: 'PDF', pdfedit: 'Bearbeitbar', fontminus: 'Schrift-', fontplus: 'Schrift+', color: 'Farbe', table: 'Tabelle', import: 'Erkunden', sync: 'Synchronisieren', restore: 'Importieren', backup: 'Exportieren', zoomin: 'Vergrößern', zoomout: 'Verkleinern', theme: 'Thema', langTxt: 'Sprache', pTitle: 'Titel...', pBody: 'Hier schreiben...', menu: 'Menü', del: 'Löschen', copyCard: 'Kopieren', share: 'Teilen', history: 'Verlauf', close: 'Schließen', clear: 'Löschen', confirmDel: 'Wirklich löschen?' },
-        'en-GB': { name: 'English', install: 'Install', save: 'Save', new: 'New', mic: 'Dictate', read: 'Read', vmsg: 'VoiceNote', tts: 'AudioText', stop: 'Stop', copy: 'Copy', doc: 'Document', pdf: 'PDF', pdfedit: 'EditablePDF', fontminus: 'Font-', fontplus: 'Font+', color: 'Color', table: 'Table', import: 'Explore', sync: 'Sync', restore: 'Import', backup: 'Export', zoomin: 'ZoomIn', zoomout: 'ZoomOut', theme: 'Theme', langTxt: 'Language', pTitle: 'Script Title...', pBody: 'Write or dictate here...', menu: 'Menu', del: 'Delete', copyCard: 'Copy', share: 'Share', history: 'History', close: 'Close', clear: 'Clear', confirmDel: 'Are you sure?' },
-        'es-ES': { name: 'Español (ES)', install: 'Instalar', save: 'Guardar', new: 'Nuevo', mic: 'Dictar', read: 'Lectura', vmsg: 'MensajeVoz', tts: 'TextoAudio', stop: 'Detener', copy: 'Copiar', doc: 'Documento', pdf: 'PDF', pdfedit: 'PDFeditable', fontminus: 'Fuente-', fontplus: 'Fuente+', color: 'Color', table: 'Tabla', import: 'Explorar', sync: 'Sincronizar', restore: 'Importar', backup: 'Exportar', zoomin: 'Acercar', zoomout: 'Alejar', theme: 'Tema', langTxt: 'Idioma', pTitle: 'Titular de la Obra...', pBody: 'Escribe o dicta aquí tu obra...', menu: 'Menú', del: 'Borrar', copyCard: 'Copiar', share: 'Compartir', history: 'Historial', close: 'Cerrar', clear: 'Limpiar', confirmDel: '¿Deseas eliminar este registro?' },
-        'es-MX': { name: 'Español (MX)', install: 'Instalar', save: 'Guardar', new: 'Nuevo', mic: 'Dictar', read: 'Lectura', vmsg: 'MensajeVoz', tts: 'TextoAudio', stop: 'Detener', copy: 'Copiar', doc: 'Documento', pdf: 'PDF', pdfedit: 'PDFeditable', fontminus: 'Fuente-', fontplus: 'Fuente+', color: 'Color', table: 'Tabla', import: 'Explorar', sync: 'Sincronizar', restore: 'Importar', backup: 'Exportar', zoomin: 'Acercar', zoomout: 'Alejar', theme: 'Tema', langTxt: 'Idioma', pTitle: 'Título del Guion...', pBody: 'Escribe o dicta aquí tu retórica...', menu: 'Menú', del: 'Borrar', copyCard: 'Copiar', share: 'Compartir', history: 'Historial', close: 'Cerrar', clear: 'Limpiar', confirmDel: '¿Deseas eliminar este registro?' },
-        'fr-FR': { name: 'Français', install: 'Installer', save: 'Enregistrer', new: 'Nouveau', mic: 'Dicter', read: 'Lecture', vmsg: 'Vocal', tts: 'TexteAudio', stop: 'Arrêter', copy: 'Copier', doc: 'Document', pdf: 'PDF', pdfedit: 'Modifiable', fontminus: 'Police-', fontplus: 'Police+', color: 'Couleur', table: 'Tableau', import: 'Explorer', sync: 'Synchroniser', restore: 'Importer', backup: 'Exporter', zoomin: 'Zoomer', zoomout: 'Dézoomer', theme: 'Thème', langTxt: 'Langue', pTitle: 'Titre du Scénario...', pBody: 'Écrivez ou dictez ici...', menu: 'Menu', del: 'Supprimer', copyCard: 'Copier', share: 'Partager', history: 'Historique', close: 'Fermer', clear: 'Effacer', confirmDel: 'Voulez-vous supprimer?' },
-        'hi-IN': { name: 'Hindi', install: 'स्थापना', save: 'सहेजें', new: 'नया', mic: 'बोलें', read: 'पढ़ें', vmsg: 'वॉयस', tts: 'ऑडियो', stop: 'रोकें', copy: 'कॉपी', doc: 'दस्तावेज़', pdf: 'PDF', pdfedit: 'संपादन', fontminus: 'फ़ॉन्ट-', fontplus: 'फ़ॉन्ट+', color: 'रंग', table: 'तालिका', import: 'खोजें', sync: 'सिंक', restore: 'आयात', backup: 'निर्यात', zoomin: 'बड़ा', zoomout: 'छोटा', theme: 'थीम', langTxt: 'भाषा', pTitle: 'शीर्षक...', pBody: 'यहाँ लिखें...', menu: 'सूची', del: 'हटाएं', copyCard: 'कॉपी', share: 'साझा', history: 'इतिहास', close: 'बंद', clear: 'साफ़', confirmDel: 'क्या आप हटाना चाहते हैं?' },
-        'it-IT': { name: 'Italiano', install: 'Installa', save: 'Salva', new: 'Nuovo', mic: 'Detta', read: 'Lettura', vmsg: 'Vocale', tts: 'TestoAudio', stop: 'Ferma', copy: 'Copia', doc: 'Documento', pdf: 'PDF', pdfedit: 'Modificabile', fontminus: 'Font-', fontplus: 'Font+', color: 'Colore', table: 'Tabella', import: 'Esplora', sync: 'Sincronizza', restore: 'Importa', backup: 'Esporta', zoomin: 'Ingrandisci', zoomout: 'Riduci', theme: 'Tema', langTxt: 'Lingua', pTitle: 'Titolo...', pBody: 'Scrivi qui...', menu: 'Menu', del: 'Elimina', copyCard: 'Copia', share: 'Condividi', history: 'Cronologia', close: 'Chiudi', clear: 'Pulisci', confirmDel: 'Sei sicuro di voler eliminare?' },
-        'ja-JP': { name: 'Japanese', install: 'インストール', save: '保存', new: '新規', mic: '口述', read: '朗読', vmsg: '音声', tts: '音源', copy: 'コピー', doc: '文書', pdf: 'PDF', pdfedit: '編集可能', fontminus: '文字-', fontplus: '文字+', color: '色', table: '表', import: '探索', sync: '同期', restore: '取込', backup: '導出', zoomin: '拡大', zoomout: '縮小', theme: '配色', langTxt: '言語', pTitle: 'タイトル...', pBody: 'ここに書く...', menu: '献立', del: '削除', copyCard: '複製', share: '共有', history: '履歴', close: '閉じる', clear: '消去', confirmDel: '削除してもよろしいですか？' },
-        'pt-PT': { name: 'Português', install: 'Instalar', save: 'Guardar', new: 'Novo', mic: 'Ditar', read: 'Leitura', vmsg: 'Voz', tts: 'TextoÁudio', stop: 'Parar', copy: 'Copiar', doc: 'Documento', pdf: 'PDF', pdfedit: 'Editável', fontminus: 'Fonte-', fontplus: 'Fonte+', color: 'Cor', table: 'Tabela', import: 'Explorar', sync: 'Sincronizar', restore: 'Importar', backup: 'Exportar', zoomin: 'Aproximar', zoomout: 'Afastar', theme: 'Tema', langTxt: 'Idioma', pTitle: 'Título...', pBody: 'Escreva aqui...', menu: 'Menu', del: 'Apagar', copyCard: 'Copiar', share: 'Partilhar', history: 'Histórico', close: 'Fechar', clear: 'Limpar', confirmDel: 'Deseja realmente apagar?' },
-        'ru-RU': { name: 'Русский', install: 'Установить', save: 'Сохранить', new: 'Новый', mic: 'Диктовать', read: 'Чтение', vmsg: 'Голос', tts: 'Аудиотекст', stop: 'Стоп', copy: 'Копировать', doc: 'Документ', pdf: 'PDF', pdfedit: 'Править', fontminus: 'Шрифт-', fontplus: 'Шрифт+', color: 'Цвет', table: 'Таблица', import: 'Обзор', sync: 'Синхронизация', restore: 'Импорт', backup: 'Экспорт', zoomin: 'Увеличить', zoomout: 'Уменьшить', theme: 'Тема', langTxt: 'Язык', pTitle: 'Название...', pBody: 'Пишите здесь...', menu: 'Меню', del: 'Удалить', copyCard: 'Копировать', share: 'Поделиться', history: 'История', close: 'Закрыть', clear: 'Очистить', confirmDel: 'Удалить эту запись?' },
-        'uk-UA': { name: 'Ukrainian', install: 'Встановити', save: 'Зберегти', new: 'Новий', mic: 'Диктувати', read: 'Читати', vmsg: 'Голос', tts: 'Аудіотекст', stop: 'Стоп', copy: 'Копіювати', doc: 'Документ', pdf: 'PDF', pdfedit: 'Редагувати', fontminus: 'Шрифт-', fontplus: 'Шрифт+', color: 'Колір', table: 'Таблиця', import: 'Огляд', sync: 'Синхронізація', restore: 'Імпорт', backup: 'Експорт', zoomin: 'Наблизити', zoomout: 'Віддалити', theme: 'Тема', langTxt: 'Мова', pTitle: 'Назва...', pBody: 'Пишіть тут...', menu: 'Меню', del: 'Видалити', copyCard: 'Копіювати', share: 'Поділитися', history: 'Історія', close: 'Закрити', clear: 'Очистити', confirmDel: 'Видалити цей запис?' },
-        'zh-CN': { name: 'Chinese', install: '安装', save: '保存', new: '新建', mic: '听写', read: '朗读', vmsg: '语音', tts: '文本音频', stop: '停止', copy: '复制', doc: '文档', pdf: 'PDF', pdfedit: '可编辑', fontminus: '字号-', fontplus: '字号+', color: '颜色', table: '表格', import: '探索', sync: '同步', restore: '导入', backup: '导出', zoomin: '放大', zoomout: '缩小', theme: '主题', langTxt: '语言', pTitle: '标题...', pBody: '在此处编写...', menu: '菜单', del: '删除', copyCard: '复制', share: '分享', history: '历史记录', close: '关闭', clear: '清除', confirmDel: '您确定要删除吗？' }
+        'ar-SA': { 
+            name: 'العربية', install: 'تثبيت', save: 'حفظ', new: 'جديد', mic: 'إملأ', read: 'قراءة', 
+            vmsg: 'صوت', tts: 'صوتيات', stop: 'إيقاف', copy: 'نسخ', doc: 'مستند', pdf: 'PDF', 
+            pdfedit: 'تعديل PDF', fontminus: 'خط -', fontplus: 'خط +', color: 'لون', table: 'جدول', 
+            import: 'استكشاف', sync: 'مزامنة', restore: 'استيراد', backup: 'تصدير', zoomin: 'تكبير', 
+            zoomout: 'تصغير', theme: 'مظهر', langTxt: 'لغة', menu: 'قائمة', pTitle: 'عنوان...', pBody: 'اكتب هنا...' 
+        },
+        'ru-RU': { 
+            name: 'Русский', install: 'Установить', save: 'Сохранить', new: 'Новый', mic: 'Диктовать', read: 'Чтение', 
+            vmsg: 'Голосовое Сообщение', tts: 'Текст Аудио', stop: 'Стоп', copy: 'Копировать', doc: 'Документ', pdf: 'PDF', 
+            pdfedit: 'Редактируемый PDF', fontminus: 'Шрифт -', fontplus: 'Шрифт +', color: 'Цвет', table: 'Таблица', 
+            import: 'Обзор', sync: 'Синхронизация', restore: 'Импорт', backup: 'Экспорт', zoomin: 'Приблизить', 
+            zoomout: 'Отдалить', theme: 'Тема', langTxt: 'Язык', menu: 'Меню', pTitle: 'Заголовок...', pBody: 'Пишите здесь...' 
+        },
+        'de-DE': { 
+            name: 'Deutsch', install: 'Installieren', save: 'Speichern', new: 'Neu', mic: 'Diktieren', read: 'Lesen', 
+            vmsg: 'Sprachnachricht', tts: 'Text Audio', stop: 'Stopp', copy: 'Kopieren', doc: 'Dokument', pdf: 'PDF', 
+            pdfedit: 'PDF Editierbar', fontminus: 'Schrift -', fontplus: 'Schrift +', color: 'Farbe', table: 'Tabelle', 
+            import: 'Durchsuchen', sync: 'Synchronisieren', restore: 'Importieren', backup: 'Exportieren', zoomin: 'Vergrößern', 
+            zoomout: 'Verkleinern', theme: 'Design', langTxt: 'Sprache', menu: 'Menü', pTitle: 'Titel...', pBody: 'Schreiben Sie hier...' 
+        },
+        'zh-HK': { 
+            name: '粵語', install: '安裝', save: '儲存', new: '新建', mic: '聽寫', read: '朗讀', 
+            vmsg: '語音訊息', tts: '文字音訊', stop: '停止', copy: '複製', doc: '文件', pdf: 'PDF', 
+            pdfedit: '可編輯PDF', fontminus: '字型 -', fontplus: '字型 +', color: '顏色', table: '表格', 
+            import: '瀏覽', sync: '同步', restore: '匯入', backup: '匯出', zoomin: '放大', 
+            zoomout: '縮小', theme: '主題', langTxt: '語言', menu: '選單', pTitle: '標題...', pBody: '在此處撰寫...' 
+        },
+        'zh-CN': { 
+            name: '中文', install: '安装', save: '保存', new: '新建', mic: '听写', read: '朗读', 
+            vmsg: '语音消息', tts: '文本音频', stop: '停止', copy: '复制', doc: '文档', pdf: 'PDF', 
+            pdfedit: '可编辑PDF', fontminus: '字体 -', fontplus: '字体 +', color: '颜色', table: '表格', 
+            import: '浏览', sync: '同步', restore: '导入', backup: '导出', zoomin: '放大', 
+            zoomout: '缩小', theme: '主题', langTxt: '语言', menu: '菜单', pTitle: '标题...', pBody: '在此处编写...' 
+        },
+        'ja-JP': { 
+            name: '日本語', install: '追加', save: '保存', new: '新規', mic: '口述', read: '再生', 
+            vmsg: '音声メッセージ', tts: '文字音声', stop: '停止', copy: '複製', doc: '文書', pdf: 'PDF', 
+            pdfedit: '編集可能PDF', fontminus: '文字 -', fontplus: '文字 +', color: '配色', table: '表', 
+            import: '参照', sync: '同期', restore: '取込', backup: '導出', zoomin: '拡大', 
+            zoomout: '縮小', theme: '基調', langTxt: '言語', menu: '献立', pTitle: '題名...', pBody: 'ここに書く...' 
+        },
+        'es-MX': { 
+            name: 'Español (LATAM)', install: 'Instalar', save: 'Guardar', new: 'Nuevo', mic: 'Dictar', read: 'Lectura', 
+            vmsg: 'Mensaje Voz', tts: 'Texto Audio', stop: 'Detener', copy: 'Copiar', doc: 'Documento', pdf: 'PDF', 
+            pdfedit: 'PDF editable', fontminus: 'Fuente -', fontplus: 'Fuente +', color: 'Color', table: 'Tabla', 
+            import: 'Explorar', sync: 'Sincronizar', restore: 'Importar', backup: 'Exportar', zoomin: 'Acercar', 
+            zoomout: 'Alejar', theme: 'Tema', langTxt: 'Idioma', menu: 'Menú', pTitle: 'Título del Guion...', pBody: 'Escribe o dicta aquí...' 
+        },
+        'it-IT': { 
+            name: 'Italiano', install: 'Installa', save: 'Salva', new: 'Nuovo', mic: 'Detta', read: 'Lettura', 
+            vmsg: 'Messaggio Vocale', tts: 'Testo Audio', stop: 'Arresta', copy: 'Copia', doc: 'Documento', pdf: 'PDF', 
+            pdfedit: 'PDF Modificabile', fontminus: 'Font -', fontplus: 'Font +', color: 'Colore', table: 'Tabella', 
+            import: 'Esplora', sync: 'Sincronizza', restore: 'Importa', backup: 'Esporta', zoomin: 'Ingrandisci', 
+            zoomout: 'Riduci', theme: 'Tema', langTxt: 'Lingua', menu: 'Menu', pTitle: 'Titolo...', pBody: 'Scrivi qui...' 
+        },
+        'uk-UA': { 
+            name: 'Українська', install: 'Встановити', save: 'Зберегти', new: 'Новий', mic: 'Диктувати', read: 'Читати', 
+            vmsg: 'Голосове Повідомлення', tts: 'Текст Аудіо', stop: 'Стоп', copy: 'Копіювати', doc: 'Документ', pdf: 'PDF', 
+            pdfedit: 'Редагований PDF', fontminus: 'Шрифт -', fontplus: 'Шрифт +', color: 'Колір', table: 'Таблиця', 
+            import: 'Огляд', sync: 'Синхронізація', restore: 'Імпорт', backup: 'Експорт', zoomin: 'Наблизити', 
+            zoomout: 'Віддалити', theme: 'Тема', langTxt: 'Мова', menu: 'Меню', pTitle: 'Заголовок...', pBody: 'Пишіть тут...' 
+        },
+        'hi-IN': { 
+            name: 'हिन्दी', install: 'स्थापित', save: 'सहेजें', new: 'नया', mic: 'बोलें', read: 'पढ़ें', 
+            vmsg: 'वॉयस मैसेज', tts: 'पाठ ऑडियो', stop: 'रोकें', copy: 'कॉपी', doc: 'दस्तावेज़', pdf: 'PDF', 
+            pdfedit: 'संपादन योग्य PDF', fontminus: 'फ़ॉन्ट -', fontplus: 'फ़ॉन्ट +', color: 'रंग', table: 'तालिका', 
+            import: 'ब्राउज़', sync: 'सिंक', restore: 'आयात', backup: 'निर्यात', zoomin: 'ज़ूम +', 
+            zoomout: 'ज़ूम -', theme: 'थीम', langTxt: 'भाषा', menu: 'सूची', pTitle: 'शीर्षक...', pBody: 'यहाँ लिखें...' 
+        },
+        'pt-PT': { 
+            name: 'Português', install: 'Instalar', save: 'Guardar', new: 'Novo', mic: 'Ditar', read: 'Leitura', 
+            vmsg: 'Mensagem Voz', tts: 'Texto Áudio', stop: 'Parar', copy: 'Copiar', doc: 'Documento', pdf: 'PDF', 
+            pdfedit: 'PDF Editável', fontminus: 'Fonte -', fontplus: 'Fonte +', color: 'Cor', table: 'Tabela', 
+            import: 'Explorar', sync: 'Sincronizar', restore: 'Importar', backup: 'Exportar', zoomin: 'Aproximar', 
+            zoomout: 'Afastar', theme: 'Tema', langTxt: 'Idioma', menu: 'Menu', pTitle: 'Título...', pBody: 'Escreva aqui...' 
+        },
+        'fr-FR': { 
+            name: 'Français', install: 'Installer', save: 'Enregistrer', new: 'Nouveau', mic: 'Dicter', read: 'Lecture', 
+            vmsg: 'Message Vocal', tts: 'Texte Audio', stop: 'Arrêter', copy: 'Copier', doc: 'Document', pdf: 'PDF', 
+            pdfedit: 'PDF Éditable', fontminus: 'Police -', fontplus: 'Police +', color: 'Couleur', table: 'Tableau', 
+            import: 'Explorer', sync: 'Synchroniser', restore: 'Importer', backup: 'Exporter', zoomin: 'Zoom +', 
+            zoomout: 'Zoom -', theme: 'Thème', langTxt: 'Langue', menu: 'Menu', pTitle: 'Titre...', pBody: 'Écrivez ici...' 
+        },
+        'en-GB': { 
+            name: 'English (UK)', install: 'Install', save: 'Save', new: 'New', mic: 'Dictate', read: 'Read', 
+            vmsg: 'Voice Note', tts: 'Text Audio', stop: 'Stop', copy: 'Copy', doc: 'Document', pdf: 'PDF', 
+            pdfedit: 'Editable PDF', fontminus: 'Font -', fontplus: 'Font +', color: 'Colour', table: 'Table', 
+            import: 'Explore', sync: 'Synchronise', restore: 'Import', backup: 'Export', zoomin: 'Zoom In', 
+            zoomout: 'Zoom Out', theme: 'Theme', langTxt: 'Language', menu: 'Menu', pTitle: 'Script Title...', pBody: 'Write or dictate here...' 
+        }
     },
 
-    // 1. Detección automática del idioma del dispositivo al iniciar
+    // 1. AUTO-DETECCIÓN AL INICIAR (SI NO ESTÁ EN LISTA, INICIA EN INGLÉS)
     init: function() {
-        var sysLang = (navigator.language || navigator.userLanguage || 'en-GB').toLowerCase();
+        var rawSysLang = (navigator.language || (navigator.languages && navigator.languages[0]) || 'en-GB').toLowerCase();
         
-        var match = this.langsOrder.find(function(l) { return l.toLowerCase() === sysLang; });
+        // Mapeo exhaustivo de prefijos e idiomas
+        var match = this.langsOrder.find(function(l) { return l.toLowerCase() === rawSysLang; });
         if (!match) {
-            var sysCode = sysLang.split('-')[0];
-            match = this.langsOrder.find(function(l) { return l.toLowerCase().startsWith(sysCode); });
+            var sysCode = rawSysLang.split('-')[0];
+            if (sysCode === 'es') match = 'es-MX';
+            else if (sysCode === 'zh') match = (rawSysLang.includes('hk') || rawSysLang.includes('tw') || rawSysLang.includes('yue')) ? 'zh-HK' : 'zh-CN';
+            else if (sysCode === 'pt') match = 'pt-PT';
+            else if (sysCode === 'en') match = 'en-GB';
+            else {
+                match = this.langsOrder.find(function(l) { return l.toLowerCase().startsWith(sysCode); });
+            }
         }
 
+        // Si no detecta ninguno de los 13 idiomas, predetermina en Inglés
         var finalLang = match || 'en-GB';
-        this.setAppLang(finalLang);
+        
+        // Registrar idioma original del sistema si aún no se ha definido
+        if (!this.originalLang) {
+            this.originalLang = finalLang;
+        }
+
+        this.setAppLang(finalLang, false);
     },
 
-    // 2. Reacción completa en la interfaz y actualización de las leyendas de los 24 botones
-    setAppLang: function(lang) {
-        var previousLang = this.currentLang;
+    // 2. REACCIÓN INTEGRAL AL CAMBIO DE IDIOMA EN TODAS LAS LEYENDAS Y BOTONES
+    setAppLang: function(lang, shouldTranslateText) {
+        if (shouldTranslateText === undefined) shouldTranslateText = true;
+        
         this.currentLang = lang;
         this.currentVoiceLang = lang;
         var p = this.db[lang] || this.db['en-GB']; 
 
+        // Función que aplica la regla: 1 palabra fija, o scroll lateral si son más palabras
         function setText(id, text) {
             var el = document.getElementById(id);
             if (el && text !== undefined && text !== null && text !== '') {
-                // Si requiere más de una palabra por restricción extrema del idioma, habilita el desplazamiento lateral
-                if (text.includes(' ')) {
+                var words = text.trim().split(/\s+/);
+                if (words.length > 1) {
                     el.innerHTML = '<span class="scroll-txt">' + text + '</span>';
                 } else {
                     el.innerText = text;
@@ -73,47 +184,42 @@ var RetoricaI18n = {
             }
         }
 
-        // Actualización sincrónica de las leyendas de la botonera principal (24 botones)
-        setText('lbl-nav-install', p.install);
-        setText('lbl-tool-save', p.save);
-        setText('lbl-tool-new', p.new);
-        setText('lbl-tool-mic', p.mic);
-        setText('lbl-tool-read', p.read);
-        setText('lbl-tool-vmsg', p.vmsg);
-        setText('lbl-tool-tts', p.tts);
-        setText('lbl-tool-stop', p.stop);
-        setText('lbl-tool-copyall', p.copy);
-        setText('lbl-tool-doc', p.doc);
-        setText('lbl-tool-pdf', p.pdf);
-        setText('lbl-tool-pdfedit', p.pdfedit);
-        setText('lbl-tool-fontminus', p.fontminus);
-        setText('lbl-tool-fontplus', p.fontplus);
-        setText('lbl-tool-color', p.color);
-        setText('lbl-tool-table', p.table);
-        setText('lbl-tool-import', p.import);
-        setText('lbl-tool-sync', p.sync);
-        setText('lbl-tool-restore', p.restore);
-        setText('lbl-tool-backup', p.backup);
-        setText('lbl-tool-zoomin', p.zoomin);
-        setText('lbl-tool-zoomout', p.zoomout);
-        setText('lbl-nav-theme', p.theme);
-        setText('lbl-nav-langtxt', p.langTxt);
+        // 24 Botones en Orden Exacto
+        setText('lbl-nav-install', p.install);   // 1. Instalar
+        setText('lbl-tool-save', p.save);         // 2. Guardar
+        setText('lbl-tool-new', p.new);           // 3. Nuevo
+        setText('lbl-tool-mic', p.mic);           // 4. Dictar
+        setText('lbl-tool-read', p.read);         // 5. Lectura
+        setText('lbl-tool-vmsg', p.vmsg);         // 6. Mensaje Voz
+        setText('lbl-tool-tts', p.tts);           // 7. Texto Audio
+        setText('lbl-tool-stop', p.stop);         // 8. Detener
+        setText('lbl-tool-copyall', p.copy);      // 9. Copiar
+        setText('lbl-tool-doc', p.doc);           // 10. Documento
+        setText('lbl-tool-pdf', p.pdf);           // 11. PDF
+        setText('lbl-tool-pdfedit', p.pdfedit);   // 12. PDF editable
+        setText('lbl-tool-fontminus', p.fontminus);// 13. Fuente -
+        setText('lbl-tool-fontplus', p.fontplus); // 14. Fuente +
+        setText('lbl-tool-color', p.color);       // 15. Color
+        setText('lbl-tool-table', p.table);       // 16. Tabla
+        setText('lbl-tool-import', p.import);     // 17. Explorar
+        setText('lbl-tool-sync', p.sync);         // 18. Sincronizar
+        setText('lbl-tool-restore', p.restore);   // 19. Importar
+        setText('lbl-tool-backup', p.backup);     // 20. Exportar
+        setText('lbl-tool-zoomin', p.zoomin);     // 21. Acercar
+        setText('lbl-tool-zoomout', p.zoomout);   // 22. Alejar
+        setText('lbl-nav-theme', p.theme);        // 23. Tema
+        setText('lbl-nav-langtxt', p.langTxt);    // 24. Idioma
 
-        // Barra de navegación y modales
+        // Menú Lateral y Placeholders
         setText('lbl-nav-menu', p.menu);
         var tInput = document.getElementById('editor-title'); 
         if (tInput) tInput.placeholder = p.pTitle;
 
-        setText('lbl-modal-history-title', p.history);
-        setText('lbl-btn-close-modal', p.close);
-        setText('lbl-btn-clear-history', p.clear);
-
-        // Actualizar acordeón de idiomas
         this.updateAccordionStyles();
 
-        // 3 y 4. Modificación de texto/selección y gestión de reverso al idioma original
-        if (previousLang !== lang) {
-            this.translateWork(previousLang);
+        // 3 y 4. TRADUCCIÓN Y RESTAURACIÓN INTEGRAL
+        if (shouldTranslateText) {
+            this.handleTextTranslation();
         }
 
         if (typeof RetoricaUI !== 'undefined' && RetoricaUI.notify) {
@@ -155,8 +261,13 @@ var RetoricaI18n = {
             wrapper.setAttribute('data-lang', langKey);
 
             var label = document.createElement('div');
-            label.className = 'btn-label-3d scrollable-label';
-            label.innerText = self.singleWordLangs[langKey] || langKey.split('-')[0];
+            label.className = 'btn-label-3d';
+            var nameWord = self.singleWordLangs[langKey] || langKey.split('-')[0];
+            if (nameWord.trim().split(/\s+/).length > 1) {
+                label.innerHTML = '<span class="scroll-txt">' + nameWord + '</span>';
+            } else {
+                label.innerText = nameWord;
+            }
 
             var btn = document.createElement('button');
             btn.type = 'button';
@@ -167,12 +278,12 @@ var RetoricaI18n = {
             iconSpan.innerText = langKey.substring(0, 2).toUpperCase();
             btn.appendChild(iconSpan);
 
-            wrapper.appendChild(label);
             wrapper.appendChild(btn);
+            wrapper.appendChild(label);
 
             wrapper.onclick = function(e) {
                 if (e) e.stopPropagation();
-                self.setAppLang(langKey);
+                self.setAppLang(langKey, true);
                 self.toggleAccordion();
             };
 
@@ -194,58 +305,61 @@ var RetoricaI18n = {
 
             if (isActive) {
                 wrapper.className = 'btn-wrapper-3d active-wrapper';
-                if (btn) {
-                    btn.className = 'btn-round-3d active';
-                    btn.style.backgroundColor = '#00e676';
-                    btn.style.color = '#000000';
-                    btn.style.borderColor = '#ffffff';
-                    btn.style.boxShadow = '0 0 10px #00e676';
-                }
+                if (btn) btn.classList.add('active');
             } else {
                 wrapper.className = 'btn-wrapper-3d';
-                if (btn) {
-                    btn.className = 'btn-round-3d';
-                    btn.style.backgroundColor = '';
-                    btn.style.color = '';
-                    btn.style.borderColor = '';
-                    btn.style.boxShadow = '';
-                }
+                if (btn) btn.classList.remove('active');
             }
         });
     },
 
-    // 3 y 4. Traducción de selección/documento completo con almacenamiento para reversión de sintaxis exacta
-    translateWork: function(previousLang) {
+    // 3 Y 4. MODIFICACIÓN DE TEXTO SELECCIONADO Y RESTAURACIÓN EXACTA SIN CAMBIOS DE SINTAXIS
+    handleTextTranslation: function() {
         var editor = document.getElementById('editor-body');
+        var titleInput = document.getElementById('editor-title');
         if (!editor) return;
 
-        // Si no existe respaldo del documento original o cambió el lienzo, guardar el estado nativo original
-        if (!this.originalDocState) {
-            this.originalDocState = {
-                lang: previousLang || this.currentLang,
-                html: editor.innerHTML,
-                text: editor.innerText.trim()
-            };
-        }
+        var currentBodyText = editor.innerText || editor.textContent || "";
+        var currentTitleText = titleInput ? titleInput.value : "";
 
-        // Si el usuario regresa al idioma original del escrito, devolver el documento intacto sin alteración sintáctica
-        if (this.currentLang === this.originalDocState.lang) {
-            editor.innerHTML = this.originalDocState.html;
-            if (typeof RetoricaUI !== 'undefined') {
-                RetoricaUI.updateCounters();
-                if (typeof RetoricaUI.triggerAutoSave === 'function') RetoricaUI.triggerAutoSave();
-            }
+        // Si el usuario vuelve al idioma original, restaurar el documento intacto
+        if (this.currentLang === this.originalLang && this.originalText !== null) {
+            editor.innerText = this.originalText;
+            if (titleInput && this.originalTitle !== null) titleInput.value = this.originalTitle;
+            if (typeof RetoricaUI !== 'undefined') RetoricaUI.updateCounters();
             return;
         }
 
+        // Guardar original si es la primera modificación
+        if (this.originalText === null && currentBodyText.trim() !== '') {
+            this.originalText = currentBodyText;
+            this.originalTitle = currentTitleText;
+        }
+
         var sel = window.getSelection();
-        var selectedText = sel ? sel.toString().trim() : '';
-        var textToTranslate = selectedText.length > 0 ? selectedText : editor.innerText.trim();
-
-        if (!textToTranslate) return;
-
+        var selectedText = sel ? sel.toString().trim() : "";
         var targetClean = this.currentLang.split('-')[0];
-        var url = "https://api.mymemory.translated.net/get?q=" + encodeURIComponent(textToTranslate) + "&langpair=autodetect|" + targetClean;
+
+        // 3. Modificación del texto seleccionado si existe
+        if (selectedText.length > 0) {
+            this.translateSegment(selectedText, targetClean, function(translated) {
+                var range = sel.getRangeAt(0);
+                range.deleteContents();
+                range.insertNode(document.createTextNode(translated));
+                if (typeof RetoricaUI !== 'undefined') RetoricaUI.updateCounters();
+            });
+        } 
+        // Si no hay texto seleccionado, traducir todo el documento
+        else if (currentBodyText.trim().length > 0) {
+            this.translateSegment(currentBodyText, targetClean, function(translated) {
+                editor.innerText = translated;
+                if (typeof RetoricaUI !== 'undefined') RetoricaUI.updateCounters();
+            });
+        }
+    },
+
+    translateSegment: function(text, targetLang, callback) {
+        var url = "https://api.mymemory.translated.net/get?q=" + encodeURIComponent(text) + "&langpair=autodetect|" + targetLang;
 
         fetch(url)
         .then(function(res) { return res.json(); })
@@ -253,20 +367,7 @@ var RetoricaI18n = {
             if (data && data.responseData && data.responseStatus === 200) {
                 var translatedText = data.responseData.translatedText;
                 if (translatedText && !translatedText.includes("INVALID SOURCE")) {
-                    if (selectedText.length > 0 && sel.rangeCount) {
-                        // Reemplazar solo el texto seleccionado manteniendo la estructura del resto del documento
-                        var range = sel.getRangeAt(0);
-                        range.deleteContents();
-                        range.insertNode(document.createTextNode(translatedText));
-                    } else {
-                        // Traducción total del lienzo
-                        editor.innerText = translatedText;
-                    }
-
-                    if (typeof RetoricaUI !== 'undefined') {
-                        RetoricaUI.updateCounters();
-                        if (typeof RetoricaUI.triggerAutoSave === 'function') RetoricaUI.triggerAutoSave();
-                    }
+                    callback(translatedText);
                 }
             }
         }).catch(function(err) {
