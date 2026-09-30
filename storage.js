@@ -4,6 +4,7 @@ var RetoricaStorage = {
     dbVersion: 1,
     dbInstance: null,
     currentDocId: null,
+    pendingDeletion: null,
 
     escapeHTML: function(str) {
         return String(str || '').replace(/[&<>"']/g, function(m) {
@@ -174,7 +175,6 @@ var RetoricaStorage = {
         var bodyInput = document.getElementById('editor-body');
         var titleInput = document.getElementById('editor-title');
         
-        // Validación UX: Evita borrado accidental si hay contenido activo
         if (bodyInput && (bodyInput.innerText || bodyInput.textContent || "").trim().length > 0) {
             if (!confirm("¿Deseas iniciar un nuevo lienzo? Se limpiará el texto no guardado de la pantalla.")) {
                 return;
@@ -214,7 +214,6 @@ var RetoricaStorage = {
                     RetoricaUI.updateCounters();
                     RetoricaUI.notify("Documento cargado ✓");
                     
-                    // Cierre explícito para evitar alternancia involuntaria del menú
                     if (typeof RetoricaUI.closeSidebar === 'function') {
                         RetoricaUI.closeSidebar();
                     }
@@ -223,26 +222,20 @@ var RetoricaStorage = {
         });
     },
 
-    pendingDeletion: null,
-
     deleteDoc: function(id, event) {
         if (event) event.stopPropagation();
         var self = this;
 
-        // Obtener el documento antes de removerlo temporalmente
         this.getDocById(id, function(doc) {
             if (!doc) return;
 
-            // Almacenar respaldo en memoria
             self.pendingDeletion = {
                 doc: doc,
                 timer: setTimeout(function() {
-                    // Confirmación definitiva tras 10 segundos
                     self.finalizeDelete(id);
                 }, 10000)
             };
 
-            // Ocultar de IndexedDB inmediatamente para respuesta visual rápida
             var transaction = self.dbInstance.transaction(['documents'], 'readwrite');
             var store = transaction.objectStore('documents');
             store.delete(id);
@@ -289,7 +282,8 @@ var RetoricaStorage = {
         var toast = document.createElement('div');
         toast.id = 'undo-toast-banner';
         toast.className = 'undo-toast-banner';
-        toast.innerHTML = '<span>Documento eliminado</span><button onclick="RetoricaStorage.undoDelete()">DESHACER</button>';
+        toast.style.cssText = "position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#333; color:#fff; padding:10px 20px; border-radius:4px; z-index:9999; display:flex; align-items:center; gap:15px;";
+        toast.innerHTML = '<span>Documento eliminado</span><button type="button" onclick="RetoricaStorage.undoDelete()" style="background:#ffc107; border:none; padding:5px 10px; cursor:pointer; font-weight:bold; border-radius:3px;">DESHACER</button>';
         document.body.appendChild(toast);
     },
 
