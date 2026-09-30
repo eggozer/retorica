@@ -174,7 +174,6 @@ var RetoricaStorage = {
         var bodyInput = document.getElementById('editor-body');
         var titleInput = document.getElementById('editor-title');
         
-        // Validación UX: Evita borrado accidental si hay contenido activo
         if (bodyInput && (bodyInput.innerText || bodyInput.textContent || "").trim().length > 0) {
             if (!confirm("¿Deseas iniciar un nuevo lienzo? Se limpiará el texto no guardado de la pantalla.")) {
                 return;
@@ -214,7 +213,6 @@ var RetoricaStorage = {
                     RetoricaUI.updateCounters();
                     RetoricaUI.notify("Documento cargado ✓");
                     
-                    // Cierre explícito para evitar alternancia involuntaria del menú
                     if (typeof RetoricaUI.closeSidebar === 'function') {
                         RetoricaUI.closeSidebar();
                     }
@@ -229,20 +227,16 @@ var RetoricaStorage = {
         if (event) event.stopPropagation();
         var self = this;
 
-        // Obtener el documento antes de removerlo temporalmente
         this.getDocById(id, function(doc) {
             if (!doc) return;
 
-            // Almacenar respaldo en memoria
             self.pendingDeletion = {
                 doc: doc,
                 timer: setTimeout(function() {
-                    // Confirmación definitiva tras 10 segundos
                     self.finalizeDelete(id);
                 }, 10000)
             };
 
-            // Ocultar de IndexedDB inmediatamente para respuesta visual rápida
             var transaction = self.dbInstance.transaction(['documents'], 'readwrite');
             var store = transaction.objectStore('documents');
             store.delete(id);
@@ -441,9 +435,7 @@ var RetoricaStorage = {
         this.save();
     },
 
-    syncWithCloud: function() {
-        // Reservado para futuras integraciones remotas
-    },
+    syncWithCloud: function() {},
 
     exportBackup: function() {
         this.getAllDocs(function(docs) {
