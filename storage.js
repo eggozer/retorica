@@ -1,10 +1,9 @@
-// --- RETÓRICA PERSISTENCE & STORAGE ENGINE (storage.js - DUAL STORAGE EDITION) ---
+// --- RETÓRICA PERSISTENCE & STORAGE ENGINE (storage.js - INDEXEDDB EDITION) ---
 var RetoricaStorage = {
     dbName: 'RetoricaDB_V2026',
     dbVersion: 1,
     dbInstance: null,
     currentDocId: null,
-    pendingDeletion: null,
 
     escapeHTML: function(str) {
         return String(str || '').replace(/[&<>"']/g, function(m) {
@@ -31,21 +30,15 @@ var RetoricaStorage = {
 
         request.onerror = function(e) {
             console.error("Error abriendo IndexedDB:", e);
-            self.recoverFromLocalStorageFallback(callback);
+            if (typeof RetoricaUI !== 'undefined') {
+                RetoricaUI.notify("Error de acceso a almacenamiento local");
+            }
+            if (callback) callback();
         };
 
         request.onsuccess = function(e) {
             self.dbInstance = e.target.result;
-            // Verificar si IndexedDB está vacío pero hay respaldo en localStorage
-            self.getAllDocs(function(docs) {
-                if ((!docs || docs.length === 0)) {
-                    self.restoreFromLocalStorageFallback(function() {
-                        if (callback) callback();
-                    });
-                } else {
-                    if (callback) callback();
-                }
-            });
+            if (callback) callback();
         };
 
         request.onupgradeneeded = function(e) {
@@ -54,67 +47,6 @@ var RetoricaStorage = {
                 db.createObjectStore('documents', { keyPath: 'id' });
             }
         };
-    },
-
-    // Respaldo de emergencia en localStorage por si IndexedDB se borra al limpiar caché
-    saveToLocalStorageFallback: function(docData) {
-        try {
-            var backupList = JSON.parse(localStorage.getItem('retorica_fallback_docs') || '[]');
-            var index = backupList.findIndex(function(d) { return d.id === docData.id; });
-            if (index >= 0) {
-                backupList[index] = docData;
-            } else {
-                backupList.push(docData);
-            }
-            localStorage.setItem('retorica_fallback_docs', JSON.stringify(backupList));
-        } catch (err) {
-            console.warn("No se pudo guardar en el respaldo de localStorage", err);
-        }
-    },
-
-    recoverFromLocalStorageFallback: function(callback) {
-        var self = this;
-        try {
-            var backupList = JSON.parse(localStorage.getItem('retorica_fallback_docs') || '[]');
-            if (backupList.length > 0 && self.dbInstance) {
-                var transaction = self.dbInstance.transaction(['documents'], 'readwrite');
-                var store = transaction.objectStore('documents');
-                backupList.forEach(function(doc) {
-                    store.put(doc);
-                });
-                transaction.oncomplete = function() {
-                    console.log("Biblioteca recuperada desde el respaldo de localStorage.");
-                };
-            }
-        } catch (err) {
-            console.error("Error al recuperar respaldo de localStorage", err);
-        }
-        if (callback) callback();
-    },
-
-    restoreFromLocalStorageFallback: function(callback) {
-        var self = this;
-        try {
-            var backupList = JSON.parse(localStorage.getItem('retorica_fallback_docs') || '[]');
-            if (backupList.length > 0 && self.dbInstance) {
-                var transaction = self.dbInstance.transaction(['documents'], 'readwrite');
-                var store = transaction.objectStore('documents');
-                backupList.forEach(function(doc) {
-                    store.put(doc);
-                });
-                transaction.oncomplete = function() {
-                    if (typeof RetoricaUI !== 'undefined') {
-                        RetoricaUI.notify("Biblioteca restaurada tras limpieza de caché ✓");
-                    }
-                    self.refreshLibrary();
-                    if (callback) callback();
-                    return;
-                };
-            }
-        } catch (err) {
-            console.error("Error restaurando fallback", err);
-        }
-        if (callback) callback();
     },
 
     save: function() {
@@ -144,19 +76,6 @@ var RetoricaStorage = {
                     createdAt: createdAt,
                     updatedAt: nowStr
                 };
-
-                // Guardar respaldo inmediato en localStorage para evitar pérdidas por borrado de caché
-                self.saveToLocalStorageFallback(docData);
-
-                if (!self.dbInstance) {
-                    localStorage.setItem('retorica_last_doc_id', self.currentDocId);
-                    if (typeof RetoricaUI !== 'undefined') {
-                        RetoricaUI.updateCounters();
-                        RetoricaUI.notify("Guardado en respaldo local ✓");
-                    }
-                    self.refreshLibrary();
-                    return;
-                }
 
                 var transaction = self.dbInstance.transaction(['documents'], 'readwrite');
                 var store = transaction.objectStore('documents');
@@ -205,13 +124,9 @@ var RetoricaStorage = {
                     updatedAt: nowStr
                 };
 
-                self.saveToLocalStorageFallback(docData);
-
-                if (self.dbInstance) {
-                    var transaction = self.dbInstance.transaction(['documents'], 'readwrite');
-                    var store = transaction.objectStore('documents');
-                    store.put(docData);
-                }
+                var transaction = self.dbInstance.transaction(['documents'], 'readwrite');
+                var store = transaction.objectStore('documents');
+                store.put(docData);
                 localStorage.setItem('retorica_last_doc_id', self.currentDocId);
             });
         });
@@ -219,16 +134,6 @@ var RetoricaStorage = {
 
     getDocById: function(id, callback) {
         if (!this.dbInstance) { 
-            // Buscar primero en el respaldo local si IndexedDB no está listo
-            try {
-                var backupList = JSON.parse(localStorage.getItem('retorica_fallback_docs') || '[]');
-                var found = backupList.find(function(d) { return d.id === id; });
-                if (found) {
-                    callback(found);
-                    return;
-                }
-            } catch (e) {}
-
             this.initDB(function() {
                 RetoricaStorage.getDocById(id, callback);
             });
@@ -239,14 +144,7 @@ var RetoricaStorage = {
         var request = store.get(id);
 
         request.onsuccess = function(e) {
-            var res = e.target.result;
-            if (!res) {
-                try {
-                    var backupList = JSON.parse(localStorage.getItem('retorica_fallback_docs') || '[]');
-                    res = backupList.find(function(d) { return d.id === id; }) || null;
-                } catch (err) {}
-            }
-            callback(res);
+            callback(e.target.result || null);
         };
         request.onerror = function() {
             callback(null);
@@ -255,14 +153,6 @@ var RetoricaStorage = {
 
     getAllDocs: function(callback) {
         if (!this.dbInstance) {
-            try {
-                var backupList = JSON.parse(localStorage.getItem('retorica_fallback_docs') || '[]');
-                if (backupList.length > 0) {
-                    callback(backupList);
-                    return;
-                }
-            } catch (e) {}
-
             this.initDB(function() {
                 RetoricaStorage.getAllDocs(callback);
             });
@@ -273,20 +163,10 @@ var RetoricaStorage = {
         var request = store.getAll();
 
         request.onsuccess = function(e) {
-            var results = e.target.result || [];
-            if (results.length === 0) {
-                try {
-                    results = JSON.parse(localStorage.getItem('retorica_fallback_docs') || '[]');
-                } catch (err) {}
-            }
-            callback(results);
+            callback(e.target.result || []);
         };
         request.onerror = function() {
-            var fallback = [];
-            try {
-                fallback = JSON.parse(localStorage.getItem('retorica_fallback_docs') || '[]');
-            } catch (err) {}
-            callback(fallback);
+            callback([]);
         };
     },
 
@@ -294,6 +174,7 @@ var RetoricaStorage = {
         var bodyInput = document.getElementById('editor-body');
         var titleInput = document.getElementById('editor-title');
         
+        // Validación UX: Evita borrado accidental si hay contenido activo
         if (bodyInput && (bodyInput.innerText || bodyInput.textContent || "").trim().length > 0) {
             if (!confirm("¿Deseas iniciar un nuevo lienzo? Se limpiará el texto no guardado de la pantalla.")) {
                 return;
@@ -333,6 +214,7 @@ var RetoricaStorage = {
                     RetoricaUI.updateCounters();
                     RetoricaUI.notify("Documento cargado ✓");
                     
+                    // Cierre explícito para evitar alternancia involuntaria del menú
                     if (typeof RetoricaUI.closeSidebar === 'function') {
                         RetoricaUI.closeSidebar();
                     }
@@ -341,46 +223,37 @@ var RetoricaStorage = {
         });
     },
 
+    pendingDeletion: null,
+
     deleteDoc: function(id, event) {
         if (event) event.stopPropagation();
         var self = this;
 
+        // Obtener el documento antes de removerlo temporalmente
         this.getDocById(id, function(doc) {
             if (!doc) return;
 
+            // Almacenar respaldo en memoria
             self.pendingDeletion = {
                 doc: doc,
                 timer: setTimeout(function() {
+                    // Confirmación definitiva tras 10 segundos
                     self.finalizeDelete(id);
                 }, 10000)
             };
 
-            // Eliminar de localStorage fallback también
-            try {
-                var backupList = JSON.parse(localStorage.getItem('retorica_fallback_docs') || '[]');
-                backupList = backupList.filter(function(d) { return d.id !== id; });
-                localStorage.setItem('retorica_fallback_docs', JSON.stringify(backupList));
-            } catch (e) {}
+            // Ocultar de IndexedDB inmediatamente para respuesta visual rápida
+            var transaction = self.dbInstance.transaction(['documents'], 'readwrite');
+            var store = transaction.objectStore('documents');
+            store.delete(id);
 
-            if (self.dbInstance) {
-                var transaction = self.dbInstance.transaction(['documents'], 'readwrite');
-                var store = transaction.objectStore('documents');
-                store.delete(id);
-
-                transaction.oncomplete = function() {
-                    if (self.currentDocId === id) {
-                        self.createNewDoc();
-                    }
-                    self.refreshLibrary();
-                    self.showUndoToast();
-                };
-            } else {
+            transaction.oncomplete = function() {
                 if (self.currentDocId === id) {
                     self.createNewDoc();
                 }
                 self.refreshLibrary();
                 self.showUndoToast();
-            }
+            };
         });
     },
 
@@ -391,23 +264,11 @@ var RetoricaStorage = {
         var restoredDoc = this.pendingDeletion.doc;
         var self = this;
 
-        self.saveToLocalStorageFallback(restoredDoc);
+        var transaction = this.dbInstance.transaction(['documents'], 'readwrite');
+        var store = transaction.objectStore('documents');
+        store.put(restoredDoc);
 
-        if (this.dbInstance) {
-            var transaction = this.dbInstance.transaction(['documents'], 'readwrite');
-            var store = transaction.objectStore('documents');
-            store.put(restoredDoc);
-
-            transaction.oncomplete = function() {
-                self.pendingDeletion = null;
-                self.removeUndoToast();
-                self.loadDoc(restoredDoc.id);
-                self.refreshLibrary();
-                if (typeof RetoricaUI !== 'undefined') {
-                    RetoricaUI.notify("Documento restaurado ✓");
-                }
-            };
-        } else {
+        transaction.oncomplete = function() {
             self.pendingDeletion = null;
             self.removeUndoToast();
             self.loadDoc(restoredDoc.id);
@@ -415,7 +276,7 @@ var RetoricaStorage = {
             if (typeof RetoricaUI !== 'undefined') {
                 RetoricaUI.notify("Documento restaurado ✓");
             }
-        }
+        };
     },
 
     finalizeDelete: function(id) {
@@ -428,8 +289,7 @@ var RetoricaStorage = {
         var toast = document.createElement('div');
         toast.id = 'undo-toast-banner';
         toast.className = 'undo-toast-banner';
-        toast.style.cssText = "position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#333; color:#fff; padding:10px 20px; border-radius:4px; z-index:9999; display:flex; align-items:center; gap:15px;";
-        toast.innerHTML = '<span>Documento eliminado</span><button type="button" onclick="RetoricaStorage.undoDelete()" style="background:#ffc107; border:none; padding:5px 10px; cursor:pointer; font-weight:bold; border-radius:3px;">DESHACER</button>';
+        toast.innerHTML = '<span>Documento eliminado</span><button onclick="RetoricaStorage.undoDelete()">DESHACER</button>';
         document.body.appendChild(toast);
     },
 
@@ -540,24 +400,11 @@ var RetoricaStorage = {
                 doc.title = newTitle.trim();
                 doc.updatedAt = new Date().toISOString();
 
-                self.saveToLocalStorageFallback(doc);
+                var transaction = self.dbInstance.transaction(['documents'], 'readwrite');
+                var store = transaction.objectStore('documents');
+                store.put(doc);
 
-                if (self.dbInstance) {
-                    var transaction = self.dbInstance.transaction(['documents'], 'readwrite');
-                    var store = transaction.objectStore('documents');
-                    store.put(doc);
-
-                    transaction.oncomplete = function() {
-                        if (self.currentDocId === id) {
-                            var titleInput = document.getElementById('editor-title');
-                            if (titleInput) titleInput.value = doc.title;
-                        }
-                        self.refreshLibrary();
-                        if (typeof RetoricaUI !== 'undefined') {
-                            RetoricaUI.notify("Título actualizado ✓");
-                        }
-                    };
-                } else {
+                transaction.oncomplete = function() {
                     if (self.currentDocId === id) {
                         var titleInput = document.getElementById('editor-title');
                         if (titleInput) titleInput.value = doc.title;
@@ -566,7 +413,7 @@ var RetoricaStorage = {
                     if (typeof RetoricaUI !== 'undefined') {
                         RetoricaUI.notify("Título actualizado ✓");
                     }
-                }
+                };
             }
         });
     },
@@ -620,23 +467,14 @@ var RetoricaStorage = {
             try {
                 var docs = JSON.parse(e.target.result);
                 if (Array.isArray(docs)) {
-                    docs.forEach(function(doc) {
-                        self.saveToLocalStorageFallback(doc);
-                    });
+                    var transaction = self.dbInstance.transaction(['documents'], 'readwrite');
+                    var store = transaction.objectStore('documents');
+                    docs.forEach(function(doc) { store.put(doc); });
 
-                    if (self.dbInstance) {
-                        var transaction = self.dbInstance.transaction(['documents'], 'readwrite');
-                        var store = transaction.objectStore('documents');
-                        docs.forEach(function(doc) { store.put(doc); });
-
-                        transaction.oncomplete = function() {
-                            self.refreshLibrary();
-                            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Copia de seguridad restaurada ✓");
-                        };
-                    } else {
+                    transaction.oncomplete = function() {
                         self.refreshLibrary();
                         if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Copia de seguridad restaurada ✓");
-                    }
+                    };
                 }
             } catch (err) {
                 if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Archivo de respaldo inválido");
