@@ -249,6 +249,7 @@
             overflow: hidden; 
             height: auto; 
             text-align: center;
+            position: relative;
         }
 
         .card-template-title { 
@@ -483,7 +484,7 @@
 
             <div class="btn-wrapper-3d">
                 <button type="button" class="btn-round-3d" onclick="RetoricaUI.expPDFEditable()" title="Exportar como PDF editable" aria-label="Exportar como PDF editable">
-                    <span class="emoji-icon" aria-hidden="true">✏️️📄</span>
+                    <span class="emoji-icon" aria-hidden="true">✏📄</span>
                 </button>
                 <div class="btn-label-3d" id="lbl-tool-pdfedit"><span class="scroll-txt">PDF editable</span></div>
             </div>
@@ -586,6 +587,7 @@
     </div>
 
     <input type="file" id="file-picker-local" class="file-input-hidden" accept=".txt,.html,.md,.csv,.json" onchange="RetoricaStorage.importLocalFile(event)">
+    <input type="file" id="importFileInput" class="file-input-hidden" accept=".json" onchange="RetoricaStorage.importBackup(event)">
 
     <!-- MENÚ LATERAL -->
     <div class="sidebar-panel" id="sidebar" role="dialog" aria-label="Menú Lateral">
