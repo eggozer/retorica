@@ -135,7 +135,9 @@ var RetoricaI18n = {
         }
     },
 
-    // 1. AUTO-DETECCIÓN AL INICIAR (SI NO ESTÁ EN LISTA, INICIA EN INGLÉS)
+    // ==========================================
+    // SECCIÓN 1: AUTO-DETECCIÓN Y CONFIGURACIÓN INICIAL
+    // ==========================================
     init: function() {
         var rawSysLang = (navigator.language || (navigator.languages && navigator.languages[0]) || 'en-GB').toLowerCase();
         
@@ -163,7 +165,9 @@ var RetoricaI18n = {
         this.setAppLang(finalLang, false);
     },
 
-    // 2. REACCIÓN INTEGRAL AL CAMBIO DE IDIOMA EN TODAS LAS LEYENDAS Y BOTONES
+    // ==========================================
+    // SECCIÓN 2: REACCIÓN AL CAMBIO DE IDIOMA Y TRADUCCIÓN DE UI
+    // ==========================================
     setAppLang: function(lang, shouldTranslateText) {
         if (shouldTranslateText === undefined) shouldTranslateText = true;
         
@@ -227,6 +231,9 @@ var RetoricaI18n = {
         }
     },
 
+    // ==========================================
+    // SECCIÓN 3: ACORDEÓN DESPLEGABLE DE IDIOMAS
+    // ==========================================
     toggleAccordion: function() {
         var panel = document.getElementById('accordion-languages');
         var arrow = document.getElementById('accordion-arrow');
@@ -313,7 +320,9 @@ var RetoricaI18n = {
         });
     },
 
-    // 3 Y 4. MODIFICACIÓN DE TEXTO SELECCIONADO Y RESTAURACIÓN EXACTA SIN CAMBIOS DE SINTAXIS
+    // ==========================================
+    // SECCIÓN 4: MOTOR DE TRADUCCIÓN Y RESTAURACIÓN DE TEXTOS
+    // ==========================================
     handleTextTranslation: function() {
         var editor = document.getElementById('editor-body');
         var titleInput = document.getElementById('editor-title');
