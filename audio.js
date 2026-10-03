@@ -1,6 +1,3 @@
-// ==========================================
-// SECCIÓN 1: CONFIGURACIÓN INICIAL Y ESTADO
-// ==========================================
 // --- RETÓRICA AUDIO & SPEECH ENGINE (audio.js) ---
 var RetoricaAudio = {
     state: { 
@@ -12,9 +9,7 @@ var RetoricaAudio = {
         speedRate: 1.0   // Velocidad / Tempo de lectura
     },
 
-    // ==========================================
-// SECCIÓN 2: CONTROL DE CALIDAD Y VELOCIDAD
-// ==========================================
+    // 1. Configuración de Calidad y Velocidad
     setQuality: function(quality) {
         this.state.quality = quality;
         if (typeof RetoricaUI !== 'undefined') {
@@ -29,9 +24,7 @@ var RetoricaAudio = {
         }
     },
 
-    // ==========================================
-// SECCIÓN 3: DICTADO POR VOZ (MICRÓFONO)
-// ==========================================
+    // 2. Dictado por micrófono con inserción en la posición del cursor
     toggleMic: function() {
         var btn = document.getElementById('btn-mic-main');
         var Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -59,6 +52,7 @@ var RetoricaAudio = {
 
                 editor.focus();
 
+                // Intento 1: Usar execCommand para mantener el historial de deshacer y posición
                 var success = false;
                 try {
                     success = document.execCommand('insertText', false, textChunk + ' ');
@@ -66,6 +60,7 @@ var RetoricaAudio = {
                     success = false;
                 }
 
+                // Intento 2: Inserción directa en el Rango del Cursor si execCommand falla
                 if (!success) {
                     var sel = window.getSelection();
                     if (sel.rangeCount > 0) {
@@ -74,11 +69,13 @@ var RetoricaAudio = {
                         var textNode = document.createTextNode(textChunk + ' ');
                         range.insertNode(textNode);
                         
+                        // Mover el cursor después del texto insertado
                         range.setStartAfter(textNode);
                         range.setEndAfter(textNode);
                         sel.removeAllRanges();
                         sel.addRange(range);
                     } else {
+                        // Fallback secundario al final solo si no hay ningún foco previo
                         editor.innerText += (editor.innerText.trim() ? ' ' : '') + textChunk;
                     }
                 }
@@ -110,9 +107,7 @@ var RetoricaAudio = {
         if (btn) btn.classList.remove('recording-active');
     },
 
-    // ==========================================
-// SECCIÓN 4: MOTOR DE LECTURA KAREOKE Y SÍNTESIS DE VOZ (TTS)
-// ==========================================
+    // 3. Lectura Karaoke con Sincronización Real y Salto por Clic
     play: function() {
         if (!('speechSynthesis' in window)) {
             if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Lectura de voz no disponible.");
@@ -131,12 +126,15 @@ var RetoricaAudio = {
         var self = this;
         window.speechSynthesis.cancel(); 
 
+        // Preparar el DOM dividiendo las palabras para poder resaltarlas y tocarlas
         this.prepareKaraokeDOM(editor, text);
+
+        // Iniciar reproducción desde el principio (índice 0)
         this.playFromIndex(0, text);
     },
 
     prepareKaraokeDOM: function(container, rawText) {
-        container.setAttribute('dir', 'auto');
+        container.setAttribute('dir', 'auto'); // Ajuste automático RTL/LTR
         container.innerHTML = '';
 
         var tokens = rawText.split(/(\s+)/);
@@ -150,6 +148,7 @@ var RetoricaAudio = {
                 span.className = 'karaoke-word';
                 span.style.cursor = 'pointer';
                 
+                // Salto de lectura al presionar/hacer clic en la palabra
                 span.onclick = function(e) {
                     e.stopPropagation();
                     var start = parseInt(this.dataset.start, 10);
@@ -173,6 +172,7 @@ var RetoricaAudio = {
         utterance.lang = typeof RetoricaI18n !== 'undefined' ? RetoricaI18n.currentVoiceLang : 'es-MX';
         utterance.rate = this.state.speedRate;
 
+        // Evento principal para resaltar palabra actual en tiempo real
         utterance.onboundary = function(event) {
             if (event.name === 'word') {
                 var currentAbsIndex = startIndex + event.charIndex;
@@ -242,9 +242,7 @@ var RetoricaAudio = {
         if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Procesos de audio detenidos.");
     },
 
-    // ==========================================
-// SECCIÓN 5: GRABACIÓN DE MENSAJES DE VOZ Y EXPORTACIÓN WAV
-// ==========================================
+    // 4. Grabación Real de Audio (Botón REC / vmsg)
     produceVoiceMessage: function() {
         var self = this;
         var btn = document.getElementById('btn-icon-vmsg');
@@ -293,6 +291,7 @@ var RetoricaAudio = {
             });
     },
 
+    // 5. Convertir Texto a Audio en el Área de Trabajo (Botón AUD / tts)
     convertTextToVoiceFile: function() {
         var bodyInput = document.getElementById('editor-body');
         var body = bodyInput ? (bodyInput.innerText || bodyInput.textContent || '').trim() : '';
@@ -336,9 +335,7 @@ var RetoricaAudio = {
         }
     },
 
-    // ==========================================
-// SECCIÓN 6: RENDERIZADO VISUAL DE CONTROLES DE AUDIO
-// ==========================================
+    // 6. Inserción del Control de Audio (Diseño 3D Monocromático)
     renderAudioControl: function(blob, labelText) {
         var editor = document.getElementById('editor-body');
         if (!editor) return;
