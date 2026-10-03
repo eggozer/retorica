@@ -9,7 +9,9 @@ var RetoricaAudio = {
         speedRate: 1.0   // Velocidad / Tempo de lectura
     },
 
-    // 1. Configuración de Calidad y Velocidad
+    // ==========================================
+    // SECCIÓN 1: CONFIGURACIÓN DE CALIDAD Y VELOCIDAD
+    // ==========================================
     setQuality: function(quality) {
         this.state.quality = quality;
         if (typeof RetoricaUI !== 'undefined') {
@@ -24,7 +26,9 @@ var RetoricaAudio = {
         }
     },
 
-    // 2. Dictado por micrófono con inserción en la posición del cursor
+    // ==========================================
+    // SECCIÓN 2: DICTADO POR MICRÓFONO
+    // ==========================================
     toggleMic: function() {
         var btn = document.getElementById('btn-mic-main');
         var Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -107,7 +111,9 @@ var RetoricaAudio = {
         if (btn) btn.classList.remove('recording-active');
     },
 
-    // 3. Lectura Karaoke con Sincronización Real y Salto por Clic
+    // ==========================================
+    // SECCIÓN 3: LECTURA KAREOKE Y SINTETIZADOR
+    // ==========================================
     play: function() {
         if (!('speechSynthesis' in window)) {
             if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Lectura de voz no disponible.");
@@ -242,7 +248,9 @@ var RetoricaAudio = {
         if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Procesos de audio detenidos.");
     },
 
-    // 4. Grabación Real de Audio (Botón REC / vmsg)
+    // ==========================================
+    // SECCIÓN 4: GRABACIÓN DE MENSAJES DE VOZ
+    // ==========================================
     produceVoiceMessage: function() {
         var self = this;
         var btn = document.getElementById('btn-icon-vmsg');
@@ -291,7 +299,9 @@ var RetoricaAudio = {
             });
     },
 
-    // 5. Convertir Texto a Audio en el Área de Trabajo (Botón AUD / tts)
+    // ==========================================
+    // SECCIÓN 5: TEXTO A AUDIO (TTS)
+    // ==========================================
     convertTextToVoiceFile: function() {
         var bodyInput = document.getElementById('editor-body');
         var body = bodyInput ? (bodyInput.innerText || bodyInput.textContent || '').trim() : '';
@@ -335,7 +345,9 @@ var RetoricaAudio = {
         }
     },
 
-    // 6. Inserción del Control de Audio (Diseño 3D Monocromático)
+    // ==========================================
+    // SECCIÓN 6: RENDERIZADO DE CONTROLES DE AUDIO
+    // ==========================================
     renderAudioControl: function(blob, labelText) {
         var editor = document.getElementById('editor-body');
         if (!editor) return;
