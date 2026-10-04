@@ -183,7 +183,6 @@ var RetoricaStorage = {
         var bodyInput = document.getElementById('editor-body');
         var titleInput = document.getElementById('editor-title');
         
-        // Validación UX: Evita borrado accidental si hay contenido activo
         if (bodyInput && (bodyInput.innerText || bodyInput.textContent || "").trim().length > 0) {
             if (!confirm("¿Deseas iniciar un nuevo lienzo? Se limpiará el texto no guardado de la pantalla.")) {
                 return;
@@ -200,6 +199,7 @@ var RetoricaStorage = {
             RetoricaUI.updateCounters();
             RetoricaUI.notify("Nuevo documento iniciado");
         }
+        this.refreshLibrary();
     },
 
     clearCanvas: function() {
@@ -223,11 +223,11 @@ var RetoricaStorage = {
                     RetoricaUI.updateCounters();
                     RetoricaUI.notify("Documento cargado ✓");
                     
-                    // Cierre explícito para evitar alternancia involuntaria del menú
                     if (typeof RetoricaUI.closeSidebar === 'function') {
                         RetoricaUI.closeSidebar();
                     }
                 }
+                self.refreshLibrary();
             }
         });
     },
@@ -241,20 +241,16 @@ var RetoricaStorage = {
         if (event) event.stopPropagation();
         var self = this;
 
-        // Obtener el documento antes de removerlo temporalmente
         this.getDocById(id, function(doc) {
             if (!doc) return;
 
-            // Almacenar respaldo en memoria
             self.pendingDeletion = {
                 doc: doc,
                 timer: setTimeout(function() {
-                    // Confirmación definitiva tras 10 segundos
                     self.finalizeDelete(id);
                 }, 10000)
             };
 
-            // Ocultar de IndexedDB inmediatamente para respuesta visual rápida
             var transaction = self.dbInstance.transaction(['documents'], 'readwrite');
             var store = transaction.objectStore('documents');
             store.delete(id);
@@ -364,7 +360,7 @@ var RetoricaStorage = {
     },
 
     // ==========================================
-    // SECCIÓN 6: RENDERIZADO DE BIBLIOTECA LATERAL Y BACKUPS
+    // SECCIÓN 6: RENDERIZADO DE BIBLIOTECA, FECHAS E INDICADOR ACTIVO
     // ==========================================
     refreshLibrary: function() {
         var container = document.getElementById('docs-list-render');
@@ -385,16 +381,24 @@ var RetoricaStorage = {
             var fragment = document.createDocumentFragment();
             docs.forEach(function(doc) {
                 var card = document.createElement('div');
-                card.className = 'card-template';
+                var isActive = (doc.id === self.currentDocId);
+                
+                // Indicador visual alrededor de la plantilla en uso
+                card.className = 'card-template' + (isActive ? ' active-template-indicator' : '');
                 card.onclick = function() { self.loadDoc(doc.id); };
 
                 var tempDiv = document.createElement('div');
                 tempDiv.innerHTML = doc.body || '';
                 var plainText = tempDiv.innerText || tempDiv.textContent || '';
 
+                // Formato legible de fecha y hora de creación y modificación
+                var createdStr = doc.createdAt ? new Date(doc.createdAt).toLocaleString() : 'N/A';
+                var updatedStr = doc.updatedAt ? new Date(doc.updatedAt).toLocaleString() : 'N/A';
+
                 card.innerHTML = 
                     '<div class="card-template-title">' + self.escapeHTML(doc.title || 'Sin Título') + '</div>' +
                     '<div class="card-template-body">' + self.escapeHTML(plainText || 'Documento vacío...') + '</div>' +
+                    '<div style="font-size:0.55rem; color:var(--text-muted); margin-bottom:6px; text-align:center;">Creado: ' + createdStr + '<br>Modificado: ' + updatedStr + '</div>' +
                     '<div class="card-template-actions">' +
                         '<button type="button" class="btn-action-tmpl" onclick="RetoricaStorage.renameDoc(\'' + doc.id + '\', event)">EDITAR TÍTULO</button>' +
                         '<button type="button" class="btn-action-tmpl card-btn-copy" onclick="RetoricaStorage.copyDoc(\'' + doc.id + '\', event)">COPIAR</button>' +
