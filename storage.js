@@ -11,9 +11,6 @@ var RetoricaStorage = {
         });
     },
 
-    // ==========================================
-    // SECCIÓN 1: INICIALIZACIÓN DE INDEXEDDB Y PERSISTENCIA
-    // ==========================================
     initDB: function(callback) {
         if (navigator.storage && navigator.storage.persist) {
             navigator.storage.persist().then(function(persistent) {
@@ -52,9 +49,6 @@ var RetoricaStorage = {
         };
     },
 
-    // ==========================================
-    // SECCIÓN 2: GUARDADO Y AUTOGUARDADO DE DOCUMENTOS
-    // ==========================================
     save: function() {
         var self = this;
         this.initDB(function() {
@@ -138,9 +132,6 @@ var RetoricaStorage = {
         });
     },
 
-    // ==========================================
-    // SECCIÓN 3: CONSULTA, CARGA Y GESTIÓN DE LIENZOS
-    // ==========================================
     getDocById: function(id, callback) {
         if (!this.dbInstance) { 
             this.initDB(function() {
@@ -232,9 +223,6 @@ var RetoricaStorage = {
         });
     },
 
-    // ==========================================
-    // SECCIÓN 4: ELIMINACIÓN SEGURA Y SISTEMA DE "DESHACER" (UNDO)
-    // ==========================================
     pendingDeletion: null,
 
     deleteDoc: function(id, event) {
@@ -312,9 +300,6 @@ var RetoricaStorage = {
         }
     },
 
-    // ==========================================
-    // SECCIÓN 5: ACCESOS RÁPIDOS, COPIA Y COMPARTICIÓN
-    // ==========================================
     copyDoc: function(id, event) {
         if (event) event.stopPropagation();
         this.getDocById(id, function(doc) {
@@ -363,9 +348,6 @@ var RetoricaStorage = {
         });
     },
 
-    // ==========================================
-    // SECCIÓN 6: RENDERIZADO DE BIBLIOTECA LATERAL Y BACKUPS
-    // ==========================================
     refreshLibrary: function() {
         var container = document.getElementById('docs-list-render');
         if (!container) return;
