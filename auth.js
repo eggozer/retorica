@@ -2,6 +2,9 @@
 var RetoricaAuth = {
     state: { mode: 'email' },
 
+    // ==========================================
+    // SECCIÓN 1: CICLO DE VIDA Y MODOS DE ACCESO
+    // ==========================================
     initLifecycle: function() {
         var self = this;
         var currentActive = localStorage.getItem('ret_session_active');
@@ -63,6 +66,9 @@ var RetoricaAuth = {
         if (containerPass) containerPass.style.display = 'block';
     },
 
+    // ==========================================
+    // SECCIÓN 2: PROCESAMIENTO Y VALIDACIÓN
+    // ==========================================
     process: function() {
         var emailVal = document.getElementById('auth-input-email') ? document.getElementById('auth-input-email').value.trim() : '';
         var phoneVal = document.getElementById('auth-input-phone') ? document.getElementById('auth-input-phone').value.trim() : '';
@@ -146,6 +152,10 @@ var RetoricaAuth = {
         location.reload();
     }
 };
+
+// ==========================================
+// SECCIÓN 3: MOTOR CRIPTOGRÁFICO E2EE
+// ==========================================
 // --- RETÓRICA E2EE CRYPTO ENGINE (Web Crypto API) ---
 var RetoricaCrypto = {
     // Genera una clave AES-GCM derivada del UID del usuario

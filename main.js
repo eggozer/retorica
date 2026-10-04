@@ -13,6 +13,9 @@ window.addEventListener('beforeinstallprompt', function(e) {
 var RetoricaUI = {
     state: { zoom: 1.0, touchStartX: 0, touchEndX: 0 },
 
+    // ==========================================
+    // SECCIÓN 1: INICIALIZACIÓN Y CICLO DE VIDA
+    // ==========================================
     init: function() {
         var editor = document.getElementById('editor-body');
         var titleInput = document.getElementById('editor-title');
@@ -56,7 +59,9 @@ var RetoricaUI = {
         }
     },
 
-    // --- FUNCIONES DE FORMATO, COLOR Y TABLAS ---
+    // ==========================================
+    // SECCIÓN 2: FORMATO, COLOR Y TABLAS AVANZADAS
+    // ==========================================
     setFontSize: function(size) {
         var editor = document.getElementById('editor-body');
         document.execCommand('fontSize', false, size);
@@ -160,6 +165,9 @@ var RetoricaUI = {
         }, 1500);
     },
 
+    // ==========================================
+    // SECCIÓN 3: GESTIÓN DE GESTOS TÁCTILES Y VIEWPORT
+    // ==========================================
     initTouchGestures: function() {
         var self = this;
         document.addEventListener('touchstart', function(e) {
@@ -271,7 +279,9 @@ var RetoricaUI = {
         }, 2500);
     },
 
-    // --- EXPORTACIONES CON VERIFICACIÓN SEGURA ---
+    // ==========================================
+    // SECCIÓN 4: MOTOR DE EXPORTACIÓN (PDF Y WORD)
+    // ==========================================
     expPDF: function() {
         if (typeof html2pdf === 'undefined') {
             RetoricaUI.notify("Librería PDF no cargada o inaccesible.");

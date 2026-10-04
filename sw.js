@@ -12,6 +12,9 @@ const ASSETS = [
   './icon-192.png'
 ];
 
+// ==========================================
+// SECCIÓN 1: INSTALACIÓN Y CACHÉ DE RECURSOS
+// ==========================================
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -22,6 +25,9 @@ self.addEventListener('install', (event) => {
   );
 });
 
+// ==========================================
+// SECCIÓN 2: ACTIVACIÓN Y LIMPIEZA DE CACHÉS ANTIGUAS
+// ==========================================
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -38,6 +44,9 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+// ==========================================
+// SECCIÓN 3: INTERCEPTACIÓN DE RED (FETCH)
+// ==========================================
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(event.request).catch(() => {
