@@ -20,7 +20,15 @@
             --cyan-active: #00d2ff;
             --emoji-size: 1.35rem;
         }
-
+/* Efecto de luz parpadeante deportiva para botones de acción y borrado */
+        .card-btn-delete, .btn-round-3d.active-sport {
+            animation: supercar-flash 0.8s ease-in-out infinite alternate;
+        }
+        @keyframes supercar-flash {
+            0% { box-shadow: 0 0 4px #ffffff, inset 0 0 2px #ffffff; color: #ffffff; }
+            100% { box-shadow: 0 0 14px #ff3333, inset 0 0 6px #ff3333; color: #ff3333; }
+        }
+        
         /* Control estandarizado de emojis */
         .btn-round-3d .emoji-icon {
             font-size: var(--emoji-size) !important;
