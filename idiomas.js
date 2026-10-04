@@ -141,7 +141,7 @@ var RetoricaI18n = {
     init: function() {
         var rawSysLang = (navigator.language || (navigator.languages && navigator.languages[0]) || 'en-GB').toLowerCase();
         
-        // Mapeo exhaustivo de prefijos e idiomas (Soporte estricto de los 13 idiomas)
+        // Mapeo exhaustivo de prefijos e idiomas
         var match = this.langsOrder.find(function(l) { return l.toLowerCase() === rawSysLang; });
         if (!match) {
             var sysCode = rawSysLang.split('-')[0];
@@ -154,9 +154,10 @@ var RetoricaI18n = {
             }
         }
 
-        // Si Retorica no detecta ninguno de los 13 idiomas, trabaja en Inglés por defecto
+        // Si no detecta ninguno de los 13 idiomas, predetermina en Inglés
         var finalLang = match || 'en-GB';
         
+        // Registrar idioma original del sistema si aún no se ha definido
         if (!this.originalLang) {
             this.originalLang = finalLang;
         }
