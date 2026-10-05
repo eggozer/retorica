@@ -21,6 +21,15 @@
             --emoji-size: 1.35rem;
         }
 
+/* Indicador de uso reactivo con destello amarillo al presionar */
+        @keyframes yellow-flash {
+            0% { box-shadow: 0 0 4px #eab308, inset 0 0 2px #eab308; color: #eab308; border-color: #eab308; }
+            100% { box-shadow: 0 0 14px #eab308, inset 0 0 6px #eab308; color: #eab308; border-color: #eab308; }
+        }
+        .btn-round-3d.active-action-flash, .card-btn-action.active-action-flash {
+            animation: yellow-flash 0.6s ease-in-out infinite alternate !important;
+        }
+        
         /* Control estandarizado de emojis */
         .btn-round-3d .emoji-icon {
             font-size: var(--emoji-size) !important;
