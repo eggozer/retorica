@@ -385,27 +385,77 @@ var RetoricaStorage = {
             var fragment = document.createDocumentFragment();
             docs.forEach(function(doc) {
                 var card = document.createElement('div');
-                card.className = 'card-template';
+                var isActive = (doc.id === self.currentDocId);
+                
+                card.className = 'card-template' + (isActive ? ' active-template-indicator' : '');
                 card.onclick = function() { self.loadDoc(doc.id); };
 
                 var tempDiv = document.createElement('div');
                 tempDiv.innerHTML = doc.body || '';
                 var plainText = tempDiv.innerText || tempDiv.textContent || '';
 
+                var createdStr = doc.createdAt ? new Date(doc.createdAt).toLocaleString() : 'N/A';
+                var updatedStr = doc.updatedAt ? new Date(doc.updatedAt).toLocaleString() : 'N/A';
+
+                // Renderizado con botones idénticos a la barra superior (Redondos 3D, icono interior y leyenda inferior)
                 card.innerHTML = 
                     '<div class="card-template-title">' + self.escapeHTML(doc.title || 'Sin Título') + '</div>' +
                     '<div class="card-template-body">' + self.escapeHTML(plainText || 'Documento vacío...') + '</div>' +
+                    '<div style="font-size:0.55rem; color:var(--text-muted); margin-bottom:8px; text-align:center;">Creado: ' + createdStr + '<br>Modificado: ' + updatedStr + '</div>' +
                     '<div class="card-template-actions">' +
-                        '<button type="button" class="btn-action-tmpl" onclick="RetoricaStorage.renameDoc(\'' + doc.id + '\', event)">EDITAR TÍTULO</button>' +
-                        '<button type="button" class="btn-action-tmpl card-btn-copy" onclick="RetoricaStorage.copyDoc(\'' + doc.id + '\', event)">COPIAR</button>' +
-                        '<button type="button" class="btn-action-tmpl card-btn-share" onclick="RetoricaStorage.shareDoc(\'' + doc.id + '\', event)">COMPARTIR</button>' +
-                        '<button type="button" class="btn-action-tmpl card-btn-delete" onclick="RetoricaStorage.deleteDoc(\'' + doc.id + '\', event)">BORRAR</button>' +
+                        
+                        /* 1. Editar Título */
+                        '<div class="btn-wrapper-3d">' +
+                            '<button type="button" class="btn-round-3d card-btn-action" onclick="RetoricaStorage.triggerActionWithFlash(this, function() { RetoricaStorage.renameDoc(\'' + doc.id + '\', event); })" title="Editar Título" aria-label="Editar Título">' +
+                                '<span class="emoji-icon" aria-hidden="true">✏️</span>' +
+                            '</button>' +
+                            '<div class="btn-label-3d">Editar</div>' +
+                        '</div>' +
+
+                        /* 2. Copiar */
+                        '<div class="btn-wrapper-3d">' +
+                            '<button type="button" class="btn-round-3d card-btn-action" onclick="RetoricaStorage.triggerActionWithFlash(this, function() { RetoricaStorage.copyDoc(\'' + doc.id + '\', event); })" title="Copiar" aria-label="Copiar">' +
+                                '<span class="emoji-icon" aria-hidden="true">📋</span>' +
+                            '</button>' +
+                            '<div class="btn-label-3d">Copiar</div>' +
+                        '</div>' +
+
+                        /* 3. Compartir */
+                        '<div class="btn-wrapper-3d">' +
+                            '<button type="button" class="btn-round-3d card-btn-action" onclick="RetoricaStorage.triggerActionWithFlash(this, function() { RetoricaStorage.shareDoc(\'' + doc.id + '\', event); })" title="Compartir" aria-label="Compartir">' +
+                                '<span class="emoji-icon" aria-hidden="true">📤</span>' +
+                            '</button>' +
+                            '<div class="btn-label-3d">Compartir</div>' +
+                        '</div>' +
+
+                        /* 4. Borrar */
+                        '<div class="btn-wrapper-3d">' +
+                            '<button type="button" class="btn-round-3d card-btn-action" onclick="RetoricaStorage.triggerActionWithFlash(this, function() { RetoricaStorage.deleteDoc(\'' + doc.id + '\', event); })" title="Borrar" aria-label="Borrar">' +
+                                '<span class="emoji-icon" aria-hidden="true">🗑️</span>' +
+                            '</button>' +
+                            '<div class="btn-label-3d">Borrar</div>' +
+                        '</div>' +
+
                     '</div>';
 
                 fragment.appendChild(card);
             });
             container.appendChild(fragment);
         });
+    },
+
+    // Función auxiliar para activar el destello amarillo únicamente al presionar el botón de acción
+    triggerActionWithFlash: function(btnElement, actionCallback) {
+        if (event) event.stopPropagation();
+        if (btnElement) {
+            btnElement.classList.add('active-action-flash');
+            setTimeout(function() {
+                btnElement.classList.remove('active-action-flash');
+            }, 1200);
+        }
+        if (typeof actionCallback === 'function') {
+            actionCallback();
+        }
     },
 
     renameDoc: function(id, event) {
