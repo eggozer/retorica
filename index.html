@@ -731,6 +731,10 @@
         <div class="sidebar-content">
             <div id="user-session-bar" style="margin-bottom: 12px;"></div>
             <div style="font-size: 0.75rem; font-weight: bold; color: var(--text-muted); margin-bottom: 10px; letter-spacing: 1px;">BIBLIOTECA DE DOCUMENTOS</div>
+            <!-- Buscador de palabras para la biblioteca -->
+<div style="margin-bottom: 10px; position: relative;">
+    <input type="text" id="library-search-input" placeholder="Buscar palabras en documentos..." oninput="RetoricaStorage.filterLibrary(this.value)" style="width: 100%; background: var(--bg-card); border: 1px solid var(--border); padding: 8px 12px; border-radius: 8px; color: var(--text-main); font-size: 0.75rem; outline: none;" aria-label="Buscar palabras en documentos">
+</div>
             <div class="grid-templates" id="docs-list-render"></div>
         </div>
         <div class="sidebar-footer">
