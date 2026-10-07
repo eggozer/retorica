@@ -458,6 +458,109 @@ var RetoricaStorage = {
         }
     },
 
+    const RetoricaStorageExtension = {
+  // 1. Borrar con timer de 10s y opción de deshacer (Entre líneas 300 y 370)
+  deleteDocWithTimer(id) {
+    if (pendingDeletion) {
+      this.finalizeDelete(pendingDeletion);
+    }
+
+    pendingDeletion = id;
+    const cardElement = document.getElementById(`doc-card-${id}`);
+    if (cardElement) cardElement.style.opacity = '0.4';
+
+    this.showUndoToast("Documento marcado para eliminar. ¿Deshacer?", () => {
+      this.undoDelete();
+    }, 10000);
+
+    deleteTimer = setTimeout(() => {
+      if (pendingDeletion === id) {
+        this.finalizeDelete(id);
+      }
+    }, 10000);
+  },
+
+  undoDelete() {
+    if (deleteTimer) clearTimeout(deleteTimer);
+    if (pendingDeletion) {
+      const cardElement = document.getElementById(`doc-card-${pendingDeletion}`);
+      if (cardElement) cardElement.style.opacity = '1';
+      pendingDeletion = null;
+      this.refreshLibrary();
+      this.hideUndoToast();
+    }
+  },
+
+  finalizeDelete(id) {
+    let docs = JSON.parse(localStorage.getItem('retorica_docs') || '[]');
+    docs = docs.filter(doc => doc.id !== id);
+    localStorage.setItem('retorica_docs', JSON.stringify(docs));
+    pendingDeletion = null;
+    this.refreshLibrary();
+  },
+
+  showUndoToast(message, undoCallback, duration) {
+    let toast = document.getElementById('undo-toast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'undo-toast';
+      toast.style.cssText = "position:fixed; bottom:20px; right:20px; background:#333; color:#fff; padding:12px 20px; border-radius:8px; display:flex; gap:12px; align-items:center; z-index:1000; box-shadow:0 4px 12px rgba(0,0,0,0.3);";
+      document.body.appendChild(toast);
+    }
+    toast.innerHTML = `<span>${message}</span> <button id="undo-btn" style="background:#00ffcc; border:none; padding:4px 10px; border-radius:4px; cursor:pointer; font-weight:bold; color:#000;">Deshacer</button>`;
+    
+    document.getElementById('undo-btn').onclick = () => {
+      undoCallback();
+      this.hideUndoToast();
+    };
+
+    if (this.toastTimeout) clearTimeout(this.toastTimeout);
+    this.toastTimeout = setTimeout(() => {
+      this.hideUndoToast();
+    }, duration);
+  },
+
+  hideUndoToast() {
+    const toast = document.getElementById('undo-toast');
+    if (toast) toast.remove();
+  },
+
+  // 2 y 4. Renderizado con fechas, indicador multicolor y acciones autoajustables (Entre líneas 450 y 510)
+  renderDocCard(doc) {
+    const isActive = doc.id === this.currentDocId;
+    const activeClass = isActive ? 'active-template-indicator' : '';
+    
+    const createdDate = new Date(doc.createdAt || Date.now()).toLocaleString();
+    const updatedDate = new Date(doc.updatedAt || Date.now()).toLocaleString();
+
+    return `
+      <div id="doc-card-${doc.id}" class="doc-card ${activeClass}" style="position:relative; padding:12px; margin-bottom:10px; background:#222; border-radius:8px; border:1px solid #444;">
+        <h4>${doc.title || 'Sin título'}</h4>
+        <div style="font-size: 0.75rem; color: #aaa; margin: 4px 0;">
+          <div>Creado: ${createdDate}</div>
+          <div>Modificado: ${updatedDate}</div>
+        </div>
+        <p style="font-size: 0.85rem; color: #ccc;">${doc.content ? doc.content.substring(0, 60) + '...' : 'Vacío'}</p>
+        
+        <div class="card-template-actions">
+          <button onclick="RetoricaStorage.loadDoc('${doc.id}')" title="Abrir">📂</button>
+          <button onclick="RetoricaStorage.deleteDocWithTimer('${doc.id}')" title="Eliminar">🗑️</button>
+        </div>
+      </div>
+    `;
+  },
+
+  // 3. Filtrado en tiempo real por palabras o contenido
+  filterLibrary(query) {
+    const q = query.toLowerCase();
+    const cards = document.querySelectorAll('.doc-card');
+    cards.forEach(card => {
+      const text = card.innerText.toLowerCase();
+      card.style.display = text.includes(q) ? 'block' : 'none';
+    });
+  }
+};
+    
     renameDoc: function(id, event) {
         if (event) event.stopPropagation();
         var self = this;
