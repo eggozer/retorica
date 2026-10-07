@@ -21,15 +21,6 @@
             --emoji-size: 1.35rem;
         }
 
-/* Indicador de uso reactivo con destello amarillo al presionar */
-        @keyframes yellow-flash {
-            0% { box-shadow: 0 0 4px #eab308, inset 0 0 2px #eab308; color: #eab308; border-color: #eab308; }
-            100% { box-shadow: 0 0 14px #eab308, inset 0 0 6px #eab308; color: #eab308; border-color: #eab308; }
-        }
-        .btn-round-3d.active-action-flash, .card-btn-action.active-action-flash {
-            animation: yellow-flash 0.6s ease-in-out infinite alternate !important;
-        }
-        
         /* Control estandarizado de emojis */
         .btn-round-3d .emoji-icon {
             font-size: var(--emoji-size) !important;
@@ -413,62 +404,6 @@
             unicode-bidi: plaintext;
             text-align: start;
         }
-        /* Indicador fosforescente multicolor para la plantilla activa */
-  @keyframes neonGlow {
-    0% { border-color: #ff0055; box-shadow: 0 0 8px #ff0055; }
-    33% { border-color: #00ffcc; box-shadow: 0 0 8px #00ffcc; }
-    66% { border-color: #9900ff; box-shadow: 0 0 8px #9900ff; }
-    100% { border-color: #ff0055; box-shadow: 0 0 8px #ff0055; }
-  }
-
-  .active-template-indicator {
-    border: 2px solid #ff0055 !important;
-    animation: neonGlow 4s infinite linear;
-  }
-
-  /* Buscador de palabras flotante en la biblioteca */
-  #search-floating-container {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    background: var(--bg-color, #1a1a1a);
-    padding: 10px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  }
-
-  #library-search-input {
-    width: 100%;
-    padding: 8px 12px;
-    border-radius: 6px;
-    border: 1px solid #444;
-    background: #2a2a2a;
-    color: #fff;
-    outline: none;
-  }
-
-  #library-search-input:focus {
-    border-color: #00ffcc;
-  }
-
-  /* Contenedor de botones autoajustable sin estorbar */
-  .card-template-actions {
-    position: absolute;
-    bottom: 8px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 6px;
-    background: rgba(0, 0, 0, 0.85);
-    padding: 4px 8px;
-    border-radius: 20px;
-    backdrop-filter: blur(4px);
-    animation: subtle-blink 3s ease-in-out infinite;
-  }
-
-  @keyframes subtle-blink {
-    0%, 100% { opacity: 0.9; }
-    50% { opacity: 1; filter: brightness(1.2); }
-  }
     </style>
 </head>
 <body>
@@ -765,9 +700,6 @@
         <div class="sidebar-content">
             <div id="user-session-bar" style="margin-bottom: 12px;"></div>
             <div style="font-size: 0.75rem; font-weight: bold; color: var(--text-muted); margin-bottom: 10px; letter-spacing: 1px;">BIBLIOTECA DE DOCUMENTOS</div>
-            <div id="search-floating-container">
-  <input type="text" id="library-search-input" placeholder="Buscar palabras, párrafos o archivos..." oninput="RetoricaStorage.filterLibrary(this.value)">
-</div>
             <div class="grid-templates" id="docs-list-render"></div>
         </div>
         <div class="sidebar-footer">
