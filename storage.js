@@ -366,7 +366,7 @@ var RetoricaStorage = {
     // ==========================================
     // SECCIÓN 6: RENDERIZADO DE BIBLIOTECA LATERAL Y BACKUPS
     // ==========================================
-    refreshLibrary: function(filterQuery) {
+    refreshLibrary: function() {
         var container = document.getElementById('docs-list-render');
         if (!container) return;
 
@@ -382,32 +382,24 @@ var RetoricaStorage = {
                 return new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0);
             });
 
-            var query = (filterQuery || "").toLowerCase();
             var fragment = document.createDocumentFragment();
-
             docs.forEach(function(doc) {
-                var titleText = doc.title || 'Sin Título';
-                var tempDiv = document.createElement('div');
-                tempDiv.innerHTML = doc.body || '';
-                var plainText = tempDiv.innerText || tempDiv.textContent || '';
-
-                // Filtrado por buscador (respeta lo que muestran tus capturas)
-                if (query && !titleText.toLowerCase().includes(query) && !plainText.toLowerCase().includes(query)) {
-                    return;
-                }
-
                 var card = document.createElement('div');
                 var isActive = (doc.id === self.currentDocId);
                 
                 card.className = 'card-template' + (isActive ? ' active-template-indicator' : '');
                 card.onclick = function() { self.loadDoc(doc.id); };
 
+                var tempDiv = document.createElement('div');
+                tempDiv.innerHTML = doc.body || '';
+                var plainText = tempDiv.innerText || tempDiv.textContent || '';
+
                 var createdStr = doc.createdAt ? new Date(doc.createdAt).toLocaleString() : 'N/A';
                 var updatedStr = doc.updatedAt ? new Date(doc.updatedAt).toLocaleString() : 'N/A';
 
-                // Renderizado con la botonera 3D completa y los botones de acción
+                // Renderizado con botones idénticos a la barra superior (Redondos 3D, icono interior y leyenda inferior)
                 card.innerHTML = 
-                    '<div class="card-template-title">' + self.escapeHTML(titleText) + '</div>' +
+                    '<div class="card-template-title">' + self.escapeHTML(doc.title || 'Sin Título') + '</div>' +
                     '<div class="card-template-body">' + self.escapeHTML(plainText || 'Documento vacío...') + '</div>' +
                     '<div style="font-size:0.55rem; color:var(--text-muted); margin-bottom:8px; text-align:center;">Creado: ' + createdStr + '<br>Modificado: ' + updatedStr + '</div>' +
                     '<div class="card-template-actions">' +
@@ -450,10 +442,6 @@ var RetoricaStorage = {
             });
             container.appendChild(fragment);
         });
-    },
-
-    filterLibrary: function(query) {
-        this.refreshLibrary(query);
     },
 
     // Función auxiliar para activar el destello amarillo únicamente al presionar el botón de acción
