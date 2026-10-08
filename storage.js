@@ -393,13 +393,26 @@ var RetoricaStorage = {
                 var plainText = tempDiv.innerText || tempDiv.textContent || '';
 
                 card.innerHTML = 
+                    card.innerHTML = 
                     '<div class="card-template-title">' + self.escapeHTML(doc.title || 'Sin Título') + '</div>' +
                     '<div class="card-template-body">' + self.escapeHTML(plainText || 'Documento vacío...') + '</div>' +
                     '<div class="card-template-actions">' +
-                        '<button type="button" class="btn-action-tmpl" onclick="RetoricaStorage.renameDoc(\'' + doc.id + '\', event)">EDITAR TÍTULO</button>' +
-                        '<button type="button" class="btn-action-tmpl card-btn-copy" onclick="RetoricaStorage.copyDoc(\'' + doc.id + '\', event)">COPIAR</button>' +
-                        '<button type="button" class="btn-action-tmpl card-btn-share" onclick="RetoricaStorage.shareDoc(\'' + doc.id + '\', event)">COMPARTIR</button>' +
-                        '<button type="button" class="btn-action-tmpl card-btn-delete" onclick="RetoricaStorage.deleteDoc(\'' + doc.id + '\', event)">BORRAR</button>' +
+                        '<div class="card-action-wrapper">' +
+                            '<button type="button" class="btn-action-tmpl" onclick="RetoricaStorage.renameDoc(\'' + doc.id + '\', event)">✏️</button>' +
+                            '<div class="card-action-label"><span class="scroll-txt">Editar Título</span></div>' +
+                        '</div>' +
+                        '<div class="card-action-wrapper">' +
+                            '<button type="button" class="btn-action-tmpl" onclick="RetoricaStorage.copyDoc(\'' + doc.id + '\', event)">📋</button>' +
+                            '<div class="card-action-label">Copiar</div>' +
+                        '</div>' +
+                        '<div class="card-action-wrapper">' +
+                            '<button type="button" class="btn-action-tmpl" onclick="RetoricaStorage.shareDoc(\'' + doc.id + '\', event)">🔗</button>' +
+                            '<div class="card-action-label">Compartir</div>' +
+                        '</div>' +
+                        '<div class="card-action-wrapper">' +
+                            '<button type="button" class="btn-action-tmpl" style="color: #ef4444 !important;" onclick="RetoricaStorage.deleteDoc(\'' + doc.id + '\', event)">🗑️</button>' +
+                            '<div class="card-action-label">Borrar</div>' +
+                        '</div>' +
                     '</div>';
 
                 fragment.appendChild(card);
