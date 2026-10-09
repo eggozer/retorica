@@ -385,9 +385,7 @@ var RetoricaStorage = {
             var fragment = document.createDocumentFragment();
             docs.forEach(function(doc) {
                 var card = document.createElement('div');
-                var isActive = (doc.id === self.currentDocId);
-                
-                card.className = 'card-template' + (isActive ? ' active-template-indicator' : '');
+                card.className = 'card-template';
                 card.onclick = function() { self.loadDoc(doc.id); };
 
                 var tempDiv = document.createElement('div');
@@ -400,7 +398,7 @@ var RetoricaStorage = {
                 card.innerHTML = 
                     '<div class="card-template-title">' + self.escapeHTML(doc.title || 'Sin Título') + '</div>' +
                     '<div class="card-template-body">' + self.escapeHTML(plainText || 'Documento vacío...') + '</div>' +
-                    '<div style="font-size:0.55rem; color:var(--text-muted); margin-bottom:8px; text-align:center;">Creado: ' + createdStr + '<br>Modificado: ' + updatedStr + '</div>' +
+                    '<div style="font-size:0.55rem; color:var(--text-muted); margin-bottom:6px; text-align:center;">Creado: ' + createdStr + '<br>Modificado: ' + updatedStr + '</div>' +
                     '<div class="card-template-actions">' +
                         '<div class="card-action-wrapper">' +
                             '<button type="button" class="btn-action-tmpl" onclick="RetoricaStorage.renameDoc(\'' + doc.id + '\', event)">✏️</button>' +
