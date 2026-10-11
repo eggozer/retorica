@@ -410,7 +410,7 @@ var RetoricaStorage = {
                         '</div>' +
                         '<div class="card-action-wrapper">' +
                             '<button type="button" class="btn-action-tmpl" onclick="RetoricaStorage.shareDoc(\'' + doc.id + '\', event)">🔗</button>' +
-                            '<div class="card-action-label">Compartir</div>' +
+                            '<div class="card-action-label"><span class="scroll-txt">Compartir</span></div>' +
                         '</div>' +
                         '<div class="card-action-wrapper">' +
                             '<button type="button" class="btn-action-tmpl" style="color: #ef4444 !important;" onclick="RetoricaStorage.deleteDoc(\'' + doc.id + '\', event)">🗑️</button>' +
