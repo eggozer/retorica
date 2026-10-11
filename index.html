@@ -283,21 +283,23 @@
             width: 100%;
         }
 
+        /* Contenedor fijo integrado en la parte inferior de la plantilla */
         .card-template-actions { 
-            display: none !important; 
-            position: absolute;
-            bottom: 8px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90% !important; 
-            gap: 6px !important;
-            background: var(--bg-sidebar);
-            border: 1px solid var(--border); 
-            border-radius: 12px;
-            padding: 6px; 
-            z-index: 50;
+            display: flex !important; 
+            position: relative !important;
+            bottom: auto !important;
+            left: auto !important;
+            transform: none !important;
+            width: 100% !important; 
+            gap: 4px !important;
+            background: transparent !important;
+            border: none !important; 
+            border-top: 1px dashed var(--border) !important;
+            padding-top: 8px !important;
+            margin-top: 6px !important;
+            z-index: 5;
             flex-direction: row !important; 
-            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+            box-shadow: none !important;
         }
 
         .card-template:hover .card-template-actions,
@@ -323,25 +325,6 @@
             overflow: hidden; 
             height: auto; 
             text-align: center;
-        }
-
-        /* Contenedor fijo integrado en la parte inferior de la plantilla */
-        .card-template-actions { 
-            display: flex !important; 
-            position: relative !important;
-            bottom: auto !important;
-            left: auto !important;
-            transform: none !important;
-            width: 100% !important; 
-            gap: 4px !important;
-            background: transparent !important;
-            border: none !important; 
-            border-top: 1px dashed var(--border) !important;
-            padding-top: 8px !important;
-            margin-top: 6px !important;
-            z-index: 5;
-            flex-direction: row !important; 
-            box-shadow: none !important;
         }
 
         .card-action-wrapper {
