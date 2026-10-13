@@ -238,23 +238,22 @@ var RetoricaStorage = {
     pendingDeletion: null,
 
     deleteDoc: function(id, event) {
-        if (event) event.stopPropagation();
+        if (event) {
+            event.stopPropagation();
+            event.preventDefault();
+        }
         var self = this;
 
-        // Obtener el documento antes de removerlo temporalmente
         this.getDocById(id, function(doc) {
             if (!doc) return;
 
-            // Almacenar respaldo en memoria
             self.pendingDeletion = {
                 doc: doc,
                 timer: setTimeout(function() {
-                    // Confirmación definitiva tras 10 segundos
                     self.finalizeDelete(id);
                 }, 10000)
             };
 
-            // Ocultar de IndexedDB inmediatamente para respuesta visual rápida
             var transaction = self.dbInstance.transaction(['documents'], 'readwrite');
             var store = transaction.objectStore('documents');
             store.delete(id);
