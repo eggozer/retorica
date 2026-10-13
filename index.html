@@ -468,6 +468,40 @@
             unicode-bidi: plaintext;
             text-align: start;
         }
+        /* Estilo visual para el aviso flotante de deshacer */
+        .undo-toast-banner {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-sidebar);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            z-index: 4000;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        .undo-toast-banner button {
+            background: var(--btn-3d-bg);
+            color: #00ff66;
+            border: 1px solid var(--border);
+            border-bottom: 2px solid var(--btn-shadow);
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 900;
+            font-size: 0.75rem;
+        }
+        .undo-toast-banner button:active {
+            transform: translateY(2px);
+            border-bottom-width: 1px;
+        }
     </style>
 </head>
 <body>
