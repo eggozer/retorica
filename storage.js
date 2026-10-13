@@ -260,7 +260,14 @@ var RetoricaStorage = {
 
             transaction.oncomplete = function() {
                 if (self.currentDocId === id) {
-                    self.createNewDoc();
+                    // Limpieza directa del lienzo activo sin disparar alertas de confirmación
+                    self.currentDocId = null;
+                    var titleInput = document.getElementById('editor-title');
+                    var bodyInput = document.getElementById('editor-body');
+                    if (titleInput) titleInput.value = '';
+                    if (bodyInput) bodyInput.innerHTML = '';
+                    localStorage.removeItem('retorica_last_doc_id');
+                    if (typeof RetoricaUI !== 'undefined') RetoricaUI.updateCounters();
                 }
                 self.refreshLibrary();
                 self.showUndoToast();
