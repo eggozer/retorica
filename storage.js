@@ -238,36 +238,30 @@ var RetoricaStorage = {
     pendingDeletion: null,
 
     deleteDoc: function(id, event) {
-        if (event) {
-            event.stopPropagation();
-            event.preventDefault();
-        }
+        if (event) event.stopPropagation();
         var self = this;
 
+        // Obtener el documento antes de removerlo temporalmente
         this.getDocById(id, function(doc) {
             if (!doc) return;
 
+            // Almacenar respaldo en memoria
             self.pendingDeletion = {
                 doc: doc,
                 timer: setTimeout(function() {
+                    // Confirmación definitiva tras 10 segundos
                     self.finalizeDelete(id);
                 }, 10000)
             };
 
+            // Ocultar de IndexedDB inmediatamente para respuesta visual rápida
             var transaction = self.dbInstance.transaction(['documents'], 'readwrite');
             var store = transaction.objectStore('documents');
             store.delete(id);
 
             transaction.oncomplete = function() {
                 if (self.currentDocId === id) {
-                    // Limpieza directa del lienzo activo sin disparar alertas de confirmación
-                    self.currentDocId = null;
-                    var titleInput = document.getElementById('editor-title');
-                    var bodyInput = document.getElementById('editor-body');
-                    if (titleInput) titleInput.value = '';
-                    if (bodyInput) bodyInput.innerHTML = '';
-                    localStorage.removeItem('retorica_last_doc_id');
-                    if (typeof RetoricaUI !== 'undefined') RetoricaUI.updateCounters();
+                    self.createNewDoc();
                 }
                 self.refreshLibrary();
                 self.showUndoToast();
@@ -391,7 +385,9 @@ var RetoricaStorage = {
             var fragment = document.createDocumentFragment();
             docs.forEach(function(doc) {
                 var card = document.createElement('div');
-                card.className = 'card-template';
+                var isActive = (doc.id === self.currentDocId);
+                
+                card.className = 'card-template' + (isActive ? ' active-template-indicator' : '');
                 card.onclick = function() { self.loadDoc(doc.id); };
 
                 var tempDiv = document.createElement('div');
@@ -404,7 +400,7 @@ var RetoricaStorage = {
                 card.innerHTML = 
                     '<div class="card-template-title">' + self.escapeHTML(doc.title || 'Sin Título') + '</div>' +
                     '<div class="card-template-body">' + self.escapeHTML(plainText || 'Documento vacío...') + '</div>' +
-                    '<div style="font-size:0.55rem; color:var(--text-muted); margin-bottom:6px; text-align:center;">Creado: ' + createdStr + '<br>Modificado: ' + updatedStr + '</div>' +
+                    '<div style="font-size:0.55rem; color:var(--text-muted); margin-bottom:8px; text-align:center;">Creado: ' + createdStr + '<br>Modificado: ' + updatedStr + '</div>' +
                     '<div class="card-template-actions">' +
                         '<div class="card-action-wrapper">' +
                             '<button type="button" class="btn-action-tmpl" onclick="RetoricaStorage.renameDoc(\'' + doc.id + '\', event)">✏️</button>' +
@@ -416,7 +412,7 @@ var RetoricaStorage = {
                         '</div>' +
                         '<div class="card-action-wrapper">' +
                             '<button type="button" class="btn-action-tmpl" onclick="RetoricaStorage.shareDoc(\'' + doc.id + '\', event)">🔗</button>' +
-                            '<div class="card-action-label"><span class="scroll-txt">Compartir</span></div>' +
+                            '<div class="card-action-label">Compartir</div>' +
                         '</div>' +
                         '<div class="card-action-wrapper">' +
                             '<button type="button" class="btn-action-tmpl" style="color: #ef4444 !important;" onclick="RetoricaStorage.deleteDoc(\'' + doc.id + '\', event)">🗑️</button>' +
