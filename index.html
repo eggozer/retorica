@@ -241,7 +241,7 @@
             overflow-x: hidden; 
         }
 
-        /* Tarjeta de plantilla estática que NUNCA cambia de tamaño */
+        /* Tarjeta compacta que se autoajusta a su contenido natural */
         .card-template { 
             flex: 1 1 calc(50% - 5px); 
             min-width: calc(50% - 5px); 
@@ -254,8 +254,8 @@
             border-radius: 12px; 
             padding: 10px 8px;
             word-break: break-word; 
-            overflow: hidden !important; 
-            height: 140px; /* Altura fija para mantener el grid perfectamente alineado */
+            overflow: visible !important; /* Permite desplegar el menú Flotante de forma limpia */
+            height: auto !important; /* Autoajuste perfecto del contenido */
             text-align: center;
             position: relative;
         }
@@ -315,7 +315,7 @@
             border-bottom-width: 1px !important;
         }
 
-        /* Submenú flotante absoluto sobre la propia tarjeta (sin modificar tamaño de la tarjeta ni de la vecina) */
+        /* Submenú Flotante sobre la misma tarjeta que NO estira la grilla ni las vecinas */
         .card-template-actions { 
             display: none !important; 
             position: absolute !important;
