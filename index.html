@@ -241,7 +241,7 @@
             overflow-x: hidden; 
         }
 
-        /* Tarjeta de plantilla */
+        /* Tarjeta de plantilla estática que NUNCA cambia de tamaño */
         .card-template { 
             flex: 1 1 calc(50% - 5px); 
             min-width: calc(50% - 5px); 
@@ -254,8 +254,8 @@
             border-radius: 12px; 
             padding: 10px 8px;
             word-break: break-word; 
-            overflow: hidden; 
-            height: auto; 
+            overflow: hidden !important; 
+            height: 140px; /* Altura fija para mantener el grid perfectamente alineado */
             text-align: center;
             position: relative;
         }
@@ -270,7 +270,7 @@
             text-overflow: ellipsis; 
             text-align: center;
             width: 100%;
-            padding-right: 24px; /* Espacio para no encimarse con el botón 3 puntos */
+            padding-right: 24px;
         }
 
         .card-template-body { 
@@ -282,7 +282,7 @@
             -webkit-box-orient: vertical; 
             overflow: hidden; 
             text-overflow: ellipsis; 
-            margin-bottom: 8px; 
+            margin-bottom: 6px; 
             text-align: center;
             width: 100%;
         }
@@ -315,27 +315,28 @@
             border-bottom-width: 1px !important;
         }
 
-        /* Submenú desplegable HORIZONTAL dentro de la misma tarjeta */
+        /* Submenú flotante absoluto sobre la propia tarjeta (sin modificar tamaño de la tarjeta ni de la vecina) */
         .card-template-actions { 
             display: none !important; 
-            position: relative !important;
-            width: 100% !important; 
-            gap: 4px !important;
-            background: transparent !important;
-            border: none !important; 
-            border-top: 1px dashed var(--border) !important;
-            padding-top: 8px !important;
-            margin-top: 6px !important;
-            z-index: 5;
+            position: absolute !important;
+            bottom: 4px !important;
+            left: 4px !important;
+            right: 4px !important;
+            background: var(--bg-sidebar) !important;
+            border: 1px solid var(--border) !important; 
+            border-radius: 10px !important;
+            padding: 6px !important; 
+            z-index: 50 !important;
             flex-direction: row !important; 
-            box-shadow: none !important;
+            gap: 4px !important;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.6) !important;
         }
 
         .card-template-actions.visible {
             display: flex !important;
         }
 
-        /* Contenedores de botones horizontales */
+        /* Contenedores de botones horizontales dentro del menú flotante */
         .card-action-wrapper {
             flex: 1 1 0% !important;
             min-width: 0 !important;
@@ -347,7 +348,7 @@
             overflow: visible !important;
         }
 
-        /* Botones redondos de acción */
+        /* Tamaño original restaurado para los iconos de la botonera */
         .btn-action-tmpl { 
             width: 36px !important;
             height: 36px !important;
@@ -365,7 +366,6 @@
             justify-content: center;
             box-shadow: 0 0 8px rgba(250, 204, 21, 0.4), inset 0 0 4px rgba(250, 204, 21, 0.2);
             border-color: #facc15 !important;
-            animation: sport-brake-flash 1.2s infinite alternate ease-in-out;
         }
 
         .btn-action-tmpl:active { 
