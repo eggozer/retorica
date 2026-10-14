@@ -12,7 +12,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
    
     <style>
-   :root {
+<style>
+        :root {
             --bg-main: #0f111a; --bg-sidebar: #161925; --bg-card: #1f2335;
             --accent: #e2e8f0; --text-main: #f3f4f6; --text-muted: #a0aec0;
             --border: #2d3748; --danger: #718096; --btn-3d-bg: #2d3244;
@@ -33,9 +34,8 @@
         body.light-theme {
             --bg-main: #f0f2f5; --bg-sidebar: #e4e7eb; --bg-card: #ffffff;
             --accent: #2d3748; --text-main: #1a202c; --text-muted: #718096;
-            --border: #cbd5e0; --danger: #a0aec0; --btn-3d-bg: #e2e8f0;
-            --btn-shadow: #cbd5e0; --btn-play-green: #15803d;
-            --cyan-active: #0088cc;
+            --border: #cbd5e0; --danger: #a0aec0; --btn-shadow: #cbd5e0;
+            --btn-play-green: #15803d; --cyan-active: #0088cc;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
         body, html { width: 100%; height: 100%; background: var(--bg-main); color: var(--text-main); overflow-y: auto; display: flex; flex-direction: column; }
@@ -126,7 +126,7 @@
             box-shadow: 0 2px 3px rgba(0,0,0,0.3); 
         }
 
-        /* Leyenda Exterior Inferior con Desplazamiento Lateral Continuo (Ida y Vuelta) si supera 1 palabra */
+        /* Leyenda Exterior Inferior con Desplazamiento Lateral Continuo */
         .top-navbar .btn-label-3d, .accordion-body .btn-label-3d {
             font-size: 0.58rem;
             font-weight: bold;
@@ -241,7 +241,7 @@
             overflow-x: hidden; 
         }
 
-        /* Tarjeta de plantilla con posicionamiento relativo */
+        /* Tarjeta de plantilla */
         .card-template { 
             flex: 1 1 calc(50% - 5px); 
             min-width: calc(50% - 5px); 
@@ -254,7 +254,7 @@
             border-radius: 12px; 
             padding: 10px 8px;
             word-break: break-word; 
-            overflow: visible !important; 
+            overflow: hidden; 
             height: auto; 
             text-align: center;
             position: relative;
@@ -270,6 +270,7 @@
             text-overflow: ellipsis; 
             text-align: center;
             width: 100%;
+            padding-right: 24px; /* Espacio para no encimarse con el botón 3 puntos */
         }
 
         .card-template-body { 
@@ -289,16 +290,16 @@
         /* Botón de Tres Puntos en la esquina superior derecha */
         .card-menu-btn {
             position: absolute;
-            top: 8px;
-            right: 8px;
-            width: 28px !important;
-            height: 28px !important;
+            top: 6px;
+            right: 6px;
+            width: 26px !important;
+            height: 26px !important;
             border-radius: 50% !important;
             background: linear-gradient(145deg, var(--bg-card), var(--btn-3d-bg)) !important;
             border: 1px solid var(--border) !important;
             border-bottom: 2px solid var(--btn-shadow) !important;
             color: var(--text-main) !important;
-            font-size: 0.85rem !important;
+            font-size: 0.8rem !important;
             font-weight: bold;
             display: flex;
             align-items: center;
@@ -314,77 +315,101 @@
             border-bottom-width: 1px !important;
         }
 
-        /* Submenú desplegable flotante de acciones */
+        /* Submenú desplegable HORIZONTAL dentro de la misma tarjeta */
         .card-template-actions { 
             display: none !important; 
-            position: absolute;
-            top: 42px;
-            right: 8px;
-            width: 180px !important; 
+            position: relative !important;
+            width: 100% !important; 
             gap: 4px !important;
-            background: var(--bg-sidebar);
-            border: 1px solid var(--border); 
-            border-radius: 10px;
-            padding: 8px; 
-            z-index: 100;
-            flex-direction: column !important; 
-            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+            background: transparent !important;
+            border: none !important; 
+            border-top: 1px dashed var(--border) !important;
+            padding-top: 8px !important;
+            margin-top: 6px !important;
+            z-index: 5;
+            flex-direction: row !important; 
+            box-shadow: none !important;
         }
 
         .card-template-actions.visible {
             display: flex !important;
         }
 
-        /* Contenedor de Botón + Leyenda dentro del submenú flotante */
+        /* Contenedores de botones horizontales */
         .card-action-wrapper {
-            display: flex !important;
-            flex-direction: row !important;
+            flex: 1 1 0% !important;
+            min-width: 0 !important;
+            display: inline-flex;
+            flex-direction: column !important;
             align-items: center;
-            gap: 8px;
-            width: 100%;
-            padding: 4px;
-            border-bottom: 1px dashed var(--border);
-        }
-        .card-action-wrapper:last-child {
-            border-bottom: none;
+            justify-content: flex-start;
+            position: relative;
+            overflow: visible !important;
         }
 
-        /* Botón de acción individual en el submenú */
+        /* Botones redondos de acción */
         .btn-action-tmpl { 
-            width: 32px !important;
-            height: 32px !important;
+            width: 36px !important;
+            height: 36px !important;
             border-radius: 50% !important;
             background: linear-gradient(145deg, var(--bg-card), var(--btn-3d-bg)) !important;
             border: 1px solid var(--border) !important; 
-            border-bottom: 2px solid var(--btn-shadow) !important; 
+            border-bottom: 3px solid var(--btn-shadow) !important; 
             padding: 0 !important;
-            font-size: 0.85rem !important;
+            font-size: 0.95rem !important;
             font-weight: 800; 
             color: var(--text-main) !important; 
             cursor: pointer; 
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 0 6px rgba(250, 204, 21, 0.4), inset 0 0 3px rgba(250, 204, 21, 0.2);
+            box-shadow: 0 0 8px rgba(250, 204, 21, 0.4), inset 0 0 4px rgba(250, 204, 21, 0.2);
             border-color: #facc15 !important;
+            animation: sport-brake-flash 1.2s infinite alternate ease-in-out;
         }
 
         .btn-action-tmpl:active { 
-            transform: translateY(1px); 
+            transform: translateY(2px); 
             border-bottom-width: 1px !important; 
         }
 
+        @keyframes sport-brake-flash {
+            0% {
+                box-shadow: 0 0 4px rgba(255, 255, 255, 0.2), inset 0 0 2px rgba(250, 204, 21, 0.4);
+                filter: brightness(1);
+            }
+            50% {
+                box-shadow: 0 0 14px rgba(255, 255, 255, 0.9), 0 0 22px rgba(250, 204, 21, 0.8);
+                filter: brightness(1.3);
+            }
+            100% {
+                box-shadow: 0 0 4px rgba(255, 255, 255, 0.2), inset 0 0 2px rgba(250, 204, 21, 0.4);
+                filter: brightness(1);
+            }
+        }
+
         .card-action-label {
-            font-size: 0.65rem !important;
+            font-size: 0.5rem;
             font-weight: bold;
             color: var(--text-muted);
-            text-align: left !important;
+            text-align: center;
+            line-height: 1.1rem;
+            height: 1.1rem;
+            margin-top: 3px !important;
             text-transform: uppercase;
-            width: auto !important;
-            flex: 1;
+            width: 100%;
             overflow: hidden;
             white-space: nowrap;
+            position: relative;
         }
+
+        .card-action-label span.scroll-txt {
+            display: inline-block;
+            white-space: nowrap;
+            animation: marquee-side 4s ease-in-out infinite alternate;
+        }
+
+        .btn-action-tmpl.card-btn-delete { color: #ef4444 !important; }
 
         .sidebar-footer { position: absolute; bottom: 0; left: 0; width: 100%; padding: 15px 20px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--bg-main); box-shadow: 0 -4px 10px rgba(0,0,0,0.3); padding-bottom: calc(15px + env(safe-area-inset-bottom)); }
         
@@ -465,6 +490,7 @@
             unicode-bidi: plaintext;
             text-align: start;
         }
+</style>
     </style>
 </head>
 <body>
