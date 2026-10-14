@@ -402,8 +402,11 @@ var RetoricaStorage = {
                 var createdStr = doc.createdAt ? new Date(doc.createdAt).toLocaleString() : 'N/A';
                 var updatedStr = doc.updatedAt ? new Date(doc.updatedAt).toLocaleString() : 'N/A';
 
+                // Si es el documento activo, se agrega la clase 'active-card-btn' al botón de 3 puntos
+                var btnActiveClass = isActive ? ' active-card-btn' : '';
+
                 card.innerHTML = 
-                    '<button type="button" class="card-menu-btn" onclick="RetoricaStorage.toggleCardMenu(\'' + doc.id + '\', event)" title="Opciones">⋮</button>' +
+                    '<button type="button" class="card-menu-btn' + btnActiveClass + '" onclick="RetoricaStorage.toggleCardMenu(\'' + doc.id + '\', event)" title="Opciones">⋮</button>' +
                     '<div class="card-template-title">' + self.escapeHTML(doc.title || 'Sin Título') + '</div>' +
                     '<div class="card-template-body">' + self.escapeHTML(plainText || 'Documento vacío...') + '</div>' +
                     '<div style="font-size:0.55rem; color:var(--text-muted); margin-bottom:6px; text-align:center;">Creado: ' + createdStr + '<br>Modificado: ' + updatedStr + '</div>' +
