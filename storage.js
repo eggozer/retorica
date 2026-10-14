@@ -389,7 +389,6 @@ var RetoricaStorage = {
                 
                 card.className = 'card-template' + (isActive ? ' active-template-indicator' : '');
                 
-                // Al hacer clic en la tarjeta (fuera del menú), carga el documento
                 card.onclick = function(e) {
                     if (!e.target.closest('.card-template-actions') && !e.target.closest('.card-menu-btn')) {
                         self.loadDoc(doc.id);
@@ -411,7 +410,7 @@ var RetoricaStorage = {
                     '<div id="actions-menu-' + doc.id + '" class="card-template-actions">' +
                         '<div class="card-action-wrapper">' +
                             '<button type="button" class="btn-action-tmpl" onclick="RetoricaStorage.renameDoc(\'' + doc.id + '\', event)">✏️</button>' +
-                            '<div class="card-action-label">Editar Título</div>' +
+                            '<div class="card-action-label"><span class="scroll-txt">Editar Título</span></div>' +
                         '</div>' +
                         '<div class="card-action-wrapper">' +
                             '<button type="button" class="btn-action-tmpl" onclick="RetoricaStorage.copyDoc(\'' + doc.id + '\', event)">📋</button>' +
@@ -419,7 +418,7 @@ var RetoricaStorage = {
                         '</div>' +
                         '<div class="card-action-wrapper">' +
                             '<button type="button" class="btn-action-tmpl" onclick="RetoricaStorage.shareDoc(\'' + doc.id + '\', event)">🔗</button>' +
-                            '<div class="card-action-label">Compartir</div>' +
+                            '<div class="card-action-label"><span class="scroll-txt">Compartir</span></div>' +
                         '</div>' +
                         '<div class="card-action-wrapper">' +
                             '<button type="button" class="btn-action-tmpl" style="color: #ef4444 !important;" onclick="RetoricaStorage.deleteDoc(\'' + doc.id + '\', event)">🗑️</button>' +
@@ -436,7 +435,6 @@ var RetoricaStorage = {
     toggleCardMenu: function(id, event) {
         if (event) event.stopPropagation();
         
-        // Cerrar otros menús abiertos
         var allMenus = document.querySelectorAll('.card-template-actions');
         allMenus.forEach(function(menu) {
             if (menu.id !== 'actions-menu-' + id) {
@@ -444,7 +442,6 @@ var RetoricaStorage = {
             }
         });
 
-        // Alternar el menú actual
         var menuElem = document.getElementById('actions-menu-' + id);
         if (menuElem) {
             menuElem.classList.toggle('visible');
