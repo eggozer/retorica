@@ -374,14 +374,41 @@
         }
 
         @keyframes sport-brake-flash {
+            /* Destello 1 */
             0% {
                 box-shadow: 0 0 4px rgba(255, 255, 255, 0.2), inset 0 0 2px rgba(250, 204, 21, 0.4);
                 filter: brightness(1);
             }
-            50% {
-                box-shadow: 0 0 14px rgba(255, 255, 255, 0.9), 0 0 22px rgba(250, 204, 21, 0.8);
-                filter: brightness(1.3);
+            5% {
+                box-shadow: 0 0 16px rgba(255, 255, 255, 1), 0 0 24px rgba(250, 204, 21, 0.9);
+                filter: brightness(1.4);
             }
+            10% {
+                box-shadow: 0 0 4px rgba(255, 255, 255, 0.2), inset 0 0 2px rgba(250, 204, 21, 0.4);
+                filter: brightness(1);
+            }
+
+            /* Destello 2 */
+            15% {
+                box-shadow: 0 0 16px rgba(255, 255, 255, 1), 0 0 24px rgba(250, 204, 21, 0.9);
+                filter: brightness(1.4);
+            }
+            20% {
+                box-shadow: 0 0 4px rgba(255, 255, 255, 0.2), inset 0 0 2px rgba(250, 204, 21, 0.4);
+                filter: brightness(1);
+            }
+
+            /* Destello 3 */
+            25% {
+                box-shadow: 0 0 16px rgba(255, 255, 255, 1), 0 0 24px rgba(250, 204, 21, 0.9);
+                filter: brightness(1.4);
+            }
+            30% {
+                box-shadow: 0 0 4px rgba(255, 255, 255, 0.2), inset 0 0 2px rgba(250, 204, 21, 0.4);
+                filter: brightness(1);
+            }
+
+            /* Pausa apagada / reposo del 30% al 100% del tiempo */
             100% {
                 box-shadow: 0 0 4px rgba(255, 255, 255, 0.2), inset 0 0 2px rgba(250, 204, 21, 0.4);
                 filter: brightness(1);
