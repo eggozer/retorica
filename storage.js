@@ -388,7 +388,13 @@ var RetoricaStorage = {
                 var isActive = (doc.id === self.currentDocId);
                 
                 card.className = 'card-template' + (isActive ? ' active-template-indicator' : '');
-                card.onclick = function() { self.loadDoc(doc.id); };
+                
+                // Al hacer clic en la tarjeta (fuera del menú), carga el documento
+                card.onclick = function(e) {
+                    if (!e.target.closest('.card-template-actions') && !e.target.closest('.card-menu-btn')) {
+                        self.loadDoc(doc.id);
+                    }
+                };
 
                 var tempDiv = document.createElement('div');
                 tempDiv.innerHTML = doc.body || '';
@@ -398,13 +404,14 @@ var RetoricaStorage = {
                 var updatedStr = doc.updatedAt ? new Date(doc.updatedAt).toLocaleString() : 'N/A';
 
                 card.innerHTML = 
+                    '<button type="button" class="card-menu-btn" onclick="RetoricaStorage.toggleCardMenu(\'' + doc.id + '\', event)" title="Opciones">⋮</button>' +
                     '<div class="card-template-title">' + self.escapeHTML(doc.title || 'Sin Título') + '</div>' +
                     '<div class="card-template-body">' + self.escapeHTML(plainText || 'Documento vacío...') + '</div>' +
-                    '<div style="font-size:0.55rem; color:var(--text-muted); margin-bottom:8px; text-align:center;">Creado: ' + createdStr + '<br>Modificado: ' + updatedStr + '</div>' +
-                    '<div class="card-template-actions">' +
+                    '<div style="font-size:0.55rem; color:var(--text-muted); margin-bottom:6px; text-align:center;">Creado: ' + createdStr + '<br>Modificado: ' + updatedStr + '</div>' +
+                    '<div id="actions-menu-' + doc.id + '" class="card-template-actions">' +
                         '<div class="card-action-wrapper">' +
                             '<button type="button" class="btn-action-tmpl" onclick="RetoricaStorage.renameDoc(\'' + doc.id + '\', event)">✏️</button>' +
-                            '<div class="card-action-label"><span class="scroll-txt">Editar Título</span></div>' +
+                            '<div class="card-action-label">Editar Título</div>' +
                         '</div>' +
                         '<div class="card-action-wrapper">' +
                             '<button type="button" class="btn-action-tmpl" onclick="RetoricaStorage.copyDoc(\'' + doc.id + '\', event)">📋</button>' +
@@ -426,6 +433,23 @@ var RetoricaStorage = {
         });
     },
 
+    toggleCardMenu: function(id, event) {
+        if (event) event.stopPropagation();
+        
+        // Cerrar otros menús abiertos
+        var allMenus = document.querySelectorAll('.card-template-actions');
+        allMenus.forEach(function(menu) {
+            if (menu.id !== 'actions-menu-' + id) {
+                menu.classList.remove('visible');
+            }
+        });
+
+        // Alternar el menú actual
+        var menuElem = document.getElementById('actions-menu-' + id);
+        if (menuElem) {
+            menuElem.classList.toggle('visible');
+        }
+    },
     renameDoc: function(id, event) {
         if (event) event.stopPropagation();
         var self = this;
