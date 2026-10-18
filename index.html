@@ -843,5 +843,24 @@
     <script src="./audio.js?v=2026_GOD_MODE"></script>
     <script src="./storage.js?v=2026_GOD_MODE"></script>
     <script src="./main.js?v=2026_GOD_MODE"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('pointerdown', (e) => {
+        const btn = e.target.closest('.btn-round-3d, .card-menu-btn, .btn-action-tmpl');
+        if (!btn) return;
+
+        // Reinicia la animación de ráfaga
+        btn.style.animation = 'none';
+        btn.offsetHeight; // Forzar reflow
+        btn.style.animation = 'sport-brake-flash 0.5s ease-in-out 1';
+        btn.style.borderColor = '#facc15';
+
+        setTimeout(() => {
+            btn.style.animation = '';
+            btn.style.borderColor = '';
+        }, 500);
+    });
+});
+</script>
 </body>
 </html>
