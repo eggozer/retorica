@@ -846,19 +846,24 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('pointerdown', (e) => {
+        const langBtn = e.target.closest('#accordion-languages .btn-round-3d');
+        if (langBtn) {
+            // Ráfaga amarilla al presionar un idioma diferente
+            langBtn.style.animation = 'none';
+            langBtn.offsetHeight; // Reflow
+            langBtn.style.animation = 'flash-yellow-burst 0.4s ease-in-out 1';
+            return;
+        }
+
         const btn = e.target.closest('.btn-round-3d, .card-menu-btn, .btn-action-tmpl');
-        if (!btn) return;
-
-        // Reinicia la animación de ráfaga
-        btn.style.animation = 'none';
-        btn.offsetHeight; // Forzar reflow
-        btn.style.animation = 'sport-brake-flash 0.5s ease-in-out 1';
-        btn.style.borderColor = '#facc15';
-
-        setTimeout(() => {
-            btn.style.animation = '';
-            btn.style.borderColor = '';
-        }, 500);
+        if (btn) {
+            btn.style.animation = 'none';
+            btn.offsetHeight;
+            btn.style.animation = 'flash-yellow-burst 0.4s ease-in-out 1';
+            setTimeout(() => {
+                btn.style.animation = '';
+            }, 400);
+        }
     });
 });
 </script>
