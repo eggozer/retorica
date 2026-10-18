@@ -373,34 +373,37 @@
             justify-content: center;
         }
 
-        /* La animación de destello en la botonera SOLO se activa al abrir el submenú */
+        /* Destello rápido múltiple (ráfaga) al presionar cualquier botón */
         .btn-round-3d:active,
-.card-menu-btn:active,
-.btn-action-tmpl:active {
-    border-color: #facc15 !important;
-    animation: sport-brake-flash 0.4s ease-out !important;
-}
+        .card-menu-btn:active,
+        .btn-action-tmpl:active {
+            border-color: #facc15 !important;
+            animation: sport-brake-flash 0.5s ease-in-out 1 !important;
+        }
 
         .btn-action-tmpl:active { 
             transform: translateY(2px); 
             border-bottom-width: 1px !important; 
         }
 
-        /* Animación de destellos tipo luz estroboscópica */
+        /* Animación de ráfaga de destellos rápidos (parpadea varias veces y se apaga) */
         @keyframes sport-brake-flash {
-    0% {
-        box-shadow: 0 0 2px rgba(255, 255, 255, 0.2), inset 0 0 2px rgba(250, 204, 21, 0.4);
-        filter: brightness(1);
-    }
-    50% {
-        box-shadow: 0 0 16px rgba(255, 255, 255, 1), 0 0 24px rgba(250, 204, 21, 0.9);
-        filter: brightness(1.4);
-    }
-    100% {
-        box-shadow: 0 0 2px rgba(255, 255, 255, 0.2), inset 0 0 2px rgba(250, 204, 21, 0.4);
-        filter: brightness(1);
-    }
-}
+            0%, 100% {
+                box-shadow: 0 0 2px rgba(255, 255, 255, 0.2), inset 0 0 2px rgba(250, 204, 21, 0.4);
+                filter: brightness(1);
+                border-color: var(--border) !important;
+            }
+            15%, 45%, 75% {
+                box-shadow: 0 0 16px rgba(255, 255, 255, 1), 0 0 24px rgba(250, 204, 21, 0.9);
+                filter: brightness(1.4);
+                border-color: #facc15 !important;
+            }
+            30%, 60%, 90% {
+                box-shadow: 0 0 2px rgba(255, 255, 255, 0.2), inset 0 0 2px rgba(250, 204, 21, 0.4);
+                filter: brightness(1);
+                border-color: var(--border) !important;
+            }
+        }
         
         .card-action-label {
             font-size: 0.5rem;
