@@ -12,14 +12,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
    
     <style>
-    :root {
-        --bg-main: #0f111a; --bg-sidebar: #161925; --bg-card: #1f2335;
-        --accent: #e2e8f0; --text-main: #f3f4f6; --text-muted: #a0aec0;
-        --border: #2d3748; --danger: #718096; --btn-3d-bg: #2d3244;
-        --btn-shadow: #11131c; --btn-play-green: #22c55e;
-        --cyan-active: #00d2ff;
-        --emoji-size: 1.35rem;
-    }
+        :root {
+            --bg-main: #0f111a; --bg-sidebar: #161925; --bg-card: #1f2335;
+            --accent: #e2e8f0; --text-main: #f3f4f6; --text-muted: #a0aec0;
+            --border: #2d3748; --danger: #718096; --btn-3d-bg: #2d3244;
+            --btn-shadow: #11131c; --btn-play-green: #22c55e;
+            --cyan-active: #00d2ff;
+            --emoji-size: 1.35rem;
+        }
 
         /* Control estandarizado de emojis */
         .btn-round-3d .emoji-icon {
@@ -30,18 +30,17 @@
             user-select: none;
         }
         
-        /* Restablece el fondo claro de los botones en Modo Día */
-    body.light-theme {
-        --bg-main: #f0f2f5; --bg-sidebar: #e4e7eb; --bg-card: #ffffff;
-        --accent: #2d3748; --text-main: #1a202c; --text-muted: #718096;
-        --border: #cbd5e0; --danger: #a0aec0; --btn-shadow: #cbd5e0;
-        --btn-3d-bg: #e2e8f0;
-        --btn-play-green: #15803d; --cyan-active: #0088cc;
-    }
+        body.light-theme {
+            --bg-main: #f0f2f5; --bg-sidebar: #e4e7eb; --bg-card: #ffffff;
+            --accent: #2d3748; --text-main: #1a202c; --text-muted: #718096;
+            --border: #cbd5e0; --danger: #a0aec0; --btn-shadow: #cbd5e0;
+            --btn-3d-bg: #e2e8f0;
+            --btn-play-green: #15803d; --cyan-active: #0088cc;
+        }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
         body, html { width: 100%; height: 100%; background: var(--bg-main); color: var(--text-main); overflow-y: auto; display: flex; flex-direction: column; }
         
-        /* Capa de Autenticación */
+        /* Capa de Autenticación - Efecto Lava / Guinda */
         .auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-main); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; }
         .auth-card { background: var(--bg-sidebar); border: 1px solid var(--border); border-radius: 16px; width: 100%; max-width: 400px; padding: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); text-align: center; }
         .auth-logo-container { display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 25px; gap: 10px; }
@@ -53,11 +52,46 @@
         .input-group label { display: block; font-size: 0.65rem; color: var(--text-muted); font-weight: bold; margin-bottom: 5px; letter-spacing: 0.5px; }
         .input-field { width: 100%; background: var(--bg-card); border: 1px solid var(--border); padding: 12px 15px; border-radius: 8px; color: var(--text-main); font-size: 0.9rem; font-weight: bold; }
         .input-field:focus { border-color: var(--text-muted); outline: none; }
-        .btn-auth-3d { width: 100%; background: var(--btn-3d-bg); border: none; border-bottom: 4px solid var(--btn-shadow); padding: 12px; border-radius: 8px; color: var(--text-main); font-weight: bold; font-size: 0.85rem; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
-        .btn-auth-3d:active { transform: translateY(2px); border-bottom-width: 2px; }
+        
+        /* Botones Auth con borde e iluminación guinda permanente (efecto lava) */
+        .btn-auth-3d, .btn-oauth { 
+            width: 100%; 
+            background: var(--btn-3d-bg); 
+            border: 1px solid #8b0000 !important; 
+            border-bottom: 4px solid var(--btn-shadow); 
+            padding: 12px; 
+            border-radius: 8px; 
+            color: var(--text-main); 
+            font-weight: bold; 
+            font-size: 0.85rem; 
+            cursor: pointer; 
+            box-shadow: 0 0 8px rgba(139, 0, 0, 0.7), 0 4px 6px rgba(0,0,0,0.2) !important;
+            transition: all 0.2s ease;
+        }
+        .btn-auth-3d:active, .btn-oauth:active { 
+            transform: translateY(2px); 
+            border-bottom-width: 2px; 
+            border-color: #ff6600 !important;
+            animation: flash-auth-orange 0.4s ease-in-out 1 !important;
+        }
         .oauth-container { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
         .btn-oauth { text-align: left; padding: 10px 15px; font-size: 0.8rem; display: block; }
-        .btn-oauth:active { transform: translateY(2px); border-bottom-width: 2px; }
+
+        @keyframes flash-auth-orange {
+            0%, 100% {
+                box-shadow: 0 0 8px rgba(139, 0, 0, 0.7);
+                border-color: #8b0000 !important;
+            }
+            20%, 60% {
+                box-shadow: 0 0 20px #ff6600, inset 0 0 10px #ff6600 !important;
+                filter: brightness(1.4);
+                border-color: #ff6600 !important;
+            }
+            40%, 80% {
+                box-shadow: 0 0 8px rgba(139, 0, 0, 0.7);
+                border-color: #8b0000 !important;
+            }
+        }
         
         /* Encabezado Principal */
         .header-app { display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--bg-sidebar); border-bottom: 1px solid var(--border); gap: 4px; height: 60px !important; padding: 0 20px !important; box-sizing: border-box; overflow: hidden; width: 100%; }
@@ -166,13 +200,6 @@
             font-weight: bold; 
         }
 
-        .btn-round-3d.active {
-            background: var(--bg-card) !important;
-            color: #00ff66 !important;
-            border: 1px solid #00ff66 !important;
-            box-shadow: 0 0 12px #00ff66, inset 0 0 5px #00ff66 !important;
-        }
-
         .btn-wrapper-3d.active-wrapper .btn-label-3d {
             color: var(--text-main) !important;
             font-weight: 900;
@@ -242,7 +269,6 @@
             overflow-x: hidden; 
         }
 
-        /* Tarjeta compacta que se autoajusta a su contenido natural */
         .card-template { 
             flex: 1 1 calc(50% - 5px); 
             min-width: calc(50% - 5px); 
@@ -255,8 +281,8 @@
             border-radius: 12px; 
             padding: 10px 8px;
             word-break: break-word; 
-            overflow: visible !important; /* Permite desplegar el menú Flotante de forma limpia */
-            height: auto !important; /* Autoajuste perfecto del contenido */
+            overflow: visible !important; 
+            height: auto !important; 
             text-align: center;
             position: relative;
         }
@@ -288,7 +314,6 @@
             width: 100%;
         }
 
-/* Botón de Tres Puntos Neutro (Estado Inactivo) */
         .card-menu-btn {
             position: absolute;
             top: 6px;
@@ -315,15 +340,13 @@
             border-bottom-width: 1px !important;
         }
 
-        /* Botón de Tres Puntos de la Plantilla ABIERTA (Activa) con destello / flash */
         .card-menu-btn.active-card-btn {
             color: var(--text-main) !important;
             border-color: #facc15 !important;
             box-shadow: 0 0 8px rgba(250, 204, 21, 0.5);
-            animation: sport-brake-flash 2.5s infinite linear;
+            animation: flash-yellow-burst 2.5s infinite linear;
         }
 
-        /* Submenú flotante */
         .card-template-actions { 
             display: none !important; 
             position: absolute !important;
@@ -344,7 +367,6 @@
             display: flex !important;
         }
 
-        /* Contenedores de botones horizontales dentro del menú flotante */
         .card-action-wrapper {
             flex: 1 1 0% !important;
             min-width: 0 !important;
@@ -356,7 +378,6 @@
             overflow: visible !important;
         }
 
-        /* Botones del submenú (Sin destello por defecto) */
         .btn-action-tmpl { 
             width: 36px !important;
             height: 36px !important;
@@ -374,12 +395,12 @@
             justify-content: center;
         }
 
-        /* Destello rápido en tono AMARILLO al presionar cualquier botón */
+        /* Destello amarillo al presionar botones generales */
         .btn-round-3d:active,
         .card-menu-btn:active,
         .btn-action-tmpl:active {
             border-color: #facc15 !important;
-            animation: sport-brake-flash 0.5s ease-in-out 1 !important;
+            animation: flash-yellow-burst 0.4s ease-in-out 1 !important;
         }
 
         .btn-action-tmpl:active { 
@@ -387,22 +408,46 @@
             border-bottom-width: 1px !important; 
         }
 
-        /* Animación de ráfaga de destellos en color AMARILLO que se apaga al terminar */
-        @keyframes sport-brake-flash {
+        @keyframes flash-yellow-burst {
             0%, 100% {
                 box-shadow: none;
                 filter: brightness(1);
                 border-color: var(--border) !important;
             }
-            15%, 45%, 75% {
+            20%, 60% {
                 box-shadow: 0 0 16px rgba(250, 204, 21, 0.9), inset 0 0 8px rgba(250, 204, 21, 0.6);
                 filter: brightness(1.3);
                 border-color: #facc15 !important;
             }
-            30%, 60%, 90% {
+            40%, 80% {
                 box-shadow: none;
                 filter: brightness(1);
                 border-color: var(--border) !important;
+            }
+        }
+
+        /* Idioma Activo - Ráfaga cíclica en Azul Fuego */
+        .accordion-body .btn-wrapper-3d.active-wrapper .btn-round-3d,
+        .accordion-body .btn-round-3d.active {
+            border-color: #00d2ff !important;
+            animation: cycle-blue-fire 2.8s infinite ease-in-out !important;
+        }
+
+        @keyframes cycle-blue-fire {
+            0%, 50%, 100% {
+                box-shadow: 0 0 3px rgba(0, 210, 255, 0.3);
+                border-color: var(--border) !important;
+                filter: brightness(1);
+            }
+            10%, 30% {
+                box-shadow: 0 0 18px #00d2ff, inset 0 0 10px #00d2ff !important;
+                border-color: #00d2ff !important;
+                filter: brightness(1.5);
+            }
+            20%, 40% {
+                box-shadow: 0 0 3px rgba(0, 210, 255, 0.3);
+                border-color: var(--border) !important;
+                filter: brightness(1);
             }
         }
         
