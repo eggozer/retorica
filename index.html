@@ -374,10 +374,12 @@
         }
 
         /* La animación de destello en la botonera SOLO se activa al abrir el submenú */
-        .card-template-actions.visible .btn-action-tmpl {
-            border-color: #facc15 !important;
-            animation: sport-brake-flash 2.5s infinite linear;
-        }
+        .btn-round-3d:active,
+.card-menu-btn:active,
+.btn-action-tmpl:active {
+    border-color: #facc15 !important;
+    animation: sport-brake-flash 0.4s ease-out !important;
+}
 
         .btn-action-tmpl:active { 
             transform: translateY(2px); 
