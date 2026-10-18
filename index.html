@@ -12,14 +12,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
    
     <style>
-        :root {
-            --bg-main: #0f111a; --bg-sidebar: #161925; --bg-card: #1f2335;
-            --accent: #e2e8f0; --text-main: #f3f4f6; --text-muted: #a0aec0;
-            --border: #2d3748; --danger: #718096; --btn-3d-bg: #2d3244;
-            --btn-shadow: #11131c; --btn-play-green: #22c55e;
-            --cyan-active: #00d2ff;
-            --emoji-size: 1.35rem;
-        }
+    :root {
+        --bg-main: #0f111a; --bg-sidebar: #161925; --bg-card: #1f2335;
+        --accent: #e2e8f0; --text-main: #f3f4f6; --text-muted: #a0aec0;
+        --border: #2d3748; --danger: #718096; --btn-3d-bg: #2d3244;
+        --btn-shadow: #11131c; --btn-play-green: #22c55e;
+        --cyan-active: #00d2ff;
+        --emoji-size: 1.35rem;
+    }
 
         /* Control estandarizado de emojis */
         .btn-round-3d .emoji-icon {
@@ -30,12 +30,14 @@
             user-select: none;
         }
         
-        body.light-theme {
-            --bg-main: #f0f2f5; --bg-sidebar: #e4e7eb; --bg-card: #ffffff;
-            --accent: #2d3748; --text-main: #1a202c; --text-muted: #718096;
-            --border: #cbd5e0; --danger: #a0aec0; --btn-shadow: #cbd5e0;
-            --btn-play-green: #15803d; --cyan-active: #0088cc;
-        }
+        /* Restablece el fondo claro de los botones en Modo Día */
+    body.light-theme {
+        --bg-main: #f0f2f5; --bg-sidebar: #e4e7eb; --bg-card: #ffffff;
+        --accent: #2d3748; --text-main: #1a202c; --text-muted: #718096;
+        --border: #cbd5e0; --danger: #a0aec0; --btn-shadow: #cbd5e0;
+        --btn-3d-bg: #e2e8f0;
+        --btn-play-green: #15803d; --cyan-active: #0088cc;
+    }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
         body, html { width: 100%; height: 100%; background: var(--bg-main); color: var(--text-main); overflow-y: auto; display: flex; flex-direction: column; }
         
