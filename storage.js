@@ -293,7 +293,7 @@ var RetoricaStorage = {
         var toast = document.createElement('div');
         toast.id = 'undo-toast-banner';
         toast.className = 'undo-toast-banner';
-        toast.innerHTML = '<span>Documento eliminado</span><button onclick="RetoricaStorage.undoDelete()">DESHACER</button>';
+        toast.innerHTML = '<span>Documento eliminado</span><button type="button" onclick="RetoricaStorage.undoDelete()">DESHACER</button>';
         document.body.appendChild(toast);
     },
 
