@@ -182,13 +182,6 @@ var RetoricaStorage = {
     createNewDoc: function() {
         var bodyInput = document.getElementById('editor-body');
         var titleInput = document.getElementById('editor-title');
-        
-        // Validación UX: Evita borrado accidental si hay contenido activo
-        if (bodyInput && (bodyInput.innerText || bodyInput.textContent || "").trim().length > 0) {
-            if (!confirm("¿Deseas iniciar un nuevo lienzo? Se limpiará el texto no guardado de la pantalla.")) {
-                return;
-            }
-        }
 
         this.currentDocId = 'doc_' + Date.now();
         if (titleInput) titleInput.value = '';
@@ -198,7 +191,6 @@ var RetoricaStorage = {
 
         if (typeof RetoricaUI !== 'undefined') {
             RetoricaUI.updateCounters();
-            RetoricaUI.notify("Nuevo documento iniciado");
         }
     },
 
