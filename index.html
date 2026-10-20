@@ -53,7 +53,7 @@
         .input-field { width: 100%; background: var(--bg-card); border: 1px solid var(--border); padding: 12px 15px; border-radius: 8px; color: var(--text-main); font-size: 0.9rem; font-weight: bold; }
         .input-field:focus { border-color: var(--text-muted); outline: none; }
         
-        /* Botones Auth con borde e iluminación guinda permanente (efecto lava) */
+        /* Botones Auth y campos con efecto lava anaranjado permanente e intermitente */
         .btn-auth-3d, .btn-oauth { 
             width: 100%; 
             background: var(--btn-3d-bg); 
@@ -65,31 +65,44 @@
             font-weight: bold; 
             font-size: 0.85rem; 
             cursor: pointer; 
-            box-shadow: 0 0 8px rgba(139, 0, 0, 0.7), 0 4px 6px rgba(0,0,0,0.2) !important;
+            text-align: center !important;
+            box-shadow: 0 0 12px rgba(255, 102, 0, 0.8), 0 4px 6px rgba(0,0,0,0.2) !important;
+            animation: lava-glow-orange 2.2s infinite ease-in-out !important;
             transition: all 0.2s ease;
         }
         .btn-auth-3d:active, .btn-oauth:active { 
             transform: translateY(2px); 
             border-bottom-width: 2px; 
             border-color: #ff6600 !important;
-            animation: flash-auth-orange 0.4s ease-in-out 1 !important;
         }
         .oauth-container { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
-        .btn-oauth { text-align: left; padding: 10px 15px; font-size: 0.8rem; display: block; }
+        .btn-oauth { text-align: center !important; padding: 10px 15px; font-size: 0.8rem; display: block; }
 
-        @keyframes flash-auth-orange {
+        /* Campos de entrada con el mismo efecto lava intermitente */
+        .input-field { 
+            width: 100%; 
+            background: var(--bg-card); 
+            border: 1px solid #ff6600 !important; 
+            padding: 12px 15px; 
+            border-radius: 8px; 
+            color: var(--text-main); 
+            font-size: 0.9rem; 
+            font-weight: bold; 
+            box-shadow: 0 0 10px rgba(255, 102, 0, 0.6);
+            animation: lava-glow-orange 2.2s infinite ease-in-out !important;
+        }
+        .input-field:focus { border-color: #ff6600; outline: none; }
+
+        @keyframes lava-glow-orange {
             0%, 100% {
                 box-shadow: 0 0 8px rgba(139, 0, 0, 0.7);
                 border-color: #8b0000 !important;
+                filter: brightness(1);
             }
-            20%, 60% {
-                box-shadow: 0 0 20px #ff6600, inset 0 0 10px #ff6600 !important;
+            50% {
+                box-shadow: 0 0 22px #ff6600, inset 0 0 10px #ff6600 !important;
                 filter: brightness(1.4);
                 border-color: #ff6600 !important;
-            }
-            40%, 80% {
-                box-shadow: 0 0 8px rgba(139, 0, 0, 0.7);
-                border-color: #8b0000 !important;
             }
         }
         
