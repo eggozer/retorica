@@ -571,7 +571,7 @@
 </head>
 <body>
 
-    <!-- ========================================== -->
+   <!-- ========================================== -->
     <!-- SECCIÓN 1: CAPA DE AUTENTICACIÓN -->
     <!-- ========================================== -->
     <div class="auth-overlay" id="auth-layer-screen">
@@ -591,17 +591,17 @@
             </div>
 
             <form id="auth-form" onsubmit="event.preventDefault(); if(typeof RetoricaAuth!=='undefined') RetoricaAuth.process();">
-                <div class="input-group" id="group-input-email">
-                    <label id="lbl-auth-email" for="auth-input-email">CORREO ELECTRÓNICO (GOOGLE / EMAIL)</label>
+                <div class="input-group" id="group-input-email" style="text-align: center;">
+                    <label id="lbl-auth-email" for="auth-input-email" style="text-align: center; display: block;">CORREO ELECTRÓNICO (GOOGLE / EMAIL)</label>
                     <input type="email" id="auth-input-email" class="input-field" placeholder="ejemplo@gmail.com">
                 </div>
 
-                <div class="input-group" id="group-input-phone" style="display: none;">
-                    <label id="lbl-auth-phone" for="auth-input-phone">NÚMERO TELEFÓNICO CELULAR</label>
+                <div class="input-group" id="group-input-phone" style="display: none; text-align: center;">
+                    <label id="lbl-auth-phone" for="auth-input-phone" style="text-align: center; display: block;">NÚMERO TELEFÓNICO CELULAR</label>
                     <input type="tel" id="auth-input-phone" class="input-field" placeholder="Ingresa tu número celular">
                 </div>
 
-                <button type="submit" class="btn-auth-3d" id="btn-submit-auth" style="margin-top: 10px;" title="Continuar e ingresar al sistema" aria-label="Continuar e ingresar al sistema">CONTINUAR E INGRESAR</button>
+                <button type="submit" class="btn-auth-3d" id="btn-submit-auth" style="margin-top: 10px; text-align: center;" title="Continuar e ingresar al sistema" aria-label="Continuar e ingresar al sistema">CONTINUAR E INGRESAR</button>
             </form>
         </div>
     </div>
