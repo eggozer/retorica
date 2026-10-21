@@ -293,8 +293,30 @@ var RetoricaStorage = {
         var toast = document.createElement('div');
         toast.id = 'undo-toast-banner';
         toast.className = 'undo-toast-banner';
-        toast.innerHTML = '<span>Documento eliminado</span><button type="button" onclick="RetoricaStorage.undoDelete()">DESHACER</button>';
+        
+        toast.innerHTML = 
+            '<span>Documento eliminado</span>' +
+            '<div class="btn-wrapper-3d">' +
+                '<button type="button" class="btn-round-3d undo-standby" id="btn-undo-action" onclick="RetoricaStorage.triggerUndoPress(this)" title="Deshacer borrado" aria-label="Deshacer borrado">' +
+                    '<span class="emoji-icon" aria-hidden="true">↩️</span>' +
+                '</button>' +
+                '<div class="btn-label-3d"><span class="scroll-txt-fast">Deshacer</span></div>' +
+            '</div>';
+            
         document.body.appendChild(toast);
+    },
+
+    triggerUndoPress: function(btnElem) {
+        if (!btnElem) return;
+        // Ráfaga rápida de destellos amarillos al hacer click
+        btnElem.classList.remove('undo-standby');
+        btnElem.style.animation = 'none';
+        btnElem.offsetHeight; // Reflow
+        btnElem.style.animation = 'flash-yellow-burst 0.4s ease-in-out 2 !important';
+        
+        setTimeout(function() {
+            RetoricaStorage.undoDelete();
+        }, 300);
     },
 
     removeUndoToast: function() {
