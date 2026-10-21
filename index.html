@@ -567,7 +567,8 @@
             unicode-bidi: plaintext;
             text-align: start;
         }
-        /* Banner Flotante para Deshacer Borrado (Diseño Retórica 3D) */
+        
+        /* Banner Flotante para Deshacer Borrado con Botón Redondo 3D Retórica */
         .undo-toast-banner {
             position: fixed;
             bottom: 75px;
@@ -577,28 +578,71 @@
             border: 1px solid var(--border);
             border-bottom: 4px solid var(--btn-shadow);
             padding: 10px 18px;
-            border-radius: 12px;
+            border-radius: 16px;
             display: flex;
             align-items: center;
-            gap: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+            justify-content: center;
+            gap: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
             z-index: 4000;
             color: var(--text-main);
             font-size: 0.8rem;
             font-weight: bold;
         }
-        .undo-toast-banner button {
-            background: linear-gradient(145deg, var(--bg-card), var(--btn-3d-bg));
-            border: 1px solid #facc15;
-            border-bottom: 3px solid var(--btn-shadow);
-            color: var(--text-main);
-            padding: 6px 14px;
-            border-radius: 8px;
-            font-weight: 900;
-            font-size: 0.75rem;
-            cursor: pointer;
-            box-shadow: 0 0 10px rgba(250, 204, 21, 0.4);
-            animation: flash-yellow-burst 1.2s infinite ease-in-out !important;
+
+        /* Contenedor Wrapper 3D para el Botón y su Leyenda */
+        .undo-toast-banner .btn-wrapper-3d {
+            width: 60px !important;
+            display: inline-flex;
+            flex-direction: column !important;
+            align-items: center;
+            justify-content: flex-start;
+            position: relative;
+        }
+
+        /* Indicador de uso: Flasheo constante en modo espera */
+        .undo-toast-banner .btn-round-3d.undo-standby {
+            border-color: #facc15 !important;
+            animation: undo-pulse-slow 1.6s infinite ease-in-out !important;
+        }
+
+        @keyframes undo-pulse-slow {
+            0%, 100% {
+                box-shadow: 0 0 4px rgba(250, 204, 21, 0.3);
+                border-color: var(--border) !important;
+                filter: brightness(1);
+            }
+            50% {
+                box-shadow: 0 0 16px rgba(250, 204, 21, 0.95), inset 0 0 8px rgba(250, 204, 21, 0.6);
+                border-color: #facc15 !important;
+                filter: brightness(1.3);
+            }
+        }
+
+        /* Leyenda exterior inferior con marquesina rápida y fluida para lectura ágil */
+        .undo-toast-banner .btn-label-3d {
+            font-size: 0.58rem;
+            font-weight: bold;
+            color: var(--text-muted);
+            text-align: center;
+            line-height: 1.1rem;
+            height: 1.1rem;
+            margin-top: 4px !important;
+            text-transform: uppercase;
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .undo-toast-banner .btn-label-3d span.scroll-txt-fast {
+            display: inline-block;
+            white-space: nowrap;
+            animation: marquee-fast-read 2.2s ease-in-out infinite alternate;
+        }
+
+        @keyframes marquee-fast-read {
+            0%, 25% { transform: translateX(0%); }
+            75%, 100% { transform: translateX(-30%); }
         }
     </style>
 </head>
