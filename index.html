@@ -360,24 +360,56 @@
             animation: flash-yellow-burst 2.5s infinite linear;
         }
 
+        /* ========================================== */
+        /* ESTANDARIZACIÓN DE SUBMENÚS FLOTANTES SUPERIORES */
+        /* ========================================== */
+        
+        /* 1. Menú de opciones de tarjeta (Editar, Copiar, Compartir, Borrar) */
         .card-template-actions { 
             display: none !important; 
-            position: absolute !important;
-            bottom: 4px !important;
-            left: 4px !important;
-            right: 4px !important;
+            position: fixed !important;
+            top: 75px !important; /* Posicionado en la parte superior justo debajo de la barra */
+            left: 50% !important;
+            transform: translateX(-50%) !important;
             background: var(--bg-sidebar) !important;
             border: 1px solid var(--border) !important; 
-            border-radius: 10px !important;
-            padding: 6px !important; 
-            z-index: 50 !important;
+            border-radius: 14px !important;
+            padding: 8px 12px !important; 
+            z-index: 5000 !important;
             flex-direction: row !important; 
-            gap: 4px !important;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.6) !important;
+            gap: 8px !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8) !important;
+            width: auto !important;
+            max-width: 90% !important;
         }
 
         .card-template-actions.visible {
             display: flex !important;
+        }
+
+        /* 2. Banner flotante de deshacer borrado */
+        .undo-toast-banner {
+            position: fixed;
+            top: 75px !important; /* Posicionado también en la parte superior para mantener consistencia */
+            bottom: auto !important;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-sidebar);
+            border: 1px solid var(--border);
+            border-bottom: 4px solid var(--btn-shadow);
+            padding: 10px 16px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            z-index: 5000;
+            color: var(--text-main);
+            font-size: 0.8rem;
+            font-weight: bold;
+            width: auto !important;
+            max-width: 90% !important;
         }
 
         .card-action-wrapper {
