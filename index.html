@@ -387,31 +387,6 @@
             display: flex !important;
         }
 
-        /* 2. Banner flotante de deshacer borrado */
-        .undo-toast-banner {
-            position: fixed;
-            top: 75px !important; /* Posicionado también en la parte superior para mantener consistencia */
-            bottom: auto !important;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--bg-sidebar);
-            border: 1px solid var(--border);
-            border-bottom: 4px solid var(--btn-shadow);
-            padding: 10px 16px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            z-index: 5000;
-            color: var(--text-main);
-            font-size: 0.8rem;
-            font-weight: bold;
-            width: auto !important;
-            max-width: 90% !important;
-        }
-
         .card-action-wrapper {
             flex: 1 1 0% !important;
             min-width: 0 !important;
@@ -581,10 +556,11 @@
             text-align: start;
         }
         
-        /* Banner Flotante de Borrado con botones 3D DESHACER y CONTINUAR */
+        /* 2. Banner flotante de deshacer borrado */
         .undo-toast-banner {
             position: fixed;
-            bottom: 75px;
+            top: 75px !important; /* Posicionado también en la parte superior para mantener consistencia */
+            bottom: auto !important;
             left: 50%;
             transform: translateX(-50%);
             background: var(--bg-sidebar);
@@ -597,10 +573,12 @@
             justify-content: center;
             gap: 16px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            z-index: 4000;
+            z-index: 5000;
             color: var(--text-main);
             font-size: 0.8rem;
             font-weight: bold;
+            width: auto !important;
+            max-width: 90% !important;
         }
 
         /* Contenedor Wrapper 3D para cada Botón y su Leyenda */
