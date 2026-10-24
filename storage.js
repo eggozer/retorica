@@ -1321,6 +1321,13 @@ JavaScript
                 return new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0);
             });
 
+            // Vectores Dibujados SVG (100% compatibles con Android 5)
+            var svgEdit = '<svg class="svg-retorica-icon" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>';
+            var svgCopy = '<svg class="svg-retorica-icon" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>';
+            var svgShare = '<svg class="svg-retorica-icon" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>';
+            var svgDelete = '<svg class="svg-retorica-icon" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>';
+            var svgDots = '<svg class="svg-retorica-icon" viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>';
+
             var fragment = document.createDocumentFragment();
             docs.forEach(function(doc) {
                 var card = document.createElement('div');
@@ -1341,29 +1348,28 @@ JavaScript
                 var createdStr = doc.createdAt ? new Date(doc.createdAt).toLocaleString() : 'N/A';
                 var updatedStr = doc.updatedAt ? new Date(doc.updatedAt).toLocaleString() : 'N/A';
 
-                // Si es el documento activo, se agrega la clase 'active-card-btn' al botón de 3 puntos
                 var btnActiveClass = isActive ? ' active-card-btn' : '';
 
                 card.innerHTML = 
-                    '<button type="button" class="card-menu-btn' + btnActiveClass + '" onclick="RetoricaStorage.toggleCardMenu(\'' + doc.id + '\', event)" title="Opciones">⋮</button>' +
+                    '<button type="button" class="card-menu-btn' + btnActiveClass + '" onclick="RetoricaStorage.toggleCardMenu(\'' + doc.id + '\', event)" title="Opciones">' + svgDots + '</button>' +
                     '<div class="card-template-title">' + self.escapeHTML(doc.title || 'Sin Título') + '</div>' +
                     '<div class="card-template-body">' + self.escapeHTML(plainText || 'Documento vacío...') + '</div>' +
                     '<div style="font-size:0.55rem; color:var(--text-muted); margin-bottom:6px; text-align:center;">Creado: ' + createdStr + '<br>Modificado: ' + updatedStr + '</div>' +
                     '<div id="actions-menu-' + doc.id + '" class="card-template-actions">' +
                         '<div class="card-action-wrapper">' +
-                            '<button type="button" class="btn-action-tmpl" onclick="RetoricaStorage.renameDoc(\'' + doc.id + '\', event)">✏️</button>' +
+                            '<button type="button" class="btn-action-tmpl" onclick="RetoricaStorage.renameDoc(\'' + doc.id + '\', event)">' + svgEdit + '</button>' +
                             '<div class="card-action-label"><span class="scroll-txt">Editar Título</span></div>' +
                         '</div>' +
                         '<div class="card-action-wrapper">' +
-                            '<button type="button" class="btn-action-tmpl" onclick="RetoricaStorage.copyDoc(\'' + doc.id + '\', event)">📋</button>' +
+                            '<button type="button" class="btn-action-tmpl" onclick="RetoricaStorage.copyDoc(\'' + doc.id + '\', event)">' + svgCopy + '</button>' +
                             '<div class="card-action-label">Copiar</div>' +
                         '</div>' +
                         '<div class="card-action-wrapper">' +
-                            '<button type="button" class="btn-action-tmpl" onclick="RetoricaStorage.shareDoc(\'' + doc.id + '\', event)">🔗</button>' +
+                            '<button type="button" class="btn-action-tmpl" onclick="RetoricaStorage.shareDoc(\'' + doc.id + '\', event)">' + svgShare + '</button>' +
                             '<div class="card-action-label"><span class="scroll-txt">Compartir</span></div>' +
                         '</div>' +
                         '<div class="card-action-wrapper">' +
-                            '<button type="button" class="btn-action-tmpl" style="color: #ef4444 !important;" onclick="RetoricaStorage.deleteDoc(\'' + doc.id + '\', event)">🗑️</button>' +
+                            '<button type="button" class="btn-action-tmpl" style="color: #ef4444 !important;" onclick="RetoricaStorage.deleteDoc(\'' + doc.id + '\', event)">' + svgDelete + '</button>' +
                             '<div class="card-action-label">Borrar</div>' +
                         '</div>' +
                     '</div>';
@@ -1372,7 +1378,7 @@ JavaScript
             });
             container.appendChild(fragment);
         });
-    },
+    }
 
     toggleCardMenu: function(id, event) {
         if (event) event.stopPropagation();
