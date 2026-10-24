@@ -644,6 +644,45 @@
             0%, 25% { transform: translateX(0%); }
             75%, 100% { transform: translateX(-30%); }
         }
+        /* Animación de Doble Flasheo (Borde Amarillo + Icono Blanco) */
+        @keyframes flash-yellow-burst {
+            0%, 100% {
+                box-shadow: none;
+                filter: brightness(1);
+                border-color: var(--border) !important;
+            }
+            12%, 36%, 60%, 84% {
+                box-shadow: 0 0 18px rgba(250, 204, 21, 0.95), inset 0 0 10px rgba(250, 204, 21, 0.7);
+                filter: brightness(1.4);
+                border-color: #facc15 !important;
+            }
+            24%, 48%, 72% {
+                box-shadow: none;
+                filter: brightness(1);
+                border-color: var(--border) !important;
+            }
+        }
+
+        /* Flasheo Blanco en el dibujo SVG al presionar el botón */
+        .btn-round-3d:active svg,
+        .btn-action-tmpl:active svg,
+        .card-menu-btn:active svg {
+            animation: svg-white-flash 0.4s ease-in-out 1 !important;
+        }
+
+        @keyframes svg-white-flash {
+            0%, 100% { fill: currentColor; stroke: currentColor; filter: drop-shadow(0 0 0 transparent); }
+            50% { fill: #ffffff !important; stroke: #ffffff !important; filter: drop-shadow(0 0 8px #ffffff) !important; }
+        }
+
+        /* Dimensiones estandarizadas para Vectores SVG de la Biblioteca */
+        .svg-retorica-icon {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+            display: inline-block;
+            vertical-align: middle;
+        }
     </style>
 </head>
 <body>
