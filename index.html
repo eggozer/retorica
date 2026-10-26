@@ -655,19 +655,29 @@
             }
         }
 
-        /* Flasheo Blanco en el dibujo SVG al presionar el botón */
+        /* ========================================== */
+        /* DOBLE FLASHEO: ICONOS EN AZUL FUEGO (ANDROID 5+ COMPATIBLE) */
+        /* ========================================== */
         .btn-round-3d:active svg,
-        .btn-action-tmpl:active svg,
-        .card-menu-btn:active svg {
-            animation: svg-white-flash 0.4s ease-in-out 1 !important;
+        .card-menu-btn:active svg,
+        .btn-action-tmpl:active svg {
+            animation: svg-blue-fire-flash 0.4s ease-in-out 1 !important;
         }
 
-        @keyframes svg-white-flash {
-            0%, 100% { fill: currentColor; stroke: currentColor; filter: drop-shadow(0 0 0 transparent); }
-            50% { fill: #ffffff !important; stroke: #ffffff !important; filter: drop-shadow(0 0 8px #ffffff) !important; }
+        @keyframes svg-blue-fire-flash {
+            0%, 100% { 
+                fill: currentColor; 
+                stroke: currentColor; 
+                filter: none; 
+            }
+            50% { 
+                fill: #00d2ff !important; 
+                stroke: #00d2ff !important; 
+                filter: drop-shadow(0 0 8px #00d2ff) !important; 
+            }
         }
 
-        /* Dimensiones estandarizadas para Vectores SVG de la Biblioteca */
+        /* Dimensiones estandarizadas y seguras para Vectores SVG (Android 5) */
         .svg-retorica-icon {
             width: 20px;
             height: 20px;
