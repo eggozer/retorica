@@ -289,8 +289,8 @@ var RetoricaStorage = {
         toast.id = 'undo-toast-banner';
         toast.className = 'undo-toast-banner';
         
-var svgUndo = '<svg class="svg-retorica-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/></svg>';
-var svgPlay = '<svg class="svg-retorica-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+        var svgUndo = '<svg class="svg-retorica-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/></svg>';
+        var svgPlay = '<svg class="svg-retorica-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
        
         toast.innerHTML = 
             '<span>Documento eliminado</span>' +
@@ -308,6 +308,19 @@ var svgPlay = '<svg class="svg-retorica-icon" xmlns="http://www.w3.org/2000/svg"
             '</div>';
             
         document.body.appendChild(toast);
+
+        // Aplicar la misma posición guardada del submenú anterior
+        if (typeof window.RetoricaDragManager !== 'undefined') {
+            window.RetoricaDragManager.initElement(toast);
+        } else {
+            let savedX = localStorage.getItem('retorica_menu_pos_x');
+            let savedY = localStorage.getItem('retorica_menu_pos_y');
+            if (savedX !== null && savedY !== null) {
+                toast.style.left = savedX + 'px';
+                toast.style.top = savedY + 'px';
+                toast.style.transform = 'none';
+            }
+        }
     },
 
     triggerUndoPress: function(btnElem) {
