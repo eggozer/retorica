@@ -1044,5 +1044,81 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 </script>
+    <script>
+// Sistema global de arrastre y memoria de posición para submenús
+document.addEventListener('DOMContentLoaded', () => {
+    let activeDragElement = null;
+    let startX = 0, startY = 0;
+    let initialLeft = 0, initialTop = 0;
+
+    function applySavedPosition(elem) {
+        let savedX = localStorage.getItem('retorica_menu_pos_x');
+        let savedY = localStorage.getItem('retorica_menu_pos_y');
+        if (savedX !== null && savedY !== null) {
+            elem.style.left = savedX + 'px';
+            elem.style.top = savedY + 'px';
+            elem.style.transform = 'none';
+        }
+    }
+
+    // Exponer función global para posicionar elementos nuevos
+    window.RetoricaDragManager = {
+        initElement: function(elem) {
+            if (!elem) return;
+            applySavedPosition(elem);
+
+            elem.addEventListener('pointerdown', (e) => {
+                // Permitir clics normales en los botones internos del submenú
+                if (e.target.closest('button')) return;
+                
+                activeDragElement = elem;
+                let rect = elem.getBoundingClientRect();
+                
+                // Si el elemento tenía transform: translateX(-50%), calculamos su left real
+                if (elem.style.transform.includes('translateX')) {
+                    elem.style.left = rect.left + 'px';
+                    elem.style.top = rect.top + 'px';
+                    elem.style.transform = 'none';
+                }
+
+                startX = e.clientX;
+                startY = e.clientY;
+                initialLeft = elem.offsetLeft;
+                initialTop = elem.offsetTop;
+                
+                elem.setPointerCapture(e.pointerId);
+                e.preventDefault();
+            });
+
+            elem.addEventListener('pointermove', (e) => {
+                if (!activeDragElement || activeDragElement !== elem) return;
+                let dx = e.clientX - startX;
+                let dy = e.clientY - startY;
+
+                let newLeft = initialLeft + dx;
+                let newTop = initialTop + dy;
+
+                // Limites de pantalla
+                newLeft = Math.max(10, Math.min(window.innerWidth - elem.offsetWidth - 10, newLeft));
+                newTop = Math.max(10, Math.min(window.innerHeight - elem.offsetHeight - 10, newTop));
+
+                elem.style.left = newLeft + 'px';
+                elem.style.top = newTop + 'px';
+
+                // Guardar última posición en memoria
+                localStorage.setItem('retorica_menu_pos_x', newLeft);
+                localStorage.setItem('retorica_menu_pos_y', newTop);
+            });
+
+            elem.addEventListener('pointerup', (e) => {
+                if (activeDragElement === elem) {
+                    activeDragElement = null;
+                    try { elem.releasePointerCapture(e.pointerId); } catch(err) {}
+                }
+            });
+        }
+    };
+});
+</script>
 </body>
 </html>
