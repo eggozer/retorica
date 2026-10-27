@@ -504,6 +504,9 @@ var svgDots = '<svg class="svg-retorica-icon" xmlns="http://www.w3.org/2000/svg"
         var menuElem = document.getElementById('actions-menu-' + id);
         if (menuElem) {
             menuElem.classList.toggle('visible');
+            if (menuElem.classList.contains('visible') && typeof window.RetoricaDragManager !== 'undefined') {
+                window.RetoricaDragManager.initElement(menuElem);
+            }
         }
     },
 
