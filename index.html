@@ -368,19 +368,19 @@
         .card-template-actions { 
             display: none !important; 
             position: fixed !important;
-            top: 75px !important; /* Posicionado en la parte superior justo debajo de la barra */
+            top: 95px !important; /* Posicionado un poco más abajo para liberar los 3 puntos */
             left: 50% !important;
             transform: translateX(-50%) !important;
             background: var(--bg-sidebar) !important;
             border: 1px solid var(--border) !important; 
             border-radius: 14px !important;
-            padding: 8px 12px !important; 
+            padding: 10px 14px !important; 
             z-index: 5000 !important;
             flex-direction: row !important; 
-            gap: 8px !important;
+            gap: 10px !important;
             box-shadow: 0 10px 30px rgba(0,0,0,0.8) !important;
             width: auto !important;
-            max-width: 90% !important;
+            max-width: 95% !important;
         }
 
         .card-template-actions.visible {
@@ -555,30 +555,30 @@
             unicode-bidi: plaintext;
             text-align: start;
         }
-        
+
         /* 2. Banner flotante de deshacer borrado */
         .undo-toast-banner {
             position: fixed;
-            top: 75px !important; /* Posicionado también en la parte superior para mantener consistencia */
+            top: 95px !important; /* Posicionado a la misma altura para mantener simetría */
             bottom: auto !important;
             left: 50%;
             transform: translateX(-50%);
             background: var(--bg-sidebar);
             border: 1px solid var(--border);
             border-bottom: 4px solid var(--btn-shadow);
-            padding: 10px 16px;
+            padding: 12px 18px;
             border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 16px;
+            gap: 18px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.8);
             z-index: 5000;
             color: var(--text-main);
             font-size: 0.8rem;
             font-weight: bold;
             width: auto !important;
-            max-width: 90% !important;
+            max-width: 95% !important;
         }
 
         /* Contenedor Wrapper 3D para cada Botón y su Leyenda */
