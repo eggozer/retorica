@@ -1055,9 +1055,9 @@ document.addEventListener('DOMContentLoaded', () => {
         let savedX = localStorage.getItem('retorica_menu_pos_x');
         let savedY = localStorage.getItem('retorica_menu_pos_y');
         if (savedX !== null && savedY !== null) {
-            elem.style.left = savedX + 'px';
-            elem.style.top = savedY + 'px';
-            elem.style.transform = 'none';
+            elem.style.setProperty('left', savedX + 'px', 'important');
+            elem.style.setProperty('top', savedY + 'px', 'important');
+            elem.style.setProperty('transform', 'none', 'important');
         }
     }
 
@@ -1075,10 +1075,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 let rect = elem.getBoundingClientRect();
                 
                 // Si el elemento tenía transform: translateX(-50%), calculamos su left real
-                if (elem.style.transform.includes('translateX')) {
-                    elem.style.left = rect.left + 'px';
-                    elem.style.top = rect.top + 'px';
-                    elem.style.transform = 'none';
+                if (!elem.style.left || elem.style.transform.includes('translateX')) {
+                    elem.style.setProperty('left', rect.left + 'px', 'important');
+                    elem.style.setProperty('top', rect.top + 'px', 'important');
+                    elem.style.setProperty('transform', 'none', 'important');
                 }
 
                 startX = e.clientX;
@@ -1102,8 +1102,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 newLeft = Math.max(10, Math.min(window.innerWidth - elem.offsetWidth - 10, newLeft));
                 newTop = Math.max(10, Math.min(window.innerHeight - elem.offsetHeight - 10, newTop));
 
-                elem.style.left = newLeft + 'px';
-                elem.style.top = newTop + 'px';
+                elem.style.setProperty('left', newLeft + 'px', 'important');
+                elem.style.setProperty('top', newTop + 'px', 'important');
+                elem.style.setProperty('transform', 'none', 'important');
 
                 // Guardar última posición en memoria
                 localStorage.setItem('retorica_menu_pos_x', newLeft);
