@@ -1053,8 +1053,37 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
     <script>
-// Sistema global de arrastre y memoria de posición para submenús
 document.addEventListener('DOMContentLoaded', () => {
+    // 1. Animación de ráfaga amarilla y azul fuego en iconos al presionar
+    document.addEventListener('pointerdown', (e) => {
+        const langBtn = e.target.closest('#accordion-languages .btn-round-3d');
+        if (langBtn) {
+            langBtn.style.animation = 'none';
+            langBtn.offsetHeight;
+            langBtn.style.animation = 'flash-yellow-burst 0.4s ease-in-out 1';
+            return;
+        }
+
+        const btn = e.target.closest('.btn-round-3d, .card-menu-btn, .btn-action-tmpl, .btn-oauth, .btn-auth-3d');
+        if (btn) {
+            btn.style.animation = 'none';
+            btn.offsetHeight;
+            btn.style.animation = 'flash-yellow-burst 0.5s ease-in-out 1';
+
+            const iconElem = btn.querySelector('svg, .emoji-icon, .icon-raw, span') || btn;
+            if (iconElem) {
+                iconElem.classList.remove('flash-blue-fire');
+                void iconElem.offsetHeight;
+                iconElem.classList.add('flash-blue-fire');
+
+                setTimeout(() => {
+                    iconElem.classList.remove('flash-blue-fire');
+                }, 1000);
+            }
+        }
+    });
+
+    // 2. Sistema global de arrastre y memoria de posición para submenús
     let activeDragElement = null;
     let startX = 0, startY = 0;
     let initialLeft = 0, initialTop = 0;
@@ -1069,20 +1098,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Exponer función global para posicionar elementos nuevos
     window.RetoricaDragManager = {
         initElement: function(elem) {
             if (!elem) return;
             applySavedPosition(elem);
 
             elem.addEventListener('pointerdown', (e) => {
-                // Permitir clics normales en los botones internos del submenú
                 if (e.target.closest('button')) return;
                 
                 activeDragElement = elem;
                 let rect = elem.getBoundingClientRect();
                 
-                // Si el elemento tenía transform: translateX(-50%), calculamos su left real
                 if (!elem.style.left || elem.style.transform.includes('translateX')) {
                     elem.style.setProperty('left', rect.left + 'px', 'important');
                     elem.style.setProperty('top', rect.top + 'px', 'important');
@@ -1106,7 +1132,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 let newLeft = initialLeft + dx;
                 let newTop = initialTop + dy;
 
-                // Limites de pantalla
                 newLeft = Math.max(10, Math.min(window.innerWidth - elem.offsetWidth - 10, newLeft));
                 newTop = Math.max(10, Math.min(window.innerHeight - elem.offsetHeight - 10, newTop));
 
@@ -1114,7 +1139,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 elem.style.setProperty('top', newTop + 'px', 'important');
                 elem.style.setProperty('transform', 'none', 'important');
 
-                // Guardar última posición en memoria
                 localStorage.setItem('retorica_menu_pos_x', newLeft);
                 localStorage.setItem('retorica_menu_pos_y', newTop);
             });
