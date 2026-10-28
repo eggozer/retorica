@@ -661,27 +661,30 @@
         }
 
         /* ========================================== */
-        /* DOBLE FLASHEO: ICONOS EN AZUL FUEGO (ANDROID 5+ COMPATIBLE) */
+        /* FLASHEO AZUL FUEGO EN ICONOS (UNIVERSAL JS) */
         /* ========================================== */
-        .btn-round-3d:active svg,
-        .card-menu-btn:active svg,
-        .btn-action-tmpl:active svg {
-            animation: svg-blue-fire-flash 0.4s ease-in-out 1 !important;
+        
+        /* Clase universal inyectada por JS al presionar cualquier icono */
+        .flash-blue-fire {
+            animation: svg-blue-fire-flash 1.0s ease-in-out 1 !important;
         }
 
         @keyframes svg-blue-fire-flash {
             0%, 100% { 
                 fill: currentColor; 
                 stroke: currentColor; 
+                color: inherit;
                 filter: none; 
+                transform: scale(1);
             }
-            50% { 
+            30%, 70% { 
                 fill: #00d2ff !important; 
                 stroke: #00d2ff !important; 
-                filter: drop-shadow(0 0 8px #00d2ff) !important; 
+                color: #00d2ff !important;
+                filter: drop-shadow(0 0 10px #00d2ff) brightness(1.8) !important; 
+                transform: scale(1.18);
             }
         }
-
         /* Dimensiones estandarizadas y seguras para Vectores SVG (Android 5) */
         .svg-retorica-icon {
             width: 20px;
