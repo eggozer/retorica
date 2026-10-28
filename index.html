@@ -558,9 +558,8 @@
 
         /* 2. Banner flotante de deshacer borrado */
         .undo-toast-banner {
-            position: fixed;
-            top: 95px !important; /* Posicionado a la misma altura para mantener simetría */
-            bottom: auto !important;
+            position: fixed !important;
+            top: 95px;
             left: 50%;
             transform: translateX(-50%);
             background: var(--bg-sidebar);
@@ -579,6 +578,9 @@
             font-weight: bold;
             width: auto !important;
             max-width: 95% !important;
+            touch-action: none;
+            cursor: move;
+            user-select: none;
         }
 
         /* Contenedor Wrapper 3D para cada Botón y su Leyenda */
