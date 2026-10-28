@@ -1054,7 +1054,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
     <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Animación de ráfaga amarilla y azul fuego en iconos al presionar
+    // 1. Animación sincronizada: Borde amarillo + Icono Azul Fuego (1.0s exacto)
     document.addEventListener('pointerdown', (e) => {
         const langBtn = e.target.closest('#accordion-languages .btn-round-3d');
         if (langBtn) {
@@ -1070,7 +1070,8 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.offsetHeight;
             btn.style.animation = 'flash-yellow-burst 0.5s ease-in-out 1';
 
-            const iconElem = btn.querySelector('svg, .emoji-icon, .icon-raw, span') || btn;
+            // Selecciona el icono SVG nativo del botón
+            const iconElem = btn.querySelector('svg, .svg-retorica-icon, .emoji-icon, .icon-raw') || btn;
             if (iconElem) {
                 iconElem.classList.remove('flash-blue-fire');
                 void iconElem.offsetHeight;
@@ -1152,6 +1153,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 });
-</script>
+ </script>
 </body>
 </html>
