@@ -661,39 +661,41 @@
         }
 
         /* ========================================== */
-        /* DOBLE FLASHEO: BORDE AMARILLO + ICONO AZUL FUEGO */
+        /* ICONOS EN AZUL FUEGO FIJO + INFLADO AL PULSAR */
         /* ========================================== */
         
-        /* Animación unificada para iconos compatibles con Android 5+ */
+        /* Clase universal inyectada por JS al presionar cualquier icono */
         .flash-blue-fire {
             animation: svg-blue-fire-flash 1.0s ease-in-out 1 !important;
         }
 
         @keyframes svg-blue-fire-flash {
             0%, 100% { 
-                fill: currentColor; 
-                stroke: currentColor; 
-                color: inherit;
-                filter: none; 
+                fill: #00d2ff !important; 
+                stroke: #00d2ff !important; 
+                color: #00d2ff !important;
+                filter: drop-shadow(0 0 4px rgba(0, 210, 255, 0.5)); 
                 transform: scale(1);
             }
             30%, 70% { 
                 fill: #00d2ff !important; 
                 stroke: #00d2ff !important; 
                 color: #00d2ff !important;
-                filter: drop-shadow(0 0 10px #00d2ff) brightness(1.8) !important; 
+                filter: drop-shadow(0 0 12px #00d2ff) brightness(1.8) !important; 
                 transform: scale(1.18);
             }
         }
 
-        /* Dimensiones estandarizadas y seguras para Vectores SVG (Android 5+) */
+        /* Dimensiones estandarizadas y color Azul Fuego permanente (Día y Noche) */
         .svg-retorica-icon {
             width: 22px;
             height: 22px;
-            fill: currentColor;
-            stroke: currentColor;
+            fill: #00d2ff !important;
+            stroke: #00d2ff !important;
+            color: #00d2ff !important;
             display: inline-block;
             vertical-align: middle;
+            transition: all 0.2s ease;
         }
     </style>
 </head>
