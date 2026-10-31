@@ -112,7 +112,7 @@ var RetoricaAudio = {
     },
 
     // ==========================================
-    // SECCIÓN 3: LECTURA RÁPIDA Y SINTETIZADOR POR PÁRRAFOS
+    // SECCIÓN 3: LECTURA DESDE EL CURSOR Y DETENCIÓN ABSOLUTA
     // ==========================================
     play: function() {
         if (!('speechSynthesis' in window)) {
@@ -123,23 +123,42 @@ var RetoricaAudio = {
         var editor = document.getElementById('editor-body');
         if (!editor) return;
 
-        // Obtener el texto respetando los párrafos originales sin unificarlos
-        var text = (editor.innerText || editor.textContent || '').trim();
-        if (!text) { 
+        var fullText = (editor.innerText || editor.textContent || '').trim();
+        if (!fullText) { 
             if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("No hay texto para leer."); 
             return; 
         }
 
         window.speechSynthesis.cancel(); 
 
-        var utterance = new SpeechSynthesisUtterance(text);
+        // Detectar la posición actual del cursor (Selection / Caret) en el editor
+        var startIndex = 0;
+        var sel = window.getSelection();
+        if (sel && sel.rangeCount > 0 && editor.contains(sel.anchorNode)) {
+            var range = sel.getRangeAt(0);
+            var preCaretRange = range.cloneRange();
+            preCaretRange.selectNodeContents(editor);
+            preCaretRange.setEnd(range.endContainer, range.endOffset);
+            startIndex = preCaretRange.toString().length;
+        }
+
+        // Si el cursor está al final o fuera del texto, leer desde el inicio
+        if (startIndex >= fullText.length) {
+            startIndex = 0;
+        }
+
+        var textToRead = fullText.substring(startIndex);
+
+        var utterance = new SpeechSynthesisUtterance(textToRead);
         utterance.lang = typeof RetoricaI18n !== 'undefined' ? RetoricaI18n.currentVoiceLang : 'es-MX';
         utterance.rate = this.state.speedRate;
 
         utterance.onstart = function() {
             var playBtn = document.getElementById('btn-play-main');
             if (playBtn) playBtn.classList.add('reading-active');
-            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Iniciando lectura rápida...");
+            if (typeof RetoricaUI !== 'undefined') {
+                RetoricaUI.notify(startIndex > 0 ? "Reanudando lectura desde el cursor..." : "Iniciando lectura...");
+            }
         };
 
         utterance.onend = function() {
@@ -156,16 +175,22 @@ var RetoricaAudio = {
     },
 
     stop: function() {
-        if (window.speechSynthesis) window.speechSynthesis.cancel();
+        // Cancelación absoluta y definitiva para evitar que se reactive sola
+        if (window.speechSynthesis) {
+            window.speechSynthesis.pause();
+            window.speechSynthesis.cancel();
+        }
+        
         var playBtn = document.getElementById('btn-play-main');
         if (playBtn) playBtn.classList.remove('reading-active');
+        
         this.stopMicLocally();
 
         if (this.state.mediaRecorder && this.state.mediaRecorder.state !== 'inactive') {
             this.state.mediaRecorder.stop();
         }
 
-        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Procesos de audio detenidos.");
+        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Lectura detenida por completo.");
     },
 
     // ==========================================
