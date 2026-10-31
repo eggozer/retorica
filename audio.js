@@ -111,8 +111,8 @@ var RetoricaAudio = {
         if (btn) btn.classList.remove('recording-active');
     },
 
-    // ==========================================
-    // SECCIÓN 3: LECTURA DESDE EL CURSOR Y DETENCIÓN ABSOLUTA
+// ==========================================
+    // SECCIÓN 3: LECTURA INTELIGENTE (SELECCIÓN O DESDE EL CURSOR)
     // ==========================================
     play: function() {
         if (!('speechSynthesis' in window)) {
@@ -131,23 +131,34 @@ var RetoricaAudio = {
 
         window.speechSynthesis.cancel(); 
 
-        // Detectar la posición actual del cursor (Selection / Caret) en el editor
-        var startIndex = 0;
+        var textToRead = "";
+        var noticeMsg = "";
+
+        // 1. Verificar si el usuario ha seleccionado texto explícitamente (palabras, párrafos o fragmentos)
         var sel = window.getSelection();
-        if (sel && sel.rangeCount > 0 && editor.contains(sel.anchorNode)) {
-            var range = sel.getRangeAt(0);
-            var preCaretRange = range.cloneRange();
-            preCaretRange.selectNodeContents(editor);
-            preCaretRange.setEnd(range.endContainer, range.endOffset);
-            startIndex = preCaretRange.toString().length;
-        }
+        var selectedText = sel ? sel.toString().trim() : "";
 
-        // Si el cursor está al final o fuera del texto, leer desde el inicio
-        if (startIndex >= fullText.length) {
-            startIndex = 0;
-        }
+        if (selectedText.length > 0 && editor.contains(sel.anchorNode)) {
+            textToRead = selectedText;
+            noticeMsg = "Leyendo selección...";
+        } else {
+            // 2. Si no hay selección, usar la posición actual del cursor (Caret)
+            var startIndex = 0;
+            if (sel && sel.rangeCount > 0 && editor.contains(sel.anchorNode)) {
+                var range = sel.getRangeAt(0);
+                var preCaretRange = range.cloneRange();
+                preCaretRange.selectNodeContents(editor);
+                preCaretRange.setEnd(range.endContainer, range.endOffset);
+                startIndex = preCaretRange.toString().length;
+            }
 
-        var textToRead = fullText.substring(startIndex);
+            if (startIndex >= fullText.length) {
+                startIndex = 0;
+            }
+
+            textToRead = fullText.substring(startIndex);
+            noticeMsg = startIndex > 0 ? "Reanudando lectura desde el cursor..." : "Iniciando lectura...";
+        }
 
         var utterance = new SpeechSynthesisUtterance(textToRead);
         utterance.lang = typeof RetoricaI18n !== 'undefined' ? RetoricaI18n.currentVoiceLang : 'es-MX';
@@ -157,7 +168,7 @@ var RetoricaAudio = {
             var playBtn = document.getElementById('btn-play-main');
             if (playBtn) playBtn.classList.add('reading-active');
             if (typeof RetoricaUI !== 'undefined') {
-                RetoricaUI.notify(startIndex > 0 ? "Reanudando lectura desde el cursor..." : "Iniciando lectura...");
+                RetoricaUI.notify(noticeMsg);
             }
         };
 
