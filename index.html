@@ -661,7 +661,7 @@
         }
 
         /* ========================================== */
-        /* ICONOS LAVA NARANJA CON CONTORNO GUINDA */
+        /* ICONOS LAVA: RELLENO GUINDA Y CONTORNO NARANJA */
         /* ========================================== */
         
         /* Clase universal inyectada por JS al presionar cualquier icono */
@@ -671,8 +671,8 @@
 
         @keyframes svg-lava-glow-flash {
             0%, 100% { 
-                fill: #ff6600 !important; 
-                stroke: #8b0000 !important; 
+                fill: #8b0000 !important; 
+                stroke: #ff6600 !important; 
                 color: #ff6600 !important;
                 filter: drop-shadow(0 0 4px rgba(255, 102, 0, 0.4)); 
                 transform: scale(1);
@@ -680,18 +680,18 @@
             30%, 70% { 
                 fill: #ff3300 !important; 
                 stroke: #ff6600 !important; 
-                color: #ff3300 !important;
+                color: #ff6600 !important;
                 filter: drop-shadow(0 0 14px #ff6600) brightness(2.0) !important; 
                 transform: scale(1.18);
             }
         }
 
-        /* Dimensiones estandarizadas: Relleno naranja lava con contorno guinda permanente */
+        /* Dimensiones estandarizadas: Relleno interior guinda con contorno naranja lava */
         .svg-retorica-icon {
             width: 22px;
             height: 22px;
-            fill: #ff6600 !important;
-            stroke: #8b0000 !important;
+            fill: #8b0000 !important;
+            stroke: #ff6600 !important;
             stroke-width: 1.5px;
             color: #ff6600 !important;
             display: inline-block;
