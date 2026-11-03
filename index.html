@@ -641,7 +641,7 @@
             75%, 100% { transform: translateX(-30%); }
         }
 
-        /* Animación de Doble Flasheo (Borde Amarillo + Icono Blanco) */
+        /* Animación de Doble Flasheo (Borde Amarillo) */
         @keyframes flash-yellow-burst {
             0%, 100% {
                 box-shadow: none;
@@ -649,9 +649,9 @@
                 border-color: var(--border) !important;
             }
             12%, 36%, 60%, 84% {
-                box-shadow: 0 0 18px rgba(250, 204, 21, 0.95), inset 0 0 10px rgba(250, 204, 21, 0.7);
+                box-shadow: 0 0 18px rgba(255, 204, 0, 0.95), inset 0 0 10px rgba(255, 204, 0, 0.7);
                 filter: brightness(1.4);
-                border-color: #facc15 !important;
+                border-color: #ffcc00 !important;
             }
             24%, 48%, 72% {
                 box-shadow: none;
