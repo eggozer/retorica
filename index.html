@@ -843,10 +843,12 @@
                 <div class="btn-label-3d" id="lbl-tool-doc">Documento</div>
             </div>
 
-            <!-- 11. PDF -->
+            <!-- 11. PDF (Solo letras vectoriales centradas, sin cuadro) -->
             <div class="btn-wrapper-3d">
                 <button type="button" class="btn-round-3d" onclick="RetoricaUI.expPDF()" title="Exportar PDF" aria-label="Exportar PDF">
-                    <svg class="svg-retorica-icon" viewBox="0 0 24 24"><path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8.5 7.5c0 .83-.67 1.5-1.5 1.5H9v2H7.5V7H10c.83 0 1.5.67 1.5 1.5v1zm5 2c0 .83-.67 1.5-1.5 1.5h-2.5V7H15c.83 0 1.5.67 1.5 1.5v3zm4-3H19v1.5h1.5V13H19v2h-1.5V7h3v1.5z"/></svg>
+                    <svg class="svg-retorica-icon" viewBox="0 0 24 24" style="overflow: visible;">
+                        <path d="M3 8h3.5C7.33 8 8 7.33 8 6.5S7.33 5 6.5 5H3v6h1.5V9.5H6V11h1.5V8H3zm0 8h2.5c.83 0 1.5-.67 1.5-1.5S6.33 13 5.5 13H4.5v-1.5H6V10H3v6zm1.5-1.5V14h1v.5h-1zM9 16V8h2.5c1.1 0 2 .9 2 2v4c0 1.1-.9 2-2 2H9zm1.5-1.5h1v-5h-1v5zm5 1.5V8H19v1.5h-2v1.75h1.75V12.75H17V14.5h2V16h-3.5z" />
+                    </svg>
                 </button>
                 <div class="btn-label-3d" id="lbl-tool-pdf">PDF</div>
             </div>
