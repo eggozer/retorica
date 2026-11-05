@@ -27,78 +27,113 @@ var RetoricaAudio = {
     },
 
     // ==========================================
-    // SECCIÓN 2: DICTADO POR MICRÓFONO
+    // SECCIÓN 2: DICTADO Y GRABACIÓN ROBUSTA PARA ANDROID 5
     // ==========================================
     toggleMic: function() {
         var btn = document.getElementById('btn-mic-main');
         var Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!Speech) { 
-            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Dictado no soportado en este navegador."); 
-            return; 
-        }
 
-        if (!this.state.isRecording) {
-            var editor = document.getElementById('editor-body');
-            if (editor) {
-                editor.focus();
-            }
-
-            this.state.recognition = new Speech(); 
-            this.state.recognition.continuous = true;
-            this.state.recognition.interimResults = false;
-            
-            this.state.recognition.lang = typeof RetoricaI18n !== 'undefined' ? RetoricaI18n.currentLang : 'es-MX';
-            
-            this.state.recognition.onresult = function(event) {
-                var textChunk = event.results[event.results.length - 1][0].transcript;
+        // Si el navegador soporta dictado nativo y no estamos grabando, intentarlo
+        if (Speech && !this.state.isRecording) {
+            try {
                 var editor = document.getElementById('editor-body');
-                if (!editor) return;
+                if (editor) editor.focus();
 
-                editor.focus();
+                this.state.recognition = new Speech(); 
+                this.state.recognition.continuous = true;
+                this.state.recognition.interimResults = false;
+                this.state.recognition.lang = typeof RetoricaI18n !== 'undefined' ? RetoricaI18n.currentLang : 'es-MX';
+                
+                this.state.recognition.onresult = function(event) {
+                    var textChunk = event.results[event.results.length - 1][0].transcript;
+                    var editor = document.getElementById('editor-body');
+                    if (!editor) return;
 
-                // Intento 1: Usar execCommand para mantener el historial de deshacer y posición
-                var success = false;
-                try {
-                    success = document.execCommand('insertText', false, textChunk + ' ');
-                } catch(e) {
-                    success = false;
-                }
-
-                // Intento 2: Inserción directa en el Rango del Cursor si execCommand falla
-                if (!success) {
-                    var sel = window.getSelection();
-                    if (sel.rangeCount > 0) {
-                        var range = sel.getRangeAt(0);
-                        range.deleteContents();
-                        var textNode = document.createTextNode(textChunk + ' ');
-                        range.insertNode(textNode);
-                        
-                        // Mover el cursor después del texto insertado
-                        range.setStartAfter(textNode);
-                        range.setEndAfter(textNode);
-                        sel.removeAllRanges();
-                        sel.addRange(range);
-                    } else {
-                        // Fallback secundario al final solo si no hay ningún foco previo
+                    editor.focus();
+                    try {
+                        document.execCommand('insertText', false, textChunk + ' ');
+                    } catch(e) {
                         editor.innerText += (editor.innerText.trim() ? ' ' : '') + textChunk;
                     }
+
+                    if (typeof RetoricaUI !== 'undefined') {
+                        RetoricaUI.updateCounters();
+                        RetoricaUI.triggerAutoSave();
+                    }
+                };
+                
+                var self = this;
+                this.state.recognition.onerror = function() { 
+                    // Si falla por restricciones de Google/Android 5, activar fallback de audio automático
+                    self.stopMicLocally();
+                    self.fallbackAudioRecording();
+                };
+                this.state.recognition.onend = function() { RetoricaAudio.stopMicLocally(); };
+                this.state.recognition.start(); 
+                this.state.isRecording = true;
+                if (btn) btn.classList.add('recording-active'); 
+                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Micrófono abierto (Dictando)...");
+                return;
+            } catch(err) {
+                // Si ocurre cualquier excepción en el arranque nativo, pasar directo al fallback
+                this.fallbackAudioRecording();
+                return;
+            }
+        }
+
+        // Si ya está grabando, detener
+        if (this.state.isRecording) {
+            this.stopMicLocally();
+            if (this.state.mediaRecorder && this.state.mediaRecorder.state === 'recording') {
+                this.state.mediaRecorder.stop();
+            }
+            return;
+        }
+
+        // Fallback directo para Android 5 si no existe SpeechRecognition
+        this.fallbackAudioRecording();
+    },
+
+    fallbackAudioRecording: function() {
+        var self = this;
+        var btn = document.getElementById('btn-mic-main');
+
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("El micrófono no está accesible en este dispositivo.");
+            return;
+        }
+
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(function(stream) {
+                self.state.recordedChunks = [];
+                try {
+                    self.state.mediaRecorder = new MediaRecorder(stream);
+                } catch (e) {
+                    self.state.mediaRecorder = new MediaRecorder(stream);
                 }
 
-                if (typeof RetoricaUI !== 'undefined') {
-                    RetoricaUI.updateCounters();
-                    RetoricaUI.triggerAutoSave();
-                }
-            };
-            
-            this.state.recognition.onerror = function() { RetoricaAudio.stopMicLocally(); };
-            this.state.recognition.onend = function() { RetoricaAudio.stopMicLocally(); };
-            this.state.recognition.start(); 
-            this.state.isRecording = true;
-            if (btn) btn.classList.add('recording-active'); 
-            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Micrófono abierto (Dictando)...");
-        } else {
-            this.stopMicLocally();
-        }
+                self.state.mediaRecorder.ondataavailable = function(e) {
+                    if (e.data.size > 0) self.state.recordedChunks.push(e.data);
+                };
+
+                self.state.mediaRecorder.onstop = function() {
+                    var blob = new Blob(self.state.recordedChunks, { type: 'audio/webm' });
+                    stream.getTracks().forEach(function(track) { track.stop(); });
+                    self.renderAudioControl(blob, "Nota de Voz (Android 5)");
+                    if (btn) btn.classList.remove('recording-active');
+                    self.state.isRecording = false;
+                    if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Nota de voz guardada en lienzo ✓");
+                };
+
+                self.state.mediaRecorder.start();
+                self.state.isRecording = true;
+                if (btn) btn.classList.add('recording-active');
+                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Grabando audio directo (Modo Android 5)...");
+            })
+            .catch(function(err) {
+                console.error("Error de hardware de audio:", err);
+                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Acceso al micrófono bloqueado por el sistema.");
+            });
     },
 
     stopMicLocally: function() {
