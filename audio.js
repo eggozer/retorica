@@ -36,8 +36,10 @@ var RetoricaAudio = {
         // Si el navegador soporta dictado nativo y no estamos grabando, intentarlo
         if (Speech && !this.state.isRecording) {
             try {
-                var editor = document.getElementById('editor-body');
-                if (editor) editor.focus();
+                // CORRECCIÓN: Detectar si el foco actual está en el título o en el cuerpo
+                var activeElem = document.activeElement;
+                var targetEditor = (activeElem && activeElem.id === 'editor-title') ? activeElem : document.getElementById('editor-body');
+                if (targetEditor) targetEditor.focus();
 
                 this.state.recognition = new Speech(); 
                 this.state.recognition.continuous = true;
@@ -46,14 +48,21 @@ var RetoricaAudio = {
                 
                 this.state.recognition.onresult = function(event) {
                     var textChunk = event.results[event.results.length - 1][0].transcript;
-                    var editor = document.getElementById('editor-body');
+                    
+                    // CORRECCIÓN: Mantener el texto dictado en el elemento activo correcto (Título o Cuerpo)
+                    var currentActive = document.activeElement;
+                    var editor = (currentActive && currentActive.id === 'editor-title') ? currentActive : document.getElementById('editor-body');
                     if (!editor) return;
 
                     editor.focus();
-                    try {
-                        document.execCommand('insertText', false, textChunk + ' ');
-                    } catch(e) {
-                        editor.innerText += (editor.innerText.trim() ? ' ' : '') + textChunk;
+                    if (editor.id === 'editor-title') {
+                        editor.value += (editor.value.trim() ? ' ' : '') + textChunk;
+                    } else {
+                        try {
+                            document.execCommand('insertText', false, textChunk + ' ');
+                        } catch(e) {
+                            editor.innerText += (editor.innerText.trim() ? ' ' : '') + textChunk;
+                        }
                     }
 
                     if (typeof RetoricaUI !== 'undefined') {
