@@ -9,6 +9,9 @@ var RetoricaAudio = {
         speedRate: 1.0   // Velocidad / Tempo de lectura
     },
 
+    // Memoria persistente para el foco activo en Android 5
+    lastFocusedElement: null,
+
     // ==========================================
     // SECCIÓN 1: CONFIGURACIÓN DE CALIDAD Y VELOCIDAD
     // ==========================================
@@ -26,9 +29,6 @@ var RetoricaAudio = {
         }
     },
 
-      // Variable global local para recordar dónde estaba el cursor antes de tocar el botón del micrófono
-    lastFocusedElement: null,
-
     // ==========================================
     // SECCIÓN 2: DICTADO Y GRABACIÓN ROBUSTA PARA ANDROID 5
     // ==========================================
@@ -43,7 +43,6 @@ var RetoricaAudio = {
             if (activeElem && (activeElem.id === 'editor-title' || activeElem.id === 'editor-body')) {
                 this.lastFocusedElement = activeElem;
             } else if (!this.lastFocusedElement) {
-                // Por defecto si no hay registro previo, usar el editor principal
                 this.lastFocusedElement = document.getElementById('editor-body');
             }
         }
@@ -112,7 +111,49 @@ var RetoricaAudio = {
 
         // Fallback directo para Android 5 si no existe SpeechRecognition
         this.fallbackAudioRecording();
-    },                     
+    },
+
+    fallbackAudioRecording: function() {
+        var self = this;
+        var btn = document.getElementById('btn-mic-main');
+
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("El micrófono no está accesible en este dispositivo.");
+            return;
+        }
+
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(function(stream) {
+                self.state.recordedChunks = [];
+                try {
+                    self.state.mediaRecorder = new MediaRecorder(stream);
+                } catch (e) {
+                    self.state.mediaRecorder = new MediaRecorder(stream);
+                }
+
+                self.state.mediaRecorder.ondataavailable = function(e) {
+                    if (e.data.size > 0) self.state.recordedChunks.push(e.data);
+                };
+
+                self.state.mediaRecorder.onstop = function() {
+                    var blob = new Blob(self.state.recordedChunks, { type: 'audio/webm' });
+                    stream.getTracks().forEach(function(track) { track.stop(); });
+                    self.renderAudioControl(blob, "Nota de Voz (Android 5)");
+                    if (btn) btn.classList.remove('recording-active');
+                    self.state.isRecording = false;
+                    if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Nota de voz guardada en lienzo ✓");
+                };
+
+                self.state.mediaRecorder.start();
+                self.state.isRecording = true;
+                if (btn) btn.classList.add('recording-active');
+                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Grabando audio directo (Modo Android 5)...");
+            })
+            .catch(function(err) {
+                console.error("Error de hardware de audio:", err);
+                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Acceso al micrófono bloqueado por el sistema.");
+            });
+    },
 
     stopMicLocally: function() {
         var btn = document.getElementById('btn-mic-main');
@@ -124,7 +165,7 @@ var RetoricaAudio = {
         if (btn) btn.classList.remove('recording-active');
     },
 
-// ==========================================
+    // ==========================================
     // SECCIÓN 3: LECTURA INTELIGENTE (SELECCIÓN O DESDE EL CURSOR)
     // ==========================================
     play: function() {
@@ -147,7 +188,6 @@ var RetoricaAudio = {
         var textToRead = "";
         var noticeMsg = "";
 
-        // 1. Verificar si el usuario ha seleccionado texto explícitamente (palabras, párrafos o fragmentos)
         var sel = window.getSelection();
         var selectedText = sel ? sel.toString().trim() : "";
 
@@ -155,7 +195,6 @@ var RetoricaAudio = {
             textToRead = selectedText;
             noticeMsg = "Leyendo selección...";
         } else {
-            // 2. Si no hay selección, usar la posición actual del cursor (Caret)
             var startIndex = 0;
             if (sel && sel.rangeCount > 0 && editor.contains(sel.anchorNode)) {
                 var range = sel.getRangeAt(0);
@@ -199,7 +238,6 @@ var RetoricaAudio = {
     },
 
     stop: function() {
-        // Cancelación absoluta y definitiva para evitar que se reactive sola
         if (window.speechSynthesis) {
             window.speechSynthesis.pause();
             window.speechSynthesis.cancel();
@@ -406,3 +444,25 @@ var RetoricaAudio = {
         }
     }
 };
+
+// Listener global de respaldo de foco para Android 5 en el input del título
+document.addEventListener('DOMContentLoaded', function() {
+    var titleInput = document.getElementById('editor-title');
+    if (titleInput) {
+        titleInput.addEventListener('pointerdown', function() {
+            RetoricaAudio.lastFocusedElement = this;
+        });
+        titleInput.addEventListener('focus', function() {
+            RetoricaAudio.lastFocusedElement = this;
+        });
+    }
+    var bodyInput = document.getElementById('editor-body');
+    if (bodyInput) {
+        bodyInput.addEventListener('pointerdown', function() {
+            RetoricaAudio.lastFocusedElement = this;
+        });
+        bodyInput.addEventListener('focus', function() {
+            RetoricaAudio.lastFocusedElement = this;
+        });
+    }
+});
