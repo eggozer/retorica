@@ -1,4 +1,4 @@
-// --- RETÓRICA AUDIO & SPEECH ENGINE (audio.js - UNIVERSAL COMPATIBILITY) ---
+// --- RETÓRICA AUDIO & SPEECH ENGINE (audio.js - UNIVERSAL & ZERO-FAIL FLUSH) ---
 var RetoricaAudio = {
     state: { 
         isRecording: false, 
@@ -9,7 +9,7 @@ var RetoricaAudio = {
         speedRate: 1.0   // Velocidad / Tempo de lectura
     },
 
-    // Memoria persistente para recordar exactamente dónde estaba el cursor
+    // Memoria persistente del elemento enfocado
     lastFocusedElement: null,
 
     // ==========================================
@@ -30,13 +30,13 @@ var RetoricaAudio = {
     },
 
     // ==========================================
-    // SECCIÓN 2: CONTROL UNIVERSAL DE MICRÓFONO (HÍBRIDO)
+    // SECCIÓN 2: CONTROL UNIVERSAL DE MICRÓFONO (PREVENTIVO & HÍBRIDO)
     // ==========================================
     toggleMic: function() {
         var btn = document.getElementById('btn-mic-main');
         var Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-        // Si ya está en proceso de grabación activa, detener todo de inmediato
+        // 1. Si ya está grabando, detener la sesión de inmediato
         if (this.state.isRecording) {
             this.stopMicLocally();
             if (this.state.mediaRecorder && this.state.mediaRecorder.state === 'recording') {
@@ -46,7 +46,7 @@ var RetoricaAudio = {
             return;
         }
 
-        // Capturar rigurosamente dónde tiene el usuario el foco ANTES de que el navegador lo pierda al presionar el botón
+        // 2. Preservar y asegurar el foco antes de abrir el canal de voz
         var activeElem = document.activeElement;
         if (activeElem && (activeElem.id === 'editor-title' || activeElem.id === 'editor-body')) {
             this.lastFocusedElement = activeElem;
@@ -54,13 +54,14 @@ var RetoricaAudio = {
             this.lastFocusedElement = document.getElementById('editor-body');
         }
 
-        // RUTA A: Dispositivos Modernos (Android 10/11, PC, etc.) -> Dictado Nativo Voz a Texto
+        // Reenfoque garantizado en pantalla
+        if (this.lastFocusedElement) {
+            this.lastFocusedElement.focus();
+        }
+
+        // 3. RUTA A: Dispositivos Modernos (Android 10/11, Chrome, etc.) -> Dictado Nativo al Primer Intento
         if (Speech) {
             try {
-                if (this.lastFocusedElement) {
-                    this.lastFocusedElement.focus();
-                }
-
                 this.state.recognition = new Speech(); 
                 this.state.recognition.continuous = true;
                 this.state.recognition.interimResults = false;
@@ -70,7 +71,7 @@ var RetoricaAudio = {
                 this.state.recognition.onresult = function(event) {
                     var textChunk = event.results[event.results.length - 1][0].transcript;
                     
-                    // Asegurar que el texto dictado se inserte estrictamente en el elemento guardado (Título o Cuerpo)
+                    // Inserción estricta en el destino memorizado (Título o Cuerpo)
                     var target = self.lastFocusedElement || document.getElementById('editor-body');
                     if (!target) return;
 
@@ -92,9 +93,12 @@ var RetoricaAudio = {
                 };
                 
                 this.state.recognition.onerror = function(err) { 
-                    console.warn("Fallo en reconocimiento nativo, intentando respaldo de audio:", err);
+                    console.warn("Fallo o interrupción en reconocimiento nativo:", err);
                     self.stopMicLocally();
-                    self.fallbackAudioRecording();
+                    // Solo conmuta a nota de voz si el fallo no es por cancelación manual
+                    if (err.error !== 'aborted') {
+                        self.fallbackAudioRecording();
+                    }
                 };
 
                 this.state.recognition.onend = function() { 
@@ -104,17 +108,17 @@ var RetoricaAudio = {
                 this.state.recognition.start(); 
                 this.state.isRecording = true;
                 if (btn) btn.classList.add('recording-active'); 
-                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Micrófono abierto (Dictando)...");
+                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Dictando texto...");
                 return;
 
             } catch(err) {
-                console.warn("Excepción al iniciar SpeechRecognition, usando respaldo:", err);
+                console.warn("Error al inicializar SpeechRecognition, ejecutando respaldo:", err);
                 this.fallbackAudioRecording();
                 return;
             }
         }
 
-        // RUTA B: Dispositivos Antiguos (Android 5 o navegadores sin API de voz) -> Grabación de Nota de Voz
+        // 4. RUTA B: Dispositivos Antiguos (Android 5 o navegadores sin API de voz) -> Grabación de Nota de Voz
         this.fallbackAudioRecording();
     },
 
@@ -123,7 +127,7 @@ var RetoricaAudio = {
         var btn = document.getElementById('btn-mic-main');
 
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("El micrófono no está accesible en este dispositivo.");
+            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("El micrófono no está disponible.");
             return;
         }
 
@@ -148,7 +152,7 @@ var RetoricaAudio = {
                     self.renderAudioControl(blob, "Nota de Voz");
                     if (btn) btn.classList.remove('recording-active');
                     self.state.isRecording = false;
-                    if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Nota de voz guardada en lienzo ✓");
+                    if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Nota de voz guardada ✓");
                 };
 
                 self.state.mediaRecorder.start();
@@ -157,7 +161,7 @@ var RetoricaAudio = {
                 if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Grabando nota de voz...");
             })
             .catch(function(err) {
-                console.error("Error de hardware de audio:", err);
+                console.error("Error al obtener hardware de micrófono:", err);
                 if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Permiso de micrófono denegado.");
             });
     },
@@ -265,7 +269,7 @@ var RetoricaAudio = {
     },
 
     // ==========================================
-    // SECCIÓN 4: GRABACIÓN DE MENSAJES DE VOZ
+    // SECCIÓN 4: GRABACIÓN DE MENSAJES DE VOZ DIRECTOS
     // ==========================================
     produceVoiceMessage: function() {
         var self = this;
@@ -454,18 +458,33 @@ var RetoricaAudio = {
     }
 };
 
-// Listener global de respaldo de foco en inputs para evitar saltos indeseados
-document.addEventListener('DOMContentLoaded', function() {
-    var titleInput = document.getElementById('editor-title');
-    if (titleInput) {
-        titleInput.addEventListener('focus', function() {
-            RetoricaAudio.lastFocusedElement = this;
-        });
+// Registradores inmediatos y de respaldo para retener la posición exacta del foco
+(function registerFocusListeners() {
+    function bindEvents() {
+        var titleInput = document.getElementById('editor-title');
+        var bodyInput = document.getElementById('editor-body');
+
+        if (titleInput) {
+            titleInput.addEventListener('focus', function() {
+                RetoricaAudio.lastFocusedElement = this;
+            });
+            titleInput.addEventListener('click', function() {
+                RetoricaAudio.lastFocusedElement = this;
+            });
+        }
+        if (bodyInput) {
+            bodyInput.addEventListener('focus', function() {
+                RetoricaAudio.lastFocusedElement = this;
+            });
+            bodyInput.addEventListener('click', function() {
+                RetoricaAudio.lastFocusedElement = this;
+            });
+        }
     }
-    var bodyInput = document.getElementById('editor-body');
-    if (bodyInput) {
-        bodyInput.addEventListener('focus', function() {
-            RetoricaAudio.lastFocusedElement = this;
-        });
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', bindEvents);
+    } else {
+        bindEvents();
     }
-});
+})();
