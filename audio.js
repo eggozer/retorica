@@ -5,12 +5,38 @@ var RetoricaAudio = {
         recognition: null,
         mediaRecorder: null,
         recordedChunks: [],
-        quality: 'high', // 'high' (HQ) o 'low' (Ligero)
-        speedRate: 1.0   // Velocidad / Tempo de lectura
+        quality: 'high', 
+        speedRate: 1.0   
     },
 
     // Memoria persistente del elemento enfocado
     lastFocusedElement: null,
+
+    // ==========================================
+    // SECCIÓN 0: UTILIDAD DE AUDIO SINTETIZADO (BEEP)
+    // ==========================================
+    playBeep: function(frequency, duration) {
+        try {
+            var AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+            var ctx = new AudioCtx();
+            var osc = ctx.createOscillator();
+            var gain = ctx.createGain();
+            
+            osc.type = 'sine';
+            osc.frequency.value = frequency || 440;
+            gain.gain.setValueAtTime(0.1, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + (duration || 0.15));
+            
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            
+            osc.start();
+            osc.stop(ctx.currentTime + (duration || 0.15));
+        } catch(e) {
+            // Ignorar si el navegador restringe el contexto de audio sin interacción previa
+        }
+    },
 
     // ==========================================
     // SECCIÓN 1: CONFIGURACIÓN DE CALIDAD Y VELOCIDAD
@@ -30,7 +56,7 @@ var RetoricaAudio = {
     },
 
     // ==========================================
-    // SECCIÓN 2: CONTROL UNIVERSAL DE MICRÓFONO (PREVENTIVO & HÍBRIDO)
+    // SECCIÓN 2: CONTROL UNIVERSAL DE MICRÓFONO (CORREGIDO AL 1° TOQUE)
     // ==========================================
     toggleMic: function() {
         var btn = document.getElementById('btn-mic-main');
@@ -43,10 +69,11 @@ var RetoricaAudio = {
                 this.state.mediaRecorder.stop();
             }
             if (btn) btn.classList.remove('recording-active');
+            this.playBeep(300, 0.2); // Tono grave de detenido
             return;
         }
 
-        // 2. Preservar y asegurar el foco antes de abrir el canal de voz
+        // 2. Capturar y asegurar el foco de manera instantánea antes de abrir el canal
         var activeElem = document.activeElement;
         if (activeElem && (activeElem.id === 'editor-title' || activeElem.id === 'editor-body')) {
             this.lastFocusedElement = activeElem;
@@ -54,7 +81,6 @@ var RetoricaAudio = {
             this.lastFocusedElement = document.getElementById('editor-body');
         }
 
-        // Reenfoque garantizado en pantalla
         if (this.lastFocusedElement) {
             this.lastFocusedElement.focus();
         }
@@ -71,7 +97,6 @@ var RetoricaAudio = {
                 this.state.recognition.onresult = function(event) {
                     var textChunk = event.results[event.results.length - 1][0].transcript;
                     
-                    // Inserción estricta en el destino memorizado (Título o Cuerpo)
                     var target = self.lastFocusedElement || document.getElementById('editor-body');
                     if (!target) return;
 
@@ -95,7 +120,6 @@ var RetoricaAudio = {
                 this.state.recognition.onerror = function(err) { 
                     console.warn("Fallo o interrupción en reconocimiento nativo:", err);
                     self.stopMicLocally();
-                    // Solo conmuta a nota de voz si el fallo no es por cancelación manual
                     if (err.error !== 'aborted') {
                         self.fallbackAudioRecording();
                     }
@@ -108,6 +132,7 @@ var RetoricaAudio = {
                 this.state.recognition.start(); 
                 this.state.isRecording = true;
                 if (btn) btn.classList.add('recording-active'); 
+                this.playBeep(650, 0.15); // Tono agudo de inicio de dictado
                 if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Dictando texto...");
                 return;
 
@@ -118,7 +143,7 @@ var RetoricaAudio = {
             }
         }
 
-        // 4. RUTA B: Dispositivos Antiguos (Android 5 o navegadores sin API de voz) -> Grabación de Nota de Voz
+        // 4. RUTA B: Dispositivos Antiguos (Android 5) -> Grabación de Nota de Voz
         this.fallbackAudioRecording();
     },
 
@@ -152,12 +177,14 @@ var RetoricaAudio = {
                     self.renderAudioControl(blob, "Nota de Voz");
                     if (btn) btn.classList.remove('recording-active');
                     self.state.isRecording = false;
+                    self.playBeep(300, 0.2);
                     if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Nota de voz guardada ✓");
                 };
 
                 self.state.mediaRecorder.start();
                 self.state.isRecording = true;
                 if (btn) btn.classList.add('recording-active');
+                self.playBeep(650, 0.15);
                 if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Grabando nota de voz...");
             })
             .catch(function(err) {
@@ -179,7 +206,7 @@ var RetoricaAudio = {
     },
 
     // ==========================================
-    // SECCIÓN 3: LECTURA INTELIGENTE (SELECCIÓN O DESDE EL CURSOR)
+    // SECCIÓN 3: LECTURA INTELIGENTE
     // ==========================================
     play: function() {
         if (!('speechSynthesis' in window)) {
@@ -278,6 +305,7 @@ var RetoricaAudio = {
         if (this.state.mediaRecorder && this.state.mediaRecorder.state === 'recording') {
             this.state.mediaRecorder.stop();
             if (btn) btn.classList.remove('recording-active');
+            this.playBeep(300, 0.2);
             return;
         }
 
@@ -306,11 +334,13 @@ var RetoricaAudio = {
                     stream.getTracks().forEach(function(track) { track.stop(); });
                     self.renderAudioControl(blob, "Mensaje de Voz");
                     if (btn) btn.classList.remove('recording-active');
+                    self.playBeep(300, 0.2);
                     if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Audio grabado e insertado ✓");
                 };
 
                 self.state.mediaRecorder.start();
                 if (btn) btn.classList.add('recording-active');
+                self.playBeep(650, 0.15);
                 if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Grabando mensaje de voz...");
             })
             .catch(function(err) {
@@ -458,7 +488,7 @@ var RetoricaAudio = {
     }
 };
 
-// Registradores inmediatos y de respaldo para retener la posición exacta del foco
+// Registradores inmediatos para retener la posición exacta del foco y prevenir el doble toque
 (function registerFocusListeners() {
     function bindEvents() {
         var titleInput = document.getElementById('editor-title');
