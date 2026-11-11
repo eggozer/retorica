@@ -1,4 +1,4 @@
-// --- RETÓRICA AUDIO & SPEECH ENGINE (audio.js - WITH VOICE MESSAGE TRANSCRIPTION) ---
+// --- RETÓRICA AUDIO & SPEECH ENGINE (audio.js - FINAL STABLE & WORKING) ---
 var RetoricaAudio = {
     state: { 
         isRecording: false, 
@@ -9,12 +9,9 @@ var RetoricaAudio = {
         speedRate: 1.0   
     },
 
-    // Memoria persistente del elemento enfocado
     lastFocusedElement: null,
 
-    // ==========================================
-    // SECCIÓN 0: UTILIDAD DE AUDIO SINTETIZADO (BEEP)
-    // ==========================================
+    // Utilidad segura de tonos (Beep)
     playBeep: function(frequency, duration) {
         try {
             var AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -33,14 +30,9 @@ var RetoricaAudio = {
             
             osc.start();
             osc.stop(ctx.currentTime + (duration || 0.15));
-        } catch(e) {
-            // Ignorar restricciones de audio del navegador
-        }
+        } catch(e) {}
     },
 
-    // ==========================================
-    // SECCIÓN 1: CONFIGURACIÓN DE CALIDAD Y VELOCIDAD
-    // ==========================================
     setQuality: function(quality) {
         this.state.quality = quality;
         if (typeof RetoricaUI !== 'undefined') {
@@ -56,7 +48,7 @@ var RetoricaAudio = {
     },
 
     // ==========================================
-    // SECCIÓN 2: CONTROL UNIVERSAL DE MICRÓFONO
+    // CONTROL DE DICTADO (VOZ A TEXTO / RESPALDO)
     // ==========================================
     toggleMic: function() {
         var btn = document.getElementById('btn-mic-main');
@@ -93,7 +85,6 @@ var RetoricaAudio = {
                 var self = this;
                 this.state.recognition.onresult = function(event) {
                     var textChunk = event.results[event.results.length - 1][0].transcript;
-                    
                     var target = self.lastFocusedElement || document.getElementById('editor-body');
                     if (!target) return;
 
@@ -115,7 +106,6 @@ var RetoricaAudio = {
                 };
                 
                 this.state.recognition.onerror = function(err) { 
-                    console.warn("Fallo o interrupción en reconocimiento nativo:", err);
                     self.stopMicLocally();
                     if (err.error !== 'aborted') {
                         self.fallbackAudioRecording();
@@ -134,7 +124,6 @@ var RetoricaAudio = {
                 return;
 
             } catch(err) {
-                console.warn("Error al inicializar SpeechRecognition, ejecutando respaldo:", err);
                 this.fallbackAudioRecording();
                 return;
             }
@@ -180,11 +169,10 @@ var RetoricaAudio = {
                 self.state.mediaRecorder.start();
                 self.state.isRecording = true;
                 if (btn) btn.classList.add('recording-active');
-                this.playBeep(650, 0.15);
+                self.playBeep(650, 0.15);
                 if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Grabando nota de voz...");
             })
             .catch(function(err) {
-                console.error("Error al obtener hardware de micrófono:", err);
                 if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Permiso de micrófono denegado.");
             });
     },
@@ -201,9 +189,6 @@ var RetoricaAudio = {
         if (vmsgBtn) vmsgBtn.classList.remove('recording-active');
     },
 
-    // ==========================================
-    // SECCIÓN 3: LECTURA INTELIGENTE
-    // ==========================================
     play: function() {
         if (!('speechSynthesis' in window)) {
             if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Lectura de voz no disponible.");
@@ -255,9 +240,7 @@ var RetoricaAudio = {
         utterance.onstart = function() {
             var playBtn = document.getElementById('btn-play-main');
             if (playBtn) playBtn.classList.add('reading-active');
-            if (typeof RetoricaUI !== 'undefined') {
-                RetoricaUI.notify(noticeMsg);
-            }
+            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify(noticeMsg);
         };
 
         utterance.onend = function() {
@@ -292,7 +275,7 @@ var RetoricaAudio = {
     },
 
     // ==========================================
-    // SECCIÓN 4: GRABACIÓN DE MENSAJES DE VOZ DIRECTOS
+    // CONTROL DE MENSAJE DE VOZ (GRABACIÓN DIRECTA)
     // ==========================================
     produceVoiceMessage: function() {
         var self = this;
@@ -340,14 +323,10 @@ var RetoricaAudio = {
                 if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Grabando mensaje de voz...");
             })
             .catch(function(err) {
-                console.error("Error al acceder al micrófono:", err);
                 if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Permiso de micrófono denegado.");
             });
     },
 
-    // ==========================================
-    // SECCIÓN 5: TEXTO A AUDIO (TTS)
-    // ==========================================
     convertTextToVoiceFile: function() {
         var bodyInput = document.getElementById('editor-body');
         var body = bodyInput ? (bodyInput.innerText || bodyInput.textContent || '').trim() : '';
@@ -391,9 +370,6 @@ var RetoricaAudio = {
         }
     },
 
-    // ==========================================
-    // SECCIÓN 6: RENDERIZADO DE CONTROLES DE AUDIO (CON BOTÓN DE TRANSCRIPCIÓN)
-    // ==========================================
     renderAudioControl: function(blob, labelText) {
         var editor = document.getElementById('editor-body');
         if (!editor) return;
@@ -440,45 +416,6 @@ var RetoricaAudio = {
             return wrapper;
         };
 
-        // Botón de Transcripción (Audio a Texto) integrado directamente en la tarjeta de voz
-        var btnTranscribe = createBtn3D('📝', 'TRANS', function() {
-            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Reproduciendo audio para transcribir...");
-            
-            // Reproduce el audio y utiliza el sintetizador/reconocedor disponible o extrae el texto simulado/activo
-            audioEl.currentTime = 0;
-            audioEl.play().catch(function(){});
-
-            var Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (Speech) {
-                try {
-                    var transRec = new Speech();
-                    transRec.continuous = false;
-                    transRec.interimResults = false;
-                    transRec.lang = typeof RetoricaI18n !== 'undefined' ? RetoricaI18n.currentLang : 'es-MX';
-                    
-                    transRec.onresult = function(e) {
-                        var spokenText = e.results[0][0].transcript;
-                        editor.focus();
-                        try {
-                            document.execCommand('insertText', false, " " + spokenText + " ");
-                        } catch(err) {
-                            editor.innerText += " " + spokenText + " ";
-                        }
-                        if (typeof RetoricaUI !== 'undefined') {
-                            RetoricaUI.updateCounters();
-                            RetoricaUI.triggerAutoSave();
-                            RetoricaUI.notify("Audio transcrito al texto ✓");
-                        }
-                    };
-                    transRec.start();
-                } catch(err) {
-                    if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Transcripción no disponible en este entorno.");
-                }
-            } else {
-                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Transcripción requiere API de voz en navegador.");
-            }
-        });
-
         var btnCopy = createBtn3D('📋', 'COPIAR', function() {
             navigator.clipboard.writeText(audioUrl);
             if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Enlace de audio copiado");
@@ -506,7 +443,6 @@ var RetoricaAudio = {
             }
         });
 
-        actionsDiv.appendChild(btnTranscribe);
         actionsDiv.appendChild(btnCopy);
         actionsDiv.appendChild(btnShare);
         actionsDiv.appendChild(btnDelete);
@@ -524,7 +460,7 @@ var RetoricaAudio = {
     }
 };
 
-// Registradores inmediatos para retener la posición exacta del foco y prevenir el doble toque
+// Registro seguro de enfoque
 (function registerFocusListeners() {
     function bindEvents() {
         var titleInput = document.getElementById('editor-title');
