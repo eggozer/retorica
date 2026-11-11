@@ -1,4 +1,4 @@
-// --- RETÓRICA AUDIO & SPEECH ENGINE (audio.js - UNIVERSAL & ZERO-FAIL FLUSH) ---
+// --- RETÓRICA AUDIO & SPEECH ENGINE (audio.js - WITH VOICE MESSAGE TRANSCRIPTION) ---
 var RetoricaAudio = {
     state: { 
         isRecording: false, 
@@ -34,7 +34,7 @@ var RetoricaAudio = {
             osc.start();
             osc.stop(ctx.currentTime + (duration || 0.15));
         } catch(e) {
-            // Ignorar si el navegador restringe el contexto de audio sin interacción previa
+            // Ignorar restricciones de audio del navegador
         }
     },
 
@@ -56,24 +56,22 @@ var RetoricaAudio = {
     },
 
     // ==========================================
-    // SECCIÓN 2: CONTROL UNIVERSAL DE MICRÓFONO (CORREGIDO AL 1° TOQUE)
+    // SECCIÓN 2: CONTROL UNIVERSAL DE MICRÓFONO
     // ==========================================
     toggleMic: function() {
         var btn = document.getElementById('btn-mic-main');
         var Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-        // 1. Si ya está grabando, detener la sesión de inmediato
         if (this.state.isRecording) {
             this.stopMicLocally();
             if (this.state.mediaRecorder && this.state.mediaRecorder.state === 'recording') {
                 this.state.mediaRecorder.stop();
             }
             if (btn) btn.classList.remove('recording-active');
-            this.playBeep(300, 0.2); // Tono grave de detenido
+            this.playBeep(300, 0.2);
             return;
         }
 
-        // 2. Capturar y asegurar el foco de manera instantánea antes de abrir el canal
         var activeElem = document.activeElement;
         if (activeElem && (activeElem.id === 'editor-title' || activeElem.id === 'editor-body')) {
             this.lastFocusedElement = activeElem;
@@ -85,7 +83,6 @@ var RetoricaAudio = {
             this.lastFocusedElement.focus();
         }
 
-        // 3. RUTA A: Dispositivos Modernos (Android 10/11, Chrome, etc.) -> Dictado Nativo al Primer Intento
         if (Speech) {
             try {
                 this.state.recognition = new Speech(); 
@@ -132,7 +129,7 @@ var RetoricaAudio = {
                 this.state.recognition.start(); 
                 this.state.isRecording = true;
                 if (btn) btn.classList.add('recording-active'); 
-                this.playBeep(650, 0.15); // Tono agudo de inicio de dictado
+                this.playBeep(650, 0.15);
                 if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Dictando texto...");
                 return;
 
@@ -143,7 +140,6 @@ var RetoricaAudio = {
             }
         }
 
-        // 4. RUTA B: Dispositivos Antiguos (Android 5) -> Grabación de Nota de Voz
         this.fallbackAudioRecording();
     },
 
@@ -184,7 +180,7 @@ var RetoricaAudio = {
                 self.state.mediaRecorder.start();
                 self.state.isRecording = true;
                 if (btn) btn.classList.add('recording-active');
-                self.playBeep(650, 0.15);
+                this.playBeep(650, 0.15);
                 if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Grabando nota de voz...");
             })
             .catch(function(err) {
@@ -396,7 +392,7 @@ var RetoricaAudio = {
     },
 
     // ==========================================
-    // SECCIÓN 6: RENDERIZADO DE CONTROLES DE AUDIO
+    // SECCIÓN 6: RENDERIZADO DE CONTROLES DE AUDIO (CON BOTÓN DE TRANSCRIPCIÓN)
     // ==========================================
     renderAudioControl: function(blob, labelText) {
         var editor = document.getElementById('editor-body');
@@ -444,6 +440,45 @@ var RetoricaAudio = {
             return wrapper;
         };
 
+        // Botón de Transcripción (Audio a Texto) integrado directamente en la tarjeta de voz
+        var btnTranscribe = createBtn3D('📝', 'TRANS', function() {
+            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Reproduciendo audio para transcribir...");
+            
+            // Reproduce el audio y utiliza el sintetizador/reconocedor disponible o extrae el texto simulado/activo
+            audioEl.currentTime = 0;
+            audioEl.play().catch(function(){});
+
+            var Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (Speech) {
+                try {
+                    var transRec = new Speech();
+                    transRec.continuous = false;
+                    transRec.interimResults = false;
+                    transRec.lang = typeof RetoricaI18n !== 'undefined' ? RetoricaI18n.currentLang : 'es-MX';
+                    
+                    transRec.onresult = function(e) {
+                        var spokenText = e.results[0][0].transcript;
+                        editor.focus();
+                        try {
+                            document.execCommand('insertText', false, " " + spokenText + " ");
+                        } catch(err) {
+                            editor.innerText += " " + spokenText + " ";
+                        }
+                        if (typeof RetoricaUI !== 'undefined') {
+                            RetoricaUI.updateCounters();
+                            RetoricaUI.triggerAutoSave();
+                            RetoricaUI.notify("Audio transcrito al texto ✓");
+                        }
+                    };
+                    transRec.start();
+                } catch(err) {
+                    if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Transcripción no disponible en este entorno.");
+                }
+            } else {
+                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Transcripción requiere API de voz en navegador.");
+            }
+        });
+
         var btnCopy = createBtn3D('📋', 'COPIAR', function() {
             navigator.clipboard.writeText(audioUrl);
             if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Enlace de audio copiado");
@@ -471,6 +506,7 @@ var RetoricaAudio = {
             }
         });
 
+        actionsDiv.appendChild(btnTranscribe);
         actionsDiv.appendChild(btnCopy);
         actionsDiv.appendChild(btnShare);
         actionsDiv.appendChild(btnDelete);
