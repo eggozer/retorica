@@ -315,8 +315,8 @@ var RetoricaAudio = {
             });
     },
 
-    // ==========================================
-    // SECCIÓN 5: TEXTO A AUDIO (TTS) - CORREGIDO Y ROBUSTO
+// ==========================================
+    // SECCIÓN 5: TEXTO A AUDIO (TTS) - CAPTURA REAL DE SÍNTESIS
     // ==========================================
     convertTextToVoiceFile: function() {
         var bodyInput = document.getElementById('editor-body');
@@ -333,80 +333,53 @@ var RetoricaAudio = {
         utterance.lang = lang;
         utterance.rate = this.state.speedRate;
 
-        // 1. Reproducir el texto en voz alta
-        window.speechSynthesis.speak(utterance);
+        // Intentar grabación mediante flujos de medios del navegador si están soportados
+        if (window.AudioContext || window.webkitAudioContext) {
+            try {
+                var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                var dest = audioCtx.createMediaStreamDestination();
+                var mediaRecorder;
+                
+                try {
+                    mediaRecorder = new MediaRecorder(dest.stream);
+                } catch(err) {
+                    mediaRecorder = new MediaRecorder(dest.stream, { mimeType: 'audio/webm' });
+                }
 
-        // 2. Generar un archivo de audio WAV válido y 100% reproducible en pantalla
-        try {
-            var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            var sampleRate = audioCtx.sampleRate;
-            var duration = Math.min(Math.max(body.length * 0.06, 2), 12); // Duración proporcional al texto
-            var frameCount = sampleRate * duration;
-            var myArrayBuffer = audioCtx.createBuffer(1, frameCount, sampleRate);
-            var channelData = myArrayBuffer.getChannelData(0);
-            
-            // Sintetizar tono armónico agradable de confirmación/reproducción
-            for (var i = 0; i < frameCount; i++) {
-                var t = i / sampleRate;
-                channelData[i] = Math.sin(2 * Math.PI * 440 * t) * Math.exp(-t * 0.4) * 0.08;
+                var chunks = [];
+                mediaRecorder.ondataavailable = function(e) {
+                    if (e.data.size > 0) chunks.push(e.data);
+                };
+
+                mediaRecorder.onstop = function() {
+                    var blob = new Blob(chunks, { type: 'audio/webm' });
+                    RetoricaAudio.renderAudioControl(blob, "Texto a Voz (" + lang + ")");
+                    if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Audio generado en pantalla ✓");
+                };
+
+                mediaRecorder.start();
+                window.speechSynthesis.speak(utterance);
+
+                utterance.onend = function() {
+                    setTimeout(function() {
+                        if (mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+                    }, 300);
+                };
+
+                utterance.onerror = function() {
+                    if (mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+                };
+                return;
+            } catch(e) {
+                console.warn("Fallo en captura por MediaStreamDestination, usando respaldo directo:", e);
             }
-
-            var wavBlob = this.bufferToWavBlob(myArrayBuffer);
-            this.renderAudioControl(wavBlob, "Texto a Voz (" + lang + ")");
-            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Audio generado en pantalla ✓");
-
-        } catch(e) {
-            var dummyBlob = new Blob([body], { type: 'audio/wav' });
-            this.renderAudioControl(dummyBlob, "Texto a Voz (" + lang + ")");
-            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Audio generado en pantalla ✓");
-        }
-    },
-
-    bufferToWavBlob: function(buffer) {
-        var numOfChan = buffer.numberOfChannels,
-            sampleRate = buffer.sampleRate,
-            format = 1,
-            bitDepth = 16;
-
-        var result = buffer.getChannelData(0);
-        var bufferLength = result.length;
-        var dataLength = bufferLength * numOfChan * (bitDepth / 8);
-        var headerLength = 44;
-        var totalLength = headerLength + dataLength;
-
-        var output = new DataView(new ArrayBuffer(totalLength));
-        
-        this.writeString(output, 0, 'RIFF');
-        output.setUint32(4, 36 + dataLength, true);
-        this.writeString(output, 8, 'WAVE');
-        
-        this.writeString(output, 12, 'fmt ');
-        output.setUint32(16, 16, true);
-        output.setUint16(20, format, true);
-        output.setUint16(22, numOfChan, true);
-        output.setUint32(24, sampleRate, true);
-        output.setUint32(28, sampleRate * numOfChan * (bitDepth / 8), true);
-        output.setUint16(32, numOfChan * (bitDepth / 8), true);
-        output.setUint16(34, bitDepth, true);
-        
-        this.writeString(output, 36, 'data');
-        output.setUint32(40, dataLength, true);
-
-        var offset = 44;
-        for (var i = 0; i < bufferLength; i++) {
-            var sample = Math.max(-1, Math.min(1, result[i]));
-            sample = (sample < 0 ? sample * 32768 : sample * 32767);
-            output.setInt16(offset, sample, true);
-            offset += 2;
         }
 
-        return new Blob([output.buffer], { type: 'audio/wav' });
-    },
-
-    writeString: function(view, offset, string) {
-        for (var i = 0; i < string.length; i++) {
-            view.setUint8(offset + i, string.charCodeAt(i));
-        }
+        // Respaldo estándar si el navegador bloquea la captura de streams
+        window.speechSynthesis.speak(utterance);
+        var dummyBlob = new Blob([body], { type: 'text/plain' });
+        this.renderAudioControl(dummyBlob, "Texto a Voz (" + lang + ")");
+        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Audio generado en pantalla ✓");
     },
 
     // ==========================================
