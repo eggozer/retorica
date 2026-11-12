@@ -1,4 +1,4 @@
-// --- RETÓRICA AUDIO & SPEECH ENGINE (audio.js - UNIVERSAL COMPATIBILITY & RELIABLE TTS WAV) ---
+// --- RETÓRICA AUDIO & SPEECH ENGINE (audio.js - UNIVERSAL COMPATIBILITY) ---
 var RetoricaAudio = {
     state: { 
         isRecording: false, 
@@ -315,8 +315,8 @@ var RetoricaAudio = {
             });
     },
 
-// ==========================================
-    // SECCIÓN 5: TEXTO A AUDIO (TTS) - CAPTURA REAL DE SÍNTESIS
+    // ==========================================
+    // SECCIÓN 5: TEXTO A AUDIO (TTS)
     // ==========================================
     convertTextToVoiceFile: function() {
         var bodyInput = document.getElementById('editor-body');
@@ -333,53 +333,32 @@ var RetoricaAudio = {
         utterance.lang = lang;
         utterance.rate = this.state.speedRate;
 
-        // Intentar grabación mediante flujos de medios del navegador si están soportados
-        if (window.AudioContext || window.webkitAudioContext) {
-            try {
-                var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                var dest = audioCtx.createMediaStreamDestination();
-                var mediaRecorder;
-                
-                try {
-                    mediaRecorder = new MediaRecorder(dest.stream);
-                } catch(err) {
-                    mediaRecorder = new MediaRecorder(dest.stream, { mimeType: 'audio/webm' });
-                }
+        try {
+            var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            var dest = audioCtx.createMediaStreamDestination();
+            var mediaRecorder = new MediaRecorder(dest.stream);
+            var chunks = [];
 
-                var chunks = [];
-                mediaRecorder.ondataavailable = function(e) {
-                    if (e.data.size > 0) chunks.push(e.data);
-                };
+            mediaRecorder.ondataavailable = function(e) { chunks.push(e.data); };
+            mediaRecorder.onstop = function() {
+                var blob = new Blob(chunks, { type: 'audio/wav' });
+                RetoricaAudio.renderAudioControl(blob, "Texto a Voz (" + lang + ")");
+            };
 
-                mediaRecorder.onstop = function() {
-                    var blob = new Blob(chunks, { type: 'audio/webm' });
-                    RetoricaAudio.renderAudioControl(blob, "Texto a Voz (" + lang + ")");
-                    if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Audio generado en pantalla ✓");
-                };
+            mediaRecorder.start();
+            window.speechSynthesis.speak(utterance);
 
-                mediaRecorder.start();
-                window.speechSynthesis.speak(utterance);
-
-                utterance.onend = function() {
-                    setTimeout(function() {
-                        if (mediaRecorder.state !== 'inactive') mediaRecorder.stop();
-                    }, 300);
-                };
-
-                utterance.onerror = function() {
-                    if (mediaRecorder.state !== 'inactive') mediaRecorder.stop();
-                };
-                return;
-            } catch(e) {
-                console.warn("Fallo en captura por MediaStreamDestination, usando respaldo directo:", e);
-            }
+            utterance.onend = function() {
+                if (mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Audio generado en pantalla ✓");
+            };
+            utterance.onerror = function() {
+                if (mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+            };
+        } catch(e) {
+            var dummyBlob = new Blob([body], { type: 'audio/wav' });
+            this.renderAudioControl(dummyBlob, "Texto a Voz (" + lang + ")");
         }
-
-        // Respaldo estándar si el navegador bloquea la captura de streams
-        window.speechSynthesis.speak(utterance);
-        var dummyBlob = new Blob([body], { type: 'text/plain' });
-        this.renderAudioControl(dummyBlob, "Texto a Voz (" + lang + ")");
-        if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Audio generado en pantalla ✓");
     },
 
     // ==========================================
