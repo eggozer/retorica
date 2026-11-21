@@ -1161,5 +1161,36 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 });
  </script>
+    <script>
+document.addEventListener('DOMContentLoaded', () => {
+    const scrollArea = document.querySelector('.menu-scroll-area');
+    if (scrollArea) {
+        let touchStartX = 0;
+        let touchStartScrollLeft = 0;
+        let isDraggingScroll = false;
+
+        scrollArea.addEventListener('touchstart', (e) => {
+            if (!e.touches || e.touches.length !== 1) return;
+            touchStartX = e.touches[0].clientX;
+            touchStartScrollLeft = scrollArea.scrollLeft;
+            isDraggingScroll = true;
+        }, { passive: true });
+
+        scrollArea.addEventListener('touchmove', (e) => {
+            if (!isDraggingScroll || !e.touches || e.touches.length !== 1) return;
+            const currentX = e.touches[0].clientX;
+            const deltaX = currentX - touchStartX;
+            scrollArea.scrollLeft = touchStartScrollLeft - deltaX;
+        }, { passive: true });
+
+        const endTouchScroll = () => {
+            isDraggingScroll = false;
+        };
+
+        scrollArea.addEventListener('touchend', endTouchScroll, { passive: true });
+        scrollArea.addEventListener('touchcancel', endTouchScroll, { passive: true });
+    }
+});
+</script>
 </body>
 </html>
