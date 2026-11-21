@@ -46,7 +46,7 @@ var RetoricaAudio = {
             return;
         }
 
-        // Capturar rigurosamente dónde tiene el usuario el foco ANTES de que el navegador lo pierda al presionar el botón
+        // Capturar rigurosamente dónde tiene el usuario el foco ANTES de perderlo
         var activeElem = document.activeElement;
         if (activeElem && (activeElem.id === 'editor-title' || activeElem.id === 'editor-body')) {
             this.lastFocusedElement = activeElem;
@@ -54,33 +54,35 @@ var RetoricaAudio = {
             this.lastFocusedElement = document.getElementById('editor-body');
         }
 
-        // RUTA A: Dispositivos Modernos (Android 10/11, PC, etc.) -> Dictado Nativo Voz a Texto
+        var self = this;
+
+        // RUTA A: Dictado Voz a Texto (SpeechRecognition)
         if (Speech) {
             try {
-                if (this.lastFocusedElement) {
+                if (this.lastFocusedElement && typeof this.lastFocusedElement.focus === 'function') {
                     this.lastFocusedElement.focus();
                 }
 
-                this.state.recognition = new Speech(); 
-                this.state.recognition.continuous = true;
+                this.state.recognition = new Speech();
+                this.state.recognition.continuous = false; // Más estable en WebView de Android
                 this.state.recognition.interimResults = false;
-                this.state.recognition.lang = typeof RetoricaI18n !== 'undefined' ? RetoricaI18n.currentLang : 'es-MX';
-                
-                var self = this;
+                this.state.recognition.lang = (typeof RetoricaI18n !== 'undefined' && RetoricaI18n.currentLang) ? RetoricaI18n.currentLang : 'es-MX';
+
                 this.state.recognition.onresult = function(event) {
-                    var textChunk = event.results[event.results.length - 1][0].transcript;
-                    
-                    // Asegurar que el texto dictado se inserte estrictamente en el elemento guardado (Título o Cuerpo)
+                    var lastResult = event.results[event.results.length - 1];
+                    if (!lastResult || !lastResult[0]) return;
+                    var textChunk = lastResult[0].transcript;
+
                     var target = self.lastFocusedElement || document.getElementById('editor-body');
                     if (!target) return;
 
-                    target.focus();
+                    if (typeof target.focus === 'function') target.focus();
                     if (target.id === 'editor-title') {
                         target.value += (target.value.trim() ? ' ' : '') + textChunk;
                     } else {
                         try {
                             document.execCommand('insertText', false, textChunk + ' ');
-                        } catch(e) {
+                        } catch (e) {
                             target.innerText += (target.innerText.trim() ? ' ' : '') + textChunk;
                         }
                     }
@@ -90,31 +92,41 @@ var RetoricaAudio = {
                         RetoricaUI.triggerAutoSave();
                     }
                 };
-                
-                this.state.recognition.onerror = function(err) { 
-                    console.warn("Fallo en reconocimiento nativo, intentando respaldo de audio:", err);
+
+                this.state.recognition.onerror = function(err) {
+                    var code = (err && err.error) ? err.error : 'desconocido';
+                    console.warn("Error SpeechRecognition:", code, err);
                     self.stopMicLocally();
+
+                    if (code === 'not-allowed' || code === 'service-not-allowed') {
+                        if (typeof RetoricaUI !== 'undefined') {
+                            RetoricaUI.notify("Permiso de micrófono o servicio de voz bloqueado.");
+                        }
+                        return;
+                    }
+                    // Si el motor de dictado no está disponible en este WebView, pasar a nota de voz
                     self.fallbackAudioRecording();
                 };
 
-                this.state.recognition.onend = function() { 
-                    RetoricaAudio.stopMicLocally(); 
+                this.state.recognition.onend = function() {
+                    self.stopMicLocally();
                 };
 
-                this.state.recognition.start(); 
+                this.state.recognition.start();
                 this.state.isRecording = true;
-                if (btn) btn.classList.add('recording-active'); 
+                if (btn) btn.classList.add('recording-active');
                 if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Micrófono abierto (Dictando)...");
                 return;
 
-            } catch(err) {
-                console.warn("Excepción al iniciar SpeechRecognition, usando respaldo:", err);
+            } catch (err) {
+                console.warn("Excepción al iniciar SpeechRecognition:", err);
+                this.stopMicLocally();
                 this.fallbackAudioRecording();
                 return;
             }
         }
 
-        // RUTA B: Dispositivos Antiguos (Android 5 o navegadores sin API de voz) -> Grabación de Nota de Voz
+        // RUTA B: Respaldo de grabación de audio cuando no hay SpeechRecognition en el WebView
         this.fallbackAudioRecording();
     },
 
@@ -122,16 +134,37 @@ var RetoricaAudio = {
         var self = this;
         var btn = document.getElementById('btn-mic-main');
 
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("El micrófono no está accesible en este dispositivo.");
+        var getUserMedia = (navigator.mediaDevices && navigator.mediaDevices.getUserMedia)
+            ? function(constraints) { return navigator.mediaDevices.getUserMedia(constraints); }
+            : (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia)
+                ? function(constraints) {
+                    return new Promise(function(resolve, reject) {
+                        var legacyFn = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+                        legacyFn.call(navigator, constraints, resolve, reject);
+                    });
+                }
+                : null;
+
+        if (!getUserMedia) {
+            if (typeof RetoricaUI !== 'undefined') {
+                RetoricaUI.notify("Dictado/micrófono no soportado en este WebView.");
+            }
             return;
         }
 
-        navigator.mediaDevices.getUserMedia({ audio: true })
+        getUserMedia({ audio: true })
             .then(function(stream) {
+                if (typeof MediaRecorder === 'undefined') {
+                    stream.getTracks().forEach(function(track) { track.stop(); });
+                    if (typeof RetoricaUI !== 'undefined') {
+                        RetoricaUI.notify("Grabadora de audio no disponible en este Android.");
+                    }
+                    return;
+                }
+
                 self.state.recordedChunks = [];
                 var options = self.state.quality === 'high' ? { mimeType: 'audio/webm;codecs=opus' } : { mimeType: 'audio/webm' };
-                
+
                 try {
                     self.state.mediaRecorder = new MediaRecorder(stream, options);
                 } catch (e) {
@@ -139,7 +172,7 @@ var RetoricaAudio = {
                 }
 
                 self.state.mediaRecorder.ondataavailable = function(e) {
-                    if (e.data.size > 0) self.state.recordedChunks.push(e.data);
+                    if (e.data && e.data.size > 0) self.state.recordedChunks.push(e.data);
                 };
 
                 self.state.mediaRecorder.onstop = function() {
@@ -154,11 +187,14 @@ var RetoricaAudio = {
                 self.state.mediaRecorder.start();
                 self.state.isRecording = true;
                 if (btn) btn.classList.add('recording-active');
-                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Grabando nota de voz...");
+                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Sin dictado en WebView: grabando nota de voz...");
             })
             .catch(function(err) {
                 console.error("Error de hardware de audio:", err);
-                if (typeof RetoricaUI !== 'undefined') RetoricaUI.notify("Permiso de micrófono denegado.");
+                self.stopMicLocally();
+                if (typeof RetoricaUI !== 'undefined') {
+                    RetoricaUI.notify("Permiso de micrófono denegado o sin acceso.");
+                }
             });
     },
 
@@ -166,7 +202,7 @@ var RetoricaAudio = {
         var btn = document.getElementById('btn-mic-main');
         var vmsgBtn = document.getElementById('btn-icon-vmsg');
         if (this.state.recognition) {
-            try { this.state.recognition.stop(); } catch(e){}
+            try { this.state.recognition.stop(); } catch (e) {}
             this.state.recognition = null;
         }
         this.state.isRecording = false;
