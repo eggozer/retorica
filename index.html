@@ -120,20 +120,26 @@
             padding: 10px 15px;
             display: flex !important;
             flex-wrap: nowrap !important;
-            overflow-x: auto !important; 
-            gap: 16px;
+            overflow: hidden !important;
+            gap: 12px;
             z-index: 1000;
             position: relative !important;
             align-items: flex-start;
+            width: 100%;
         }
 
         .menu-scroll-area {
             display: flex !important;
             flex-wrap: nowrap !important;
             overflow-x: auto !important;
+            overflow-y: hidden !important;
             gap: 16px;
             flex: 1;
+            min-width: 0;
+            width: 100%;
+            touch-action: pan-x !important;
             -webkit-overflow-scrolling: touch;
+            scroll-behavior: auto;
         }
         .menu-scroll-area::-webkit-scrollbar { display: none; }
 
