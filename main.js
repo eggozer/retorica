@@ -24,11 +24,70 @@ var RetoricaUI = {
             RetoricaI18n.init();
         }
 
-        if (editor) { 
-            editor.oninput = function() { 
-                RetoricaUI.updateCounters(); 
+        if (editor) {
+            editor.oninput = function() {
+                RetoricaUI.updateCounters();
                 RetoricaUI.triggerAutoSave();
-            }; 
+            };
+
+            editor.addEventListener('paste', function(e) {
+                var clipboardData = e.clipboardData || window.clipboardData;
+                if (!clipboardData) return;
+
+                var plainText = clipboardData.getData('text/plain');
+                if (typeof plainText !== 'string') return;
+
+                e.preventDefault();
+
+                var cleanText = plainText
+                    .replace(/\r\n/g, '\n')
+                    .replace(/\r/g, '\n')
+                    .replace(/\n{3,}/g, '\n\n');
+
+                editor.focus();
+
+                var inserted = false;
+                if (typeof document.execCommand === 'function') {
+                    try {
+                        inserted = document.execCommand('insertText', false, cleanText);
+                    } catch (err) {
+                        inserted = false;
+                    }
+                }
+
+                if (!inserted) {
+                    var sel = window.getSelection ? window.getSelection() : null;
+                    if (sel && sel.rangeCount > 0) {
+                        var range = sel.getRangeAt(0);
+                        if (editor.contains(range.commonAncestorContainer)) {
+                            range.deleteContents();
+                            var frag = document.createDocumentFragment();
+                            var lines = cleanText.split('\n');
+                            for (var i = 0; i < lines.length; i++) {
+                                if (i > 0) {
+                                    frag.appendChild(document.createElement('br'));
+                                }
+                                frag.appendChild(document.createTextNode(lines[i]));
+                            }
+                            var lastNode = frag.lastChild;
+                            range.insertNode(frag);
+                            if (lastNode) {
+                                range.setStartAfter(lastNode);
+                                range.collapse(true);
+                                sel.removeAllRanges();
+                                sel.addRange(range);
+                            }
+                        } else {
+                            editor.appendChild(document.createTextNode(cleanText));
+                        }
+                    } else {
+                        editor.appendChild(document.createTextNode(cleanText));
+                    }
+                }
+
+                RetoricaUI.updateCounters();
+                RetoricaUI.triggerAutoSave();
+            });
         }
         if (titleInput) {
             titleInput.oninput = function() {
