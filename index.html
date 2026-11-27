@@ -649,22 +649,22 @@
 
         /* Animación de Doble Flasheo (Borde Amarillo) */
         @keyframes flash-yellow-burst {
-            0%, 100% {
-                box-shadow: none;
-                filter: brightness(1);
-                border-color: var(--border) !important;
-            }
-            12%, 36%, 60%, 84% {
-                box-shadow: 0 0 18px rgba(255, 204, 0, 0.95), inset 0 0 10px rgba(255, 204, 0, 0.7);
-                filter: brightness(1.4);
-                border-color: #ffcc00 !important;
-            }
-            24%, 48%, 72% {
-                box-shadow: none;
-                filter: brightness(1);
-                border-color: var(--border) !important;
-            }
-        }
+    0%, 100% {
+        box-shadow: none;
+        filter: brightness(1);
+        border-color: var(--border) !important;
+    }
+    15%, 45%, 75% {
+        box-shadow: 0 0 20px rgba(251, 191, 36, 0.95), inset 0 0 10px rgba(245, 158, 11, 0.75);
+        filter: brightness(1.35);
+        border-color: #fbbf24 !important;
+    }
+    30%, 60% {
+        box-shadow: 0 0 6px rgba(245, 158, 11, 0.35);
+        filter: brightness(1.05);
+        border-color: var(--border) !important;
+    }
+}
 
         /* ========================================== */
         /* ICONOS LAVA: RELLENO GUINDA Y CONTORNO NARANJA */
